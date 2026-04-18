@@ -167,7 +167,9 @@
       document.querySelectorAll('.l1 .nav-item').forEach(x => x.classList.remove('active'));
       n.classList.add('active');
       const href = NAV_HREFS[n.getAttribute('data-k')];
-      if (href) (window.top || window).location.href = href;
+      if (!href) return;
+      const top = window.top || window;
+      top.location.href = new URL(href, top.location.href).href;
     }));
     initSupportMenu();
   }
