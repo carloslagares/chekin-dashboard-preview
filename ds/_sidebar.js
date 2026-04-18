@@ -123,6 +123,15 @@
     // Strip header elements we don't use (search box, user avatar)
     document.querySelectorAll('header.top .search-top, header.top .user-av').forEach(el => el.remove());
 
+    // Push Ask Chek / Support / notifications cluster to the right
+    const header = document.querySelector('header.top');
+    if (header){
+      const agentSlot = header.querySelector('[data-agent-trigger-slot]');
+      const bell = header.querySelector('button.iconbtn[aria-label="Notifications"]');
+      const pusher = agentSlot || bell;
+      if (pusher) pusher.style.marginLeft = 'auto';
+    }
+
     const slot = document.getElementById('sidebar-slot');
     if(!slot) return;
     const nav = slot.getAttribute('data-nav');
@@ -175,8 +184,18 @@
   }
 
   function initSupportMenu(){
-    const btn = document.querySelector('header.top button.iconbtn[aria-label="Help"]');
-    if (!btn || document.getElementById('supportMenu')) return;
+    if (document.getElementById('supportMenu')) return;
+    let btn = document.querySelector('header.top button.iconbtn[aria-label="Help"], header.top button.iconbtn[aria-label="Support"]');
+    if (!btn){
+      const header = document.querySelector('header.top');
+      if (!header) return;
+      btn = document.createElement('button');
+      btn.className = 'iconbtn';
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 1 1 5.8 1c0 2-3 2-3 4M12 17h.01"/></svg>';
+      const bell = header.querySelector('button.iconbtn[aria-label="Notifications"]');
+      if (bell) header.insertBefore(btn, bell);
+      else header.appendChild(btn);
+    }
     btn.setAttribute('aria-label', 'Support');
     btn.setAttribute('title', 'Support');
     btn.setAttribute('aria-haspopup', 'menu');
