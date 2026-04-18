@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Chekin — Guest App variants</title>
+<link rel="stylesheet" href="../ds/colors_and_type.css">
+<style>
+  :root{
+    --nav:#161643;
+    --ink:#161643;
+    --ink2:#6B6B95;
+    --line:#E5E6EE;
+    --bg:#F7F8FB;
+    --blue:#385CF8;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);font-family:var(--font-primary);color:var(--ink)}
+
+  .switcher{
+    position:fixed;top:14px;left:50%;transform:translateX(-50%);
+    z-index:100;
+    background:rgba(255,255,255,.88);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    border:1px solid var(--line);border-radius:999px;
+    padding:4px;display:flex;gap:2px;
+    box-shadow:0 8px 24px rgba(56,92,248,.1),0 2px 4px rgba(22,22,67,.05);
+  }
+  .switcher button{
+    appearance:none;border:none;background:transparent;
+    padding:8px 14px;border-radius:999px;cursor:pointer;
+    font:600 12.5px var(--font-primary);color:var(--ink2);
+    display:flex;align-items:center;gap:8px;
+    transition:background .15s,color .15s;
+  }
+  .switcher button:hover{color:var(--ink);background:rgba(56,92,248,.06)}
+  .switcher button.active{background:var(--blue);color:#fff;box-shadow:0 0 0 3px rgba(56,92,248,.2)}
+  .switcher button .v{font:700 10px var(--font-primary);padding:1px 6px;border-radius:999px;background:rgba(22,22,67,.08);color:var(--ink2)}
+  .switcher button.active .v{background:rgba(255,255,255,.25);color:#fff}
+  .switcher .sep{width:1px;background:var(--line);margin:6px 4px}
+  .switcher .tag{font:700 9px var(--font-primary);padding:1px 6px;border-radius:4px;background:#161643;color:#fff;letter-spacing:.06em;margin-right:6px}
+
+  .stage{position:relative;min-height:100vh}
+  iframe.variant{width:100%;border:none;display:none;background:var(--bg)}
+  iframe.variant.active{display:block}
+</style>
+</head>
+<body>
+
+<div class="switcher" role="tablist" aria-label="Guest App variants">
+  <span class="tag">GUEST APP</span>
+  <button class="active" data-v="v1" role="tab"><span class="v">V1</span>AI Concierge</button>
+  <button data-v="v2" role="tab"><span class="v">V2</span>Guided journey</button>
+  <button data-v="v3" role="tab"><span class="v">V3</span>Local feed</button>
+</div>
+
+<div class="stage">
+  <iframe class="variant active" data-v="v1" src="variants/v1_concierge.html" title="V1 AI Concierge"></iframe>
+  <iframe class="variant" data-v="v2" data-src="variants/v2_journey.html" title="V2 Guided journey"></iframe>
+  <iframe class="variant" data-v="v3" data-src="variants/v3_feed.html" title="V3 Local feed"></iframe>
+</div>
+
+<script>
+  function sizeFrames(){
+    document.querySelectorAll('iframe.variant').forEach(f => {
+      f.style.height = window.innerHeight + 'px';
+    });
+  }
+  sizeFrames();
+  window.addEventListener('resize', sizeFrames);
+
+  const VIEW_MAP = { concierge:'v1', journey:'v2', feed:'v3' };
+  const urlView = new URLSearchParams(location.search).get('view');
+  const LS = 'chekin_guestapp_variant';
+  const saved = localStorage.getItem(LS);
+  if (urlView && VIEW_MAP[urlView]) activate(VIEW_MAP[urlView]);
+  else if (saved && document.querySelector(`.switcher button[data-v="${saved}"]`)) activate(saved);
+
+  function activate(v){
+    document.querySelectorAll('.switcher button').forEach(b => b.classList.toggle('active', b.dataset.v === v));
+    document.querySelectorAll('iframe.variant').forEach(f => {
+      const match = f.dataset.v === v;
+      f.classList.toggle('active', match);
+      if (match && !f.hasAttribute('src') && f.dataset.src) f.setAttribute('src', f.dataset.src);
+    });
+    localStorage.setItem(LS, v);
+  }
+
+  document.querySelectorAll('.switcher button').forEach(b => {
+    b.addEventListener('click', () => activate(b.dataset.v));
+  });
+</script>
+</body>
+</html>
