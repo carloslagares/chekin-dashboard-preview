@@ -2,6 +2,8 @@
    Pages set <div id="sidebar-slot" data-nav="home|bookings|properties|…">.
 */
 (function(){
+  const SCRIPT_URL = (document.currentScript && document.currentScript.src) || '';
+  const LOGO_URL = SCRIPT_URL ? new URL('assets/logos/chekin-wordmark.png', SCRIPT_URL).href : '';
   const SIDEBAR_HTML = `
 <aside class="l1">
   <div class="brand">
@@ -118,10 +120,16 @@
 </aside>`;
 
   function init(){
+    // Strip header elements we don't use (search box, user avatar)
+    document.querySelectorAll('header.top .search-top, header.top .user-av').forEach(el => el.remove());
+
     const slot = document.getElementById('sidebar-slot');
     if(!slot) return;
     const nav = slot.getAttribute('data-nav');
     slot.outerHTML = SIDEBAR_HTML;
+    // Fix logo path so it resolves from any page depth
+    const logoImg = document.querySelector('.l1 .brand img');
+    if (logoImg && LOGO_URL) logoImg.src = LOGO_URL;
     if (nav) document.querySelector(`.l1 .nav-item[data-k="${nav}"]`)?.classList.add('active');
     // Inject Views section after Compliance if not present
     const compTaxes = document.querySelector('.l1 .nav-item[data-k="taxes"]');
