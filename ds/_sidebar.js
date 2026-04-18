@@ -48,34 +48,6 @@
 
   <div class="foot">
 
-    <details class="acc" data-acc="support">
-      <summary>
-        <div class="acc-head">
-          <svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 1 1 5.8 1c0 2-3 2-3 4M12 17h.01"/></svg>
-          Support
-          <svg class="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
-        </div>
-      </summary>
-      <div class="subitems">
-        <div class="sub-item">
-          <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          Talk to an agent
-        </div>
-        <div class="sub-item">
-          <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-          Help Center
-        </div>
-        <div class="sub-item">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 1 1 5.8 1c0 2-3 2-3 4M12 17h.01"/></svg>
-          FAQs
-        </div>
-        <div class="sub-item">
-          <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="m10 9 5 3-5 3z" fill="currentColor" stroke="none"/></svg>
-          Video tutorials
-        </div>
-      </div>
-    </details>
-
     <details class="acc" data-acc="account" open>
       <summary>
         <div class="acc-head account">
@@ -188,6 +160,59 @@
       const href = NAV_HREFS[n.getAttribute('data-k')];
       if (href) (window.top || window).location.href = href;
     }));
+    initSupportMenu();
+  }
+
+  function initSupportMenu(){
+    const btn = document.querySelector('header.top button.iconbtn[aria-label="Help"]');
+    if (!btn || document.getElementById('supportMenu')) return;
+    btn.setAttribute('aria-label', 'Support');
+    btn.setAttribute('title', 'Support');
+    btn.setAttribute('aria-haspopup', 'menu');
+    btn.setAttribute('aria-expanded', 'false');
+
+    const menu = document.createElement('div');
+    menu.id = 'supportMenu';
+    menu.className = 'support-menu';
+    menu.setAttribute('role', 'menu');
+    menu.innerHTML = `
+      <div class="sm-head">Support</div>
+      <div class="sm-item" role="menuitem" tabindex="0">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <div class="sm-txt"><div class="t">Talk to an agent</div><div class="d">Average reply ~3 min</div></div>
+      </div>
+      <div class="sm-item" role="menuitem" tabindex="0">
+        <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        <div class="sm-txt"><div class="t">Help Center</div><div class="d">Guides, setup & troubleshooting</div></div>
+      </div>
+      <div class="sm-item" role="menuitem" tabindex="0">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 1 1 5.8 1c0 2-3 2-3 4M12 17h.01"/></svg>
+        <div class="sm-txt"><div class="t">FAQs</div><div class="d">Quick answers to common questions</div></div>
+      </div>
+      <div class="sm-item" role="menuitem" tabindex="0">
+        <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="m10 9 5 3-5 3z" fill="currentColor" stroke="none"/></svg>
+        <div class="sm-txt"><div class="t">Video tutorials</div><div class="d">Watch how things work</div></div>
+      </div>`;
+    document.body.appendChild(menu);
+
+    function place(){
+      const r = btn.getBoundingClientRect();
+      menu.style.top = (r.bottom + 8) + 'px';
+      menu.style.right = (window.innerWidth - r.right) + 'px';
+    }
+    function close(){ menu.classList.remove('open'); btn.setAttribute('aria-expanded','false'); }
+    function open(){ place(); menu.classList.add('open'); btn.setAttribute('aria-expanded','true'); }
+
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      menu.classList.contains('open') ? close() : open();
+    });
+    document.addEventListener('click', e => {
+      if (!menu.contains(e.target) && e.target !== btn) close();
+    });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+    window.addEventListener('resize', () => { if (menu.classList.contains('open')) place(); });
+    window.addEventListener('scroll', () => { if (menu.classList.contains('open')) place(); }, true);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
