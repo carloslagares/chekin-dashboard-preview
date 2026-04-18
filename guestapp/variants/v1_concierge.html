@@ -79,7 +79,10 @@
   /* Chat panel */
   .chat{display:flex;flex-direction:column;background:#fff;border:1px solid var(--stroke-gray-lighter);border-radius:var(--radius-xl);overflow:hidden;box-shadow:var(--shadow-card);min-height:calc(100vh - 56px)}
   .chat .chead{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--stroke-gray-lighter)}
-  .chat .chead .av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#385CF8,#8CA5FF);display:grid;place-items:center;color:#fff;flex-shrink:0;position:relative}
+  .chat .chead .av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#385CF8,#8CA5FF);display:grid;place-items:center;color:#fff;flex-shrink:0;position:relative;isolation:isolate}
+  .chat .chead .av::before{content:"";position:absolute;inset:-10px;border-radius:50%;background:radial-gradient(circle,rgba(56,92,248,.42),transparent 65%);filter:blur(10px);opacity:.55;z-index:-1;pointer-events:none;animation:vela-aura 3.6s ease-in-out infinite}
+  @keyframes vela-aura{0%,100%{transform:scale(.9);opacity:.4}50%{transform:scale(1.15);opacity:.9}}
+  @media (prefers-reduced-motion:reduce){.chat .chead .av::before{animation:none;opacity:.35}}
   .chat .chead .av svg{width:19px;height:19px;stroke:#fff;fill:none;stroke-width:1.7}
   .chat .chead .av::after{content:"";position:absolute;bottom:-1px;right:-1px;width:10px;height:10px;border-radius:50%;background:var(--text-success);border:2px solid #fff}
   .chat .chead .ht{font:700 15px var(--font-primary)}
