@@ -149,6 +149,7 @@
     const NAV_HREFS = {
       home:              'index.html',
       bookings:          'bookings.html',
+      properties:        'properties.html',
       'view-agenda':     'index.html?view=agenda',
       'view-compliance': 'index.html?view=compliance',
       'view-ai':         'index.html?view=ai',

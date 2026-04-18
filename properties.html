@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Chekin — Properties</title>
+<link rel="stylesheet" href="ds/colors_and_type.css">
+<link rel="stylesheet" href="ds/_sidebar.css">
+<link rel="stylesheet" href="ds/_agent.css">
+<style>
+  :root{
+    --bg-dark:#161643;
+    --bg-screen:#FDFDFF;
+    --bg-white:#FFFFFF;
+    --bg-neutral-light:#F4F6F8;
+    --bg-neutral-cold:#F0F0F8;
+    --bg-sky-light:#EFF6FF;
+    --bg-blue-light:#F0F3FF;
+    --bg-success-light:#E8FCF7;
+    --stroke-gray-lighter:#E5E6EE;
+    --stroke-gray-light:#DEDEEB;
+    --stroke-gray-medium:#CECEDE;
+    --text-dark:#161643;
+    --text-gray-dark:#6B6B95;
+    --text-gray-medium:#9696B9;
+    --text-gray-light:#CECEDE;
+    --text-white:#FFFFFF;
+    --text-brand:#385CF8;
+    --text-danger:#FF2467;
+    --shadow-card:0 0 5px 0 rgba(143,143,143,.2);
+    --shadow-dropdown:0 4px 10px 0 rgba(143,143,143,.2);
+    --radius-sm:6px;
+    --radius-md:8px;
+    --radius-lg:14px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg-screen);font-family:var(--font-primary);color:var(--text-dark);font-feature-settings:"ss01"}
+
+  /* Top bar */
+  main{display:flex;flex-direction:column;min-width:0}
+  header.top{display:flex;align-items:center;gap:16px;padding:0 32px;height:64px;border-bottom:1px solid var(--stroke-gray-lighter);background:var(--bg-white);position:sticky;top:0;z-index:5}
+  .crumbs{font:500 14px var(--font-primary);color:var(--text-gray-dark)}
+  .crumbs b{color:var(--text-dark);font-weight:600}
+  .search-top{margin-left:auto;position:relative}
+  .search-top input{width:320px;height:40px;padding:0 14px 0 38px;border-radius:var(--radius-md);border:1px solid rgba(22,22,67,.12);background:var(--bg-neutral-light);font:500 14px var(--font-primary);color:var(--text-dark);outline:none}
+  .search-top input::placeholder{color:var(--text-gray-medium)}
+  .search-top input:focus{background:#fff;border-color:var(--text-dark);box-shadow:0 0 0 3px rgba(56,92,248,.2)}
+  .search-top svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:var(--text-gray-medium);fill:none;stroke-width:2}
+  .iconbtn{width:40px;height:40px;border-radius:var(--radius-md);background:#fff;border:1px solid var(--stroke-gray-lighter);display:grid;place-items:center;cursor:pointer;position:relative}
+  .iconbtn svg{width:18px;height:18px;stroke:var(--text-gray-dark);fill:none;stroke-width:1.6}
+  .iconbtn:hover{background:var(--bg-neutral-light)}
+  .iconbtn .pip{position:absolute;top:8px;right:8px;width:8px;height:8px;border-radius:50%;background:var(--text-danger);border:2px solid #fff}
+  .user-av{width:40px;height:40px;border-radius:50%;background:var(--bg-sky-light);color:var(--text-brand);display:grid;place-items:center;font:700 14px var(--font-primary);cursor:pointer}
+
+  /* Page */
+  .page{padding:28px 32px 64px;display:flex;flex-direction:column;gap:20px;min-width:0}
+  .pagehead{display:flex;align-items:center;justify-content:space-between;gap:24px}
+  .pagehead h1{font:600 26px/32px var(--font-primary);color:var(--text-dark);margin:0;letter-spacing:-.005em;display:flex;align-items:center;gap:12px}
+  .pagehead h1 .count{font:600 14px var(--font-primary);color:var(--text-gray-dark);background:var(--bg-neutral-light);padding:4px 10px;border-radius:999px;border:1px solid var(--stroke-gray-lighter)}
+  .pagehead .sub{font:400 14px var(--font-primary);color:var(--text-gray-dark);margin-top:4px}
+
+  /* Toolbar */
+  .toolbar{display:flex;align-items:center;gap:12px}
+  .search{position:relative;width:293px}
+  .search input{width:100%;height:40px;padding:0 14px 0 38px;border-radius:var(--radius-sm);border:1px solid var(--stroke-gray-medium);background:#fff;font:500 14px var(--font-primary);color:var(--text-dark);outline:none}
+  .search input::placeholder{color:var(--text-gray-medium)}
+  .search input:focus{border-color:var(--text-dark);box-shadow:0 0 0 3px rgba(56,92,248,.15)}
+  .search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:var(--text-gray-medium);fill:none;stroke-width:2}
+
+  .tbtn{height:40px;padding:0 14px;background:#fff;border:1px solid var(--stroke-gray-medium);color:var(--text-dark);font:600 14px var(--font-primary);border-radius:var(--radius-sm);cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+  .tbtn:hover{background:var(--bg-neutral-light)}
+  .tbtn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8}
+  .tbtn .chev{width:12px;height:12px;stroke:var(--text-gray-dark);margin-left:2px}
+  .spacer{flex:1}
+
+  .btn-primary{height:40px;padding:0 16px;background:var(--text-brand);border:none;color:#fff;font:600 14px var(--font-primary);border-radius:var(--radius-sm);cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+  .btn-primary:hover{background:linear-gradient(0deg,rgba(255,255,255,.1),rgba(255,255,255,.1)),var(--text-brand)}
+  .btn-primary svg{width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2.5}
+  .btn-primary .chev{stroke-width:2;opacity:.8}
+  .split{display:inline-flex}
+  .split .btn-primary{border-radius:var(--radius-sm) 0 0 var(--radius-sm);padding-right:12px}
+  .split .btn-primary + .btn-primary{border-radius:0 var(--radius-sm) var(--radius-sm) 0;border-left:1px solid rgba(255,255,255,.25);padding:0 10px}
+
+  /* Filter chips bar */
+  .chips{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .chip{height:32px;padding:0 10px 0 10px;background:var(--bg-white);border:1px solid var(--stroke-gray-medium);border-radius:var(--radius-sm);display:inline-flex;align-items:center;gap:6px;font:500 13px var(--font-primary);color:var(--text-dark);cursor:pointer}
+  .chip:hover{background:var(--bg-neutral-light)}
+  .chip.active{background:var(--bg-blue-light);border-color:var(--text-brand);color:var(--text-brand)}
+  .chip .x{width:14px;height:14px;border-radius:50%;background:var(--text-brand);color:#fff;display:grid;place-items:center;font-size:10px;font-weight:700;margin-left:2px;cursor:pointer}
+  .chip .ic{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8}
+  .chip .count{font-weight:600;color:var(--text-gray-dark);margin-left:4px}
+  .chip.active .count{color:var(--text-brand)}
+  .chip-divider{width:1px;height:20px;background:var(--stroke-gray-light);margin:0 4px}
+
+  /* Feature-matrix table */
+  .table-wrap{background:#fff;border-radius:var(--radius-lg);border:1px solid var(--stroke-gray-lighter);overflow:hidden;box-shadow:var(--shadow-card)}
+  .table-scroll{overflow-x:auto}
+  table{width:100%;min-width:1120px;border-collapse:collapse;table-layout:fixed}
+  thead{background:var(--bg-neutral-cold);border-bottom:1px solid var(--stroke-gray-light)}
+  th{height:48px;padding:0 12px;text-align:left;font:600 13px var(--font-primary);color:var(--text-gray-dark);text-transform:none;letter-spacing:0;vertical-align:middle;user-select:none}
+  th.sort{cursor:pointer}
+  th.sort:hover{color:var(--text-dark)}
+  th .sort-ic{width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:2;margin-left:4px;opacity:.4}
+  th.sort.active .sort-ic{opacity:1;color:var(--text-brand)}
+  th.feat{text-align:center;width:96px;padding:0 4px;font-size:12px}
+  th.num{width:48px;text-align:center}
+  th.prop{width:260px}
+  th.check{width:40px;text-align:center}
+  th .help{width:14px;height:14px;stroke:var(--text-gray-medium);fill:none;stroke-width:2;margin-left:4px;opacity:.7;cursor:help}
+
+  tbody tr{border-bottom:1px solid var(--stroke-gray-lighter);transition:background .12s}
+  tbody tr:last-child{border-bottom:none}
+  tbody tr:hover{background:#FBFBFE}
+  td{height:64px;padding:0 12px;vertical-align:middle;font:500 15px/24px var(--font-primary);color:var(--text-dark)}
+  td.num{text-align:center;color:var(--text-gray-dark);font-weight:600;font-size:13px;font-variant-numeric:tabular-nums}
+  td.check{text-align:center}
+  td.prop .lt{display:flex;align-items:center;gap:12px;min-width:0}
+  td.prop .thumb{width:36px;height:36px;border-radius:6px;background:var(--bg-neutral-cold);flex-shrink:0;display:grid;place-items:center;color:var(--text-gray-dark);overflow:hidden;position:relative}
+  td.prop .thumb svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.5}
+  td.prop .name{font:600 15px/20px var(--font-primary);color:var(--text-dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  td.prop .meta{font:400 12px/16px var(--font-primary);color:var(--text-gray-medium);display:flex;align-items:center;gap:6px;white-space:nowrap}
+  td.prop .meta .flag{width:14px;height:10px;border-radius:2px;overflow:hidden;flex-shrink:0;border:1px solid rgba(0,0,0,.08)}
+  td.prop .meta .dot{width:3px;height:3px;border-radius:50%;background:var(--text-gray-light)}
+
+  /* Feature icon cells — single state per surface docs: enabled/disabled */
+  td.feat{text-align:center;padding:0}
+  .fic{display:inline-grid;place-items:center;width:40px;height:40px;border-radius:8px;position:relative;transition:transform .1s}
+  .fic:hover{transform:scale(1.08)}
+  .fic svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+  .fic.on{background:var(--bg-blue-light);color:var(--text-brand)}
+  .fic.off{background:var(--bg-neutral-light);color:var(--text-gray-light)}
+  .fic.warn{background:#FFF2E0;color:#C47A1B}
+  .fic.warn::after{content:"";position:absolute;top:-2px;right:-2px;width:8px;height:8px;border-radius:50%;background:#FF9500;border:1.5px solid #fff}
+  .fic.new::after{content:"NEW";position:absolute;top:-6px;right:-14px;font:700 9px var(--font-primary);color:#fff;background:var(--text-brand);padding:1px 4px;border-radius:3px;letter-spacing:.04em}
+
+  /* Checkbox */
+  .cb{width:18px;height:18px;border-radius:4px;border:1.5px solid var(--stroke-gray-medium);background:#fff;display:inline-grid;place-items:center;cursor:pointer;vertical-align:middle}
+  .cb.on{background:var(--text-brand);border-color:var(--text-brand)}
+  .cb.on::after{content:"";width:10px;height:5px;border:2px solid #fff;border-top:none;border-right:none;transform:rotate(-45deg) translate(1px,-1px)}
+
+  /* Bulk action bar */
+  .bulkbar{display:none;align-items:center;gap:16px;padding:12px 16px;background:var(--text-dark);color:#fff;border-radius:var(--radius-md);position:sticky;top:76px;z-index:6;box-shadow:0 8px 20px rgba(22,22,67,.25)}
+  .bulkbar.show{display:flex}
+  .bulkbar .n{font:600 14px var(--font-primary)}
+  .bulkbar .sep{width:1px;height:20px;background:rgba(255,255,255,.15)}
+  .bulkbar button{height:32px;padding:0 12px;border-radius:6px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:#fff;font:600 13px var(--font-primary);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+  .bulkbar button:hover{background:rgba(255,255,255,.12)}
+  .bulkbar button svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2}
+  .bulkbar .close{margin-left:auto;width:28px;height:28px;border-radius:6px;display:grid;place-items:center;cursor:pointer;border:none;background:transparent}
+
+  /* Pagination footer */
+  .pagination{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-top:1px solid var(--stroke-gray-lighter);background:var(--bg-neutral-cold)}
+  .pagination .info{font:500 13px var(--font-primary);color:var(--text-gray-dark)}
+  .pagination .ctrls{display:flex;align-items:center;gap:4px}
+  .pagination .pbtn{width:32px;height:32px;border-radius:6px;border:1px solid var(--stroke-gray-medium);background:#fff;color:var(--text-dark);font:600 13px var(--font-primary);cursor:pointer;display:grid;place-items:center}
+  .pagination .pbtn:hover{background:var(--bg-neutral-light)}
+  .pagination .pbtn.active{background:var(--text-brand);color:#fff;border-color:var(--text-brand)}
+  .pagination .pbtn.arrow svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2}
+
+  /* Legend tooltip */
+  .legend{display:flex;align-items:center;gap:14px;padding:0 4px;font:500 12px var(--font-primary);color:var(--text-gray-dark)}
+  .legend .lc{display:inline-flex;align-items:center;gap:6px}
+  .legend .sw{width:16px;height:16px;border-radius:4px;display:inline-grid;place-items:center}
+  .legend .sw.on{background:var(--bg-blue-light);color:var(--text-brand)}
+  .legend .sw.off{background:var(--bg-neutral-light);color:var(--text-gray-light)}
+  .legend .sw.warn{background:#FFF2E0;color:#C47A1B}
+  .legend .sw svg{width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:2}
+</style>
+</head>
+<body>
+
+<div class="app" data-screen-label="02 Dashboard Properties">
+  <!-- Sidebar L1 (injected by _sidebar.js) -->
+  <div id="sidebar-slot" data-nav="properties"></div>
+
+  <main>
+    <header class="top">
+      <div class="crumbs"><b>Properties</b></div>
+      <div class="search-top">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input placeholder="Search properties, bookings, guests…">
+      </div>
+      <span data-agent-trigger-slot></span>
+      <button class="iconbtn" aria-label="Help"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 1 1 5.8 1c0 2-3 2-3 4M12 17h.01"/></svg></button>
+      <button class="iconbtn" aria-label="Notifications"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><div class="pip"></div></button>
+      <div class="user-av">MR</div>
+    </header>
+
+    <div class="page">
+      <!-- Page head -->
+      <div class="pagehead">
+        <div>
+          <h1>Properties <span class="count">24</span></h1>
+          <div class="sub">Enable features per property. Icons in each column show what's active.</div>
+        </div>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <div class="search">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input placeholder="Search property…">
+        </div>
+        <button class="tbtn">
+          <svg viewBox="0 0 24 24"><path d="M22 3H2l8 9.5V19l4 2v-8.5z"/></svg>
+          Filters
+          <svg class="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+
+        <div class="spacer"></div>
+
+        <button class="tbtn">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          Feature Explanations
+        </button>
+        <button class="tbtn">
+          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/></svg>
+          Custom View
+        </button>
+        <div class="split">
+          <button class="btn-primary"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add Property</button>
+          <button class="btn-primary" aria-label="More options"><svg class="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button>
+        </div>
+      </div>
+
+      <!-- Filter chips (active filters) -->
+      <div class="chips">
+        <div class="chip active">
+          Online check-in <span class="count">enabled</span>
+          <span class="x">×</span>
+        </div>
+        <div class="chip">
+          <svg class="ic" viewBox="0 0 24 24"><path d="M3 9 12 2l9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+          City <span class="count">All</span>
+          <svg class="ic" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+        <div class="chip">
+          Police <span class="count">All</span>
+          <svg class="ic" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+        <div class="chip">
+          Identity <span class="count">All</span>
+          <svg class="ic" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+        <div class="chip-divider"></div>
+        <div class="chip" style="border-style:dashed">
+          <svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          Add filter
+        </div>
+
+        <div style="margin-left:auto" class="legend">
+          <span class="lc"><span class="sw on"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span>Enabled</span>
+          <span class="lc"><span class="sw off"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></span>Disabled</span>
+          <span class="lc"><span class="sw warn"><svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01M10.3 3.8 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.8a2 2 0 0 0-3.4 0Z"/></svg></span>Needs attention</span>
+        </div>
+      </div>
+
+      <!-- Bulk action bar (hidden until selection) -->
+      <div class="bulkbar" id="bulkbar">
+        <div class="n"><span id="selcount">2</span> properties selected</div>
+        <div class="sep"></div>
+        <button><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Enable feature</button>
+        <button><svg viewBox="0 0 24 24"><path d="M19 12H5"/></svg>Disable feature</button>
+        <button><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Send check-in links</button>
+        <button><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Export</button>
+        <button class="close" aria-label="Clear selection"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+      </div>
+
+      <!-- Feature-matrix table -->
+      <div class="table-wrap">
+        <div class="table-scroll">
+        <table>
+          <colgroup>
+            <col style="width:40px"><col style="width:48px"><col style="width:240px">
+            <col style="width:96px"><col style="width:96px"><col style="width:96px">
+            <col style="width:96px"><col style="width:96px"><col style="width:96px">
+            <col style="width:96px"><col style="width:96px"><col style="width:96px">
+            <col style="width:48px">
+          </colgroup>
+          <thead>
+            <tr>
+              <th class="check"><span class="cb" data-bulk="all"></span></th>
+              <th class="num">#</th>
+              <th class="sort active prop">Property <svg class="sort-ic" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></th>
+              <th class="feat">Police <svg class="help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 1 1 5.8 1c0 2-3 2-3 4M12 17h.01"/></svg></th>
+              <th class="feat">Identity</th>
+              <th class="feat">Keys</th>
+              <th class="feat">Payments</th>
+              <th class="feat">Protection</th>
+              <th class="feat">Taxes</th>
+              <th class="feat">Guidebooks</th>
+              <th class="feat">Upselling</th>
+              <th class="feat">Branding</th>
+              <th class="check"></th>
+            </tr>
+          </thead>
+          <tbody id="tbody"><!-- filled by JS --></tbody>
+        </table>
+        </div>
+
+        <div class="pagination">
+          <div class="info">Showing 1–8 of 24 properties</div>
+          <div class="ctrls">
+            <button class="pbtn arrow" disabled style="opacity:.4;cursor:not-allowed"><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>
+            <button class="pbtn active">1</button>
+            <button class="pbtn">2</button>
+            <button class="pbtn">3</button>
+            <button class="pbtn arrow"><svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+  // Icons per feature column (matches the feature-matrix in the audit)
+  const icons = {
+    police: '<svg viewBox="0 0 24 24"><path d="M12 2 4 5v7c0 5 3.5 8 8 10 4.5-2 8-5 8-10V5z"/><path d="M9 12l2 2 4-4"/></svg>',
+    identity: '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="12" r="2.5"/><path d="M14 10h4M14 14h4M5 17c.6-1.6 2.2-2.5 4-2.5s3.4.9 4 2.5"/></svg>',
+    keys: '<svg viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="3.5"/><path d="m10 13 10-10M16 7l3 3M20 3l-1 1"/></svg>',
+    payments: '<svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M2 10h20M6 14h4"/></svg>',
+    protection: '<svg viewBox="0 0 24 24"><path d="M12 2 4 5v7c0 5 3.5 8 8 10 4.5-2 8-5 8-10V5z"/></svg>',
+    taxes: '<svg viewBox="0 0 24 24"><path d="M4 4h16v4H4zM4 12h16v4H4zM4 20h10"/><circle cx="18" cy="20" r="2"/></svg>',
+    guidebooks: '<svg viewBox="0 0 24 24"><path d="M4 4h10a4 4 0 0 1 4 4v12H8a4 4 0 0 1-4-4z"/><path d="M8 8h6M8 12h6"/></svg>',
+    upselling: '<svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>',
+    branding: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="9"/></svg>'
+  };
+
+  // Fake flag chips (CSS only)
+  const flags = {
+    ES: 'linear-gradient(to bottom, #C60B1E 33%, #FFC400 33% 66%, #C60B1E 66%)',
+    IT: 'linear-gradient(to right, #009246 33%, #fff 33% 66%, #CE2B37 66%)',
+    FR: 'linear-gradient(to right, #0055A4 33%, #fff 33% 66%, #EF4135 66%)',
+    DE: 'linear-gradient(to bottom, #000 33%, #DD0000 33% 66%, #FFCE00 66%)',
+    GB: 'linear-gradient(135deg, #012169 40%, #C8102E 40% 60%, #012169 60%)',
+    PT: 'linear-gradient(to right, #006600 40%, #FF0000 40%)',
+  };
+
+  // Properties — a realistic mix so the matrix actually tells a story
+  const rows = [
+    { name: "Saint George's Palace",  city: 'London, UK',        flag:'GB', feats:{ police:'warn', identity:'on',  keys:'off', payments:'on',  protection:'off', taxes:'off', guidebooks:'on',  upselling:'off', branding:'on'  } },
+    { name: "Blackwood St. BT7",       city: 'Belfast, UK',       flag:'GB', feats:{ police:'warn', identity:'on',  keys:'on',  payments:'on',  protection:'on',  taxes:'on',  guidebooks:'on',  upselling:'on',  branding:'on'  } },
+    { name: "Green House",             city: 'Dublin, IE',        flag:'GB', feats:{ police:'warn', identity:'off', keys:'on',  payments:'off', protection:'off', taxes:'off', guidebooks:'off', upselling:'off', branding:'off' } },
+    { name: "Spencer's Hotels",        city: 'Manchester, UK',    flag:'GB', feats:{ police:'warn', identity:'on',  keys:'on',  payments:'on',  protection:'on',  taxes:'on',  guidebooks:'on',  upselling:'off', branding:'off' } },
+    { name: "Puerta del Sol",          city: 'Madrid, ES',        flag:'ES', feats:{ police:'on',   identity:'on',  keys:'on',  payments:'on',  protection:'on',  taxes:'on',  guidebooks:'on',  upselling:'on',  branding:'on'  } },
+    { name: "Gràcia Loft 3B",          city: 'Barcelona, ES',     flag:'ES', feats:{ police:'on',   identity:'on',  keys:'off', payments:'on',  protection:'off', taxes:'on',  guidebooks:'on',  upselling:'on',  branding:'off' } },
+    { name: "Trastevere Suites",       city: 'Rome, IT',          flag:'IT', feats:{ police:'on',   identity:'on',  keys:'on',  payments:'on',  protection:'on',  taxes:'on',  guidebooks:'off', upselling:'off', branding:'on'  } },
+    { name: "Montmartre 9e",           city: 'Paris, FR',         flag:'FR', feats:{ police:'off',  identity:'on',  keys:'off', payments:'on',  protection:'off', taxes:'off', guidebooks:'off', upselling:'off', branding:'off' } },
+  ];
+
+  const featOrder = ['police','identity','keys','payments','protection','taxes','guidebooks','upselling','branding'];
+  const tbody = document.getElementById('tbody');
+
+  rows.forEach((r, i) => {
+    const tr = document.createElement('tr');
+    let fc = '';
+    featOrder.forEach(k => {
+      const state = r.feats[k] || 'off';
+      fc += `<td class="feat"><span class="fic ${state}" title="${k}: ${state}">${icons[k]}</span></td>`;
+    });
+    tr.innerHTML = `
+      <td class="check"><span class="cb" data-row="${i}"></span></td>
+      <td class="num">${i+1}</td>
+      <td class="prop">
+        <div class="lt">
+          <div class="thumb"><svg viewBox="0 0 24 24"><path d="M3 9 12 2l9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg></div>
+          <div style="min-width:0">
+            <div class="name">${r.name}</div>
+            <div class="meta">
+              <span class="flag" style="background:${flags[r.flag]}"></span>
+              ${r.city}
+              <span class="dot"></span>
+              ID #${100234+i}
+            </div>
+          </div>
+        </div>
+      </td>
+      ${fc}
+      <td class="check"><button class="iconbtn" style="width:28px;height:28px;border:none;background:transparent" aria-label="More"><svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text-gray-dark);fill:none;stroke-width:2"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // Checkbox behaviour
+  const bulkbar = document.getElementById('bulkbar');
+  const selcount = document.getElementById('selcount');
+  function updateBulk(){
+    const n = document.querySelectorAll('.cb.on[data-row]').length;
+    selcount.textContent = n;
+    bulkbar.classList.toggle('show', n > 0);
+    const all = document.querySelector('.cb[data-bulk="all"]');
+    if (all){
+      const total = document.querySelectorAll('.cb[data-row]').length;
+      all.classList.toggle('on', n === total);
+    }
+  }
+  document.querySelectorAll('.cb').forEach(cb => cb.addEventListener('click', e => {
+    if (cb.dataset.bulk === 'all'){
+      const turnOn = !cb.classList.contains('on');
+      document.querySelectorAll('.cb').forEach(c => c.classList.toggle('on', turnOn));
+    } else {
+      cb.classList.toggle('on');
+    }
+    updateBulk();
+  }));
+
+  // Pre-select 2 rows for demo of bulk bar (so the user sees it)
+  document.querySelectorAll('.cb[data-row="1"], .cb[data-row="4"]').forEach(c => c.classList.add('on'));
+  updateBulk();
+</script>
+<script src="ds/_sidebar.js"></script>
+<script src="ds/_agent.js"></script>
+</body>
+</html>
