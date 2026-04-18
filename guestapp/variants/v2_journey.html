@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Chekin Guest — Guided Journey</title>
+<link rel="stylesheet" href="../../ds/colors_and_type.css">
+<style>
+  :root{
+    --bg-dark:#161643;
+    --bg-screen:#F7F8FB;
+    --bg-white:#FFFFFF;
+    --bg-neutral-light:#F4F6F8;
+    --bg-neutral-cold:#F0F0F8;
+    --bg-sky-light:#EFF6FF;
+    --bg-blue-light:#F0F3FF;
+    --bg-success-light:#E8FCF7;
+    --bg-warn-light:#FFF2E0;
+    --bg-danger-light:#FFE4EC;
+    --stroke-gray-lighter:#E5E6EE;
+    --stroke-gray-light:#DEDEEB;
+    --stroke-gray-medium:#CECEDE;
+    --text-dark:#161643;
+    --text-gray-dark:#6B6B95;
+    --text-gray-medium:#9696B9;
+    --text-gray-light:#CECEDE;
+    --text-brand:#385CF8;
+    --text-brand-dark:#2945C5;
+    --text-brand-light:#8CA5FF;
+    --text-success:#0F9F80;
+    --text-warn:#B86A00;
+    --text-danger:#FF2467;
+    --radius-sm:6px;
+    --radius-md:10px;
+    --radius-lg:14px;
+    --radius-xl:20px;
+    --shadow-card:0 1px 2px rgba(22,22,67,.04),0 0 0 1px rgba(22,22,67,.04);
+    --shadow-elev:0 8px 24px rgba(22,22,67,.06),0 2px 4px rgba(22,22,67,.04);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg-screen);font-family:var(--font-primary);color:var(--text-dark);font-feature-settings:"ss01"}
+
+  .app{display:grid;grid-template-columns:248px 1fr 320px;min-height:100vh}
+
+  /* Sidebar (same as V1) */
+  .side{background:var(--bg-dark);color:#fff;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+  .side .prop{display:flex;align-items:center;gap:12px;padding:18px 18px 16px;border-bottom:1px solid rgba(255,255,255,.06)}
+  .side .prop .av{width:36px;height:36px;border-radius:10px;background:rgba(56,92,248,.22);display:grid;place-items:center;flex-shrink:0}
+  .side .prop .av svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:1.7}
+  .side .prop .name{font:600 15px/20px var(--font-primary)}
+  .side .prop .ref{font:500 11px var(--font-primary);color:rgba(255,255,255,.5);margin-top:2px}
+  .side nav{padding:14px 10px;flex:1;display:flex;flex-direction:column;gap:3px}
+  .side .sgroup{font:600 10.5px var(--font-primary);color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.1em;padding:14px 12px 6px}
+  .side .n-item{display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:8px;cursor:pointer;font:500 14px/20px var(--font-primary);color:rgba(255,255,255,.78);user-select:none}
+  .side .n-item:hover{background:rgba(255,255,255,.05);color:#fff}
+  .side .n-item.active{background:rgba(56,92,248,.22);color:#fff}
+  .side .n-item svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.6;flex-shrink:0}
+  .side .n-item .badge{margin-left:auto;font:700 10.5px var(--font-primary);padding:2px 7px;border-radius:999px;background:rgba(255,36,103,.2);color:#FFB4C7}
+  .side .n-item .check{margin-left:auto;width:14px;height:14px;border-radius:50%;background:var(--text-success);display:grid;place-items:center}
+  .side .n-item .check::after{content:"";width:6px;height:3px;border:1.5px solid #fff;border-top:none;border-right:none;transform:rotate(-45deg) translate(.5px,-1px)}
+  .side .me{margin-top:auto;padding:14px 16px;border-top:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:10px}
+  .side .me .av{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.1);color:#fff;display:grid;place-items:center;font:700 11px var(--font-primary)}
+  .side .me .n{font:600 13px/16px var(--font-primary)}
+  .side .me .e{font:500 11px var(--font-primary);color:rgba(255,255,255,.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px}
+
+  /* Main */
+  .main{padding:28px 32px 56px;display:flex;flex-direction:column;gap:24px;min-width:0}
+  .head h1{font:600 28px/32px var(--font-primary);margin:0;letter-spacing:-.01em}
+  .head .sub{font:500 13px var(--font-primary);color:var(--text-gray-dark);margin-top:6px}
+
+  /* Check-in strip */
+  .strip{position:relative;overflow:hidden;background:linear-gradient(135deg,#161643 0%,#274BF0 100%);color:#fff;border-radius:var(--radius-xl);padding:24px 28px;display:grid;grid-template-columns:1fr auto 1fr;gap:24px;align-items:center;box-shadow:var(--shadow-elev)}
+  .strip::before{content:"";position:absolute;inset:0;background:radial-gradient(540px 260px at 92% -30%,rgba(107,224,168,.22),transparent 60%);pointer-events:none}
+  .strip .slot .l{font:700 11px var(--font-primary);color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px}
+  .strip .slot .h{font:600 30px/34px var(--font-primary);letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+  .strip .slot .d{font:500 12px var(--font-primary);color:rgba(255,255,255,.7);margin-top:4px;text-transform:uppercase;letter-spacing:.06em}
+  .strip .slot.right{text-align:right}
+  .strip .arrow{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.12);display:grid;place-items:center}
+  .strip .arrow svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2}
+
+  .card{background:#fff;border:1px solid var(--stroke-gray-lighter);border-radius:var(--radius-lg);box-shadow:var(--shadow-card)}
+  .sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:12px}
+  .sec-head h2{font:600 17px/22px var(--font-primary);margin:0}
+  .sec-head .meta{font:600 13px var(--font-primary);color:var(--text-gray-dark)}
+  .sec-head .meta b{color:var(--text-brand)}
+
+  /* Checklist */
+  .checklist .ptop{padding:14px 20px 4px;display:flex;align-items:baseline;gap:8px}
+  .checklist .ptop .n{font:700 26px var(--font-primary);color:var(--text-brand)}
+  .checklist .ptop .l{font:500 13px var(--font-primary);color:var(--text-gray-dark)}
+  .checklist .bar{margin:8px 20px 0;height:6px;background:var(--bg-neutral-light);border-radius:999px;overflow:hidden}
+  .checklist .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--text-brand),#6B8CFF);border-radius:999px;transition:width .4s ease}
+  .cl-row{display:flex;align-items:center;gap:16px;padding:16px 20px;border-top:1px solid var(--stroke-gray-lighter);cursor:pointer;transition:background .12s;margin-top:14px}
+  .cl-row:first-of-type{margin-top:14px}
+  .cl-row:hover{background:#FBFBFE}
+  .cl-row .ic{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;flex-shrink:0}
+  .cl-row .ic svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.7}
+  .cl-row.done .ic{background:var(--bg-success-light);color:var(--text-success)}
+  .cl-row.pending .ic{background:var(--bg-warn-light);color:var(--text-warn)}
+  .cl-row.todo .ic{background:var(--bg-neutral-cold);color:var(--text-gray-dark)}
+  .cl-row .lt{flex:1;min-width:0}
+  .cl-row .t{font:600 15px/20px var(--font-primary)}
+  .cl-row .d{font:400 13px/18px var(--font-primary);color:var(--text-gray-dark);margin-top:2px}
+  .cl-row .st{font:600 11px var(--font-primary);padding:3px 9px;border-radius:999px;text-transform:uppercase;letter-spacing:.04em}
+  .cl-row.done .st{background:var(--bg-success-light);color:var(--text-success)}
+  .cl-row.pending .st{background:var(--bg-warn-light);color:var(--text-warn)}
+  .cl-row.todo .st{background:var(--bg-neutral-light);color:var(--text-gray-dark)}
+  .cl-row .chev{width:20px;height:20px;stroke:var(--text-gray-light);fill:none;stroke-width:2;flex-shrink:0}
+  .cl-row:hover .chev{stroke:var(--text-brand)}
+
+  /* Chek suggestion card */
+  .nudge{display:flex;gap:14px;padding:18px 20px;background:linear-gradient(135deg,#F0F3FF,#EFF6FF);border:1px solid var(--stroke-gray-lighter);border-radius:var(--radius-lg);position:relative;overflow:hidden}
+  .nudge::before{content:"";position:absolute;inset:0;background:radial-gradient(260px 180px at 100% 0%,rgba(56,92,248,.14),transparent 60%);pointer-events:none}
+  .nudge .av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#385CF8,#8CA5FF);color:#fff;display:grid;place-items:center;flex-shrink:0;position:relative;z-index:2}
+  .nudge .av svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:1.7}
+  .nudge .b{position:relative;z-index:2;flex:1}
+  .nudge .l{font:700 10.5px var(--font-primary);color:var(--text-brand);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+  .nudge .t{font:600 14.5px/20px var(--font-primary)}
+  .nudge .d{font:400 13px/19px var(--font-primary);color:var(--text-gray-dark);margin-top:4px}
+  .nudge .actions{display:flex;gap:8px;margin-top:12px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:34px;padding:0 14px;border-radius:8px;font:600 13px var(--font-primary);cursor:pointer;border:none;text-decoration:none;transition:background .12s}
+  .btn.primary{background:var(--text-brand);color:#fff}
+  .btn.primary:hover{background:var(--text-brand-dark)}
+  .btn.ghost{background:#fff;color:var(--text-dark);border:1px solid var(--stroke-gray-medium)}
+  .btn.ghost:hover{background:var(--bg-neutral-light)}
+  .btn.dark{background:var(--bg-dark);color:#fff}
+  .btn.dark:hover{background:#222268}
+  .btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2}
+
+  /* Stay grid */
+  .stay{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .stay .card{padding:22px 20px;text-align:center}
+  .stay .ic{width:48px;height:48px;border-radius:50%;background:var(--bg-blue-light);color:var(--text-brand);display:grid;place-items:center;margin:0 auto 10px}
+  .stay .ic svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8}
+  .stay .t{font:600 16px var(--font-primary)}
+  .stay .d{font:400 13px/18px var(--font-primary);color:var(--text-gray-dark);margin:4px 0 14px}
+
+  /* Reco grid */
+  .reco{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .reco .card{overflow:hidden;cursor:pointer;transition:transform .15s,box-shadow .15s}
+  .reco .card:hover{transform:translateY(-2px);box-shadow:var(--shadow-elev)}
+  .reco .media{height:130px;position:relative;display:grid;place-items:center}
+  .reco .media svg{width:52px;height:52px;stroke:#fff;fill:none;stroke-width:1.5;opacity:.92}
+  .reco .a .media{background:linear-gradient(135deg,#FFB872,#FF7A58)}
+  .reco .b .media{background:linear-gradient(135deg,#91E7C8,#0F9F80)}
+  .reco .c .media{background:linear-gradient(135deg,#8CA5FF,#385CF8)}
+  .reco .body{padding:14px 16px}
+  .reco .t{font:600 14.5px/19px var(--font-primary)}
+  .reco .d{font:400 12px/16px var(--font-primary);color:var(--text-gray-dark);margin-top:2px}
+  .reco .row{display:flex;align-items:center;justify-content:space-between;margin-top:10px}
+  .reco .p{font:600 13px var(--font-primary);color:var(--text-brand)}
+  .reco .p .from{color:var(--text-gray-medium);font-weight:500;margin-right:3px}
+
+  /* Checkout banner */
+  .coban{display:flex;align-items:center;gap:14px;padding:16px 20px;background:var(--bg-neutral-light);border:1px dashed var(--stroke-gray-medium);border-radius:var(--radius-lg)}
+  .coban .ic{width:36px;height:36px;border-radius:50%;background:#fff;color:var(--text-gray-dark);display:grid;place-items:center;flex-shrink:0}
+  .coban .ic svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.7}
+  .coban .lt{flex:1}
+  .coban .t{font:600 13.5px var(--font-primary)}
+  .coban .d{font:400 12.5px var(--font-primary);color:var(--text-gray-medium)}
+
+  /* Rail */
+  .rail{padding:28px 24px 56px;display:flex;flex-direction:column;gap:16px;border-left:1px solid var(--stroke-gray-lighter);background:#fff}
+  .res .hd{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 12px;border-bottom:1px solid var(--stroke-gray-lighter)}
+  .res .hd .t{font:600 14px var(--font-primary)}
+  .res .hd .st{display:inline-flex;align-items:center;gap:6px;font:600 11px var(--font-primary);color:var(--text-success);background:var(--bg-success-light);padding:3px 10px;border-radius:999px}
+  .res .hd .st::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--text-success)}
+  .res dl{margin:0;padding:12px 18px 16px;display:grid;gap:8px}
+  .res .row{display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .res dt{font:500 12.5px var(--font-primary);color:var(--text-gray-dark);margin:0}
+  .res dd{margin:0;font:600 12.5px var(--font-primary);font-variant-numeric:tabular-nums}
+
+  .ups{overflow:hidden}
+  .ups .media{height:130px;background:linear-gradient(135deg,#FFB872 0%,#FF5E8C 60%,#385CF8 120%);position:relative}
+  .ups .tag{position:absolute;top:10px;left:10px;font:700 10.5px var(--font-primary);color:var(--text-brand);background:#fff;padding:3px 10px;border-radius:999px;letter-spacing:.04em;text-transform:uppercase}
+  .ups .body{padding:14px 18px}
+  .ups .t{font:600 14.5px/19px var(--font-primary)}
+  .ups .d{font:400 12.5px/17px var(--font-primary);color:var(--text-gray-dark);margin:4px 0 12px}
+  .ups .foot{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .ups .foot .p{font:700 17px var(--font-primary)}
+  .ups .foot .p .from{font:500 11px var(--font-primary);color:var(--text-gray-medium);margin-right:3px;text-transform:uppercase;letter-spacing:.05em}
+  .ups .dots{display:flex;justify-content:center;gap:5px;padding:0 0 12px}
+  .ups .dots i{width:5px;height:5px;border-radius:50%;background:var(--stroke-gray-medium)}
+  .ups .dots i.on{background:var(--text-brand);width:14px;border-radius:3px}
+
+  .contact .hd{display:flex;align-items:center;gap:10px;padding:14px 18px 4px}
+  .contact .hd svg{width:16px;height:16px;stroke:var(--text-brand);fill:none;stroke-width:1.8}
+  .contact .hd .t{font:600 13.5px var(--font-primary)}
+  .contact p{margin:0;padding:4px 18px 10px;font:400 12px/17px var(--font-primary);color:var(--text-gray-dark)}
+  .contact .cta{padding:0 14px 14px}
+  .contact .cta .btn{width:100%;height:34px}
+
+  @media (max-width:1180px){
+    .app{grid-template-columns:240px 1fr}
+    .rail{grid-column:1/-1;border-left:none;border-top:1px solid var(--stroke-gray-lighter);display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:24px 32px 56px}
+    .reco{grid-template-columns:1fr 1fr}
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- Sidebar -->
+  <aside class="side">
+    <div class="prop">
+      <div class="av"><svg viewBox="0 0 24 24"><path d="M3 9 12 2l9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg></div>
+      <div>
+        <div class="name">Puerta del Sol</div>
+        <div class="ref">VH-2026-0847</div>
+      </div>
+    </div>
+    <nav>
+      <div class="n-item active">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Home
+      </div>
+      <div class="sgroup">Before your stay</div>
+      <div class="n-item">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+        Guest registration
+        <span class="badge">2 left</span>
+      </div>
+      <div class="n-item">
+        <svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M2 10h20M6 14h4"/></svg>
+        Payments
+        <span class="badge">€340</span>
+      </div>
+      <div class="sgroup">Your stay</div>
+      <div class="n-item">
+        <svg viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="3.5"/><path d="m10 13 10-10M16 7l3 3"/></svg>
+        Virtual keys
+      </div>
+      <div class="n-item">
+        <svg viewBox="0 0 24 24"><path d="M4 4h10a4 4 0 0 1 4 4v12H8a4 4 0 0 1-4-4z"/><path d="M8 8h6M8 12h6"/></svg>
+        Guidebooks
+      </div>
+      <div class="n-item">
+        <svg viewBox="0 0 24 24"><path d="m12 2 3.1 6.3L22 9.3l-5 4.8 1.2 6.9L12 17.8 5.8 21l1.2-6.9-5-4.8 6.9-1z"/></svg>
+        Recommendations
+      </div>
+      <div class="sgroup">Check-out</div>
+      <div class="n-item">
+        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+        Check-out instructions
+      </div>
+      <div class="sgroup">Chek</div>
+      <div class="n-item">
+        <svg viewBox="0 0 24 24"><path d="M12 2a4 4 0 0 0-4 4v1a4 4 0 0 0-4 4v0a4 4 0 0 0 2 3.5V17a4 4 0 0 0 4 4h4a4 4 0 0 0 4-4v-2.5A4 4 0 0 0 20 11a4 4 0 0 0-4-4V6a4 4 0 0 0-4-4z"/></svg>
+        Ask Chek
+      </div>
+    </nav>
+    <div class="me">
+      <div class="av">CS</div>
+      <div>
+        <div class="n">Carmen Specimen</div>
+        <div class="e">carmen@email.com</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+
+    <div class="head">
+      <h1>Welcome, Carmen 👋</h1>
+      <div class="sub">Finish your check-in and make the most of your stay in Madrid.</div>
+    </div>
+
+    <!-- Check-in strip -->
+    <div class="strip">
+      <div class="slot">
+        <div class="l">Check-in</div>
+        <div class="h">14:00</div>
+        <div class="d">Mon · 18 May 2026</div>
+      </div>
+      <div class="arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
+      <div class="slot right">
+        <div class="l">Check-out</div>
+        <div class="h">10:00</div>
+        <div class="d">Sat · 23 May · 5 nights</div>
+      </div>
+    </div>
+
+    <!-- Chek nudge -->
+    <div class="nudge">
+      <div class="av"><svg viewBox="0 0 24 24"><path d="M12 2a4 4 0 0 0-4 4v1a4 4 0 0 0-4 4v0a4 4 0 0 0 2 3.5V17a4 4 0 0 0 4 4h4a4 4 0 0 0 4-4v-2.5A4 4 0 0 0 20 11a4 4 0 0 0-4-4V6a4 4 0 0 0-4-4z"/><circle cx="9.5" cy="12" r="1"/><circle cx="14.5" cy="12" r="1"/></svg></div>
+      <div class="b">
+        <div class="l">Suggested by Chek</div>
+        <div class="t">Finish ID verification now and unlock your digital keys.</div>
+        <div class="d">Your flight lands at 13:20 — verifying your ID ahead of time means you can walk straight in without waiting at the lockbox.</div>
+        <div class="actions">
+          <button class="btn primary">Start verification <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></button>
+          <button class="btn ghost">Ask Chek</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Checklist -->
+    <section>
+      <div class="sec-head">
+        <h2>Complete your check-in</h2>
+        <div class="meta"><b>1</b> of 4 done</div>
+      </div>
+      <div class="card checklist">
+        <div class="ptop"><div class="n">25%</div><div class="l">· arrival in 5 days</div></div>
+        <div class="bar"><i style="width:25%"></i></div>
+
+        <div class="cl-row done">
+          <div class="ic"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div>
+          <div class="lt">
+            <div class="t">Guest details</div>
+            <div class="d">All guests added and verified.</div>
+          </div>
+          <span class="st">Completed</span>
+          <svg class="chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg>
+        </div>
+        <div class="cl-row pending">
+          <div class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="12" r="2.5"/><path d="M14 10h4M14 14h4"/></svg></div>
+          <div class="lt">
+            <div class="t">ID verification</div>
+            <div class="d">Scan your document with NFC — ~90 seconds.</div>
+          </div>
+          <span class="st">Pending</span>
+          <svg class="chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg>
+        </div>
+        <div class="cl-row todo">
+          <div class="ic"><svg viewBox="0 0 24 24"><path d="M12 2 4 5v7c0 5 3.5 8 8 10 4.5-2 8-5 8-10V5z"/></svg></div>
+          <div class="lt">
+            <div class="t">Security deposit</div>
+            <div class="d">€200 pre-authorisation — released on check-out.</div>
+          </div>
+          <span class="st">Not started</span>
+          <svg class="chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg>
+        </div>
+        <div class="cl-row todo">
+          <div class="ic"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M2 10h20M6 14h4"/></svg></div>
+          <div class="lt">
+            <div class="t">Balance payment</div>
+            <div class="d">€340 due — unlocks your digital keys.</div>
+          </div>
+          <span class="st">Not started</span>
+          <svg class="chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- Your stay -->
+    <section>
+      <div class="sec-head"><h2>Your stay</h2></div>
+      <div class="stay">
+        <div class="card">
+          <div class="ic"><svg viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="3.5"/><path d="m10 13 10-10M16 7l3 3"/></svg></div>
+          <div class="t">Virtual keys</div>
+          <div class="d">Available once your balance is paid.</div>
+          <button class="btn dark">View keys</button>
+        </div>
+        <div class="card">
+          <div class="ic"><svg viewBox="0 0 24 24"><path d="M4 4h10a4 4 0 0 1 4 4v12H8a4 4 0 0 1-4-4z"/><path d="M8 8h6M8 12h6"/></svg></div>
+          <div class="t">Guidebooks</div>
+          <div class="d">Meet your host + local tips for Madrid.</div>
+          <button class="btn ghost">Browse</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Recommendations -->
+    <section>
+      <div class="sec-head">
+        <h2>Handpicked by Chek for your trip</h2>
+        <a class="meta" href="#" style="color:var(--text-brand);text-decoration:none">See all →</a>
+      </div>
+      <div class="reco">
+        <div class="card a">
+          <div class="media"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+          <div class="body">
+            <div class="t">Late check-out</div>
+            <div class="d">Extend your stay until 14:00 on departure day.</div>
+            <div class="row"><div class="p"><span class="from">from</span>€25</div><button class="btn ghost" style="height:30px;padding:0 10px;font-size:12.5px">Add</button></div>
+          </div>
+        </div>
+        <div class="card b">
+          <div class="media"><svg viewBox="0 0 24 24"><path d="M3 6h18l-2 12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><path d="M9 10v4M15 10v4"/></svg></div>
+          <div class="body">
+            <div class="t">Grocery pack</div>
+            <div class="d">Bread, milk and fruit waiting on arrival.</div>
+            <div class="row"><div class="p"><span class="from">from</span>€35</div><button class="btn ghost" style="height:30px;padding:0 10px;font-size:12.5px">Add</button></div>
+          </div>
+        </div>
+        <div class="card c">
+          <div class="media"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+          <div class="body">
+            <div class="t">Walking tour</div>
+            <div class="d">Private 2h tour of the Austrias quarter.</div>
+            <div class="row"><div class="p"><span class="from">from</span>€45</div><button class="btn ghost" style="height:30px;padding:0 10px;font-size:12.5px">Add</button></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Checkout -->
+    <div class="coban">
+      <div class="ic"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></div>
+      <div class="lt">
+        <div class="t">Check-out instructions</div>
+        <div class="d">Available 24 hours before departure.</div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Rail -->
+  <aside class="rail">
+    <div class="card res">
+      <div class="hd">
+        <div class="t">Your reservation</div>
+        <div class="st">Confirmed</div>
+      </div>
+      <dl>
+        <div class="row"><dt>Check-in</dt><dd>18 May · 14:00</dd></div>
+        <div class="row"><dt>Check-out</dt><dd>23 May · 10:00</dd></div>
+        <div class="row"><dt>Nights</dt><dd>5</dd></div>
+        <div class="row"><dt>Guests</dt><dd>2 adults</dd></div>
+        <div class="row"><dt>Booking ref</dt><dd>VH-2026-0847</dd></div>
+      </dl>
+    </div>
+
+    <div class="card ups">
+      <div class="media"><span class="tag">Limited offer</span></div>
+      <div class="body">
+        <div class="t">Early check-in from 10:00</div>
+        <div class="d">Arrive up to 4 hours early — perfect for early flights.</div>
+        <div class="foot">
+          <div class="p"><span class="from">from</span>€25</div>
+          <button class="btn primary" style="height:32px">Add to stay</button>
+        </div>
+      </div>
+      <div class="dots"><i class="on"></i><i></i><i></i></div>
+    </div>
+
+    <div class="card contact">
+      <div class="hd">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        <div class="t">Need a human?</div>
+      </div>
+      <p>Chek handles most requests, but your host is one tap away.</p>
+      <div class="cta"><button class="btn dark">Chat with host</button></div>
+    </div>
+
+    <div class="card contact">
+      <div class="hd">
+        <svg viewBox="0 0 24 24"><path d="M4.93 4.93l4.24 4.24M14.83 14.83l4.24 4.24"/><circle cx="12" cy="12" r="10"/></svg>
+        <div class="t">Technical support</div>
+      </div>
+      <p>Issues with payment, ID scan or the app.</p>
+      <div class="cta"><button class="btn ghost">Contact Chekin</button></div>
+    </div>
+  </aside>
+</div>
+</body>
+</html>
