@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <title>Chekin Guest — Guided Journey</title>
 <link rel="stylesheet" href="../../ds/colors_and_type.css">
+<link rel="stylesheet" href="../_chek.css">
+<script src="../_chek.js" defer></script>
 <style>
   :root{
     --bg-dark:#161643;
@@ -243,11 +245,6 @@
         <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
         Check-out instructions
       </div>
-      <div class="sgroup">Chek</div>
-      <div class="n-item">
-        <svg viewBox="0 0 24 24"><path d="M12 2a4 4 0 0 0-4 4v1a4 4 0 0 0-4 4v0a4 4 0 0 0 2 3.5V17a4 4 0 0 0 4 4h4a4 4 0 0 0 4-4v-2.5A4 4 0 0 0 20 11a4 4 0 0 0-4-4V6a4 4 0 0 0-4-4z"/></svg>
-        Ask Chek
-      </div>
     </nav>
     <div class="me">
       <div class="av">CS</div>
@@ -261,9 +258,12 @@
   <!-- Main -->
   <main class="main">
 
-    <div class="head">
-      <h1>Welcome, Carmen 👋</h1>
-      <div class="sub">Finish your check-in and make the most of your stay in Madrid.</div>
+    <div class="head" style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px">
+      <div>
+        <h1>Welcome, Carmen 👋</h1>
+        <div class="sub">Finish your check-in and make the most of your stay in Madrid.</div>
+      </div>
+      <button class="chek-trigger" data-chek-trigger>Ask Chek</button>
     </div>
 
     <!-- Check-in strip -->

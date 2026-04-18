@@ -1,0 +1,86 @@
+/* Shared Chek drawer — loaded by V2/V3 of the Guest App */
+
+/* Trigger button (live inside each page's header or any [data-chek-trigger]) */
+.chek-trigger{
+  display:inline-flex;align-items:center;gap:8px;
+  height:36px;padding:0 14px 0 8px;border-radius:999px;border:1px solid rgba(56,92,248,.18);
+  background:linear-gradient(180deg,#F0F3FF,#E4EAFF);color:var(--text-brand,#385CF8);
+  font:600 13px var(--font-primary);cursor:pointer;
+  box-shadow:0 1px 2px rgba(22,22,67,.04);
+  transition:background .12s,box-shadow .12s,transform .12s;
+}
+.chek-trigger:hover{background:linear-gradient(180deg,#E4EAFF,#D9E1FF);box-shadow:0 4px 10px rgba(56,92,248,.14)}
+.chek-trigger:active{transform:translateY(1px)}
+.chek-trigger .sp{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#385CF8,#8CA5FF);color:#fff;display:grid;place-items:center;flex-shrink:0}
+.chek-trigger .sp svg{width:14px;height:14px;fill:currentColor;stroke:none}
+.chek-trigger .kbd{font:600 10.5px var(--font-primary);color:var(--text-gray-medium,#9696B9);padding:2px 6px;border-radius:4px;background:rgba(22,22,67,.04);border:1px solid rgba(22,22,67,.06);letter-spacing:.02em}
+
+/* Drawer backdrop */
+.chek-back{position:fixed;inset:0;background:rgba(22,22,67,.32);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);z-index:100;opacity:0;pointer-events:none;transition:opacity .2s ease}
+.chek-back.open{opacity:1;pointer-events:auto}
+
+/* Drawer panel */
+.chek-drawer{
+  position:fixed;top:0;right:0;bottom:0;width:440px;max-width:90vw;
+  background:#fff;z-index:101;
+  display:flex;flex-direction:column;
+  transform:translateX(100%);transition:transform .28s cubic-bezier(.22,.72,.36,1);
+  box-shadow:-12px 0 40px rgba(22,22,67,.18);
+}
+.chek-drawer.open{transform:translateX(0)}
+
+.chek-drawer .dh{display:flex;align-items:center;gap:12px;padding:16px 18px;border-bottom:1px solid var(--stroke-gray-lighter,#E5E6EE);flex-shrink:0}
+.chek-drawer .dh .av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#385CF8,#8CA5FF);color:#fff;display:grid;place-items:center;position:relative;flex-shrink:0}
+.chek-drawer .dh .av svg{width:18px;height:18px;fill:currentColor;stroke:none}
+.chek-drawer .dh .av::after{content:"";position:absolute;bottom:-1px;right:-1px;width:10px;height:10px;border-radius:50%;background:var(--text-success,#0F9F80);border:2px solid #fff}
+.chek-drawer .dh .ht{font:700 15px var(--font-primary)}
+.chek-drawer .dh .hd{font:500 12px var(--font-primary);color:var(--text-gray-dark,#6B6B95);display:flex;align-items:center;gap:6px}
+.chek-drawer .dh .hd::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--text-success,#0F9F80);box-shadow:0 0 0 3px rgba(15,159,128,.2)}
+.chek-drawer .dh .actions{margin-left:auto;display:flex;gap:4px}
+.chek-drawer .dh .act{width:32px;height:32px;border-radius:8px;background:transparent;border:none;color:var(--text-gray-dark,#6B6B95);cursor:pointer;display:grid;place-items:center}
+.chek-drawer .dh .act:hover{background:var(--bg-neutral-light,#F4F6F8);color:var(--text-dark,#161643)}
+.chek-drawer .dh .act svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8}
+
+.chek-drawer .db{flex:1;padding:20px 20px 16px;display:flex;flex-direction:column;gap:12px;overflow-y:auto}
+
+/* Message bubble */
+.chek-drawer .msg{max-width:88%;display:flex;gap:10px;align-items:flex-end}
+.chek-drawer .msg.ai{align-self:flex-start}
+.chek-drawer .msg.user{align-self:flex-end;flex-direction:row-reverse}
+.chek-drawer .msg .bub{padding:11px 14px;border-radius:14px;font:400 14px/20px var(--font-primary);white-space:pre-wrap}
+.chek-drawer .msg.ai .bub{background:var(--bg-neutral-light,#F4F6F8);color:var(--text-dark,#161643);border-bottom-left-radius:4px}
+.chek-drawer .msg.user .bub{background:var(--text-brand,#385CF8);color:#fff;border-bottom-right-radius:4px}
+.chek-drawer .msg .av{width:26px;height:26px;border-radius:50%;flex-shrink:0;display:grid;place-items:center}
+.chek-drawer .msg.ai .av{background:linear-gradient(135deg,#385CF8,#8CA5FF);color:#fff}
+.chek-drawer .msg.ai .av svg{width:13px;height:13px;fill:currentColor;stroke:none}
+.chek-drawer .msg.user .av{background:var(--bg-sky-light,#EFF6FF);color:var(--text-brand,#385CF8);font:700 10px var(--font-primary)}
+
+/* Summary card */
+.chek-drawer .card-s{align-self:flex-start;max-width:92%;margin-left:36px;background:#fff;border:1px solid var(--stroke-gray-lighter,#E5E6EE);border-radius:12px;overflow:hidden;box-shadow:0 1px 2px rgba(22,22,67,.04)}
+.chek-drawer .card-s .sh{display:flex;align-items:center;gap:6px;padding:10px 14px 6px;font:700 10.5px var(--font-primary);text-transform:uppercase;letter-spacing:.1em;color:var(--text-brand,#385CF8);border-bottom:1px solid var(--stroke-gray-lighter,#E5E6EE)}
+.chek-drawer .card-s .sh svg{width:12px;height:12px;fill:currentColor;stroke:none}
+.chek-drawer .card-s .items{padding:10px 14px 12px;display:grid;gap:8px}
+.chek-drawer .card-s .it{display:flex;gap:10px;align-items:flex-start}
+.chek-drawer .card-s .it .pill{width:22px;height:22px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;font:700 10px var(--font-primary)}
+.chek-drawer .card-s .it.a .pill{background:var(--bg-blue-light,#F0F3FF);color:var(--text-brand,#385CF8)}
+.chek-drawer .card-s .it.b .pill{background:var(--bg-success-light,#E8FCF7);color:var(--text-success,#0F9F80)}
+.chek-drawer .card-s .it.c .pill{background:var(--bg-warn-light,#FFF2E0);color:var(--text-warn,#B86A00)}
+.chek-drawer .card-s .it .t{font:600 12.5px/16px var(--font-primary)}
+.chek-drawer .card-s .it .d{font:400 11.5px/16px var(--font-primary);color:var(--text-gray-dark,#6B6B95);margin-top:1px}
+
+/* Composer */
+.chek-drawer .dc{padding:10px 16px 14px;border-top:1px solid var(--stroke-gray-lighter,#E5E6EE);background:#fff;flex-shrink:0}
+.chek-drawer .chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;overflow-x:auto;scrollbar-width:none}
+.chek-drawer .chips::-webkit-scrollbar{display:none}
+.chek-drawer .chip{height:28px;padding:0 10px;border-radius:999px;border:1px solid var(--stroke-gray-medium,#CECEDE);background:#fff;color:var(--text-dark,#161643);font:500 12px var(--font-primary);display:inline-flex;align-items:center;gap:5px;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.chek-drawer .chip:hover{background:var(--bg-blue-light,#F0F3FF);border-color:var(--text-brand,#385CF8);color:var(--text-brand,#385CF8)}
+.chek-drawer .chip svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8}
+.chek-drawer .input{display:flex;align-items:center;gap:6px;background:var(--bg-neutral-light,#F4F6F8);border:1px solid var(--stroke-gray-lighter,#E5E6EE);border-radius:12px;padding:4px 4px 4px 12px}
+.chek-drawer .input input{flex:1;border:none;background:transparent;outline:none;font:500 13.5px var(--font-primary);color:var(--text-dark,#161643);padding:6px 0}
+.chek-drawer .input input::placeholder{color:var(--text-gray-medium,#9696B9)}
+.chek-drawer .input button{width:32px;height:32px;border:none;border-radius:8px;background:var(--text-brand,#385CF8);color:#fff;display:grid;place-items:center;cursor:pointer}
+.chek-drawer .input button:hover{background:var(--text-brand-dark,#2945C5)}
+.chek-drawer .input button svg{width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2}
+
+/* lock body scroll when open */
+body.chek-open{overflow:hidden}

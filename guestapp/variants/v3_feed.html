@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <title>Chekin Guest — Local Feed</title>
 <link rel="stylesheet" href="../../ds/colors_and_type.css">
+<link rel="stylesheet" href="../_chek.css">
+<script src="../_chek.js" defer></script>
 <style>
   :root{
     --bg-dark:#161643;
@@ -252,11 +254,14 @@
         <h1>For your trip</h1>
         <div class="sub">Curated by Chek — updates as things happen around you.</div>
       </div>
-      <div class="filters">
-        <div class="f-chip active">All</div>
-        <div class="f-chip">Tasks</div>
-        <div class="f-chip">Places</div>
-        <div class="f-chip">Tips</div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <div class="filters">
+          <div class="f-chip active">All</div>
+          <div class="f-chip">Tasks</div>
+          <div class="f-chip">Places</div>
+          <div class="f-chip">Tips</div>
+        </div>
+        <button class="chek-trigger" data-chek-trigger>Ask Chek</button>
       </div>
     </div>
 
@@ -432,18 +437,6 @@
 
     </div>
   </main>
-</div>
-
-<!-- Floating Chek launcher -->
-<div class="launcher">
-  <div class="preview">
-    <div class="av"><svg viewBox="0 0 24 24"><path d="M12 2a4 4 0 0 0-4 4v1a4 4 0 0 0-4 4v0a4 4 0 0 0 2 3.5V17a4 4 0 0 0 4 4h4a4 4 0 0 0 4-4v-2.5A4 4 0 0 0 20 11a4 4 0 0 0-4-4V6a4 4 0 0 0-4-4z"/></svg></div>
-    <div>
-      <div class="t">Chek is here</div>
-      <div class="d">Ask me anything about Madrid or your booking.</div>
-    </div>
-  </div>
-  <button class="bt" aria-label="Open Chek"><svg viewBox="0 0 24 24"><path d="M12 2a4 4 0 0 0-4 4v1a4 4 0 0 0-4 4v0a4 4 0 0 0 2 3.5V17a4 4 0 0 0 4 4h4a4 4 0 0 0 4-4v-2.5A4 4 0 0 0 20 11a4 4 0 0 0-4-4V6a4 4 0 0 0-4-4z"/><circle cx="9.5" cy="12" r="1"/><circle cx="14.5" cy="12" r="1"/></svg></button>
 </div>
 
 </body>
