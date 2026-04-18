@@ -4,11 +4,11 @@
 
   const DRAWER_HTML = `
 <div class="chek-back" id="chekBack"></div>
-<aside class="chek-drawer" id="chekDrawer" role="dialog" aria-label="Chek — AI concierge">
+<aside class="chek-drawer" id="chekDrawer" role="dialog" aria-label="Vela — AI concierge">
   <div class="dh">
     <div class="av">${SPARKLE}</div>
     <div>
-      <div class="ht">Chek</div>
+      <div class="ht">Vela</div>
       <div class="hd">Tuned in to your trip</div>
     </div>
     <div class="actions">
@@ -21,7 +21,7 @@
   <div class="db" id="chekBody">
     <div class="msg ai">
       <div class="av">${SPARKLE}</div>
-      <div class="bub">Hola Carmen 👋 I'm <b>Chek</b>. Your Iberia flight lands Monday at 13:20 — two tasks remain before arrival. Want me to take you through them?</div>
+      <div class="bub">Hola Carmen 👋 I'm <b>Vela</b>. Your Iberia flight lands Monday at 13:20 — two tasks remain before arrival. Want me to take you through them?</div>
     </div>
 
     <div class="card-s">
@@ -47,7 +47,7 @@
       <div class="chip"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Late check-out</div>
     </div>
     <div class="input">
-      <input placeholder="Ask Chek anything…">
+      <input placeholder="Ask Vela anything…">
       <button aria-label="Send"><svg viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/></svg></button>
     </div>
   </div>

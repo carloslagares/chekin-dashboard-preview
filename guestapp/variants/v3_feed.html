@@ -164,8 +164,9 @@
   .fcard.upsell .foot{display:flex;align-items:center;gap:12px}
   .fcard.upsell .price{font:700 17px var(--font-primary)}
   .fcard.upsell .price .from{font:500 10.5px var(--font-primary);color:var(--text-gray-medium);margin-right:3px;text-transform:uppercase;letter-spacing:.05em}
-  .fcard.upsell .media{background:linear-gradient(135deg,#6BE0A8,#0F9F80);min-height:150px;position:relative;display:grid;place-items:center}
-  .fcard.upsell .media svg{width:44px;height:44px;stroke:#fff;fill:none;stroke-width:1.4}
+  .fcard.upsell .media{background:var(--bg-neutral-cold);min-height:170px;position:relative;overflow:hidden}
+  .fcard.upsell .media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+  .fcard.upsell .media::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 50%,rgba(22,22,67,.18));pointer-events:none}
 
   /* Buttons */
   .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:34px;padding:0 14px;border-radius:8px;font:600 13px var(--font-primary);cursor:pointer;border:none;transition:background .12s}
@@ -252,7 +253,7 @@
     <div class="head">
       <div>
         <h1>For your trip</h1>
-        <div class="sub">Curated by Chek — updates as things happen around you.</div>
+        <div class="sub">Curated by Vela — updates as things happen around you.</div>
       </div>
       <div style="display:flex;gap:10px;align-items:center">
         <div class="filters">
@@ -261,7 +262,7 @@
           <div class="f-chip">Places</div>
           <div class="f-chip">Tips</div>
         </div>
-        <button class="chek-trigger" data-chek-trigger>Ask Chek</button>
+        <button class="chek-trigger" data-chek-trigger>Ask Vela</button>
       </div>
     </div>
 
@@ -291,7 +292,7 @@
       <div class="fcard hero w1">
         <div class="meta"><span class="tag">🌤️ Madrid weather</span><span class="time" style="color:rgba(255,255,255,.75)">Right now</span></div>
         <h3>Warm afternoon in Madrid — perfect terrace weather.</h3>
-        <div class="d">Chek noticed a wind drop tonight. Dinner outside would be a good call — I'll save you 3 nearby terraces with space to walk in.</div>
+        <div class="d">Vela noticed a wind drop tonight. Dinner outside would be a good call — I'll save you 3 nearby terraces with space to walk in.</div>
         <div class="wrow">
           <div class="temp">24<span class="u">°C</span></div>
           <div class="metrics">
@@ -328,7 +329,7 @@
         </div>
         <div class="bd">
           <div class="meta">
-            <span class="tag chek"><svg viewBox="0 0 24 24"><path d="M12 2a4 4 0 0 0-4 4v1a4 4 0 0 0-4 4v0a4 4 0 0 0 2 3.5V17a4 4 0 0 0 4 4h4a4 4 0 0 0 4-4v-2.5A4 4 0 0 0 20 11a4 4 0 0 0-4-4V6a4 4 0 0 0-4-4z"/></svg>Chek pick</span>
+            <span class="tag chek"><svg viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><path d="M10 2.3l1.75 5.45L17 9.4l-5.25 1.65L10 16.5l-1.75-5.45L3 9.4l5.25-1.65z"/><path d="M18.5 14l.75 2.25 2.25.75-2.25.75-.75 2.25-.75-2.25-2.25-.75 2.25-.75z"/></svg>Vela pick</span>
             <span>· Tapas · 3 min walk</span>
             <span class="time">Just curated</span>
           </div>
@@ -347,12 +348,12 @@
       <!-- Tip / local insight -->
       <div class="fcard tip">
         <div class="meta">
-          <span class="tag chek" style="background:#fff;color:var(--text-brand);border:1px solid rgba(56,92,248,.22)"><svg viewBox="0 0 24 24"><path d="M12 2a4 4 0 0 0-4 4v1a4 4 0 0 0-4 4v0a4 4 0 0 0 2 3.5V17a4 4 0 0 0 4 4h4a4 4 0 0 0 4-4v-2.5A4 4 0 0 0 20 11a4 4 0 0 0-4-4V6a4 4 0 0 0-4-4z"/></svg>Chek tip</span>
+          <span class="tag chek" style="background:#fff;color:var(--text-brand);border:1px solid rgba(56,92,248,.22)"><svg viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><path d="M10 2.3l1.75 5.45L17 9.4l-5.25 1.65L10 16.5l-1.75-5.45L3 9.4l5.25-1.65z"/><path d="M18.5 14l.75 2.25 2.25.75-2.25.75-.75 2.25-.75-2.25-2.25-.75 2.25-.75z"/></svg>Vela tip</span>
           <span class="time">Tailored to your arrival</span>
         </div>
         <div class="q">The airport express bus <b>leaves from T4 every 15 minutes</b> and drops you 5 minutes from the apartment. It's €5 vs ~€35 in a taxi — and it's actually faster at rush hour.</div>
         <div class="by">
-          <div class="av"><svg viewBox="0 0 24 24"><path d="M12 2a4 4 0 0 0-4 4v1a4 4 0 0 0-4 4v0a4 4 0 0 0 2 3.5V17a4 4 0 0 0 4 4h4a4 4 0 0 0 4-4v-2.5A4 4 0 0 0 20 11a4 4 0 0 0-4-4V6a4 4 0 0 0-4-4z"/></svg></div>
+          <div class="av"><svg viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><path d="M10 2.3l1.75 5.45L17 9.4l-5.25 1.65L10 16.5l-1.75-5.45L3 9.4l5.25-1.65z"/><path d="M18.5 14l.75 2.25 2.25.75-2.25.75-.75 2.25-.75-2.25-2.25-.75 2.25-.75z"/></svg></div>
           Based on your 13:20 flight · Iberia IB3142
         </div>
       </div>
@@ -402,7 +403,7 @@
       <div class="fcard upsell">
         <div class="bd">
           <div class="meta">
-            <span class="tag chek"><svg viewBox="0 0 24 24"><path d="M12 2a4 4 0 0 0-4 4v1a4 4 0 0 0-4 4v0a4 4 0 0 0 2 3.5V17a4 4 0 0 0 4 4h4a4 4 0 0 0 4-4v-2.5A4 4 0 0 0 20 11a4 4 0 0 0-4-4V6a4 4 0 0 0-4-4z"/></svg>Suggested add-on</span>
+            <span class="tag chek"><svg viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><path d="M10 2.3l1.75 5.45L17 9.4l-5.25 1.65L10 16.5l-1.75-5.45L3 9.4l5.25-1.65z"/><path d="M18.5 14l.75 2.25 2.25.75-2.25.75-.75 2.25-.75-2.25-2.25-.75 2.25-.75z"/></svg>Suggested add-on</span>
             <span>· Based on your 13:20 flight</span>
             <span class="time">Limited</span>
           </div>
@@ -415,7 +416,7 @@
           </div>
         </div>
         <div class="media">
-          <svg viewBox="0 0 24 24"><path d="M12 3v3M12 18v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M3 12h3M18 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/><circle cx="12" cy="12" r="4"/></svg>
+          <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&auto=format&fit=crop&q=80" alt="Bright cozy apartment interior" loading="lazy">
         </div>
       </div>
 
