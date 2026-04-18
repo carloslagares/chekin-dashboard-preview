@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Chekin — Welcome · AI assistant</title>
+<link rel="stylesheet" href="../ds/colors_and_type.css">
+<link rel="stylesheet" href="../ds/_sidebar.css">
+<link rel="stylesheet" href="../ds/_agent.css">
+<style>
+  :root{
+    /* Dashboard surface tokens — mirror V1's :root so sidebar + agent panel have all tokens */
+    --bg-dark:#161643;
+    --bg-screen:#FDFDFF;
+    --bg-white:#FFFFFF;
+    --bg-neutral-light:#F4F6F8;
+    --bg-sky-light:#EFF6FF;
+    --bg-blue-light:#F0F3FF;
+    --bg-success-light:#E8FCF7;
+    --stroke-gray-lighter:#E5E6EE;
+    --stroke-gray-light:#DEDEEB;
+    --stroke-gray-medium:#CECEDE;
+    --stroke-success-light:#AAF4E3;
+    --text-dark:#161643;
+    --text-gray-dark:#6B6B95;
+    --text-gray-medium:#9696B9;
+    --text-gray-light:#CECEDE;
+    --text-white:#FFFFFF;
+    --text-brand:#385CF8;
+    --text-danger:#FF2467;
+  }
+</style>
+<link rel="stylesheet" href="_shared.css">
+<style>
+  .page{gap:24px;max-width:1200px}
+
+  /* AI hero */
+  .ai-hero{
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:20px;box-shadow:var(--shadow-card);
+    padding:32px 36px 28px;position:relative;overflow:hidden;
+  }
+  .ai-hero::before{
+    content:"";position:absolute;top:-40%;right:-10%;width:520px;height:520px;border-radius:50%;
+    background:radial-gradient(closest-side, rgba(56,92,248,.14), transparent);
+    pointer-events:none;
+  }
+  .ai-hero::after{
+    content:"";position:absolute;top:-20%;right:10%;width:340px;height:340px;border-radius:50%;
+    background:radial-gradient(closest-side, rgba(107,224,168,.18), transparent);
+    pointer-events:none;
+  }
+  .ai-hero .row{display:flex;align-items:flex-start;gap:18px;position:relative;z-index:1}
+  .ai-mark{
+    width:52px;height:52px;border-radius:14px;flex-shrink:0;
+    background:linear-gradient(135deg,#385CF8 0%, #6BE0A8 100%);
+    display:grid;place-items:center;position:relative;
+    box-shadow:0 8px 24px rgba(56,92,248,.3);
+  }
+  .ai-mark svg{width:26px;height:26px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .ai-mark::after{
+    content:"";position:absolute;inset:-2px;border-radius:16px;
+    background:conic-gradient(from 0deg, rgba(56,92,248,.5), rgba(107,224,168,.5), rgba(56,92,248,.5));
+    z-index:-1;filter:blur(8px);opacity:.6;
+    animation:spin 6s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .ai-hero .intro{flex:1}
+  .ai-hero .eyebrow{font:600 12px var(--font-primary);color:var(--blue);text-transform:uppercase;letter-spacing:.08em;display:inline-flex;align-items:center;gap:8px}
+  .ai-hero h1{font:600 28px/36px var(--font-primary);color:var(--ink);margin:4px 0 0;letter-spacing:-.01em;max-width:720px}
+  .ai-hero .summary{font:400 15px/22px var(--font-primary);color:var(--ink2);margin-top:12px;max-width:720px}
+  .ai-hero .summary b{color:var(--ink);font-weight:600}
+
+  /* Composer */
+  .composer{
+    margin-top:22px;position:relative;z-index:1;
+    background:#fff;border:1.5px solid var(--line2);border-radius:14px;
+    padding:14px 16px;display:flex;gap:12px;align-items:center;
+    transition:border-color .15s,box-shadow .15s;
+  }
+  .composer:focus-within{border-color:var(--blue);box-shadow:var(--shadow-focus)}
+  .composer svg.pre{width:18px;height:18px;stroke:var(--ink3);fill:none;stroke-width:2;flex-shrink:0}
+  .composer input{flex:1;border:none;outline:none;background:transparent;font:500 15px var(--font-primary);color:var(--ink)}
+  .composer input::placeholder{color:var(--ink3)}
+  .composer .send{
+    appearance:none;border:none;background:var(--blue);color:#fff;
+    width:34px;height:34px;border-radius:10px;display:grid;place-items:center;cursor:pointer;
+    box-shadow:0 0 0 3px rgba(56,92,248,.18);
+  }
+  .composer .send svg{width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+  .prompts{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;position:relative;z-index:1}
+  .prompts .p{
+    padding:8px 12px;border-radius:999px;
+    background:var(--bg-neutral);border:1px solid var(--line);
+    font:500 12.5px var(--font-primary);color:var(--ink);
+    cursor:pointer;display:inline-flex;align-items:center;gap:6px;
+    transition:all .15s;
+  }
+  .prompts .p:hover{background:var(--blue-light);border-color:var(--blue-light);color:var(--blue)}
+  .prompts .p svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+  /* Suggestions — 3 big action cards */
+  .sug-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  .sug{
+    background:#fff;border:1px solid var(--line);border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-card);padding:22px 22px 20px;
+    display:flex;flex-direction:column;gap:14px;position:relative;overflow:hidden;
+    transition:all .2s;cursor:pointer;
+  }
+  .sug:hover{border-color:var(--blue);box-shadow:0 12px 28px rgba(26,148,255,.15);transform:translateY(-2px)}
+  .sug .ai-chip{
+    position:absolute;top:14px;right:14px;
+    font:700 10px var(--font-primary);color:var(--blue);
+    padding:3px 8px;border-radius:51px;background:var(--blue-light);
+    display:inline-flex;align-items:center;gap:4px;letter-spacing:.04em;
+  }
+  .sug .ai-chip::before{content:"";width:4px;height:4px;border-radius:50%;background:var(--blue);box-shadow:0 0 0 3px rgba(56,92,248,.2)}
+  .sug .ic{
+    width:44px;height:44px;border-radius:12px;display:grid;place-items:center;
+    background:var(--blue-chip);color:var(--blue);
+  }
+  .sug .ic svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+  .sug.win .ic{background:var(--success-bg);color:var(--success)}
+  .sug.risk .ic{background:var(--danger-bg);color:var(--danger)}
+  .sug .lab{font:600 11px var(--font-primary);color:var(--ink3);text-transform:uppercase;letter-spacing:.06em}
+  .sug h3{font:600 17px/23px var(--font-primary);color:var(--ink);margin:0}
+  .sug .reason{font:400 13.5px/20px var(--font-primary);color:var(--ink2)}
+  .sug .metric{display:flex;align-items:baseline;gap:10px;padding:10px 0;border-top:1px dashed var(--line);border-bottom:1px dashed var(--line)}
+  .sug .metric .big{font:700 22px var(--font-primary);color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+  .sug .metric .small{font:500 12px var(--font-primary);color:var(--ink2)}
+  .sug .actions{display:flex;gap:6px;justify-content:space-between;align-items:center}
+  .sug .actions .b-main{font:600 13px var(--font-primary);color:var(--blue);display:inline-flex;align-items:center;gap:4px;padding:4px 0}
+  .sug .actions .b-dismiss{font:500 12px var(--font-primary);color:var(--ink3);padding:6px 10px;border-radius:6px;cursor:pointer}
+  .sug .actions .b-dismiss:hover{background:var(--bg-neutral)}
+
+  /* Thread / reasoning log */
+  .thread{
+    background:linear-gradient(180deg,#FBFBFE 0%, #fff 100%);
+    border:1px solid var(--line);border-radius:var(--radius-lg);
+    padding:24px 28px;
+  }
+  .thread .t-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+  .thread .t-head h3{font:600 15px var(--font-primary);color:var(--ink);margin:0;text-transform:uppercase;letter-spacing:.06em}
+  .thread .t-head .live{font:600 11px var(--font-primary);color:var(--success);display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:var(--success-bg);border-radius:51px}
+  .thread .t-head .live::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--success);box-shadow:0 0 0 3px rgba(15,159,128,.2);animation:pulseGreen 1.5s ease-out infinite}
+  @keyframes pulseGreen{0%{box-shadow:0 0 0 0 rgba(15,159,128,.5)}100%{box-shadow:0 0 0 8px rgba(15,159,128,0)}}
+
+  .step{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:flex-start;padding:12px 0;border-bottom:1px dashed var(--line)}
+  .step:last-child{border-bottom:none}
+  .step .ic{width:28px;height:28px;border-radius:8px;background:var(--bg-neutral);display:grid;place-items:center;flex-shrink:0;margin-top:1px}
+  .step .ic svg{width:14px;height:14px;stroke:var(--ink2);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .step.done .ic{background:var(--success-bg)}
+  .step.done .ic svg{stroke:var(--success)}
+  .step .c{min-width:0}
+  .step .line{font:500 14px var(--font-primary);color:var(--ink)}
+  .step .line code{background:var(--blue-chip);color:var(--blue);padding:1px 7px;border-radius:5px;font:600 12px var(--font-mono,monospace)}
+  .step .det{font:400 12.5px/18px var(--font-primary);color:var(--ink2);margin-top:3px}
+  .step .t{font:500 11px var(--font-primary);color:var(--ink3);white-space:nowrap}
+
+  /* Two-col under */
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+
+  /* Capabilities */
+  .caps{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+  .cap{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background .15s}
+  .cap:hover{background:var(--bg-neutral)}
+  .cap .ic{width:28px;height:28px;border-radius:8px;background:var(--blue-chip);color:var(--blue);display:grid;place-items:center;flex-shrink:0}
+  .cap .ic svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8}
+  .cap .t{font:600 13px var(--font-primary);color:var(--ink)}
+  .cap .d{font:400 11.5px/16px var(--font-primary);color:var(--ink2);margin-top:1px}
+
+  /* Recent ai actions */
+  .ai-recent{display:flex;flex-direction:column;gap:2px}
+  .ai-recent .r{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px dashed var(--line)}
+  .ai-recent .r:last-child{border-bottom:none}
+  .ai-recent .r .dot{width:8px;height:8px;border-radius:50%;background:var(--success);box-shadow:0 0 0 3px rgba(15,159,128,.18);flex-shrink:0}
+  .ai-recent .r .dot.saved{background:var(--blue);box-shadow:0 0 0 3px rgba(56,92,248,.18)}
+  .ai-recent .r .body{flex:1;font:500 13px var(--font-primary);color:var(--ink)}
+  .ai-recent .r .body b{font-weight:600}
+  .ai-recent .r .body .sub{font:400 11.5px var(--font-primary);color:var(--ink3);margin-top:1px}
+  .ai-recent .r .t{font:500 11px var(--font-primary);color:var(--ink3)}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div id="sidebar-slot" data-nav="home"></div>
+
+  <main>
+    <header class="top">
+      <div class="crumbs"><b>Home</b></div>
+      <div class="spacer" style="margin-left:auto"></div>
+      <span data-agent-trigger-slot></span>
+      <button class="iconbtn" aria-label="Notifications"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><div class="pip"></div></button>
+    </header>
+
+    <div class="page">
+
+      <!-- AI hero -->
+      <div class="ai-hero">
+        <div class="row">
+          <div class="ai-mark">
+            <svg viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/><circle cx="12" cy="12" r="3"/></svg>
+          </div>
+          <div class="intro">
+            <div class="eyebrow">Chekin AI · daily briefing</div>
+            <h1>Good afternoon, Maria. Here's what needs your attention today.</h1>
+            <div class="summary">
+              I've handled <b>12 check-in links</b>, <b>8 ID verifications</b> and <b>2 deposit holds</b> since you last logged in. Three things still need a human: one guest hasn't uploaded their ID, you have <b>14 SES.HOSPEDAJES reports</b> queued for submission tonight, and I noticed <b>Villa Serena</b> has pricing below market for the May long weekend.
+            </div>
+          </div>
+        </div>
+
+        <div class="composer">
+          <svg class="pre" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <input placeholder="Ask Chekin anything — ‘which guests arrive this weekend?’, ‘draft a late-check-out reply in Spanish’…">
+          <button class="send" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></button>
+        </div>
+        <div class="prompts">
+          <div class="p"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Summarise this week</div>
+          <div class="p"><svg viewBox="0 0 24 24"><path d="M12 2v20M17 5H9a3 3 0 0 0 0 6h6a3 3 0 0 1 0 6H7"/></svg>Revenue by property</div>
+          <div class="p"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Draft reply to Matteo</div>
+          <div class="p"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 2"/></svg>Optimise check-in times</div>
+        </div>
+      </div>
+
+      <!-- Suggestions -->
+      <div>
+        <div class="sechead">
+          <h2>Suggested actions for you</h2>
+          <div class="range">Refreshed 4 min ago · 3 new <svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></div>
+        </div>
+        <div class="sug-grid">
+
+          <div class="sug risk">
+            <div class="ai-chip">AI suggestion</div>
+            <div class="ic"><svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01M10.3 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg></div>
+            <div class="lab">Guest intervention</div>
+            <h3>Matteo arrives in 2h without a valid ID</h3>
+            <div class="reason">Link opened twice but never submitted — likely stuck on the passport photo step. I drafted a shorter message in Italian offering to accept the ID by email as a fallback.</div>
+            <div class="metric"><span class="big">+46%</span><span class="small">completion lift when you personalise the follow-up</span></div>
+            <div class="actions">
+              <a class="b-main">Review draft <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
+              <span class="b-dismiss">Not now</span>
+            </div>
+          </div>
+
+          <div class="sug win">
+            <div class="ai-chip">AI suggestion</div>
+            <div class="ic"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg></div>
+            <div class="lab">Revenue opportunity</div>
+            <h3>Villa Serena is 18% below market for 1–4 May</h3>
+            <div class="reason">Similar villas in Toscana average €340/night for the long weekend; your calendar shows €288 with 2 nights still open. I can sync a higher rate to Booking.com &amp; Airbnb in one click.</div>
+            <div class="metric"><span class="big">+€104</span><span class="small">estimated extra revenue if you update now</span></div>
+            <div class="actions">
+              <a class="b-main">Apply suggestion <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
+              <span class="b-dismiss">Dismiss</span>
+            </div>
+          </div>
+
+          <div class="sug">
+            <div class="ai-chip">AI suggestion</div>
+            <div class="ic"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 14l2 2 4-4"/></svg></div>
+            <div class="lab">Compliance</div>
+            <h3>Submit 14 SES.HOSPEDAJES reports tonight</h3>
+            <div class="reason">All documents validated — no missing fields. You can auto-submit every evening at 22:00 so you never have to think about it again. Takes 12 seconds to enable.</div>
+            <div class="metric"><span class="big">~35 min</span><span class="small">saved per week with auto-submit on</span></div>
+            <div class="actions">
+              <a class="b-main">Review &amp; enable <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
+              <span class="b-dismiss">Do manually</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Reasoning thread -->
+      <div class="thread">
+        <div class="t-head">
+          <h3>What I'm working on right now</h3>
+          <div class="live">Live</div>
+        </div>
+        <div class="step done">
+          <div class="ic"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div>
+          <div class="c">
+            <div class="line">Synced <code>4 new reservations</code> from Booking.com via Guesty</div>
+            <div class="det">Julia Rossi, Ayşe Kaya, Dana Novak, Thomas Becker — all assigned to properties automatically.</div>
+          </div>
+          <div class="t">14:02</div>
+        </div>
+        <div class="step done">
+          <div class="ic"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div>
+          <div class="c">
+            <div class="line">Sent <code>check-in links</code> to 3 guests arriving today</div>
+            <div class="det">Used your Italian template for Julia, Spanish for Ayşe, and English for the rest.</div>
+          </div>
+          <div class="t">14:05</div>
+        </div>
+        <div class="step done">
+          <div class="ic"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div>
+          <div class="c">
+            <div class="line">Verified Julia Rossi's passport — <code>match confidence 99.2%</code></div>
+            <div class="det">NFC chip read successfully, liveness check passed. Deposit of €150 held on Stripe.</div>
+          </div>
+          <div class="t">14:21</div>
+        </div>
+        <div class="step">
+          <div class="ic"><svg viewBox="0 0 24 24" stroke="var(--blue)"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 2"/></svg></div>
+          <div class="c">
+            <div class="line">Monitoring Matteo Leone's check-in link for activity…</div>
+            <div class="det">No events in last 2h — I'll prompt you to intervene if nothing happens by 15:30.</div>
+          </div>
+          <div class="t">Now</div>
+        </div>
+      </div>
+
+      <!-- Two-col: capabilities + recent actions -->
+      <div class="two-col">
+        <div class="panel panel-pad">
+          <h3>What Chekin AI can do <a>Open playground →</a></h3>
+          <div class="caps">
+            <div class="cap">
+              <div class="ic"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+              <div><div class="t">Answer guest messages</div><div class="d">In 14 languages, using your brand voice</div></div>
+            </div>
+            <div class="cap">
+              <div class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
+              <div><div class="t">Optimise nightly rates</div><div class="d">Compare to market and push updates</div></div>
+            </div>
+            <div class="cap">
+              <div class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></div>
+              <div><div class="t">Review guest IDs</div><div class="d">Flag mismatches and forgery attempts</div></div>
+            </div>
+            <div class="cap">
+              <div class="ic"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg></div>
+              <div><div class="t">Forecast occupancy</div><div class="d">By property, week-by-week, with confidence</div></div>
+            </div>
+            <div class="cap">
+              <div class="ic"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></div>
+              <div><div class="t">Summarise compliance</div><div class="d">Plain-language status for any jurisdiction</div></div>
+            </div>
+            <div class="cap">
+              <div class="ic"><svg viewBox="0 0 24 24"><path d="M12 2l3 7 7 .6-5 4.9 1.6 6.9L12 17.8 5.4 21.4 7 14.5 2 9.6l7-.6z"/></svg></div>
+              <div><div class="t">Draft review replies</div><div class="d">Polished, specific to the guest's feedback</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel panel-pad">
+          <h3>Recent AI activity <a>See log →</a></h3>
+          <div class="ai-recent">
+            <div class="r">
+              <div class="dot saved"></div>
+              <div class="body"><b>Drafted a reply to Ayşe Kaya</b> about luggage drop-off<div class="sub">You edited 2 lines before sending · Spanish</div></div>
+              <div class="t">1h ago</div>
+            </div>
+            <div class="r">
+              <div class="dot"></div>
+              <div class="body"><b>Flagged a possible ID mismatch</b> — Dana Novak<div class="sub">You reviewed and re-sent the link</div></div>
+              <div class="t">Yesterday</div>
+            </div>
+            <div class="r">
+              <div class="dot"></div>
+              <div class="body"><b>Auto-submitted 7 SES.HOSPEDAJES reports</b><div class="sub">All acknowledged by Policía Nacional within 4 min</div></div>
+              <div class="t">Yesterday</div>
+            </div>
+            <div class="r">
+              <div class="dot saved"></div>
+              <div class="body"><b>Suggested a rate increase for 15–19 Apr</b><div class="sub">You accepted · €32 additional revenue</div></div>
+              <div class="t">3 days ago</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="../ds/_sidebar.js"></script>
+<script src="../ds/_agent.js"></script>
+<script>
+  document.querySelectorAll('.prompts .p').forEach(p => {
+    p.addEventListener('click', () => {
+      const input = document.querySelector('.composer input');
+      input.value = p.textContent.trim();
+      input.focus();
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+/* ─────────────────────────────────────────────
+   Dashboard Sidebar (L1) — shared across pages
+   Reads tokens defined in each page's :root.
+   ───────────────────────────────────────────── */
+
+.app{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+
+aside.l1{background:var(--bg-dark);color:var(--text-white);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;z-index:10}
+
+/* Brand */
+.l1 .brand{height:64px;padding:0 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0}
+.l1 .brand img{height:22px;filter:brightness(0) invert(1)}
+.l1 .brand .collapse{width:28px;height:28px;border-radius:6px;display:grid;place-items:center;cursor:pointer;color:#CECEDE}
+.l1 .brand .collapse:hover{background:rgba(255,255,255,.05)}
+.l1 .brand .collapse svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.5}
+
+/* Main nav */
+.l1 nav.side{flex:1;padding:16px;display:flex;flex-direction:column;gap:2px;overflow-y:auto;min-height:0}
+.l1 .nav-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;cursor:pointer;font:500 16px/24px var(--font-primary);color:#CECEDE;user-select:none}
+.l1 .nav-item svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.l1 .nav-item:hover{background:rgba(255,255,255,.05);color:#fff}
+.l1 .nav-item.active{background:rgba(56,92,248,.18);color:#fff}
+.l1 .nav-item .count{margin-left:auto;font:600 12px var(--font-primary);background:rgba(255,255,255,.1);color:#fff;padding:2px 8px;border-radius:999px}
+.l1 .sgroup{font:600 11px var(--font-primary);color:#6B6B95;text-transform:uppercase;letter-spacing:.08em;padding:18px 12px 6px}
+
+/* ───── Footer (accordions) ───── */
+.l1 .foot{border-top:1px solid rgba(255,255,255,.06);padding:10px 10px 12px;display:flex;flex-direction:column;gap:2px;flex-shrink:0;max-height:58vh;overflow-y:auto;position:relative}
+
+/* Accordion container (details) */
+.l1 .acc{margin:0}
+.l1 .acc > summary{list-style:none;cursor:pointer}
+.l1 .acc > summary::-webkit-details-marker{display:none}
+
+/* Accordion header uses the same shape as a nav-item */
+.l1 .acc-head{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;font:500 16px/24px var(--font-primary);color:#CECEDE}
+.l1 .acc-head:hover{background:rgba(255,255,255,.05);color:#fff}
+.l1 .acc-head svg.ic{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.l1 .acc-head .chev{margin-left:auto;width:16px;height:16px;stroke:#9696B9;fill:none;stroke-width:1.8;transition:transform .2s}
+.l1 .acc[open] .chev{transform:rotate(180deg)}
+
+/* Account variant: bigger row with avatar + 2-line label */
+.l1 .acc-head.account{padding:10px 12px;min-height:56px}
+.l1 .acc-head.account .av{width:32px;height:32px;border-radius:50%;background:#385CF8;display:grid;place-items:center;font:700 13px var(--font-primary);color:#fff;flex-shrink:0}
+.l1 .acc-head.account .labels{display:flex;flex-direction:column;line-height:1.1;min-width:0}
+.l1 .acc-head.account .labels .t{font:600 14px var(--font-primary);color:#fff}
+.l1 .acc-head.account .labels .s{font:500 12px var(--font-primary);color:#9696B9;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* Sub-items */
+.l1 .subitems{padding:2px 0 4px 12px;display:flex;flex-direction:column;gap:1px;border-left:1px solid rgba(255,255,255,.08);margin-left:22px}
+.l1 .sub-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:6px;cursor:pointer;font:500 14px/20px var(--font-primary);color:#9696B9;user-select:none;position:relative}
+.l1 .sub-item svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.l1 .sub-item:hover{background:rgba(255,255,255,.05);color:#fff}
+.l1 .sub-item.has-flyout{justify-content:flex-start}
+.l1 .sub-item .chev{margin-left:auto;width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2}
+.l1 .sub-item.selected{background:#161643;color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+
+/* ───── Account switch flyout ─────
+   Anchored to the Account Switch sub-item, shown on hover or when
+   the wrapper has .open. Positioned OUTSIDE the sidebar (right-edge). */
+.l1 .switch-wrap{position:relative}
+.l1 .flyout{
+  position:absolute;left:calc(100% + 14px);bottom:-8px;width:280px;
+  background:#fff;border-radius:10px;box-shadow:0 12px 32px rgba(22,22,67,.25), 0 0 0 1px rgba(22,22,67,.06);
+  padding:10px;opacity:0;visibility:hidden;transform:translateX(-6px);transition:opacity .15s, transform .15s;z-index:50;
+}
+.l1 .switch-wrap:hover .flyout,
+.l1 .switch-wrap.open .flyout,
+.l1 .sub-item.has-flyout:hover + .flyout,
+.l1 .sub-item.has-flyout:focus + .flyout{opacity:1;visibility:visible;transform:translateX(0)}
+.l1 .flyout::before{
+  content:"";position:absolute;left:-6px;bottom:22px;width:12px;height:12px;background:#fff;
+  transform:rotate(45deg);box-shadow:-1px 1px 0 rgba(22,22,67,.06);border-radius:2px;
+}
+.l1 .flyout .fly-search{position:relative;margin-bottom:6px}
+.l1 .flyout .fly-search input{width:100%;height:36px;padding:0 12px 0 34px;border-radius:6px;border:1px solid var(--stroke-gray-lighter);background:var(--bg-neutral-light);font:500 13px var(--font-primary);color:var(--text-dark);outline:none;box-sizing:border-box}
+.l1 .flyout .fly-search input::placeholder{color:var(--text-gray-medium)}
+.l1 .flyout .fly-search svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;stroke:var(--text-gray-medium);fill:none;stroke-width:2}
+
+.l1 .fly-list{display:flex;flex-direction:column;gap:1px;padding:4px 0}
+.l1 .fly-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;cursor:pointer;font:500 14px/20px var(--font-primary);color:var(--text-dark)}
+.l1 .fly-row:hover{background:var(--bg-neutral-light)}
+.l1 .fly-row svg{width:16px;height:16px;stroke:var(--text-gray-dark);fill:none;stroke-width:1.6;flex-shrink:0}
+.l1 .fly-row.active svg{stroke:var(--text-brand)}
+.l1 .fly-row .tag{margin-left:auto;font:600 11px var(--font-primary);color:var(--text-brand);background:var(--bg-blue-light);padding:2px 8px;border-radius:4px}
+
+.l1 .fly-sep{height:1px;background:var(--stroke-gray-lighter);margin:6px 0}
+.l1 .fly-row.ghost{color:var(--text-gray-dark)}
+.l1 .fly-row.ghost:hover{color:var(--text-dark)}

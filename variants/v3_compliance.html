@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Chekin — Welcome · Compliance first</title>
+<link rel="stylesheet" href="../ds/colors_and_type.css">
+<link rel="stylesheet" href="../ds/_sidebar.css">
+<link rel="stylesheet" href="../ds/_agent.css">
+<style>
+  :root{
+    /* Dashboard surface tokens — mirror V1's :root so sidebar + agent panel have all tokens */
+    --bg-dark:#161643;
+    --bg-screen:#FDFDFF;
+    --bg-white:#FFFFFF;
+    --bg-neutral-light:#F4F6F8;
+    --bg-sky-light:#EFF6FF;
+    --bg-blue-light:#F0F3FF;
+    --bg-success-light:#E8FCF7;
+    --stroke-gray-lighter:#E5E6EE;
+    --stroke-gray-light:#DEDEEB;
+    --stroke-gray-medium:#CECEDE;
+    --stroke-success-light:#AAF4E3;
+    --text-dark:#161643;
+    --text-gray-dark:#6B6B95;
+    --text-gray-medium:#9696B9;
+    --text-gray-light:#CECEDE;
+    --text-white:#FFFFFF;
+    --text-brand:#385CF8;
+    --text-danger:#FF2467;
+  }
+</style>
+<link rel="stylesheet" href="_shared.css">
+<style>
+  .page{gap:24px}
+
+  /* Compliance hero */
+  .comp-hero{
+    background:linear-gradient(135deg,#161643 0%, #274BF0 100%);
+    border-radius:20px;
+    color:#fff;padding:32px 36px;position:relative;overflow:hidden;
+    display:grid;grid-template-columns:1fr auto;gap:32px;align-items:center;
+  }
+  .comp-hero::before{
+    content:"";position:absolute;inset:0;
+    background:radial-gradient(600px 300px at 90% -10%, rgba(107,224,168,.25), transparent 60%);
+    pointer-events:none;
+  }
+  .comp-hero .eyebrow{font:700 11px var(--font-primary);color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.12em;margin-bottom:10px;display:inline-flex;align-items:center;gap:8px}
+  .comp-hero .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:#FF2467;box-shadow:0 0 0 4px rgba(255,36,103,.25);animation:pulse 1.4s ease-out infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,36,103,.45)}70%{box-shadow:0 0 0 10px rgba(255,36,103,0)}100%{box-shadow:0 0 0 0 rgba(255,36,103,0)}}
+  .comp-hero h1{font:600 28px/34px var(--font-primary);margin:0;letter-spacing:-.01em}
+  .comp-hero h1 .num{color:#FFB4C7;font-weight:700}
+  .comp-hero .sub{font:400 15px/22px var(--font-primary);color:rgba(255,255,255,.75);margin-top:10px;max-width:540px}
+  .comp-hero .countdown{
+    background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);
+    border-radius:14px;padding:18px 24px;min-width:220px;text-align:center;
+    backdrop-filter:blur(10px);
+  }
+  .comp-hero .countdown .l{font:600 11px var(--font-primary);color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.08em}
+  .comp-hero .countdown .v{font:700 40px/44px var(--font-primary);letter-spacing:-.02em;margin-top:6px;font-variant-numeric:tabular-nums}
+  .comp-hero .countdown .d{font:500 12px var(--font-primary);color:rgba(255,255,255,.7);margin-top:4px}
+
+  .comp-hero .actions{grid-column:1/-1;display:flex;gap:10px;margin-top:20px;position:relative;z-index:2}
+  .comp-hero .actions .btn-primary{background:#fff;color:var(--blue);box-shadow:none}
+  .comp-hero .actions .btn-primary svg{stroke:var(--blue)}
+  .comp-hero .actions .btn-primary:hover{background:linear-gradient(0deg,rgba(56,92,248,.08),rgba(56,92,248,.08)),#fff}
+  .comp-hero .actions .btn-secondary{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);color:#fff}
+  .comp-hero .actions .btn-secondary:hover{background:rgba(255,255,255,.15)}
+
+  /* Obligations grid */
+  .obligations{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .ob{
+    background:#fff;border:1px solid var(--line);border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-card);padding:20px 22px;
+    display:flex;flex-direction:column;gap:14px;position:relative;overflow:hidden;
+  }
+  .ob .accent{position:absolute;top:0;left:0;right:0;height:3px;background:var(--line)}
+  .ob.urgent .accent{background:var(--danger)}
+  .ob.due .accent{background:var(--warn)}
+  .ob.ok .accent{background:var(--success-ring)}
+
+  .ob .ob-head{display:flex;align-items:center;gap:10px}
+  .ob .flag{width:28px;height:28px;border-radius:var(--radius-sm);background:var(--bg-neutral);display:grid;place-items:center;font:700 10px var(--font-primary);overflow:hidden}
+  .ob .ob-head .country{font:600 13px var(--font-primary);color:var(--ink)}
+  .ob .ob-head .reg{font:500 12px var(--font-primary);color:var(--ink3);margin-left:auto;padding:2px 8px;background:var(--bg-neutral);border-radius:var(--radius-sm);font-family:var(--font-mono,monospace)}
+  .ob h3{font:600 16px/22px var(--font-primary);color:var(--ink);margin:0}
+  .ob .meta{font:400 13px/19px var(--font-primary);color:var(--ink2)}
+  .ob .counts{display:flex;gap:16px;padding:12px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .ob .counts .k{flex:1}
+  .ob .counts .k .n{font:700 22px var(--font-primary);color:var(--ink);letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+  .ob .counts .k.err .n{color:var(--danger)}
+  .ob .counts .k .l{font:500 11px var(--font-primary);color:var(--ink3);text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
+  .ob .foot{display:flex;justify-content:space-between;align-items:center}
+  .ob .due{font:500 12px var(--font-primary);color:var(--ink2);display:flex;align-items:center;gap:6px}
+  .ob .due svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2}
+  .ob.urgent .due{color:var(--danger);font-weight:600}
+  .ob.due .due{color:var(--warn);font-weight:600}
+  .ob .submit{font:600 13px var(--font-primary);color:var(--blue);cursor:pointer;display:inline-flex;align-items:center;gap:4px;padding:6px 10px;border-radius:var(--radius-sm)}
+  .ob .submit:hover{background:var(--blue-light)}
+
+  /* Reports table */
+  .reports{background:#fff;border:1px solid var(--line);border-radius:var(--radius-lg);box-shadow:var(--shadow-card);overflow:hidden}
+  .reports .head{display:flex;justify-content:space-between;align-items:center;padding:18px 24px;border-bottom:1px solid var(--line)}
+  .reports .head h3{font:600 16px var(--font-primary);margin:0}
+  .reports .head .tabs{display:flex;gap:4px;background:var(--bg-neutral);padding:4px;border-radius:var(--radius-md)}
+  .reports .head .tabs button{appearance:none;border:none;background:transparent;font:600 12px var(--font-primary);color:var(--ink2);padding:6px 12px;border-radius:6px;cursor:pointer}
+  .reports .head .tabs button.active{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(22,22,67,.06)}
+  .reports table{width:100%;border-collapse:collapse}
+  .reports th{text-align:left;font:600 11px var(--font-primary);color:var(--ink2);text-transform:uppercase;letter-spacing:.06em;padding:12px 24px;background:var(--bg-neutral-alt);border-bottom:1px solid var(--line)}
+  .reports td{padding:14px 24px;border-bottom:1px solid var(--line);font:500 13px var(--font-primary);color:var(--ink);vertical-align:middle}
+  .reports tr:last-child td{border-bottom:none}
+  .reports tr:hover td{background:var(--bg-neutral-alt)}
+  .reports .guest-sm{display:flex;align-items:center;gap:10px}
+  .reports .guest-sm .av{width:28px;height:28px;border-radius:50%;background:var(--blue-light);color:var(--blue);display:grid;place-items:center;font:700 11px var(--font-primary)}
+  .reports .guest-sm .n{font:600 13px var(--font-primary);color:var(--ink)}
+  .reports .guest-sm .e{font:400 11px var(--font-primary);color:var(--ink3)}
+
+  /* Side rail */
+  .two-col{display:grid;grid-template-columns:1.6fr 1fr;gap:24px}
+  .law-changes{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}
+  .law-changes:last-child{border-bottom:none}
+  .law-changes .dot{width:8px;height:8px;border-radius:50%;background:var(--blue);margin-top:6px;flex-shrink:0;box-shadow:0 0 0 3px rgba(56,92,248,.18)}
+  .law-changes .dot.new{background:var(--danger);box-shadow:0 0 0 3px rgba(255,36,103,.2)}
+  .law-changes .c{flex:1;min-width:0}
+  .law-changes .c .t{font:600 13.5px/19px var(--font-primary);color:var(--ink)}
+  .law-changes .c .d{font:400 12.5px/18px var(--font-primary);color:var(--ink2);margin-top:3px}
+  .law-changes .c .when{font:500 11px var(--font-primary);color:var(--ink3);margin-top:5px;text-transform:uppercase;letter-spacing:.05em}
+
+  .coverage{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:12px 0;border-bottom:1px dashed var(--line)}
+  .coverage:last-child{border-bottom:none}
+  .coverage .fg{width:32px;height:32px;border-radius:8px;background:var(--bg-neutral);display:grid;place-items:center;font:700 11px var(--font-primary)}
+  .coverage .name{font:600 13px var(--font-primary);color:var(--ink)}
+  .coverage .law{font:500 11px var(--font-primary);color:var(--ink3);margin-top:1px}
+  .coverage .state{font:600 11px var(--font-primary);padding:4px 10px;border-radius:51px}
+  .coverage .state.on{background:var(--success-bg);color:var(--success)}
+  .coverage .state.off{background:var(--bg-neutral);color:var(--ink2)}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div id="sidebar-slot" data-nav="home"></div>
+
+  <main>
+    <header class="top">
+      <div class="crumbs"><b>Home</b></div>
+      <div class="spacer" style="margin-left:auto"></div>
+      <span data-agent-trigger-slot></span>
+      <button class="iconbtn" aria-label="Notifications"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><div class="pip"></div></button>
+    </header>
+
+    <div class="page">
+
+      <!-- Compliance-first hero -->
+      <div class="comp-hero">
+        <div>
+          <div class="eyebrow">Tonight's deadline</div>
+          <h1>Submit <span class="num">14 guest reports</span> to SES.HOSPEDAJES before midnight.</h1>
+          <div class="sub">Chekin has validated all documents. Review and submit in one click — we'll send confirmations to each guest once Policía Nacional acknowledges.</div>
+        </div>
+        <div class="countdown">
+          <div class="l">Time left</div>
+          <div class="v">08<span style="color:rgba(255,255,255,.4)">:</span>17</div>
+          <div class="d">Cut-off at 23:59 CET</div>
+        </div>
+        <div class="actions">
+          <button class="btn-primary">
+            <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            Review &amp; submit all 14
+          </button>
+          <button class="btn-secondary">Preview as PDF</button>
+          <button class="btn-secondary" style="margin-left:auto">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+            What is SES.HOSPEDAJES?
+          </button>
+        </div>
+      </div>
+
+      <!-- Obligations grid -->
+      <div>
+        <div class="sechead">
+          <h2>Your compliance obligations</h2>
+          <div class="range">This month · April <svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></div>
+        </div>
+        <div class="obligations">
+          <div class="ob urgent">
+            <div class="accent"></div>
+            <div class="ob-head"><div class="flag">🇪🇸</div><div class="country">Spain</div><div class="reg">SES.HOSPEDAJES</div></div>
+            <h3>Guest data to Ministerio del Interior</h3>
+            <div class="meta">Required within 24h of check-in. Chekin submits automatically once the guest completes the form.</div>
+            <div class="counts">
+              <div class="k err"><div class="n">14</div><div class="l">Pending now</div></div>
+              <div class="k"><div class="n">89</div><div class="l">Submitted Apr</div></div>
+              <div class="k"><div class="n">100%</div><div class="l">Acknowledged</div></div>
+            </div>
+            <div class="foot">
+              <div class="due"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 2"/></svg>Due in 8h 17m</div>
+              <a class="submit">Review batch <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
+            </div>
+          </div>
+
+          <div class="ob due">
+            <div class="accent"></div>
+            <div class="ob-head"><div class="flag">🇪🇸</div><div class="country">Andalucía</div><div class="reg">TASA</div></div>
+            <h3>Tourist tax — Q2 declaration</h3>
+            <div class="meta">Quarterly fee collected from guests, submitted to Junta de Andalucía. Chekin computes the total from reservations.</div>
+            <div class="counts">
+              <div class="k"><div class="n">€842</div><div class="l">Collected Q2</div></div>
+              <div class="k"><div class="n">67</div><div class="l">Nights</div></div>
+              <div class="k"><div class="n">Ready</div><div class="l">Status</div></div>
+            </div>
+            <div class="foot">
+              <div class="due"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Due 20 Jul</div>
+              <a class="submit">Prepare filing <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
+            </div>
+          </div>
+
+          <div class="ob ok">
+            <div class="accent"></div>
+            <div class="ob-head"><div class="flag">🇮🇹</div><div class="country">Italy</div><div class="reg">Alloggiati</div></div>
+            <h3>Portale Alloggiati Web</h3>
+            <div class="meta">Automatic reporting to Questura for Villa Serena. All checked-in guests submitted on time this month.</div>
+            <div class="counts">
+              <div class="k"><div class="n">0</div><div class="l">Pending</div></div>
+              <div class="k"><div class="n">22</div><div class="l">Submitted Apr</div></div>
+              <div class="k"><div class="n">100%</div><div class="l">On-time rate</div></div>
+            </div>
+            <div class="foot">
+              <div class="due" style="color:var(--success)"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/></svg>All caught up</div>
+              <a class="submit">View history <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reports table -->
+      <div class="reports">
+        <div class="head">
+          <h3>Guest reports needing attention</h3>
+          <div class="tabs">
+            <button class="active">Ready to submit (14)</button>
+            <button>Missing data (2)</button>
+            <button>Flagged (1)</button>
+          </div>
+        </div>
+        <table>
+          <thead><tr>
+            <th>Guest</th>
+            <th>Property</th>
+            <th>Check-in</th>
+            <th>Regulation</th>
+            <th>Validation</th>
+            <th style="text-align:right">Action</th>
+          </tr></thead>
+          <tbody>
+            <tr>
+              <td><div class="guest-sm"><div class="av">JR</div><div><div class="n">Julia Rossi</div><div class="e">Passport · IT</div></div></div></td>
+              <td>Casa del Mar · 302</td>
+              <td>15:00 today</td>
+              <td><span class="pill info">SES.HOSPEDAJES</span></td>
+              <td><span class="pill ok"><span class="pip"></span>All fields valid</span></td>
+              <td style="text-align:right"><button class="btn-ghost">Include</button></td>
+            </tr>
+            <tr>
+              <td><div class="guest-sm"><div class="av">AK</div><div><div class="n">Ayşe Kaya</div><div class="e">Passport · TR</div></div></div></td>
+              <td>Puerta del Sol · A2</td>
+              <td>19:30 today</td>
+              <td><span class="pill info">SES.HOSPEDAJES</span></td>
+              <td><span class="pill ok"><span class="pip"></span>All fields valid</span></td>
+              <td style="text-align:right"><button class="btn-ghost">Include</button></td>
+            </tr>
+            <tr>
+              <td><div class="guest-sm"><div class="av">SO</div><div><div class="n">Sam O'Connor</div><div class="e">ID card · IE</div></div></div></td>
+              <td>Pórtico 14 · 1B</td>
+              <td>Yesterday 18:00</td>
+              <td><span class="pill info">SES.HOSPEDAJES</span></td>
+              <td><span class="pill ok"><span class="pip"></span>All fields valid</span></td>
+              <td style="text-align:right"><button class="btn-ghost">Include</button></td>
+            </tr>
+            <tr>
+              <td><div class="guest-sm"><div class="av">DN</div><div><div class="n">Dana Novak</div><div class="e">Passport · CZ</div></div></div></td>
+              <td>Casa del Mar · 215</td>
+              <td>Yesterday 19:30</td>
+              <td><span class="pill info">SES.HOSPEDAJES</span></td>
+              <td><span class="pill pend"><span class="pip"></span>Photo low contrast</span></td>
+              <td style="text-align:right"><button class="btn-ghost">Re-check</button></td>
+            </tr>
+            <tr>
+              <td><div class="guest-sm"><div class="av">+10</div><div><div class="n">10 more guests</div><div class="e">All validated · ready</div></div></div></td>
+              <td>Mixed properties</td>
+              <td>Last 24h</td>
+              <td><span class="pill info">SES.HOSPEDAJES</span></td>
+              <td><span class="pill ok"><span class="pip"></span>All fields valid</span></td>
+              <td style="text-align:right"><button class="btn-ghost">Expand</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Law changes + coverage -->
+      <div class="two-col">
+        <div class="panel panel-pad">
+          <h3>Regulation updates <a>Knowledge base →</a></h3>
+          <div class="law-changes">
+            <div class="dot new"></div>
+            <div class="c">
+              <div class="t">SES.HOSPEDAJES now requires second guardian for minors</div>
+              <div class="d">As of 1 April, reports for guests under 18 must list both parents or legal guardians. Chekin updated the guest form automatically — no action needed.</div>
+              <div class="when">3 days ago · Spain</div>
+            </div>
+          </div>
+          <div class="law-changes">
+            <div class="dot"></div>
+            <div class="c">
+              <div class="t">Alloggiati Web certificate renewal available</div>
+              <div class="d">Your digital certificate for Portale Alloggiati expires 14 June. Renew from Settings → Compliance → Italy to avoid interruption.</div>
+              <div class="when">1 week ago · Italy</div>
+            </div>
+          </div>
+          <div class="law-changes">
+            <div class="dot"></div>
+            <div class="c">
+              <div class="t">Andalucía tourist tax rate increases July 1st</div>
+              <div class="d">From €1.00 to €1.50 per guest per night (max 5 nights). Chekin will auto-apply the new rate to reservations with check-in ≥ 1 July.</div>
+              <div class="when">2 weeks ago · Spain</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel panel-pad">
+          <h3>Coverage by property <a>Manage →</a></h3>
+          <div class="coverage">
+            <div class="fg">🇪🇸</div>
+            <div><div class="name">Casa del Mar</div><div class="law">Madrid · SES.HOSPEDAJES</div></div>
+            <div class="state on">Active</div>
+          </div>
+          <div class="coverage">
+            <div class="fg">🇪🇸</div>
+            <div><div class="name">Puerta del Sol</div><div class="law">Madrid · SES.HOSPEDAJES</div></div>
+            <div class="state on">Active</div>
+          </div>
+          <div class="coverage">
+            <div class="fg">🇪🇸</div>
+            <div><div class="name">Pórtico 14</div><div class="law">Andalucía · SES + tourist tax</div></div>
+            <div class="state on">Active</div>
+          </div>
+          <div class="coverage">
+            <div class="fg">🇮🇹</div>
+            <div><div class="name">Villa Serena</div><div class="law">Toscana · Alloggiati Web</div></div>
+            <div class="state on">Active</div>
+          </div>
+          <div class="coverage">
+            <div class="fg" style="background:var(--bg-neutral);color:var(--ink3)">+</div>
+            <div><div class="name" style="color:var(--ink2)">Add another property</div><div class="law">France, Germany, Portugal &amp; 6 more</div></div>
+            <div class="state off">—</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="../ds/_sidebar.js"></script>
+<script src="../ds/_agent.js"></script>
+<script>
+  document.querySelectorAll('.reports .tabs button').forEach(b => {
+    b.addEventListener('click', () => {
+      b.parentElement.querySelectorAll('button').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

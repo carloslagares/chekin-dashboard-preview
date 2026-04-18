@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Chekin — Welcome variants</title>
+<link rel="stylesheet" href="ds/colors_and_type.css">
+<style>
+  :root{
+    --nav:#161643;
+    --ink:#161643;
+    --ink2:#6B6B95;
+    --ink3:#9696B9;
+    --line:#E5E6EE;
+    --line2:#DEDEEB;
+    --bg:#FDFDFF;
+    --blue:#385BF8;
+    --blue-light:#EFF6FF;
+    --blue-chip:#F0F3FF;
+    --success:#0F9F80;
+    --success-bg:#E8FCF7;
+    --success-ring:#35E5BC;
+    --danger:#FF2467;
+    --warn-bg:#FFF4E5;
+    --warn:#B86A00;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);font-family:var(--font-primary);color:var(--ink)}
+
+  /* Variant switcher — a floating tab bar at the top */
+  .switcher{
+    position:fixed;top:14px;left:50%;transform:translateX(-50%);
+    z-index:100;
+    background:rgba(255,255,255,.85);
+    backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px);
+    border:1px solid var(--line);
+    border-radius:999px;
+    padding:4px;
+    display:flex;gap:2px;
+    box-shadow:0 8px 24px rgba(26,148,255,.12),0 2px 4px rgba(22,22,67,.04);
+  }
+  .switcher button{
+    appearance:none;border:none;background:transparent;
+    padding:8px 14px;border-radius:999px;cursor:pointer;
+    font:600 12.5px var(--font-primary);color:var(--ink2);
+    display:flex;align-items:center;gap:8px;
+    transition:background .15s,color .15s;
+  }
+  .switcher button:hover{color:var(--ink);background:rgba(56,91,248,.06)}
+  .switcher button.active{
+    background:var(--blue);color:#fff;
+    box-shadow:0 0 0 3px rgba(56,91,248,.2);
+  }
+  .switcher button .v{
+    font:700 10px var(--font-primary);
+    padding:1px 6px;border-radius:999px;
+    background:rgba(22,22,67,.08);color:var(--ink2);
+  }
+  .switcher button.active .v{background:rgba(255,255,255,.25);color:#fff}
+  .switcher .sep{width:1px;background:var(--line);margin:6px 4px}
+
+  .stage{position:relative;min-height:100vh}
+  .variant{display:none}
+  .variant.active{display:block}
+
+  iframe.variant{
+    width:100%;border:none;display:none;background:var(--bg);
+  }
+  iframe.variant.active{display:block}
+</style>
+</head>
+<body>
+
+<div class="switcher" role="tablist" aria-label="Welcome variants">
+  <button class="active" data-v="v1" role="tab"><span class="v">V1</span>Original</button>
+  <div class="sep"></div>
+  <button data-v="v2" role="tab"><span class="v">V2</span>Today's agenda</button>
+  <button data-v="v3" role="tab"><span class="v">V3</span>Compliance first</button>
+  <button data-v="v4" role="tab"><span class="v">V4</span>AI assistant</button>
+  <button data-v="v5" role="tab"><span class="v">V5</span>Weekly calendar</button>
+</div>
+
+<div class="stage">
+  <iframe class="variant active" data-v="v1" src="variants/v1_original.html" title="V1 Original"></iframe>
+  <iframe class="variant" data-v="v2" data-src="variants/v2_agenda.html" title="V2 Today's agenda"></iframe>
+  <iframe class="variant" data-v="v3" data-src="variants/v3_compliance.html" title="V3 Compliance first"></iframe>
+  <iframe class="variant" data-v="v4" data-src="variants/v4_ai.html" title="V4 AI assistant"></iframe>
+  <iframe class="variant" data-v="v5" data-src="variants/v5_calendar.html" title="V5 Weekly calendar"></iframe>
+</div>
+
+<script>
+  // Make iframes fill viewport
+  function sizeFrames(){
+    document.querySelectorAll('iframe.variant').forEach(f => {
+      f.style.height = window.innerHeight + 'px';
+    });
+  }
+  sizeFrames();
+  window.addEventListener('resize', sizeFrames);
+
+  // Deep-link via ?view=agenda|compliance|ai|calendar (from sidebar)
+  const VIEW_MAP = { agenda:'v2', compliance:'v3', ai:'v4', calendar:'v5' };
+  const urlView = new URLSearchParams(location.search).get('view');
+
+  // Persist active tab
+  const LS = 'chekin_welcome_variant';
+  const saved = localStorage.getItem(LS);
+  if (urlView && VIEW_MAP[urlView]) {
+    activate(VIEW_MAP[urlView]);
+  } else if (saved && document.querySelector(`.switcher button[data-v="${saved}"]`)) {
+    activate(saved);
+  }
+
+  function activate(v){
+    document.querySelectorAll('.switcher button').forEach(b => b.classList.toggle('active', b.dataset.v === v));
+    document.querySelectorAll('iframe.variant').forEach(f => {
+      const match = f.dataset.v === v;
+      f.classList.toggle('active', match);
+      // Lazy load iframes on first activation
+      if (match && !f.hasAttribute('src') && f.dataset.src) f.setAttribute('src', f.dataset.src);
+    });
+    localStorage.setItem(LS, v);
+  }
+
+  document.querySelectorAll('.switcher button').forEach(b => {
+    b.addEventListener('click', () => activate(b.dataset.v));
+  });
+</script>
+</body>
+</html>
