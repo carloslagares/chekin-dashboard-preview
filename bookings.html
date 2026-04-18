@@ -1,0 +1,564 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Chekin — Bookings</title>
+<link rel="stylesheet" href="ds/colors_and_type.css">
+<link rel="stylesheet" href="ds/_sidebar.css">
+<link rel="stylesheet" href="ds/_agent.css">
+<style>
+  :root{
+    --bg-dark:#161643;
+    --bg-screen:#FDFDFF;
+    --bg-white:#FFFFFF;
+    --bg-neutral-light:#F4F6F8;
+    --bg-neutral-cold:#F0F0F8;
+    --bg-sky-light:#EFF6FF;
+    --bg-blue-light:#F0F3FF;
+    --bg-success-light:#E8FCF7;
+    --bg-danger-light:#FFE4EC;
+    --stroke-gray-lighter:#E5E6EE;
+    --stroke-gray-light:#DEDEEB;
+    --stroke-gray-medium:#CECEDE;
+    --text-dark:#161643;
+    --text-gray-dark:#6B6B95;
+    --text-gray-medium:#9696B9;
+    --text-gray-light:#CECEDE;
+    --text-white:#FFFFFF;
+    --text-brand:#385CF8;
+    --text-brand-light:#8CA5FF;
+    --text-danger:#FF2467;
+    --text-success:#0F9F80;
+    --shadow-card:0 0 5px 0 rgba(143,143,143,.2);
+    --shadow-dropdown:0 4px 10px 0 rgba(143,143,143,.2);
+    --shadow-modal:0 16px 48px rgba(22,22,67,.24);
+    --radius-sm:6px;
+    --radius-md:8px;
+    --radius-lg:14px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg-screen);font-family:var(--font-primary);color:var(--text-dark);font-feature-settings:"ss01"}
+
+  /* ───────── TOP BAR ───────── */
+  main{display:flex;flex-direction:column;min-width:0}
+  header.top{display:flex;align-items:center;gap:16px;padding:0 32px;height:64px;border-bottom:1px solid var(--stroke-gray-lighter);background:var(--bg-white);position:sticky;top:0;z-index:5}
+  .crumbs{font:500 14px var(--font-primary);color:var(--text-gray-dark)}
+  .crumbs b{color:var(--text-dark);font-weight:600}
+  .search-top{margin-left:auto;position:relative}
+  .search-top input{width:320px;height:40px;padding:0 14px 0 38px;border-radius:var(--radius-md);border:1px solid rgba(22,22,67,.12);background:var(--bg-neutral-light);font:500 14px var(--font-primary);color:var(--text-dark);outline:none}
+  .search-top input::placeholder{color:var(--text-gray-medium)}
+  .search-top input:focus{background:#fff;border-color:var(--text-dark);box-shadow:0 0 0 3px rgba(56,92,248,.2)}
+  .search-top svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:var(--text-gray-medium);fill:none;stroke-width:2}
+  .iconbtn{width:40px;height:40px;border-radius:var(--radius-md);background:#fff;border:1px solid var(--stroke-gray-lighter);display:grid;place-items:center;cursor:pointer;position:relative}
+  .iconbtn svg{width:18px;height:18px;stroke:var(--text-gray-dark);fill:none;stroke-width:1.6}
+  .iconbtn:hover{background:var(--bg-neutral-light)}
+  .iconbtn .pip{position:absolute;top:8px;right:8px;width:8px;height:8px;border-radius:50%;background:var(--text-danger);border:2px solid #fff}
+  .user-av{width:40px;height:40px;border-radius:50%;background:var(--bg-sky-light);color:var(--text-brand);display:grid;place-items:center;font:700 14px var(--font-primary);cursor:pointer}
+
+  /* ───────── PAGE ───────── */
+  .page{padding:28px 32px 64px;display:flex;flex-direction:column;gap:20px;min-width:0}
+  .pagehead{display:flex;align-items:flex-start;justify-content:space-between;gap:24px}
+  .pagehead h1{font:600 26px/32px var(--font-primary);color:var(--text-dark);margin:0;letter-spacing:-.005em;display:flex;align-items:center;gap:12px}
+  .pagehead h1 .count{font:600 14px var(--font-primary);color:var(--text-gray-dark);background:var(--bg-neutral-light);padding:4px 10px;border-radius:999px;border:1px solid var(--stroke-gray-lighter)}
+  .pagehead .sub{font:400 14px var(--font-primary);color:var(--text-gray-dark);margin-top:4px}
+
+  /* ───────── TOOLBAR ───────── */
+  .toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .search{position:relative;width:320px}
+  .search input{width:100%;height:40px;padding:0 14px 0 38px;border-radius:var(--radius-sm);border:1px solid var(--stroke-gray-medium);background:#fff;font:500 14px var(--font-primary);color:var(--text-dark);outline:none}
+  .search input::placeholder{color:var(--text-gray-medium)}
+  .search input:focus{border-color:var(--text-dark);box-shadow:0 0 0 3px rgba(56,92,248,.15)}
+  .search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:var(--text-gray-medium);fill:none;stroke-width:2}
+  .tbtn{height:40px;padding:0 14px;background:#fff;border:1px solid var(--stroke-gray-medium);color:var(--text-dark);font:600 14px var(--font-primary);border-radius:var(--radius-sm);cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+  .tbtn:hover{background:var(--bg-neutral-light)}
+  .tbtn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8}
+  .tbtn .chev{width:12px;height:12px;stroke:var(--text-gray-dark);margin-left:2px}
+  .spacer{flex:1}
+  .btn-primary{height:40px;padding:0 16px;background:var(--text-brand);border:none;color:#fff;font:600 14px var(--font-primary);border-radius:var(--radius-sm);cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+  .btn-primary:hover{background:linear-gradient(0deg,rgba(255,255,255,.1),rgba(255,255,255,.1)),var(--text-brand)}
+  .btn-primary svg{width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2.5}
+  .btn-primary .chev{stroke-width:2;opacity:.8}
+  .split{display:inline-flex}
+  .split .btn-primary{border-radius:var(--radius-sm) 0 0 var(--radius-sm);padding-right:12px}
+  .split .btn-primary + .btn-primary{border-radius:0 var(--radius-sm) var(--radius-sm) 0;border-left:1px solid rgba(255,255,255,.25);padding:0 10px}
+
+  /* ───────── FILTER CHIPS ───────── */
+  .chips{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .chip{height:32px;padding:0 10px;background:var(--bg-white);border:1px solid var(--stroke-gray-medium);border-radius:var(--radius-sm);display:inline-flex;align-items:center;gap:6px;font:500 13px var(--font-primary);color:var(--text-dark);cursor:pointer}
+  .chip:hover{background:var(--bg-neutral-light)}
+  .chip.active{background:var(--bg-blue-light);border-color:var(--text-brand);color:var(--text-brand)}
+  .chip .x{width:14px;height:14px;border-radius:50%;background:var(--text-brand);color:#fff;display:grid;place-items:center;font-size:10px;font-weight:700;margin-left:2px}
+  .chip .count{font-weight:600;color:var(--text-gray-dark);margin-left:4px}
+  .chip.active .count{color:var(--text-brand)}
+  .chip svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8}
+  .chip-divider{width:1px;height:20px;background:var(--stroke-gray-light);margin:0 4px}
+
+  /* ───────── LEGEND ───────── */
+  .legend{display:flex;align-items:center;gap:14px;font:500 12px var(--font-primary);color:var(--text-gray-dark);flex-wrap:wrap}
+  .legend .lc{display:inline-flex;align-items:center;gap:6px}
+  .legend .dot{width:10px;height:10px;border-radius:50%}
+  .legend .dot.pending{background:var(--text-gray-light)}
+  .legend .dot.progress{background:var(--text-brand-light)}
+  .legend .dot.completed{background:var(--text-brand)}
+  .legend .dot.exempted{background:var(--text-dark)}
+  .legend .dot.error{background:var(--text-danger)}
+
+  /* ───────── BULK BAR ───────── */
+  .bulkbar{display:none;align-items:center;gap:16px;padding:12px 16px;background:var(--text-dark);color:#fff;border-radius:var(--radius-md);position:sticky;top:76px;z-index:6;box-shadow:0 8px 20px rgba(22,22,67,.25)}
+  .bulkbar.show{display:flex}
+  .bulkbar .n{font:600 14px var(--font-primary)}
+  .bulkbar .sep{width:1px;height:20px;background:rgba(255,255,255,.15)}
+  .bulkbar button{height:32px;padding:0 12px;border-radius:6px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:#fff;font:600 13px var(--font-primary);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+  .bulkbar button:hover{background:rgba(255,255,255,.12)}
+  .bulkbar button svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2}
+  .bulkbar .close{margin-left:auto;width:28px;height:28px;border-radius:6px;display:grid;place-items:center;cursor:pointer;border:none;background:transparent}
+
+  /* ───────── TABLE ───────── */
+  .table-wrap{background:#fff;border-radius:var(--radius-lg);border:1px solid var(--stroke-gray-lighter);overflow:hidden;box-shadow:var(--shadow-card)}
+  .table-scroll{overflow-x:auto}
+  table{width:100%;min-width:1440px;border-collapse:collapse;table-layout:fixed}
+  thead{background:var(--bg-neutral-cold);border-bottom:1px solid var(--stroke-gray-light)}
+  th{height:48px;padding:0 12px;text-align:left;font:600 13px var(--font-primary);color:var(--text-gray-dark);vertical-align:middle;user-select:none;white-space:nowrap}
+  th.sort{cursor:pointer}
+  th.sort:hover{color:var(--text-dark)}
+  th .sort-ic{width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:2;margin-left:4px;opacity:.4}
+  th.sort.active .sort-ic{opacity:1;color:var(--text-brand)}
+  th.check{width:40px;text-align:center}
+  th.num{width:40px;text-align:center}
+  th.status-col{text-align:left;padding-left:16px}
+
+  tbody tr{border-bottom:1px solid var(--stroke-gray-lighter);transition:background .12s}
+  tbody tr:last-child{border-bottom:none}
+  tbody tr:hover{background:#FBFBFE;cursor:pointer}
+  td{height:72px;padding:10px 12px;vertical-align:middle;font:500 14px/20px var(--font-primary);color:var(--text-dark)}
+  td.num{text-align:center;color:var(--text-gray-dark);font-weight:600;font-size:13px;font-variant-numeric:tabular-nums}
+  td.check{text-align:center}
+
+  /* Guest cell */
+  td.guest .lt{display:flex;align-items:center;gap:12px;min-width:0}
+  td.guest .avatar{width:36px;height:36px;border-radius:50%;background:var(--bg-sky-light);color:var(--text-brand);display:grid;place-items:center;font:700 13px var(--font-primary);flex-shrink:0}
+  td.guest .name{font:600 14px/18px var(--font-primary);color:var(--text-dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
+  td.guest .meta{font:400 12px/16px var(--font-primary);color:var(--text-gray-medium);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
+
+  /* Property cell */
+  td.prop .lt{display:flex;align-items:center;gap:10px;min-width:0}
+  td.prop .thumb{width:32px;height:32px;border-radius:6px;background:var(--bg-neutral-cold);flex-shrink:0;display:grid;place-items:center;color:var(--text-gray-dark)}
+  td.prop .thumb svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.5}
+  td.prop .name{font:600 14px/18px var(--font-primary);color:var(--text-dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:190px}
+  td.prop .meta{font:400 12px/16px var(--font-primary);color:var(--text-gray-medium);display:flex;align-items:center;gap:6px;white-space:nowrap}
+  td.prop .meta .flag{width:14px;height:10px;border-radius:2px;overflow:hidden;flex-shrink:0;border:1px solid rgba(0,0,0,.08)}
+
+  /* Dates cell */
+  td.dates .main{font:600 14px/18px var(--font-primary);color:var(--text-dark);display:flex;align-items:center;gap:6px;white-space:nowrap}
+  td.dates .arrow{color:var(--text-gray-medium)}
+  td.dates .sub{font:400 12px/16px var(--font-primary);color:var(--text-gray-medium);margin-top:2px;display:flex;gap:6px;white-space:nowrap}
+  td.dates .sub .tag{font-weight:600;color:var(--text-brand)}
+  td.dates .sub .tag.today{color:var(--text-success)}
+  td.dates .sub .tag.urgent{color:var(--text-danger)}
+
+  /* Guests progress cell */
+  td.guests .gp{display:flex;flex-direction:column;gap:6px;min-width:96px}
+  td.guests .gp .lbl{font:500 13px/16px var(--font-primary);color:var(--text-dark);display:flex;align-items:center;gap:6px}
+  td.guests .gp .lbl svg{width:13px;height:13px;stroke:var(--text-gray-medium);fill:none;stroke-width:1.8}
+  td.guests .gp .bar{width:100%;height:4px;border-radius:2px;background:var(--bg-neutral-light);overflow:hidden}
+  td.guests .gp .bar i{display:block;height:100%;background:var(--text-brand);border-radius:2px}
+  td.guests .gp .bar i.full{background:var(--text-success)}
+  td.guests .gp .bar i.zero{background:var(--stroke-gray-medium)}
+
+  /* Channel chip */
+  td.channel .pill{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px 0 4px;border-radius:14px;background:var(--bg-neutral-light);border:1px solid var(--stroke-gray-lighter);font:600 12px var(--font-primary);color:var(--text-dark)}
+  td.channel .pill .chw{width:18px;height:18px;border-radius:50%;display:inline-grid;place-items:center;color:#fff;font:700 10px var(--font-primary)}
+
+  /* Status icon cluster */
+  td.status{padding:10px 8px}
+  .status-cluster{display:inline-flex;align-items:center;gap:3px;padding:4px;background:var(--bg-neutral-light);border-radius:10px}
+  .sic{width:28px;height:28px;border-radius:7px;display:grid;place-items:center;position:relative;cursor:help;transition:transform .1s}
+  .sic:hover{transform:scale(1.12)}
+  .sic svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .sic.pending{background:transparent;color:var(--text-gray-light)}
+  .sic.progress{background:var(--bg-sky-light);color:var(--text-brand-light)}
+  .sic.completed{background:var(--bg-blue-light);color:var(--text-brand)}
+  .sic.exempted{background:var(--bg-neutral-cold);color:var(--text-dark)}
+  .sic.error{background:var(--bg-danger-light);color:var(--text-danger)}
+  .sic.tax svg{display:none}
+  .sic.tax::before{content:"TAX";font:700 8px var(--font-primary);letter-spacing:.04em}
+  .sic.error::after{content:"";position:absolute;top:-2px;right:-2px;width:8px;height:8px;border-radius:50%;background:var(--text-danger);border:1.5px solid #fff}
+
+  /* Checkbox */
+  .cb{width:18px;height:18px;border-radius:4px;border:1.5px solid var(--stroke-gray-medium);background:#fff;display:inline-grid;place-items:center;cursor:pointer;vertical-align:middle}
+  .cb.on{background:var(--text-brand);border-color:var(--text-brand)}
+  .cb.on::after{content:"";width:10px;height:5px;border:2px solid #fff;border-top:none;border-right:none;transform:rotate(-45deg) translate(1px,-1px)}
+
+  /* Pagination */
+  .pagination{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-top:1px solid var(--stroke-gray-lighter);background:var(--bg-neutral-cold)}
+  .pagination .info{font:500 13px var(--font-primary);color:var(--text-gray-dark)}
+  .pagination .ctrls{display:flex;align-items:center;gap:4px}
+  .pagination .pbtn{min-width:32px;height:32px;padding:0 8px;border-radius:6px;border:1px solid var(--stroke-gray-medium);background:#fff;color:var(--text-dark);font:600 13px var(--font-primary);cursor:pointer;display:grid;place-items:center}
+  .pagination .pbtn:hover{background:var(--bg-neutral-light)}
+  .pagination .pbtn.active{background:var(--text-brand);color:#fff;border-color:var(--text-brand)}
+  .pagination .pbtn.arrow svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2}
+
+  /* Modal */
+  .modal-backdrop{position:fixed;inset:0;background:rgba(22,22,67,.4);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:100;display:none;align-items:flex-start;justify-content:center;padding-top:80px}
+  .modal-backdrop.show{display:flex}
+  .modal{background:#fff;border-radius:var(--radius-lg);width:640px;max-width:92vw;box-shadow:var(--shadow-modal);padding:28px;position:relative}
+  .modal h2{font:600 20px/24px var(--font-primary);color:var(--text-dark);margin:0 0 20px}
+  .modal .mclose{position:absolute;top:16px;right:16px;width:32px;height:32px;border:none;background:transparent;border-radius:6px;color:var(--text-brand);cursor:pointer;display:grid;place-items:center}
+  .modal .mclose:hover{background:var(--bg-neutral-light)}
+  .modal .mclose svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.5}
+  .modal .icongrid{display:grid;grid-template-columns:repeat(5,1fr);gap:20px 12px;margin-bottom:24px}
+  .modal .iconitem{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+  .modal .iconitem .chip{width:40px;height:40px;border-radius:10px;background:var(--bg-blue-light);color:var(--text-brand);display:grid;place-items:center}
+  .modal .iconitem .chip svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8}
+  .modal .iconitem .chip.tax svg{display:none}
+  .modal .iconitem .chip.tax::before{content:"TAX";font:700 11px var(--font-primary)}
+  .modal .iconitem .txt{font:500 12px/15px var(--font-primary);color:var(--text-dark)}
+  .modal .statelist{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
+  .modal .staterow{display:flex;align-items:flex-start;gap:10px;font:500 13px/18px var(--font-primary);color:var(--text-gray-dark)}
+  .modal .staterow b{color:var(--text-dark);font-weight:600}
+  .modal .staterow .dot{width:12px;height:12px;border-radius:50%;margin-top:4px;flex-shrink:0}
+  .modal .hint{display:flex;align-items:center;gap:10px;background:var(--bg-sky-light);border-radius:var(--radius-md);padding:10px 14px;font:500 13px var(--font-primary);color:var(--text-gray-dark)}
+  .modal .hint svg{width:16px;height:16px;stroke:var(--text-brand);fill:none;stroke-width:2;flex-shrink:0}
+
+  /* small screens: let the table scroll */
+  @media (max-width: 1100px){
+    .pagehead{flex-direction:column}
+    .legend{margin-left:0 !important}
+  }
+</style>
+</head>
+<body>
+
+<div class="app" data-screen-label="03 Dashboard Bookings">
+  <!-- Sidebar (injected by _sidebar.js) -->
+  <div id="sidebar-slot" data-nav="bookings"></div>
+
+  <main>
+    <header class="top">
+      <div class="crumbs"><b>Bookings</b></div>
+      <div class="search-top">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input placeholder="Search properties, bookings, guests…">
+      </div>
+      <span data-agent-trigger-slot></span>
+      <button class="iconbtn" aria-label="Help"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 1 1 5.8 1c0 2-3 2-3 4M12 17h.01"/></svg></button>
+      <button class="iconbtn" aria-label="Notifications"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><div class="pip"></div></button>
+      <div class="user-av">MR</div>
+    </header>
+
+    <div class="page">
+      <!-- Page head -->
+      <div class="pagehead">
+        <div>
+          <h1>Bookings <span class="count">127</span></h1>
+          <div class="sub">Upcoming check-ins, online check-in progress, and compliance status at a glance.</div>
+        </div>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <div class="search">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input placeholder="Search guest, email or booking code…">
+        </div>
+        <button class="tbtn">
+          <svg viewBox="0 0 24 24"><path d="M22 3H2l8 9.5V19l4 2v-8.5z"/></svg>
+          Filters
+          <svg class="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="spacer"></div>
+        <button class="tbtn" id="statusInfoBtn">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8h.01M11 12h1v4h1"/></svg>
+          Status info
+        </button>
+        <button class="tbtn">
+          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/></svg>
+          Custom View
+        </button>
+        <div class="split">
+          <button class="btn-primary"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>New booking</button>
+          <button class="btn-primary" aria-label="More options"><svg class="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button>
+        </div>
+      </div>
+
+      <!-- Filter chips -->
+      <div class="chips">
+        <div class="chip active">
+          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          Next 30 days <span class="x">×</span>
+        </div>
+        <div class="chip">
+          All statuses
+          <svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+        <div class="chip">
+          <svg viewBox="0 0 24 24"><path d="M3 9 12 2l9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+          All properties
+          <svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+        <div class="chip">
+          Channel <span class="count">All</span>
+          <svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+        <div class="chip-divider"></div>
+        <div class="chip" style="border-style:dashed">
+          <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          Add filter
+        </div>
+        <div style="margin-left:auto" class="legend">
+          <span class="lc"><span class="dot pending"></span>Pending</span>
+          <span class="lc"><span class="dot progress"></span>In progress</span>
+          <span class="lc"><span class="dot completed"></span>Completed</span>
+          <span class="lc"><span class="dot exempted"></span>Exempted</span>
+          <span class="lc"><span class="dot error"></span>Error</span>
+        </div>
+      </div>
+
+      <!-- Bulk action bar -->
+      <div class="bulkbar" id="bulkbar">
+        <div class="n"><span id="selcount">0</span> bookings selected</div>
+        <div class="sep"></div>
+        <button><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Send check-in links</button>
+        <button><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Export</button>
+        <button><svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>Cancel</button>
+        <button class="close" aria-label="Clear selection"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrap">
+        <div class="table-scroll">
+        <table>
+          <colgroup>
+            <col style="width:40px"><col style="width:48px">
+            <col style="width:220px"><col style="width:220px">
+            <col style="width:190px"><col style="width:140px"><col style="width:150px">
+            <col style="width:372px"><col style="width:48px">
+          </colgroup>
+          <thead>
+            <tr>
+              <th class="check"><span class="cb" data-bulk="all"></span></th>
+              <th class="num">#</th>
+              <th class="sort">Guest <svg class="sort-ic" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></th>
+              <th class="sort">Property <svg class="sort-ic" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></th>
+              <th class="sort active">Stay <svg class="sort-ic" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></th>
+              <th>Guests verified</th>
+              <th>Channel</th>
+              <th class="status-col">Booking status</th>
+              <th class="check"></th>
+            </tr>
+          </thead>
+          <tbody id="tbody"><!-- filled by JS --></tbody>
+        </table>
+        </div>
+
+        <div class="pagination">
+          <div class="info">Showing 1–10 of 127 bookings</div>
+          <div class="ctrls">
+            <button class="pbtn arrow" disabled style="opacity:.4;cursor:not-allowed"><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>
+            <button class="pbtn active">1</button>
+            <button class="pbtn">2</button>
+            <button class="pbtn">3</button>
+            <button class="pbtn">…</button>
+            <button class="pbtn">13</button>
+            <button class="pbtn arrow"><svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Status info modal -->
+<div class="modal-backdrop" id="statusModal">
+  <div class="modal" role="dialog" aria-label="Status icons meaning">
+    <button class="mclose" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    <h2>Status icons meaning</h2>
+    <div class="icongrid">
+      <div class="iconitem"><span class="chip"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span><div class="txt">Online Check-in Email</div></div>
+      <div class="iconitem"><span class="chip"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="12" r="2.5"/><path d="M14 10h4M14 14h4"/></svg></span><div class="txt">Identity Verification</div></div>
+      <div class="iconitem"><span class="chip tax"></span><div class="txt">Tourist Taxes</div></div>
+      <div class="iconitem"><span class="chip"><svg viewBox="0 0 24 24"><path d="M12 2 4 5v7c0 5 3.5 8 8 10 4.5-2 8-5 8-10V5z"/></svg></span><div class="txt">Property Protection</div></div>
+      <div class="iconitem"><span class="chip"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 12h8M12 8v8"/></svg></span><div class="txt">Booking Payments</div></div>
+      <div class="iconitem"><span class="chip"><svg viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="3.5"/><path d="m10 13 10-10M16 7l3 3"/></svg></span><div class="txt">Remote Access</div></div>
+      <div class="iconitem"><span class="chip"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0M7 11l-3 2v3h4"/></svg></span><div class="txt">Police (Check-in)</div></div>
+      <div class="iconitem"><span class="chip"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0M17 11l3 2v3h-4"/></svg></span><div class="txt">Police (Check-out)</div></div>
+      <div class="iconitem"><span class="chip"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6"/><rect x="13" y="8" width="3" height="10"/></svg></span><div class="txt">Statistics (Check-in)</div></div>
+      <div class="iconitem"><span class="chip"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><rect x="7" y="8" width="3" height="10"/><rect x="13" y="12" width="3" height="6"/></svg></span><div class="txt">Statistics (Check-out)</div></div>
+    </div>
+    <div style="font:500 13px var(--font-primary);color:var(--text-gray-dark);margin-bottom:12px">Statuses are indicated by distinctive colors to show whether a process is completed or not:</div>
+    <div class="statelist">
+      <div class="staterow"><span class="dot" style="background:var(--text-gray-light)"></span><div><b>Pending:</b> Some action is required, either from the guest or from the host.</div></div>
+      <div class="staterow"><span class="dot" style="background:var(--text-brand-light)"></span><div><b>In progress:</b> An intermediate status between pending and completed.</div></div>
+      <div class="staterow"><span class="dot" style="background:var(--text-brand)"></span><div><b>Completed:</b> No further actions are needed.</div></div>
+      <div class="staterow"><span class="dot" style="background:var(--text-dark)"></span><div><b>Exempted:</b> Requirements don't apply to this booking.</div></div>
+      <div class="staterow"><span class="dot" style="background:var(--text-danger)"></span><div><b>Error:</b> Some action is required from the host. Enter the booking to check what's wrong.</div></div>
+    </div>
+    <div class="hint">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+      Hover over any icon in the table to know more details.
+    </div>
+  </div>
+</div>
+
+<script>
+  // Status icons
+  const sicons = {
+    email:    '<svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+    id:       '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="12" r="2.5"/><path d="M14 10h4M14 14h4"/></svg>',
+    tax:      '',
+    protect:  '<svg viewBox="0 0 24 24"><path d="M12 2 4 5v7c0 5 3.5 8 8 10 4.5-2 8-5 8-10V5z"/></svg>',
+    pay:      '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 12h8M12 8v8"/></svg>',
+    keys:     '<svg viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="3.5"/><path d="m10 13 10-10M16 7l3 3"/></svg>',
+    policein: '<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0M7 11l-3 2v3h4"/></svg>',
+    policeout:'<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0M17 11l3 2v3h-4"/></svg>',
+    statin:   '<svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6"/><rect x="13" y="8" width="3" height="10"/></svg>',
+    statout:  '<svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><rect x="7" y="8" width="3" height="10"/><rect x="13" y="12" width="3" height="6"/></svg>'
+  };
+  const sorder = ['email','id','tax','protect','pay','keys','policein','policeout','statin','statout'];
+  const sLabels = { email:'Online check-in email', id:'Identity verification', tax:'Tourist taxes', protect:'Property protection', pay:'Booking payments', keys:'Remote access', policein:'Police check-in', policeout:'Police check-out', statin:'Statistics check-in', statout:'Statistics check-out' };
+
+  const flags = {
+    ES:'linear-gradient(to bottom,#C60B1E 33%,#FFC400 33% 66%,#C60B1E 66%)',
+    IT:'linear-gradient(to right,#009246 33%,#fff 33% 66%,#CE2B37 66%)',
+    FR:'linear-gradient(to right,#0055A4 33%,#fff 33% 66%,#EF4135 66%)',
+    GB:'linear-gradient(135deg,#012169 40%,#C8102E 40% 60%,#012169 60%)',
+    PT:'linear-gradient(to right,#006600 40%,#FF0000 40%)',
+  };
+
+  const channels = {
+    'Booking.com': {bg:'#003580', letter:'B'},
+    'Airbnb':      {bg:'#FF5A5F', letter:'A'},
+    'Direct':      {bg:'#0F9F80', letter:'D'},
+    'Vrbo':        {bg:'#245ABC', letter:'V'},
+    'Expedia':     {bg:'#FFC72C', letter:'E'},
+  };
+
+  function daysFromToday(dateStr){
+    const today = new Date('2026-04-18');
+    const d = new Date(dateStr);
+    return Math.round((d - today) / 86400000);
+  }
+  function formatDate(dateStr){
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('en-GB', { day:'2-digit', month:'short' });
+  }
+  function relativeTag(days){
+    if (days < 0) return {cls:'', txt:`${-days}d ago`};
+    if (days === 0) return {cls:'today', txt:'Today'};
+    if (days === 1) return {cls:'urgent', txt:'Tomorrow'};
+    if (days <= 3) return {cls:'urgent', txt:`in ${days} days`};
+    return {cls:'tag', txt:`in ${days} days`};
+  }
+
+  // Demo bookings
+  const rows = [
+    { guest:'Marco Bianchi',  email:'marco.b@gmail.com',   initials:'MB', prop:"Saint George's Palace",  city:'London',    flag:'GB', ci:'2026-04-19', co:'2026-04-22', guests:{verified:2,total:2}, channel:'Booking.com', states:{ email:'completed', id:'completed', tax:'exempted',  protect:'completed', pay:'completed', keys:'completed', policein:'completed', policeout:'pending', statin:'completed', statout:'pending' } },
+    { guest:'Anna Fischer',   email:'anna.f@outlook.com',  initials:'AF', prop:'Blackwood St. BT7',      city:'Belfast',   flag:'GB', ci:'2026-04-20', co:'2026-04-24', guests:{verified:1,total:3}, channel:'Airbnb',      states:{ email:'completed', id:'progress',  tax:'exempted',  protect:'completed', pay:'progress',  keys:'completed', policein:'pending',   policeout:'pending', statin:'progress',  statout:'pending' } },
+    { guest:"Carlos Romero",  email:'cromero@icloud.com',  initials:'CR', prop:'Green House',            city:'Dublin',    flag:'GB', ci:'2026-04-20', co:'2026-04-23', guests:{verified:0,total:1}, channel:'Direct',      states:{ email:'completed', id:'error',     tax:'exempted',  protect:'pending',   pay:'pending',   keys:'pending',   policein:'pending',   policeout:'pending', statin:'pending',   statout:'pending' } },
+    { guest:'Sofia Iglesias', email:'sofia.ig@gmail.com',  initials:'SI', prop:'Puerta del Sol',         city:'Madrid',    flag:'ES', ci:'2026-04-21', co:'2026-04-25', guests:{verified:5,total:5}, channel:'Booking.com', states:{ email:'completed', id:'completed', tax:'completed', protect:'completed', pay:'completed', keys:'completed', policein:'completed', policeout:'pending', statin:'completed', statout:'pending' } },
+    { guest:"Liam O'Connor",  email:'liam@oc.ie',          initials:'LO', prop:"Saint George's Palace",  city:'London',    flag:'GB', ci:'2026-04-22', co:'2026-04-24', guests:{verified:1,total:2}, channel:'Vrbo',        states:{ email:'completed', id:'progress',  tax:'exempted',  protect:'completed', pay:'completed', keys:'progress',  policein:'progress',  policeout:'pending', statin:'progress',  statout:'pending' } },
+    { guest:'Yuki Tanaka',    email:'yuki.tanaka@jp.co',   initials:'YT', prop:'Gràcia Loft 3B',         city:'Barcelona', flag:'ES', ci:'2026-04-24', co:'2026-04-30', guests:{verified:0,total:4}, channel:'Airbnb',      states:{ email:'pending',   id:'pending',   tax:'pending',   protect:'pending',   pay:'pending',   keys:'pending',   policein:'pending',   policeout:'pending', statin:'pending',   statout:'pending' } },
+    { guest:'Emma Dubois',    email:'emma.dubois@fr.eu',   initials:'ED', prop:'Montmartre 9e',          city:'Paris',     flag:'FR', ci:'2026-04-25', co:'2026-04-28', guests:{verified:2,total:2}, channel:'Booking.com', states:{ email:'completed', id:'completed', tax:'completed', protect:'exempted',  pay:'completed', keys:'completed', policein:'completed', policeout:'pending', statin:'completed', statout:'pending' } },
+    { guest:'Daniel Weber',   email:'dweber@de.de',        initials:'DW', prop:'Trastevere Suites',      city:'Rome',      flag:'IT', ci:'2026-04-26', co:'2026-04-29', guests:{verified:0,total:3}, channel:'Direct',      states:{ email:'progress',  id:'pending',   tax:'pending',   protect:'pending',   pay:'error',     keys:'pending',   policein:'pending',   policeout:'pending', statin:'pending',   statout:'pending' } },
+    { guest:'Chiara Conti',   email:'chiara.c@gmail.com',  initials:'CC', prop:'Puerta del Sol',         city:'Madrid',    flag:'ES', ci:'2026-04-28', co:'2026-05-03', guests:{verified:0,total:1}, channel:'Expedia',     states:{ email:'completed', id:'pending',   tax:'pending',   protect:'pending',   pay:'completed', keys:'pending',   policein:'pending',   policeout:'pending', statin:'pending',   statout:'pending' } },
+    { guest:'Noah Williams',  email:'nwilliams@uk.co',     initials:'NW', prop:'Green House',            city:'Dublin',    flag:'GB', ci:'2026-05-02', co:'2026-05-05', guests:{verified:0,total:6}, channel:'Airbnb',      states:{ email:'pending',   id:'pending',   tax:'exempted',  protect:'pending',   pay:'pending',   keys:'pending',   policein:'pending',   policeout:'pending', statin:'pending',   statout:'pending' } },
+  ];
+
+  const tbody = document.getElementById('tbody');
+  rows.forEach((r, i) => {
+    const ciDays = daysFromToday(r.ci);
+    const rel = relativeTag(ciDays);
+    const nights = Math.round((new Date(r.co) - new Date(r.ci)) / 86400000);
+    const pct = r.guests.total ? Math.round(r.guests.verified / r.guests.total * 100) : 0;
+    const barCls = pct === 100 ? 'full' : (pct === 0 ? 'zero' : '');
+    const ch = channels[r.channel] || {bg:'#6B6B95', letter:'?'};
+
+    let cluster = '<div class="status-cluster">';
+    sorder.forEach(k => {
+      const st = r.states[k] || 'pending';
+      cluster += `<span class="sic ${st} ${k==='tax'?'tax':''}" title="${sLabels[k]}: ${st}">${sicons[k]||''}</span>`;
+    });
+    cluster += '</div>';
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="check"><span class="cb" data-row="${i}"></span></td>
+      <td class="num">${i+1}</td>
+      <td class="guest">
+        <div class="lt">
+          <div class="avatar">${r.initials}</div>
+          <div style="min-width:0">
+            <div class="name">${r.guest}</div>
+            <div class="meta">${r.email}</div>
+          </div>
+        </div>
+      </td>
+      <td class="prop">
+        <div class="lt">
+          <div class="thumb"><svg viewBox="0 0 24 24"><path d="M3 9 12 2l9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg></div>
+          <div style="min-width:0">
+            <div class="name">${r.prop}</div>
+            <div class="meta"><span class="flag" style="background:${flags[r.flag]}"></span>${r.city}</div>
+          </div>
+        </div>
+      </td>
+      <td class="dates">
+        <div class="main">${formatDate(r.ci)} <span class="arrow">→</span> ${formatDate(r.co)}</div>
+        <div class="sub"><span class="tag ${rel.cls}">${rel.txt}</span><span>· ${nights} night${nights===1?'':'s'}</span></div>
+      </td>
+      <td class="guests">
+        <div class="gp">
+          <div class="lbl">
+            <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            ${r.guests.verified}/${r.guests.total} verified
+          </div>
+          <div class="bar"><i class="${barCls}" style="width:${pct}%"></i></div>
+        </div>
+      </td>
+      <td class="channel">
+        <span class="pill">
+          <span class="chw" style="background:${ch.bg}">${ch.letter}</span>
+          ${r.channel}
+        </span>
+      </td>
+      <td class="status">${cluster}</td>
+      <td class="check"><button class="iconbtn" style="width:28px;height:28px;border:none;background:transparent" aria-label="More"><svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text-gray-dark);fill:none;stroke-width:2"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // Checkboxes + bulk bar
+  const bulkbar = document.getElementById('bulkbar');
+  const selcount = document.getElementById('selcount');
+  function updateBulk(){
+    const n = document.querySelectorAll('.cb.on[data-row]').length;
+    selcount.textContent = n;
+    bulkbar.classList.toggle('show', n > 0);
+    const all = document.querySelector('.cb[data-bulk="all"]');
+    if (all){
+      const total = document.querySelectorAll('.cb[data-row]').length;
+      all.classList.toggle('on', n > 0 && n === total);
+    }
+  }
+  document.querySelectorAll('.cb').forEach(cb => cb.addEventListener('click', e => {
+    e.stopPropagation();
+    if (cb.dataset.bulk === 'all'){
+      const turnOn = !cb.classList.contains('on');
+      document.querySelectorAll('.cb').forEach(c => c.classList.toggle('on', turnOn));
+    } else {
+      cb.classList.toggle('on');
+    }
+    updateBulk();
+  }));
+
+  // Status info modal
+  const modal = document.getElementById('statusModal');
+  document.getElementById('statusInfoBtn').addEventListener('click', () => modal.classList.add('show'));
+  modal.querySelector('.mclose').addEventListener('click', () => modal.classList.remove('show'));
+  modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('show'); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') modal.classList.remove('show'); });
+</script>
+<script src="ds/_sidebar.js"></script>
+<script src="ds/_agent.js"></script>
+</body>
+</html>

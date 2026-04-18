@@ -175,19 +175,18 @@
       compTaxes.insertAdjacentHTML('afterend', VIEWS);
     }
     const NAV_HREFS = {
-      home: 'Home.html',
-      properties: 'Properties.html',
-      bookings: 'index.html',
-      'view-agenda':     'Welcome.html?view=agenda',
-      'view-compliance': 'Welcome.html?view=compliance',
-      'view-ai':         'Welcome.html?view=ai',
-      'view-calendar':   'Welcome.html?view=calendar',
+      home:              'index.html',
+      bookings:          'bookings.html',
+      'view-agenda':     'index.html?view=agenda',
+      'view-compliance': 'index.html?view=compliance',
+      'view-ai':         'index.html?view=ai',
+      'view-calendar':   'index.html?view=calendar',
     };
     document.querySelectorAll('.l1 .nav-item').forEach(n => n.addEventListener('click', () => {
       document.querySelectorAll('.l1 .nav-item').forEach(x => x.classList.remove('active'));
       n.classList.add('active');
       const href = NAV_HREFS[n.getAttribute('data-k')];
-      if (href) window.location.href = href;
+      if (href) (window.top || window).location.href = href;
     }));
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
