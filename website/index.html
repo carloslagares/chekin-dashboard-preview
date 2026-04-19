@@ -1,0 +1,788 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chekin — AI check-in for modern hospitality</title>
+<link rel="stylesheet" href="../ds/colors_and_type.css">
+<style>
+  :root{
+    --ink:#161643;
+    --ink2:#6B6B95;
+    --ink3:#9696B9;
+    --ink4:#CECEDE;
+    --line:#E5E6EE;
+    --line2:#DEDEEB;
+    --bg:#FFFFFF;
+    --bg2:#F7F8FB;
+    --bg3:#F0F3FF;
+    --bg4:#EFF6FF;
+    --blue:#385CF8;
+    --blue-dark:#2945C5;
+    --blue-light:#8CA5FF;
+    --grad:linear-gradient(180deg,#002CFA 0%,#274BF0 100%);
+    --shadow-sm:0 1px 2px rgba(22,22,67,.04),0 0 0 1px rgba(22,22,67,.04);
+    --shadow:0 8px 24px rgba(22,22,67,.08),0 2px 4px rgba(22,22,67,.04);
+    --shadow-lg:0 24px 60px rgba(22,22,67,.14),0 6px 16px rgba(22,22,67,.06);
+    --shadow-blue:0 10px 30px rgba(56,92,248,.24);
+    --r-sm:6px;--r-md:10px;--r-lg:14px;--r-xl:20px;--r-2xl:28px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);font-family:var(--font-primary);color:var(--ink);font-feature-settings:"ss01";-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  a{color:inherit;text-decoration:none}
+  button{font:inherit;cursor:pointer}
+  img{display:block;max-width:100%}
+
+  /* ─────────── TOP BAR ─────────── */
+  .nav{
+    position:sticky;top:0;z-index:50;
+    backdrop-filter:saturate(180%) blur(14px);
+    -webkit-backdrop-filter:saturate(180%) blur(14px);
+    background:rgba(255,255,255,.82);
+    border-bottom:1px solid rgba(22,22,67,.06);
+  }
+  .nav-in{max-width:1280px;margin:0 auto;padding:14px 28px;display:flex;align-items:center;gap:32px}
+  .logo{font:800 22px var(--font-primary);color:var(--ink);letter-spacing:-.02em;display:inline-flex;align-items:center;gap:2px}
+  .logo::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--blue);margin-left:2px;display:inline-block}
+  .nav-links{display:flex;align-items:center;gap:4px;flex:1}
+  .nav-link{padding:8px 14px;border-radius:8px;font:500 14px var(--font-primary);color:var(--ink);display:inline-flex;align-items:center;gap:6px;cursor:pointer;transition:background .12s}
+  .nav-link:hover{background:rgba(22,22,67,.04)}
+  .nav-link svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;opacity:.55;transition:transform .18s}
+  .nav-link.open svg{transform:rotate(180deg);opacity:1}
+  .nav-right{display:flex;align-items:center;gap:10px;margin-left:auto}
+  .nav-lang{padding:8px 12px;border-radius:8px;font:500 13px var(--font-primary);color:var(--ink2);display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+  .nav-lang:hover{color:var(--ink);background:rgba(22,22,67,.04)}
+  .nav-lang svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:38px;padding:0 18px;border-radius:10px;font:600 14px var(--font-primary);border:1px solid transparent;cursor:pointer;transition:all .14s}
+  .btn.ghost{background:transparent;color:var(--ink);border-color:transparent}
+  .btn.ghost:hover{background:rgba(22,22,67,.04)}
+  .btn.outline{background:#fff;color:var(--ink);border-color:var(--line2)}
+  .btn.outline:hover{border-color:var(--ink);box-shadow:var(--shadow-sm)}
+  .btn.primary{background:var(--blue);color:#fff}
+  .btn.primary:hover{background:var(--blue-dark);box-shadow:var(--shadow-blue)}
+  .btn.primary svg{width:14px;height:14px;fill:currentColor;stroke:none}
+  .btn.dark{background:var(--ink);color:#fff}
+  .btn.dark:hover{background:#0F0F36}
+  .btn.lg{height:46px;padding:0 22px;font-size:15px;border-radius:12px}
+
+  /* ─────────── MEGA MENU ─────────── */
+  .mega{
+    position:absolute;left:50%;transform:translateX(-50%) translateY(6px);
+    top:100%;margin-top:4px;
+    background:#fff;border:1px solid var(--line);border-radius:18px;
+    box-shadow:var(--shadow-lg);
+    padding:22px;display:none;min-width:860px;
+    z-index:100;
+  }
+  .mega.open{display:grid}
+  .mega.solutions{grid-template-columns:1fr 1fr 1fr;gap:28px}
+  .mega .col h4{font:700 11px var(--font-primary);color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px;padding:0 10px}
+  .mega .item{display:flex;align-items:flex-start;gap:12px;padding:10px;border-radius:10px;cursor:pointer;transition:background .12s}
+  .mega .item:hover{background:var(--bg2)}
+  .mega .item .ic{width:36px;height:36px;border-radius:10px;background:var(--bg3);color:var(--blue);display:grid;place-items:center;flex-shrink:0}
+  .mega .item .ic svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.7}
+  .mega .item .t{font:600 14px var(--font-primary);color:var(--ink)}
+  .mega .item .d{font:400 12px/16px var(--font-primary);color:var(--ink2);margin-top:2px}
+
+  /* Resources mega — with collage */
+  .mega.resources{grid-template-columns:1fr 1fr 360px;gap:28px;min-width:940px}
+  .mega .collage{background:linear-gradient(135deg,#F0F3FF,#EFF6FF);border-radius:14px;padding:18px;position:relative;overflow:hidden}
+  .mega .collage::before{content:"";position:absolute;inset:0;background:radial-gradient(360px 200px at 100% -20%,rgba(56,92,248,.18),transparent 60%);pointer-events:none}
+  .mega .collage .pill{position:relative;z-index:2;display:inline-flex;align-items:center;gap:5px;font:700 10.5px var(--font-primary);color:var(--blue);background:#fff;padding:4px 10px;border-radius:999px;letter-spacing:.05em;text-transform:uppercase;box-shadow:var(--shadow-sm)}
+  .mega .collage .pill svg{width:10px;height:10px;fill:currentColor;stroke:none}
+  .mega .collage h3{position:relative;z-index:2;font:700 18px/22px var(--font-primary);color:var(--ink);margin-top:10px;letter-spacing:-.005em}
+  .mega .collage p{position:relative;z-index:2;font:400 12.5px/18px var(--font-primary);color:var(--ink2);margin-top:6px}
+  .mega .collage .thumbs{position:relative;z-index:2;display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:12px 0}
+  .mega .collage .thumb{height:68px;border-radius:8px;overflow:hidden;background:#ddd;position:relative}
+  .mega .collage .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .mega .collage .thumb .tag{position:absolute;bottom:4px;left:4px;font:700 8.5px var(--font-primary);background:rgba(255,255,255,.92);padding:2px 6px;border-radius:4px;color:var(--ink);text-transform:uppercase;letter-spacing:.04em}
+  .mega .collage .cta{position:relative;z-index:2;font:600 12.5px var(--font-primary);color:var(--blue);display:inline-flex;align-items:center;gap:4px;margin-top:4px}
+  .mega .collage .cta svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.4}
+
+  /* ─────────── HERO ─────────── */
+  .hero{position:relative;overflow:hidden;padding:64px 28px 80px;max-width:1280px;margin:0 auto}
+  .hero::before{content:"";position:absolute;top:-200px;right:-200px;width:720px;height:720px;border-radius:50%;background:radial-gradient(closest-side,rgba(56,92,248,.12),transparent);pointer-events:none}
+  .hero-grid{position:relative;display:grid;grid-template-columns:1.05fr 1fr;gap:56px;align-items:center}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;padding:5px 12px 5px 5px;background:var(--bg3);border:1px solid rgba(56,92,248,.16);border-radius:999px;font:600 12px var(--font-primary);color:var(--blue);margin-bottom:20px}
+  .eyebrow .chip{background:#fff;color:var(--blue);font:700 10px var(--font-primary);padding:3px 8px;border-radius:999px;letter-spacing:.04em;text-transform:uppercase;box-shadow:var(--shadow-sm)}
+  .eyebrow svg{width:12px;height:12px;fill:currentColor;stroke:none}
+  h1.hero-title{
+    font:700 64px/1.03 var(--font-primary);color:var(--ink);
+    letter-spacing:-.022em;margin-bottom:20px;
+  }
+  h1.hero-title .accent{
+    background:linear-gradient(120deg,#385CF8 0%,#6B8CFF 50%,#385CF8 100%);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+    background-size:220% auto;
+    animation:shimmer 6s ease infinite;
+  }
+  @keyframes shimmer{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+  .hero-sub{font:400 18px/28px var(--font-primary);color:var(--ink2);max-width:520px;margin-bottom:28px}
+  .hero-ctas{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:28px}
+  .hero-reassure{display:flex;align-items:center;gap:18px;font:500 13px var(--font-primary);color:var(--ink2);flex-wrap:wrap}
+  .hero-reassure .item{display:inline-flex;align-items:center;gap:6px}
+  .hero-reassure .item svg{width:14px;height:14px;stroke:var(--blue);fill:none;stroke-width:2.4}
+
+  /* Hero visual */
+  .hero-visual{position:relative;min-height:480px}
+  .hero-card{
+    position:absolute;background:#fff;border:1px solid var(--line);border-radius:16px;
+    box-shadow:var(--shadow-lg);overflow:hidden;
+  }
+  .hero-card.main{top:20px;left:0;right:0;padding:18px 20px;background:linear-gradient(180deg,#F7F8FB 0%,#fff 100%)}
+  .hero-card.main .hh{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+  .hero-card.main .hh .av{width:30px;height:30px;border-radius:50%;background:var(--bg4);color:var(--blue);display:grid;place-items:center}
+  .hero-card.main .hh .av svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8}
+  .hero-card.main .hh .t{font:700 14px var(--font-primary)}
+  .hero-card.main .hh .dot{width:6px;height:6px;border-radius:50%;background:#0F9F80;margin-left:auto}
+  .hero-card.main .task{display:flex;align-items:center;gap:10px;padding:11px 12px;background:#fff;border:1px solid var(--line);border-radius:10px;margin-bottom:8px}
+  .hero-card.main .task .ic{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;flex-shrink:0}
+  .hero-card.main .task .ic svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.7}
+  .hero-card.main .task.done .ic{background:#E8FCF7;color:#0F9F80}
+  .hero-card.main .task.prog .ic{background:var(--bg3);color:var(--blue)}
+  .hero-card.main .task .lt{flex:1;min-width:0}
+  .hero-card.main .task .n{font:600 13px var(--font-primary)}
+  .hero-card.main .task .s{font:400 11.5px var(--font-primary);color:var(--ink2);margin-top:1px}
+  .hero-card.main .task .st{font:700 9.5px var(--font-primary);padding:2px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.05em}
+  .hero-card.main .task.done .st{background:#E8FCF7;color:#0F9F80}
+  .hero-card.main .task.prog .st{background:var(--bg3);color:var(--blue)}
+
+  .hero-card.notif{top:180px;right:-40px;width:280px;padding:14px;display:flex;gap:10px;align-items:flex-start;border-radius:14px}
+  .hero-card.notif .av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#385CF8,#8CA5FF);color:#fff;display:grid;place-items:center;flex-shrink:0;position:relative;isolation:isolate}
+  .hero-card.notif .av svg{width:15px;height:15px;fill:currentColor;stroke:none}
+  .hero-card.notif .av::before{content:"";position:absolute;inset:-5px;border-radius:50%;background:radial-gradient(circle,rgba(56,92,248,.45),transparent 60%);filter:blur(7px);opacity:.55;z-index:-1;animation:aura 3.6s ease-in-out infinite}
+  @keyframes aura{0%,100%{transform:scale(.85);opacity:.4}50%{transform:scale(1.15);opacity:.85}}
+  .hero-card.notif .tt{font:700 12.5px var(--font-primary)}
+  .hero-card.notif .dd{font:400 11.5px/16px var(--font-primary);color:var(--ink2);margin-top:2px}
+  .hero-card.notif .tm{font:500 10.5px var(--font-primary);color:var(--ink3);margin-top:5px}
+
+  .hero-card.stats{bottom:0;left:-40px;width:260px;padding:16px;border-radius:14px}
+  .hero-card.stats .l{font:700 10.5px var(--font-primary);color:var(--ink3);text-transform:uppercase;letter-spacing:.08em}
+  .hero-card.stats .n{font:700 28px var(--font-primary);color:var(--ink);font-variant-numeric:tabular-nums;margin-top:4px}
+  .hero-card.stats .g{display:flex;align-items:center;gap:4px;font:600 11px var(--font-primary);color:#0F9F80;margin-top:2px}
+  .hero-card.stats .g svg{width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:2.4}
+  .hero-card.stats .spark{margin-top:10px;height:32px}
+
+  /* ─────────── SOCIAL PROOF (logos + badges) ─────────── */
+  .strip{padding:10px 28px 48px;max-width:1280px;margin:0 auto}
+  .strip-in{display:flex;align-items:center;gap:40px;padding:20px 28px;background:var(--bg2);border:1px solid var(--line);border-radius:16px}
+  .strip-in .label{font:600 12px var(--font-primary);color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;flex-shrink:0}
+  .strip-in .logos{display:flex;align-items:center;gap:32px;flex-wrap:wrap;flex:1}
+  .strip-in .logo-placeholder{font:700 16px var(--font-primary);color:var(--ink3);letter-spacing:-.01em;opacity:.75}
+  .strip-in .badges{display:flex;align-items:center;gap:14px;flex-shrink:0;margin-left:auto}
+  .rating{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow-sm)}
+  .rating .brand{font:700 11px var(--font-primary);color:var(--ink2);letter-spacing:.04em;text-transform:uppercase}
+  .rating .stars{display:flex;gap:1px;color:#FF9E00}
+  .rating .stars svg{width:12px;height:12px;fill:currentColor;stroke:none}
+  .rating .val{font:700 13px var(--font-primary);color:var(--ink);font-variant-numeric:tabular-nums}
+
+  /* ─────────── INTEREST PICKER ─────────── */
+  .picker{padding:80px 28px;max-width:1280px;margin:0 auto}
+  .picker-head{text-align:center;margin-bottom:28px}
+  .picker-badges{display:inline-flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;justify-content:center}
+  .picker h2{font:700 44px/1.1 var(--font-primary);color:var(--ink);letter-spacing:-.018em;margin-bottom:12px}
+  .picker .sub{font:400 16px/24px var(--font-primary);color:var(--ink2);max-width:620px;margin:0 auto}
+  .pills{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:32px;max-width:880px;margin-left:auto;margin-right:auto}
+  .pill{
+    display:inline-flex;align-items:center;gap:10px;
+    padding:12px 18px;border-radius:999px;background:#fff;border:1px solid var(--line2);
+    font:600 14px var(--font-primary);color:var(--ink);cursor:pointer;
+    transition:all .15s;position:relative;
+  }
+  .pill:hover{border-color:var(--ink);transform:translateY(-1px);box-shadow:var(--shadow)}
+  .pill.active{background:var(--ink);border-color:var(--ink);color:#fff}
+  .pill .ic{width:22px;height:22px;border-radius:6px;background:var(--bg3);color:var(--blue);display:grid;place-items:center;flex-shrink:0;transition:all .15s}
+  .pill:hover .ic{background:var(--bg4)}
+  .pill.active .ic{background:rgba(255,255,255,.14);color:#fff}
+  .pill .ic svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.9}
+
+  /* Selected preview panel */
+  .pill-panel{margin-top:36px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:32px;display:grid;grid-template-columns:1.1fr 1fr;gap:36px;align-items:center;box-shadow:var(--shadow)}
+  .pill-panel .txt h3{font:700 28px/1.15 var(--font-primary);letter-spacing:-.01em;margin-bottom:10px}
+  .pill-panel .txt p{font:400 15px/23px var(--font-primary);color:var(--ink2);margin-bottom:18px}
+  .pill-panel .bullets{display:flex;flex-direction:column;gap:8px;margin-bottom:22px}
+  .pill-panel .bullets .b{display:flex;align-items:center;gap:8px;font:500 13.5px var(--font-primary);color:var(--ink)}
+  .pill-panel .bullets .b svg{width:14px;height:14px;stroke:var(--blue);fill:none;stroke-width:2.4}
+  .pill-panel .media{aspect-ratio:4/3;border-radius:14px;background:linear-gradient(135deg,#F0F3FF,#EFF6FF);border:1px solid var(--line);overflow:hidden;display:grid;place-items:center;color:var(--blue);position:relative}
+  .pill-panel .media svg{width:72px;height:72px;stroke:currentColor;fill:none;stroke-width:1.2;opacity:.4}
+
+  /* ─────────── STATS BAR ─────────── */
+  .stats-band{background:var(--ink);color:#fff;padding:56px 28px}
+  .stats-band-in{max-width:1280px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
+  .sb-item{text-align:left}
+  .sb-item .n{font:700 44px var(--font-primary);letter-spacing:-.02em;background:linear-gradient(120deg,#fff 0%,#8CA5FF 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;font-variant-numeric:tabular-nums}
+  .sb-item .l{font:500 13px var(--font-primary);color:rgba(255,255,255,.68);margin-top:6px}
+
+  /* ─────────── FEATURES ─────────── */
+  .features{padding:96px 28px;max-width:1280px;margin:0 auto}
+  .sec-head{text-align:center;margin-bottom:56px}
+  .sec-head .eyebrow{margin-bottom:14px}
+  .sec-head h2{font:700 44px/1.1 var(--font-primary);color:var(--ink);letter-spacing:-.018em;margin-bottom:12px}
+  .sec-head .sub{font:400 17px/25px var(--font-primary);color:var(--ink2);max-width:680px;margin:0 auto}
+
+  .ft-row{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;margin-bottom:80px}
+  .ft-row:nth-child(even) .ft-txt{order:2}
+  .ft-row:nth-child(even) .ft-visual{order:1}
+  .ft-row:last-child{margin-bottom:0}
+  .ft-txt .tag{display:inline-flex;align-items:center;gap:6px;padding:5px 12px 5px 5px;background:var(--bg3);border-radius:999px;font:600 12px var(--font-primary);color:var(--blue);margin-bottom:16px}
+  .ft-txt .tag .sq{width:20px;height:20px;border-radius:5px;background:#fff;display:grid;place-items:center;box-shadow:var(--shadow-sm)}
+  .ft-txt .tag .sq svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2}
+  .ft-txt h3{font:700 36px/1.15 var(--font-primary);letter-spacing:-.015em;margin-bottom:14px}
+  .ft-txt p{font:400 17px/27px var(--font-primary);color:var(--ink2);margin-bottom:20px}
+  .ft-bullets{display:flex;flex-direction:column;gap:10px;margin-bottom:22px}
+  .ft-bullets .b{display:flex;align-items:flex-start;gap:10px;font:500 14px/20px var(--font-primary)}
+  .ft-bullets .b .ok{flex-shrink:0;width:20px;height:20px;border-radius:50%;background:var(--bg4);color:var(--blue);display:grid;place-items:center;margin-top:1px}
+  .ft-bullets .b .ok svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2.8}
+  .ft-visual{position:relative;aspect-ratio:5/4;border-radius:var(--r-xl);background:linear-gradient(135deg,#F7F8FB 0%,#EFF6FF 100%);border:1px solid var(--line);overflow:hidden;box-shadow:var(--shadow)}
+  .ft-visual::before{content:"";position:absolute;inset:0;background:radial-gradient(400px 200px at 90% -20%,rgba(56,92,248,.14),transparent 60%);pointer-events:none}
+  .ft-visual .icon{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:96px;height:96px;border-radius:24px;background:#fff;box-shadow:var(--shadow-lg);display:grid;place-items:center;color:var(--blue)}
+  .ft-visual .icon svg{width:42px;height:42px;stroke:currentColor;fill:none;stroke-width:1.4}
+
+  /* ─────────── ACCOMMODATION TYPES ─────────── */
+  .types{padding:80px 28px;max-width:1280px;margin:0 auto}
+  .types-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+  .type{background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;cursor:pointer;transition:transform .15s,box-shadow .15s}
+  .type:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+  .type .media{height:160px;display:grid;place-items:center;color:#fff}
+  .type .media svg{width:56px;height:56px;stroke:currentColor;fill:none;stroke-width:1.3}
+  .type.a .media{background:linear-gradient(135deg,#385CF8,#274BF0)}
+  .type.b .media{background:linear-gradient(135deg,#FFB4C7,#FF5E8C)}
+  .type.c .media{background:linear-gradient(135deg,#91E7C8,#0F9F80)}
+  .type.d .media{background:linear-gradient(135deg,#FFD28C,#FFB872)}
+  .type .body{padding:18px 20px}
+  .type .t{font:700 16px var(--font-primary)}
+  .type .d{font:400 13px/18px var(--font-primary);color:var(--ink2);margin-top:4px}
+  .type .more{display:inline-flex;align-items:center;gap:4px;font:600 13px var(--font-primary);color:var(--blue);margin-top:10px}
+  .type .more svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.4;transition:transform .15s}
+  .type:hover .more svg{transform:translateX(3px)}
+
+  /* ─────────── TESTIMONIALS ─────────── */
+  .testimonials{padding:96px 28px;background:var(--grad);color:#fff;position:relative;overflow:hidden}
+  .testimonials::before{content:"";position:absolute;inset:0;background:radial-gradient(700px 360px at 100% -100px,rgba(255,255,255,.15),transparent 60%);pointer-events:none}
+  .testimonials-in{max-width:1280px;margin:0 auto;position:relative}
+  .testimonials .sec-head h2{color:#fff}
+  .testimonials .sec-head .sub{color:rgba(255,255,255,.75)}
+  .testimonials .sec-head .eyebrow{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.15);color:#fff}
+  .testimonials .sec-head .eyebrow .chip{background:rgba(255,255,255,.18);color:#fff;box-shadow:none}
+  .t-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .t-card{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:16px;padding:22px;backdrop-filter:blur(10px)}
+  .t-card .q{font:500 15px/23px var(--font-primary);margin-bottom:18px}
+  .t-card .by{display:flex;align-items:center;gap:10px}
+  .t-card .by .av{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.14);display:grid;place-items:center;font:700 12px var(--font-primary)}
+  .t-card .by .n{font:600 13px var(--font-primary)}
+  .t-card .by .r{font:400 11px var(--font-primary);color:rgba(255,255,255,.7)}
+
+  /* ─────────── CTA BAND ─────────── */
+  .cta-band{padding:96px 28px;max-width:1280px;margin:0 auto}
+  .cta-band-in{background:var(--ink);color:#fff;border-radius:28px;padding:56px 48px;display:grid;grid-template-columns:1.2fr auto;gap:36px;align-items:center;position:relative;overflow:hidden}
+  .cta-band-in::before{content:"";position:absolute;inset:0;background:radial-gradient(500px 260px at 0% 120%,rgba(56,92,248,.35),transparent 60%),radial-gradient(500px 260px at 100% -20%,rgba(56,92,248,.24),transparent 60%);pointer-events:none}
+  .cta-band-in h2{position:relative;z-index:2;font:700 38px/1.15 var(--font-primary);letter-spacing:-.015em}
+  .cta-band-in p{position:relative;z-index:2;font:400 16px/24px var(--font-primary);color:rgba(255,255,255,.75);margin-top:10px;max-width:520px}
+  .cta-band-in .ctas{position:relative;z-index:2;display:flex;gap:10px;flex-wrap:wrap}
+  .cta-band-in .btn.outline{background:transparent;border-color:rgba(255,255,255,.22);color:#fff}
+  .cta-band-in .btn.outline:hover{background:rgba(255,255,255,.08)}
+
+  /* ─────────── FOOTER ─────────── */
+  footer{background:#0C0C2E;color:rgba(255,255,255,.72);padding:56px 28px 32px}
+  .foot-in{max-width:1280px;margin:0 auto;display:grid;grid-template-columns:1.3fr repeat(4,1fr);gap:36px}
+  .foot-brand .logo{color:#fff}
+  .foot-brand p{font:400 13px/20px var(--font-primary);color:rgba(255,255,255,.55);margin-top:12px;max-width:280px}
+  .foot-social{display:flex;gap:8px;margin-top:16px}
+  .foot-social a{width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.05);display:grid;place-items:center;color:#fff;transition:background .12s}
+  .foot-social a:hover{background:rgba(255,255,255,.1)}
+  .foot-social a svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2}
+  .foot-col h5{font:700 11px var(--font-primary);color:#fff;letter-spacing:.1em;text-transform:uppercase;margin-bottom:14px}
+  .foot-col ul{list-style:none}
+  .foot-col li{margin-bottom:8px}
+  .foot-col a{font:400 13px var(--font-primary);color:rgba(255,255,255,.6);transition:color .12s}
+  .foot-col a:hover{color:#fff}
+  .foot-bot{max-width:1280px;margin:36px auto 0;padding-top:22px;border-top:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:center;font:400 12px var(--font-primary);color:rgba(255,255,255,.45);flex-wrap:wrap;gap:12px}
+  .foot-bot .legal{display:flex;gap:18px}
+
+  /* ─────────── RESPONSIVE ─────────── */
+  @media (max-width:1024px){
+    .nav-links{display:none}
+    h1.hero-title{font-size:48px}
+    .hero-grid,.ft-row,.pill-panel,.cta-band-in{grid-template-columns:1fr;gap:36px}
+    .stats-band-in{grid-template-columns:repeat(2,1fr)}
+    .types-grid,.t-grid,.foot-in{grid-template-columns:repeat(2,1fr)}
+  }
+</style>
+</head>
+<body>
+
+<!-- ──────────────── NAV ──────────────── -->
+<nav class="nav">
+  <div class="nav-in">
+    <a class="logo" href="#">Chekin</a>
+    <div class="nav-links">
+      <span class="nav-link">Platform <svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></span>
+      <span class="nav-link" id="triggerSolutions">Solutions <svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></span>
+      <span class="nav-link" id="triggerResources">Resources <svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></span>
+      <span class="nav-link">Pricing</span>
+      <span class="nav-link">Countries</span>
+    </div>
+    <div class="nav-right">
+      <span class="nav-lang">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/></svg>
+        EN
+        <svg viewBox="0 0 24 24" style="width:10px;height:10px"><path d="m6 9 6 6 6-6"/></svg>
+      </span>
+      <button class="btn ghost">Log in</button>
+      <button class="btn primary">Start free</button>
+    </div>
+
+    <!-- Solutions mega menu -->
+    <div class="mega solutions" id="megaSolutions">
+      <div class="col">
+        <h4>By business size</h4>
+        <div class="item"><div class="ic"><svg viewBox="0 0 24 24"><path d="M3 9 12 2l9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></div><div><div class="t">Individual hosts</div><div class="d">1–5 properties. Auto check-in out of the box.</div></div></div>
+        <div class="item"><div class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></div><div><div class="t">Property managers</div><div class="d">Multi-property ops with centralised control.</div></div></div>
+        <div class="item"><div class="ic"><svg viewBox="0 0 24 24"><path d="M3 21h18M3 7h18M5 21V7M19 21V7M9 11h2M9 15h2M13 11h2M13 15h2"/></svg></div><div><div class="t">Enterprise</div><div class="d">100+ properties, SLAs and dedicated success.</div></div></div>
+      </div>
+      <div class="col">
+        <h4>By need</h4>
+        <div class="item"><div class="ic"><svg viewBox="0 0 24 24"><path d="M12 2a4 4 0 0 0-4 4v1a4 4 0 0 0-4 4v0a4 4 0 0 0 2 3.5V17a4 4 0 0 0 4 4h4a4 4 0 0 0 4-4v-2.5A4 4 0 0 0 20 11a4 4 0 0 0-4-4V6a4 4 0 0 0-4-4z"/></svg></div><div><div class="t">Your first guest experience</div><div class="d">Launch a polished check-in in under a day.</div></div></div>
+        <div class="item"><div class="ic"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg></div><div><div class="t">Switching to Chekin</div><div class="d">Import from any PMS; keep your data, not the chaos.</div></div></div>
+        <div class="item"><div class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 12l2 2 5-5"/></svg></div><div><div class="t">Chekin onboarding</div><div class="d">Guided setup with a specialist — live in 48h.</div></div></div>
+      </div>
+      <div class="col">
+        <h4>By accommodation type</h4>
+        <div class="item"><div class="ic"><svg viewBox="0 0 24 24"><path d="M3 9 12 2l9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg></div><div><div class="t">Apartments</div><div class="d">Short-term rentals and vacation stays.</div></div></div>
+        <div class="item"><div class="ic"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V11l7-5 7 5v10M9 21v-5h6v5"/></svg></div><div><div class="t">Villas</div><div class="d">Premium stays with personalised flows.</div></div></div>
+        <div class="item"><div class="ic"><svg viewBox="0 0 24 24"><path d="M2 12h20M2 12V7h20v5M7 17v4M12 17v4M17 17v4M4 12v5h16v-5"/></svg></div><div><div class="t">Hotels &amp; aparthotels</div><div class="d">Group-ready with PMS integrations.</div></div></div>
+        <div class="item"><div class="ic"><svg viewBox="0 0 24 24"><path d="M12 2 2 22h20L12 2zM12 8v8M9 22h6"/></svg></div><div><div class="t">Campings &amp; outdoor</div><div class="d">Seasonal operations, tourist-tax ready.</div></div></div>
+      </div>
+    </div>
+
+    <!-- Resources mega menu -->
+    <div class="mega resources" id="megaResources">
+      <div class="col">
+        <h4>Learn</h4>
+        <div class="item"><div class="ic"><svg viewBox="0 0 24 24"><path d="M4 4h10a4 4 0 0 1 4 4v12H8a4 4 0 0 1-4-4z"/><path d="M8 8h6M8 12h6M8 16h4"/></svg></div><div><div class="t">Blog</div><div class="d">Trends, how-tos and product news.</div></div></div>
+        <div class="item"><div class="ic"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></svg></div><div><div class="t">Reports &amp; guides</div><div class="d">Regulation, market data, templates.</div></div></div>
+        <div class="item"><div class="ic"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="m10 9 5 3-5 3z" fill="currentColor" stroke="none"/></svg></div><div><div class="t">Webinars</div><div class="d">Live sessions and on-demand replays.</div></div></div>
+        <div class="item"><div class="ic"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div><div class="t">Events</div><div class="d">Meet us at industry gatherings.</div></div></div>
+      </div>
+      <div class="col">
+        <h4>Community</h4>
+        <div class="item"><div class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></div><div><div class="t">Customers</div><div class="d">Case studies from real operators.</div></div></div>
+        <div class="item"><div class="ic"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg></div><div><div class="t">Help Center</div><div class="d">Answers in under a minute.</div></div></div>
+        <div class="item"><div class="ic"><svg viewBox="0 0 24 24"><path d="m8 3 8 0 0 8-8 0zM3 13h8v8H3zM13 13h8v8h-8z"/></svg></div><div><div class="t">Marketplace</div><div class="d">Partner apps and integrations.</div></div></div>
+        <div class="item"><div class="ic"><svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-3M18 2l4 4-10 10H8v-4z"/></svg></div><div><div class="t">SDK &amp; API</div><div class="d">Build on top of Chekin.</div></div></div>
+      </div>
+      <div class="collage">
+        <span class="pill"><svg viewBox="0 0 24 24"><path d="M10 2l1.7 5.3L17 9l-5.3 1.7L10 14l-1.7-5.3L3 9z"/></svg>Industry insights</span>
+        <h3>The 2026 Short-Term Rental Compliance Report</h3>
+        <p>What operators across 45 countries are doing to stay ahead of guest-data regulation.</p>
+        <div class="thumbs">
+          <div class="thumb"><img src="https://images.unsplash.com/photo-1543832923-44667a44c804?w=400&auto=format&fit=crop&q=80" alt="" loading="lazy"><span class="tag">EU</span></div>
+          <div class="thumb"><img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&auto=format&fit=crop&q=80" alt="" loading="lazy"><span class="tag">Spain</span></div>
+        </div>
+        <a class="cta" href="#">Read the report <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
+      </div>
+    </div>
+
+  </div>
+</nav>
+
+<!-- ──────────────── HERO ──────────────── -->
+<section class="hero">
+  <div class="hero-grid">
+    <div>
+      <div class="eyebrow">
+        <span class="chip">NEW</span>
+        Meet Vela — your AI concierge
+        <svg viewBox="0 0 24 24"><path d="M10 2l1.7 5.3L17 9l-5.3 1.7L10 14l-1.7-5.3L3 9z"/></svg>
+      </div>
+      <h1 class="hero-title">Automated check-in for <span class="accent">modern hospitality</span>.</h1>
+      <p class="hero-sub">Chekin handles ID verification, police reports, payments, keys and guest comms — in 45 countries, from one property to thousands.</p>
+      <div class="hero-ctas">
+        <button class="btn primary lg">Start free trial <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 5l7 7-7 7"/></svg></button>
+        <button class="btn outline lg">Book a demo</button>
+      </div>
+      <div class="hero-reassure">
+        <span class="item"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>No credit card</span>
+        <span class="item"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>Setup in 48h</span>
+        <span class="item"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>Cancel anytime</span>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="hero-card main">
+        <div class="hh">
+          <div class="av"><svg viewBox="0 0 24 24"><path d="M3 9 12 2l9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></div>
+          <div class="t">Puerta del Sol · today</div>
+          <div class="dot"></div>
+        </div>
+        <div class="task done">
+          <div class="ic"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div>
+          <div class="lt"><div class="n">ID verified — Carmen S.</div><div class="s">NFC · 84s</div></div>
+          <span class="st">Done</span>
+        </div>
+        <div class="task done">
+          <div class="ic"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div>
+          <div class="lt"><div class="n">SES.HOSPEDAJES submitted</div><div class="s">Reference #24018</div></div>
+          <span class="st">Done</span>
+        </div>
+        <div class="task prog">
+          <div class="ic"><svg viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="3.5"/><path d="m10 13 10-10M16 7l3 3"/></svg></div>
+          <div class="lt"><div class="n">Digital key sent</div><div class="s">Guest opens lockbox from 14:00</div></div>
+          <span class="st">Live</span>
+        </div>
+      </div>
+
+      <div class="hero-card notif">
+        <div class="av"><svg viewBox="0 0 24 24"><path d="M10 2.3l1.75 5.45L17 9.4l-5.25 1.65L10 16.5l-1.75-5.45L3 9.4l5.25-1.65z"/><path d="M18.5 14l.75 2.25 2.25.75-2.25.75-.75 2.25-.75-2.25-2.25-.75 2.25-.75z"/></svg></div>
+        <div>
+          <div class="tt">Vela · spotted for you</div>
+          <div class="dd">3 arrivals tomorrow haven't verified their ID. Want me to nudge them?</div>
+          <div class="tm">just now</div>
+        </div>
+      </div>
+
+      <div class="hero-card stats">
+        <div class="l">Check-ins this month</div>
+        <div class="n">2,481</div>
+        <div class="g"><svg viewBox="0 0 24 24"><path d="M7 17l9-9M9 8h7v7"/></svg>+18% vs. last month</div>
+        <svg class="spark" viewBox="0 0 200 32" preserveAspectRatio="none">
+          <polyline points="0,26 20,22 40,24 60,16 80,18 100,12 120,14 140,8 160,10 180,4 200,6" fill="none" stroke="#385CF8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────── LOGO STRIP ──────────────── -->
+<section class="strip">
+  <div class="strip-in">
+    <span class="label">Trusted by 200k+ properties</span>
+    <div class="logos">
+      <span class="logo-placeholder">Sonder</span>
+      <span class="logo-placeholder">Greystar</span>
+      <span class="logo-placeholder">SmartRental</span>
+      <span class="logo-placeholder">Hybrid Resi</span>
+      <span class="logo-placeholder">Hostmacher</span>
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────── INTEREST PICKER ──────────────── -->
+<section class="picker">
+  <div class="picker-head">
+    <div class="picker-badges">
+      <div class="rating">
+        <span class="brand">Trustpilot</span>
+        <span class="stars"><svg viewBox="0 0 24 24"><path d="M12 2 15 9h7l-5.5 4 2 8L12 16l-6.5 5 2-8L2 9h7z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2 15 9h7l-5.5 4 2 8L12 16l-6.5 5 2-8L2 9h7z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2 15 9h7l-5.5 4 2 8L12 16l-6.5 5 2-8L2 9h7z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2 15 9h7l-5.5 4 2 8L12 16l-6.5 5 2-8L2 9h7z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2 15 9h7l-5.5 4 2 8L12 16l-6.5 5 2-8L2 9h7z"/></svg></span>
+        <span class="val">4.7</span>
+      </div>
+      <div class="rating">
+        <span class="brand">Capterra</span>
+        <span class="stars"><svg viewBox="0 0 24 24"><path d="M12 2 15 9h7l-5.5 4 2 8L12 16l-6.5 5 2-8L2 9h7z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2 15 9h7l-5.5 4 2 8L12 16l-6.5 5 2-8L2 9h7z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2 15 9h7l-5.5 4 2 8L12 16l-6.5 5 2-8L2 9h7z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2 15 9h7l-5.5 4 2 8L12 16l-6.5 5 2-8L2 9h7z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2 15 9h7l-5.5 4 2 8L12 16l-6.5 5 2-8L2 9h7z"/></svg></span>
+        <span class="val">4.6</span>
+      </div>
+    </div>
+    <h2>Where would you like to start?</h2>
+    <p class="sub">Pick a use case and we'll show you exactly how Chekin handles it — no demo required.</p>
+  </div>
+
+  <div class="pills" id="pills">
+    <button class="pill active" data-key="legal">
+      <span class="ic"><svg viewBox="0 0 24 24"><path d="M12 2 4 5v7c0 5 3.5 8 8 10 4.5-2 8-5 8-10V5z"/></svg></span>
+      Legal compliance
+    </button>
+    <button class="pill" data-key="id">
+      <span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="12" r="2.5"/><path d="M14 10h4M14 14h4"/></svg></span>
+      Identity verification
+    </button>
+    <button class="pill" data-key="keys">
+      <span class="ic"><svg viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="3.5"/><path d="m10 13 10-10M16 7l3 3"/></svg></span>
+      Remote access
+    </button>
+    <button class="pill" data-key="comms">
+      <span class="ic"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+      Guest communications
+    </button>
+    <button class="pill" data-key="upsell">
+      <span class="ic"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg></span>
+      Upselling
+    </button>
+    <button class="pill" data-key="taxes">
+      <span class="ic"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M2 10h20M6 14h4"/></svg></span>
+      City taxes
+    </button>
+    <button class="pill" data-key="online">
+      <span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 12l2 2 5-5"/></svg></span>
+      Check-in online
+    </button>
+  </div>
+
+  <div class="pill-panel" id="pillPanel">
+    <div class="txt">
+      <h3 id="ppT">Submit guest reports automatically in 45 countries</h3>
+      <p id="ppD">From SES.HOSPEDAJES in Spain to Alloggiati in Italy and Mossos in Catalonia — Chekin files every required report on time, in the right format, with zero intervention.</p>
+      <div class="bullets" id="ppB">
+        <div class="b"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>SES.HOSPEDAJES, Alloggiati, Mossos &amp; 40+ more</div>
+        <div class="b"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>Auto-updated whenever regulations change</div>
+        <div class="b"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>Full audit trail with reference numbers</div>
+      </div>
+      <button class="btn dark">Explore compliance →</button>
+    </div>
+    <div class="media"><svg id="ppIcon" viewBox="0 0 24 24"><path d="M12 2 4 5v7c0 5 3.5 8 8 10 4.5-2 8-5 8-10V5z"/></svg></div>
+  </div>
+</section>
+
+<!-- ──────────────── STATS BAND ──────────────── -->
+<section class="stats-band">
+  <div class="stats-band-in">
+    <div class="sb-item"><div class="n">200k+</div><div class="l">properties running on Chekin</div></div>
+    <div class="sb-item"><div class="n">25M+</div><div class="l">check-ins completed</div></div>
+    <div class="sb-item"><div class="n">45</div><div class="l">countries, one platform</div></div>
+    <div class="sb-item"><div class="n">94%</div><div class="l">guest check-in completion rate</div></div>
+  </div>
+</section>
+
+<!-- ──────────────── FEATURES ──────────────── -->
+<section class="features">
+  <div class="sec-head">
+    <div class="eyebrow">
+      <span class="chip">PLATFORM</span>
+      Everything check-in. Nothing manual.
+    </div>
+    <h2>One platform. Every country. Zero paperwork.</h2>
+    <p class="sub">Chekin is the operational layer between your PMS and every regulation, lock and payment rail your guests touch.</p>
+  </div>
+
+  <div class="ft-row">
+    <div class="ft-txt">
+      <span class="tag"><span class="sq"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="12" r="2.5"/></svg></span> Identity verification</span>
+      <h3>NFC, OCR and liveness — in 90 seconds.</h3>
+      <p>Chekin checks your guest's ID against the issuing country's database, verifies the face matches the document and flags fraud in real time.</p>
+      <div class="ft-bullets">
+        <div class="b"><span class="ok"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span>NFC chip read for EU and US IDs</div>
+        <div class="b"><span class="ok"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span>Active liveness: blink, turn, smile</div>
+        <div class="b"><span class="ok"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span>Fraud signals escalated to host instantly</div>
+      </div>
+      <button class="btn outline">See how it works →</button>
+    </div>
+    <div class="ft-visual"><div class="icon"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="12" r="2.5"/><path d="M14 10h4M14 14h4"/></svg></div></div>
+  </div>
+
+  <div class="ft-row">
+    <div class="ft-txt">
+      <span class="tag"><span class="sq"><svg viewBox="0 0 24 24"><path d="M12 2 4 5v7c0 5 3.5 8 8 10 4.5-2 8-5 8-10V5z"/></svg></span> Police &amp; compliance</span>
+      <h3>Every guest report. Filed automatically.</h3>
+      <p>The moment a guest finishes check-in, Chekin sends the right report to the right authority — with the right format and fields for each country.</p>
+      <div class="ft-bullets">
+        <div class="b"><span class="ok"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span>SES.HOSPEDAJES · Alloggiati · Mossos · 40+ more</div>
+        <div class="b"><span class="ok"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span>Auto-updated on every regulation change</div>
+        <div class="b"><span class="ok"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span>Full audit trail, exportable on demand</div>
+      </div>
+      <button class="btn outline">See countries →</button>
+    </div>
+    <div class="ft-visual"><div class="icon"><svg viewBox="0 0 24 24"><path d="M12 2 4 5v7c0 5 3.5 8 8 10 4.5-2 8-5 8-10V5z"/><path d="M9 12l2 2 4-4"/></svg></div></div>
+  </div>
+
+  <div class="ft-row">
+    <div class="ft-txt">
+      <span class="tag"><span class="sq"><svg viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="3.5"/><path d="m10 13 10-10M16 7l3 3"/></svg></span> Remote access</span>
+      <h3>Digital keys the moment check-in is complete.</h3>
+      <p>Smart locks, PIN codes and lockboxes — issued automatically once ID, payment and deposit clear. No calls. No late arrivals.</p>
+      <div class="ft-bullets">
+        <div class="b"><span class="ok"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span>Nuki · Salto · TTLock · Igloohome · August</div>
+        <div class="b"><span class="ok"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span>Time-bounded access per reservation</div>
+        <div class="b"><span class="ok"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span>Instant revoke on cancellation</div>
+      </div>
+      <button class="btn outline">Browse locks →</button>
+    </div>
+    <div class="ft-visual"><div class="icon"><svg viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="3.5"/><path d="m10 13 10-10M16 7l3 3"/></svg></div></div>
+  </div>
+</section>
+
+<!-- ──────────────── TYPES ──────────────── -->
+<section class="types">
+  <div class="sec-head">
+    <div class="eyebrow">By accommodation type</div>
+    <h2>Built for every property you run.</h2>
+    <p class="sub">Tailored flows, compliance profiles and upsells per format.</p>
+  </div>
+  <div class="types-grid">
+    <div class="type a">
+      <div class="media"><svg viewBox="0 0 24 24"><path d="M3 9 12 2l9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg></div>
+      <div class="body"><div class="t">Apartments</div><div class="d">Short-term &amp; vacation rentals</div><span class="more">See more <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span></div>
+    </div>
+    <div class="type b">
+      <div class="media"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V11l7-5 7 5v10M9 21v-5h6v5"/></svg></div>
+      <div class="body"><div class="t">Villas</div><div class="d">Premium personalised stays</div><span class="more">See more <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span></div>
+    </div>
+    <div class="type c">
+      <div class="media"><svg viewBox="0 0 24 24"><path d="M2 12h20M2 12V7h20v5M7 17v4M12 17v4M17 17v4M4 12v5h16v-5"/></svg></div>
+      <div class="body"><div class="t">Hotels</div><div class="d">Chains and aparthotels</div><span class="more">See more <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span></div>
+    </div>
+    <div class="type d">
+      <div class="media"><svg viewBox="0 0 24 24"><path d="M12 2 2 22h20L12 2zM12 8v8M9 22h6"/></svg></div>
+      <div class="body"><div class="t">Campings</div><div class="d">Outdoor &amp; glamping operators</div><span class="more">See more <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────── TESTIMONIALS ──────────────── -->
+<section class="testimonials">
+  <div class="testimonials-in">
+    <div class="sec-head">
+      <div class="eyebrow"><span class="chip">CUSTOMERS</span> Loved by operators everywhere</div>
+      <h2>Less paperwork. More happy arrivals.</h2>
+    </div>
+    <div class="t-grid">
+      <div class="t-card">
+        <div class="q">"We went from one person doing check-ins all evening to zero. Chekin just runs, quietly."</div>
+        <div class="by">
+          <div class="av">SR</div>
+          <div><div class="n">SmartRental</div><div class="r">340+ properties · Madrid</div></div>
+        </div>
+      </div>
+      <div class="t-card">
+        <div class="q">"The compliance engine alone paid for the platform. We stopped worrying about SES.HOSPEDAJES in week one."</div>
+        <div class="by">
+          <div class="av">SA</div>
+          <div><div class="n">Sweet Accommodations</div><div class="r">120+ properties · Barcelona</div></div>
+        </div>
+      </div>
+      <div class="t-card">
+        <div class="q">"Guests finish check-in on the plane. We haven't had a 'how do I open the door' message in months."</div>
+        <div class="by">
+          <div class="av">HR</div>
+          <div><div class="n">Hybrid Resi</div><div class="r">Anshul Mehta · Co-founder</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────── CTA BAND ──────────────── -->
+<section class="cta-band">
+  <div class="cta-band-in">
+    <div>
+      <h2>Ready to stop doing check-in manually?</h2>
+      <p>14-day free trial. No credit card. Your first property live in 48 hours, with a specialist.</p>
+    </div>
+    <div class="ctas">
+      <button class="btn primary lg">Start free</button>
+      <button class="btn outline lg">Book a demo</button>
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────── FOOTER ──────────────── -->
+<footer>
+  <div class="foot-in">
+    <div class="foot-brand">
+      <a class="logo" href="#">Chekin</a>
+      <p>Automated check-in, identity verification and compliance for 200k+ properties in 45 countries.</p>
+      <div class="foot-social">
+        <a href="#" aria-label="LinkedIn"><svg viewBox="0 0 24 24"><path d="M4 4h4v16H4zM6 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM10 8h4v2a4 4 0 0 1 7 3v7h-4v-7a2 2 0 0 0-4 0v7h-4z"/></svg></a>
+        <a href="#" aria-label="Twitter"><svg viewBox="0 0 24 24"><path d="M22 5.8a8 8 0 0 1-2 .6 3.5 3.5 0 0 0 1.5-2 8 8 0 0 1-2.2.9 3.5 3.5 0 0 0-6 3.2A10 10 0 0 1 3 4.7a3.5 3.5 0 0 0 1 4.6A3.5 3.5 0 0 1 2.4 9v.1a3.5 3.5 0 0 0 2.7 3.4 3.5 3.5 0 0 1-1.5.1 3.5 3.5 0 0 0 3.2 2.5A7 7 0 0 1 2 16.6a10 10 0 0 0 5.3 1.5c6.3 0 9.8-5.3 9.8-9.8v-.4A7 7 0 0 0 22 5.8z"/></svg></a>
+        <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg></a>
+        <a href="#" aria-label="YouTube"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="m10 9 5 3-5 3z" fill="currentColor" stroke="none"/></svg></a>
+      </div>
+    </div>
+    <div class="foot-col">
+      <h5>Platform</h5>
+      <ul>
+        <li><a>Online check-in</a></li>
+        <li><a>Identity verification</a></li>
+        <li><a>Police reports</a></li>
+        <li><a>Remote access</a></li>
+        <li><a>City taxes</a></li>
+        <li><a>Upselling</a></li>
+        <li><a>Vela AI</a></li>
+      </ul>
+    </div>
+    <div class="foot-col">
+      <h5>Solutions</h5>
+      <ul>
+        <li><a>Individual hosts</a></li>
+        <li><a>Property managers</a></li>
+        <li><a>Enterprise</a></li>
+        <li><a>Apartments</a></li>
+        <li><a>Villas</a></li>
+        <li><a>Hotels</a></li>
+        <li><a>Campings</a></li>
+      </ul>
+    </div>
+    <div class="foot-col">
+      <h5>Resources</h5>
+      <ul>
+        <li><a>Blog</a></li>
+        <li><a>Reports &amp; guides</a></li>
+        <li><a>Help Center</a></li>
+        <li><a>Webinars</a></li>
+        <li><a>Case studies</a></li>
+        <li><a>Marketplace</a></li>
+        <li><a>SDK &amp; API</a></li>
+      </ul>
+    </div>
+    <div class="foot-col">
+      <h5>Company</h5>
+      <ul>
+        <li><a>About</a></li>
+        <li><a>Careers</a></li>
+        <li><a>Contact sales</a></li>
+        <li><a>Partnerships</a></li>
+        <li><a>Security</a></li>
+        <li><a>Privacy</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot-bot">
+    <div>© 2026 Chekin · Made in Madrid</div>
+    <div class="legal"><a>Privacy</a><a>Terms</a><a>Cookies</a><a>Cookie settings</a></div>
+  </div>
+</footer>
+
+<script>
+  // Mega menu hover/click logic
+  const megas = { solutions: document.getElementById('megaSolutions'), resources: document.getElementById('megaResources') };
+  const trigs = { solutions: document.getElementById('triggerSolutions'), resources: document.getElementById('triggerResources') };
+  let openKey = null;
+  function closeAll(){ Object.values(megas).forEach(m => m.classList.remove('open')); Object.values(trigs).forEach(t => t.classList.remove('open')); openKey = null; }
+  Object.keys(megas).forEach(k => {
+    trigs[k].addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (openKey === k) closeAll();
+      else { closeAll(); megas[k].classList.add('open'); trigs[k].classList.add('open'); openKey = k; }
+    });
+  });
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.mega') && !e.target.closest('.nav-link')) closeAll();
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeAll(); });
+
+  // Interest picker
+  const PANELS = {
+    legal:    { t: "Submit guest reports automatically in 45 countries", d: "From SES.HOSPEDAJES in Spain to Alloggiati in Italy and Mossos in Catalonia — Chekin files every required report on time, in the right format, with zero intervention.", b: ["SES.HOSPEDAJES, Alloggiati, Mossos & 40+ more","Auto-updated whenever regulations change","Full audit trail with reference numbers"], icon:'<path d="M12 2 4 5v7c0 5 3.5 8 8 10 4.5-2 8-5 8-10V5z"/>' },
+    id:       { t: "ID verification in 90 seconds, fraud caught in real time", d: "NFC chip reading for EU and US documents, OCR fallback for the rest, and active liveness — all bundled into a single flow your guests finish on their phone.", b: ["NFC + OCR + liveness in one check","Fraud signals escalated to you instantly","GDPR-friendly retention by default"], icon:'<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="12" r="2.5"/><path d="M14 10h4M14 14h4"/>' },
+    keys:     { t: "Digital keys the second check-in clears", d: "Chekin issues access automatically once ID, payment and deposit are complete. Smart locks, PIN codes, lockboxes — you stay out of the loop.", b: ["Nuki · Salto · TTLock · Igloohome · August","Time-bounded access per reservation","Instant revoke on cancellation"], icon:'<circle cx="7.5" cy="15.5" r="3.5"/><path d="m10 13 10-10M16 7l3 3"/>' },
+    comms:    { t: "Guest messages that write themselves", d: "Vela drafts pre-arrival reminders, local tips and post-stay follow-ups in your brand voice, in 14 languages — ready for you to approve or send on autopilot.", b: ["14 languages, tone-matched to your brand","Triggered by booking state, not time","Reviewable queue with one-tap send"], icon:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>' },
+    upsell:   { t: "Turn check-in into revenue", d: "Offer early arrival, late check-out, groceries, transfers and experiences — inside the same flow your guest is already finishing. Conversion up to 18% on average.", b: ["Early / late check-in, transfers, groceries","Dynamic pricing by property and season","Stripe-powered, you keep the margin"], icon:'<path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/>' },
+    taxes:    { t: "City tax, calculated and collected on your behalf", d: "Chekin applies the right rate per city, age group and length of stay — then collects with the reservation and sends what the local authority expects.", b: ["Auto-applied per city and guest","Automatic exemptions (minors, long stays)","Filed in the local format, on schedule"], icon:'<rect x="2" y="6" width="20" height="12" rx="2"/><path d="M2 10h20M6 14h4"/>' },
+    online:   { t: "A check-in your guests actually finish", d: "Mobile-first, on brand, no account required. 94% completion rate across 25M check-ins — so your guests arrive ready to walk in.", b: ["94% completion across 25M check-ins","Your logo, your colours, your voice","Works on any phone — no app needed"], icon:'<circle cx="12" cy="12" r="10"/><path d="M8 12l2 2 5-5"/>' }
+  };
+  const ppT = document.getElementById('ppT');
+  const ppD = document.getElementById('ppD');
+  const ppB = document.getElementById('ppB');
+  const ppIcon = document.getElementById('ppIcon');
+  document.querySelectorAll('#pills .pill').forEach(p => p.addEventListener('click', () => {
+    document.querySelectorAll('#pills .pill').forEach(x => x.classList.remove('active'));
+    p.classList.add('active');
+    const data = PANELS[p.dataset.key];
+    if (!data) return;
+    ppT.textContent = data.t;
+    ppD.textContent = data.d;
+    ppB.innerHTML = data.b.map(x => '<div class="b"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>' + x + '</div>').join('');
+    ppIcon.innerHTML = data.icon;
+  }));
+</script>
+</body>
+</html>
