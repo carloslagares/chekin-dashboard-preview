@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Chekin Guest — Guided Journey</title>
+<link rel="stylesheet" href="../../ds/colors_and_type.css">
+<link rel="stylesheet" href="../_chek.css">
+<script src="../_chek.js" defer></script>
+<style>
+  :root{
+    --bg-dark:#161643;
+    --bg-screen:#F4F6FB;
+    --bg-white:#FFFFFF;
+    --bg-neutral-light:#F4F6F8;
+    --bg-neutral-cold:#F0F0F8;
+    --bg-sky-light:#EFF6FF;
+    --bg-blue-light:#F0F3FF;
+    --bg-success-light:#E8FCF7;
+    --bg-warn-light:#FFF2E0;
+    --bg-danger-light:#FFE4EC;
+    --stroke-gray-lighter:#E5E6EE;
+    --stroke-gray-light:#DEDEEB;
+    --stroke-gray-medium:#CECEDE;
+    --text-dark:#161643;
+    --text-gray-dark:#6B6B95;
+    --text-gray-medium:#9696B9;
+    --text-gray-light:#CECEDE;
+    --text-brand:#385CF8;
+    --text-brand-dark:#2945C5;
+    --text-brand-light:#8CA5FF;
+    --text-success:#0F9F80;
+    --text-warn:#B86A00;
+    --text-danger:#FF2467;
+    --radius-sm:6px;
+    --radius-md:10px;
+    --radius-lg:14px;
+    --radius-xl:20px;
+    --shadow-card:0 1px 2px rgba(22,22,67,.04),0 0 0 1px rgba(22,22,67,.04);
+    --shadow-elev:0 8px 24px rgba(22,22,67,.06),0 2px 4px rgba(22,22,67,.04);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg-screen);font-family:var(--font-primary);color:var(--text-dark);font-feature-settings:"ss01";min-height:100vh}
+
+  /* ────────── TOP BAR ────────── */
+  .topbar{
+    position:sticky;top:0;z-index:10;
+    display:flex;align-items:center;gap:12px;
+    padding:14px 20px;background:#fff;border-bottom:1px solid var(--stroke-gray-lighter);
+  }
+  .topbar .menu{
+    width:38px;height:38px;border-radius:10px;background:transparent;border:none;
+    display:grid;place-items:center;cursor:pointer;color:var(--text-dark);
+  }
+  .topbar .menu:hover{background:var(--bg-neutral-light)}
+  .topbar .menu svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8}
+  .topbar .brand{flex:1;display:flex;align-items:center;justify-content:center;gap:10px}
+  .topbar .brand .av{width:32px;height:32px;border-radius:10px;background:var(--bg-blue-light);color:var(--text-brand);display:grid;place-items:center}
+  .topbar .brand .av svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.7}
+  .topbar .brand .name{font:700 15px var(--font-primary);color:var(--text-dark)}
+  .topbar .user{
+    width:38px;height:38px;border-radius:50%;background:var(--bg-sky-light);color:var(--text-brand);
+    display:grid;place-items:center;font:700 12px var(--font-primary);cursor:pointer;
+  }
+
+  /* ────────── PAGE ────────── */
+  .page{
+    max-width:680px;margin:0 auto;padding:24px 20px 120px;
+    display:flex;flex-direction:column;gap:28px;
+  }
+
+  /* ────────── HERO CHECK-IN ────────── */
+  .hero{
+    position:relative;overflow:hidden;
+    background:radial-gradient(420px 200px at 90% -20%,rgba(107,224,168,.18),transparent 60%),linear-gradient(135deg,#161643,#274BF0);
+    color:#fff;border-radius:var(--radius-lg);padding:22px 24px;
+    display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:center;
+    box-shadow:0 8px 24px rgba(22,22,67,.12);
+  }
+  .hero .slot .l{font:700 11px var(--font-primary);color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
+  .hero .slot .v{font:600 32px/34px var(--font-primary);letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+  .hero .slot .d{font:500 11px var(--font-primary);color:rgba(255,255,255,.7);margin-top:4px;text-transform:uppercase;letter-spacing:.06em}
+  .hero .slot.right{text-align:right}
+  .hero .arrow{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.12);display:grid;place-items:center}
+  .hero .arrow svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2}
+
+  /* ────────── SECTION ────────── */
+  .sec h2{font:700 19px/24px var(--font-primary);margin:0 0 14px;letter-spacing:-.005em}
+  .sec .head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px}
+  .sec .head h2{margin:0}
+  .sec .head .count{font:600 14px var(--font-primary);color:var(--text-gray-dark);font-variant-numeric:tabular-nums}
+
+  /* ────────── PROGRESS ────────── */
+  .progress{height:6px;background:var(--bg-neutral-cold);border-radius:999px;overflow:hidden;margin-bottom:14px}
+  .progress i{display:block;height:100%;background:var(--text-dark);border-radius:999px;transition:width .4s ease}
+
+  /* ────────── CHECKLIST ────────── */
+  .checklist{display:flex;flex-direction:column;gap:10px}
+  .cl-row{
+    display:flex;align-items:center;gap:14px;
+    background:#fff;border:1px solid var(--stroke-gray-lighter);border-radius:var(--radius-md);
+    padding:14px 16px;cursor:pointer;transition:transform .12s,box-shadow .12s;position:relative;
+  }
+  .cl-row:hover{transform:translateY(-1px);box-shadow:var(--shadow-elev)}
+  .cl-row::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px;background:transparent}
+  .cl-row.done::before{background:var(--text-success)}
+  .cl-row.pending::before{background:var(--text-warn)}
+  .cl-row .ic{width:42px;height:42px;border-radius:10px;display:grid;place-items:center;flex-shrink:0}
+  .cl-row .ic svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.7}
+  .cl-row.done .ic{background:var(--bg-success-light);color:var(--text-success)}
+  .cl-row.pending .ic{background:var(--bg-warn-light);color:var(--text-warn)}
+  .cl-row.todo .ic{background:var(--bg-neutral-cold);color:var(--text-gray-dark)}
+  .cl-row .lt{flex:1;min-width:0}
+  .cl-row .t{font:700 15px/20px var(--font-primary);color:var(--text-dark)}
+  .cl-row .st{display:inline-flex;align-items:center;font:600 11px var(--font-primary);padding:3px 10px;border-radius:999px;text-transform:none;letter-spacing:0;margin-top:4px}
+  .cl-row.done .st{background:var(--bg-success-light);color:var(--text-success)}
+  .cl-row.pending .st{background:var(--bg-warn-light);color:var(--text-warn)}
+  .cl-row.todo .st{background:var(--bg-neutral-light);color:var(--text-gray-dark)}
+  .cl-row .chev{
+    width:30px;height:30px;border-radius:50%;background:var(--bg-neutral-light);
+    display:grid;place-items:center;flex-shrink:0;color:var(--text-gray-dark);
+  }
+  .cl-row.done .chev{background:var(--bg-success-light);color:var(--text-success)}
+  .cl-row.pending .chev,.cl-row:hover .chev{background:var(--text-brand);color:#fff}
+  .cl-row .chev svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.5}
+
+  /* ────────── STAY GRID ────────── */
+  .stay-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .stay-card{
+    background:#fff;border:1px solid var(--stroke-gray-lighter);border-radius:var(--radius-md);
+    padding:24px 16px;text-align:center;
+  }
+  .stay-card .ic{
+    width:56px;height:56px;border-radius:50%;background:var(--bg-blue-light);color:var(--text-brand);
+    display:grid;place-items:center;margin:0 auto 12px;
+  }
+  .stay-card .ic svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8}
+  .stay-card .t{font:700 16px var(--font-primary);margin-bottom:14px}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    height:38px;padding:0 20px;border-radius:8px;border:none;
+    font:600 13px var(--font-primary);cursor:pointer;transition:background .12s;
+  }
+  .btn.dark{background:var(--bg-dark);color:#fff}
+  .btn.dark:hover{background:#222268}
+  .btn.primary{background:var(--text-brand);color:#fff}
+  .btn.primary:hover{background:var(--text-brand-dark)}
+  .btn.ghost{background:#fff;color:var(--text-dark);border:1px solid var(--stroke-gray-medium)}
+  .btn.ghost:hover{background:var(--bg-neutral-light)}
+  .btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2}
+
+  /* ────────── CHECKOUT ────────── */
+  .checkout-card{
+    display:flex;align-items:center;gap:14px;
+    background:#fff;border:1px solid var(--stroke-gray-lighter);border-radius:var(--radius-md);
+    padding:16px 18px;cursor:pointer;transition:transform .12s,box-shadow .12s;
+  }
+  .checkout-card:hover{transform:translateY(-1px);box-shadow:var(--shadow-elev)}
+  .checkout-card .ic{width:42px;height:42px;border-radius:10px;background:var(--bg-neutral-cold);color:var(--text-gray-dark);display:grid;place-items:center;flex-shrink:0}
+  .checkout-card .ic svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.7}
+  .checkout-card .lt{flex:1;min-width:0}
+  .checkout-card .t{font:700 14px/18px var(--font-primary)}
+  .checkout-card .d{font:400 12.5px/16px var(--font-primary);color:var(--text-gray-medium);margin-top:2px}
+  .checkout-card .chev{color:var(--text-gray-light);font:500 18px var(--font-primary)}
+
+  /* ────────── RECO GRID ────────── */
+  .reco-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .reco{
+    background:#fff;border:1px solid var(--stroke-gray-lighter);border-radius:var(--radius-md);
+    overflow:hidden;cursor:pointer;transition:transform .15s,box-shadow .15s;
+  }
+  .reco:hover{transform:translateY(-2px);box-shadow:var(--shadow-elev)}
+  .reco .media{height:120px;position:relative;overflow:hidden;background:var(--bg-neutral-cold)}
+  .reco .media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s ease}
+  .reco:hover .media img{transform:scale(1.04)}
+  .reco .body{padding:12px 14px 14px}
+  .reco .t{font:700 14px/18px var(--font-primary)}
+  .reco .d{font:400 11.5px/15px var(--font-primary);color:var(--text-gray-medium);margin-top:2px}
+  .reco .price{font:700 13px var(--font-primary);color:var(--text-brand);margin-top:6px}
+
+  /* ────────── CTA BANNERS ────────── */
+  .cta-stack{display:flex;flex-direction:column;gap:12px}
+  .cta{
+    background:linear-gradient(135deg,#161643,#1F1F5E);color:#fff;
+    border-radius:var(--radius-md);padding:16px 18px;
+    display:flex;align-items:center;gap:14px;position:relative;overflow:hidden;
+  }
+  .cta::before{content:"";position:absolute;inset:0;background:radial-gradient(280px 140px at 100% -20%,rgba(56,92,248,.18),transparent 60%);pointer-events:none}
+  .cta .ic{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.08);display:grid;place-items:center;flex-shrink:0;position:relative;z-index:2}
+  .cta .ic svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:1.7}
+  .cta .lt{flex:1;min-width:0;position:relative;z-index:2}
+  .cta .t{font:700 14.5px/19px var(--font-primary)}
+  .cta .d{font:400 12px/16px var(--font-primary);color:rgba(255,255,255,.7);margin-top:2px}
+  .cta .btn{position:relative;z-index:2;background:var(--text-brand);color:#fff;height:34px;padding:0 16px;font-size:12.5px}
+  .cta .btn:hover{background:var(--text-brand-dark)}
+
+  /* ────────── FLOATING VELA BUBBLE ────────── */
+  .vela-fab{
+    position:fixed;bottom:24px;right:24px;z-index:90;
+    width:56px;height:56px;border-radius:50%;border:none;cursor:pointer;
+    background:linear-gradient(135deg,#385CF8,#2945C5);color:#fff;
+    display:grid;place-items:center;
+    box-shadow:0 12px 28px rgba(56,92,248,.32),0 4px 8px rgba(56,92,248,.2);
+    isolation:isolate;
+    transition:transform .15s;
+  }
+  .vela-fab:hover{transform:scale(1.06)}
+  .vela-fab svg{width:24px;height:24px;fill:currentColor;stroke:none;position:relative;z-index:2}
+  .vela-fab::before{
+    content:"";position:absolute;inset:-8px;border-radius:50%;
+    background:radial-gradient(circle,rgba(56,92,248,.5),transparent 65%);
+    filter:blur(10px);opacity:.6;z-index:-1;pointer-events:none;
+    animation:vela-aura 3.6s ease-in-out infinite;
+  }
+  @keyframes vela-aura{0%,100%{transform:scale(.85);opacity:.45}50%{transform:scale(1.18);opacity:.9}}
+  @media (prefers-reduced-motion:reduce){.vela-fab::before{animation:none;opacity:.4}}
+
+  /* Responsive */
+  @media (max-width:520px){
+    .hero{grid-template-columns:1fr;text-align:left}
+    .hero .arrow{transform:rotate(90deg);justify-self:start}
+    .hero .slot.right{text-align:left}
+    .stay-grid,.reco-grid{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+
+<!-- Top bar -->
+<header class="topbar">
+  <button class="menu" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+  <div class="brand">
+    <div class="av"><svg viewBox="0 0 24 24"><path d="M3 9 12 2l9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg></div>
+    <div class="name">Puerta del Sol</div>
+  </div>
+  <div class="user" title="Carmen Specimen">CS</div>
+</header>
+
+<main class="page">
+
+  <!-- Hero check-in/out -->
+  <div class="hero">
+    <div class="slot">
+      <div class="l">Check-in</div>
+      <div class="v">14:00</div>
+      <div class="d">18 May 2026</div>
+    </div>
+    <div class="arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
+    <div class="slot right">
+      <div class="l">Check-out</div>
+      <div class="v">10:00</div>
+      <div class="d">23 May 2026</div>
+    </div>
+  </div>
+
+  <!-- Complete your check-in -->
+  <section class="sec">
+    <div class="head">
+      <h2>Complete your check-in</h2>
+      <span class="count">1/4</span>
+    </div>
+    <div class="progress"><i style="width:25%"></i></div>
+    <div class="checklist">
+      <div class="cl-row done">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div>
+        <div class="lt">
+          <div class="t">Guest Details</div>
+          <span class="st">Completed</span>
+        </div>
+        <div class="chev"><svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></div>
+      </div>
+      <div class="cl-row pending">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M12 2 4 5v7c0 5 3.5 8 8 10 4.5-2 8-5 8-10V5z"/><path d="M12 8v4M12 16h.01"/></svg></div>
+        <div class="lt">
+          <div class="t">ID Verification</div>
+          <span class="st">Pending</span>
+        </div>
+        <div class="chev"><svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></div>
+      </div>
+      <div class="cl-row todo">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M12 2 4 5v7c0 5 3.5 8 8 10 4.5-2 8-5 8-10V5z"/></svg></div>
+        <div class="lt">
+          <div class="t">Security Deposit</div>
+          <span class="st">Not started</span>
+        </div>
+        <div class="chev"><svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></div>
+      </div>
+      <div class="cl-row todo">
+        <div class="ic"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M2 10h20M6 14h4"/></svg></div>
+        <div class="lt">
+          <div class="t">Payment</div>
+          <span class="st">Not started</span>
+        </div>
+        <div class="chev"><svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Your Stay -->
+  <section class="sec">
+    <h2>Your Stay</h2>
+    <div class="stay-grid">
+      <div class="stay-card">
+        <div class="ic"><svg viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="3.5"/><path d="m10 13 10-10M16 7l3 3"/></svg></div>
+        <div class="t">Virtual Keys</div>
+        <button class="btn dark">View</button>
+      </div>
+      <div class="stay-card">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M4 4h10a4 4 0 0 1 4 4v12H8a4 4 0 0 1-4-4z"/><path d="M8 8h6M8 12h6"/></svg></div>
+        <div class="t">Guidebooks</div>
+        <button class="btn dark">Browse</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Checkout -->
+  <section class="sec">
+    <h2>Checkout</h2>
+    <div class="checkout-card">
+      <div class="ic"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></div>
+      <div class="lt">
+        <div class="t">Checkout Instructions</div>
+        <div class="d">Available after check-in</div>
+      </div>
+      <span class="chev">›</span>
+    </div>
+  </section>
+
+  <!-- Recommendations -->
+  <section class="sec">
+    <h2>Our Recommendations</h2>
+    <div class="reco-grid">
+      <div class="reco">
+        <div class="media"><img src="https://images.unsplash.com/photo-1445019980597-93fa8acb246c?w=600&auto=format&fit=crop&q=80" alt="Slow morning" loading="lazy"></div>
+        <div class="body">
+          <div class="t">Late Check-out</div>
+          <div class="d">Until 14:00</div>
+          <div class="price">From 25€</div>
+        </div>
+      </div>
+      <div class="reco">
+        <div class="media"><img src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&auto=format&fit=crop&q=80" alt="Fresh produce" loading="lazy"></div>
+        <div class="body">
+          <div class="t">Grocery Pack</div>
+          <div class="d">Fresh on arrival</div>
+          <div class="price">From 35€</div>
+        </div>
+      </div>
+      <div class="reco">
+        <div class="media"><img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&auto=format&fit=crop&q=80" alt="Cozy apartment" loading="lazy"></div>
+        <div class="body">
+          <div class="t">Early Check-in</div>
+          <div class="d">From 10:00</div>
+          <div class="price">From 25€</div>
+        </div>
+      </div>
+      <div class="reco">
+        <div class="media"><img src="https://images.unsplash.com/photo-1543832923-44667a44c804?w=600&auto=format&fit=crop&q=80" alt="Madrid street" loading="lazy"></div>
+        <div class="body">
+          <div class="t">City Tour</div>
+          <div class="d">Guided highlights</div>
+          <div class="price">From 15€</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA banners -->
+  <div class="cta-stack">
+    <div class="cta">
+      <div class="ic"><svg viewBox="0 0 24 24"><path d="M17.8 19.2 16 11l3.5-3.5c.83-.83.83-2.17 0-3 -.83-.83-2.17-.83-3 0L13 8 4.8 6.2c-.5-.1-1 .06-1.3.4-.5.5-.5 1.3 0 1.8l6.3 3.4-2.3 2.3H6.5l-1 1 2.3 1.3 1.3 2.3 1-1v-1l2.3-2.3 3.4 6.3c.5.5 1.3.5 1.8 0 .34-.3.5-.8.4-1.3z"/></svg></div>
+      <div class="lt">
+        <div class="t">Airport Transfers</div>
+        <div class="d">Book your transfer easily</div>
+      </div>
+      <button class="btn">Book</button>
+    </div>
+    <div class="cta">
+      <div class="ic"><svg viewBox="0 0 24 24"><path d="M15 3 3 8v5l12-5V3z"/><path d="M6 22c0-5 3-9 6-9M15 13c3 0 6 4 6 9"/></svg></div>
+      <div class="lt">
+        <div class="t">Free Walking Tours</div>
+        <div class="d">Discover the city with free guided tours every day</div>
+      </div>
+      <button class="btn">Explore</button>
+    </div>
+  </div>
+
+</main>
+
+<!-- Floating Vela bubble -->
+<button class="vela-fab" data-chek-trigger aria-label="Ask Vela">
+  <svg viewBox="0 0 24 24"><path d="M10 2.3l1.75 5.45L17 9.4l-5.25 1.65L10 16.5l-1.75-5.45L3 9.4l5.25-1.65z"/><path d="M18.5 14l.75 2.25 2.25.75-2.25.75-.75 2.25-.75-2.25-2.25-.75 2.25-.75z"/></svg>
+</button>
+
+</body>
+</html>
