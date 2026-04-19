@@ -1,16 +1,27 @@
 /* Shared Chek drawer — loaded by V2/V3 of the Guest App */
 
 /* Trigger button (live inside each page's header or any [data-chek-trigger]) */
+@property --vela-angle{
+  syntax:"<angle>";
+  initial-value:0deg;
+  inherits:false;
+}
 .chek-trigger{
   display:inline-flex;align-items:center;gap:8px;
-  height:36px;padding:0 14px 0 8px;border-radius:999px;border:1px solid rgba(56,92,248,.18);
-  background:linear-gradient(180deg,#F0F3FF,#E4EAFF);color:var(--text-brand,#385CF8);
+  height:36px;padding:0 14px 0 8px;border-radius:999px;
+  border:1.5px solid transparent;
+  background:
+    linear-gradient(180deg,#F0F3FF,#E4EAFF) padding-box,
+    conic-gradient(from var(--vela-angle), #385CF8, #8CA5FF, #B5C4FF, #6B8CFF, #385CF8) border-box;
+  color:var(--text-brand,#385CF8);
   font:600 13px var(--font-primary);cursor:pointer;
   box-shadow:0 1px 2px rgba(22,22,67,.04);
-  transition:background .12s,box-shadow .12s,transform .12s;
+  transition:box-shadow .12s,transform .12s;
   position:relative;
   isolation:isolate;
+  animation:vela-rotate 5s linear infinite;
 }
+@keyframes vela-rotate{to{--vela-angle:360deg}}
 .chek-trigger::before{
   content:"";position:absolute;
   inset:-12px -18px;border-radius:inherit;
@@ -27,10 +38,11 @@
   0%,100%{transform:translateX(-3px) scale(.94);opacity:.5}
   50%{transform:translateX(3px) scale(1.08);opacity:.9}
 }
-.chek-trigger:hover{background:linear-gradient(180deg,#E4EAFF,#D9E1FF);box-shadow:0 4px 10px rgba(56,92,248,.14)}
+.chek-trigger:hover{box-shadow:0 4px 10px rgba(56,92,248,.18)}
 .chek-trigger:hover::before{opacity:.95}
 .chek-trigger:active{transform:translateY(1px)}
 @media (prefers-reduced-motion:reduce){
+  .chek-trigger{animation:none}
   .chek-trigger::before{animation:none;opacity:.4}
 }
 .chek-trigger .sp{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#385CF8,#8CA5FF);color:#fff;display:grid;place-items:center;flex-shrink:0}

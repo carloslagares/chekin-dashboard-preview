@@ -5,27 +5,27 @@
 (function(){
 
   const TRIGGER_HTML = `
-    <button class="chek-trigger" type="button" aria-label="Open Chek AI assistant">
+    <button class="chek-trigger" type="button" aria-label="Open Vela AI assistant">
       <span class="mark">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M12 2 13.5 8 19 9.5 13.5 11 12 17 10.5 11 5 9.5 10.5 8 Z"/>
           <path d="M19 15 19.8 17.5 22 18.2 19.8 19 19 21.5 18.2 19 16 18.2 18.2 17.5 Z"/>
         </svg>
       </span>
-      <span class="label">Ask Chek</span>
+      <span class="label">Ask Vela</span>
       <span class="kbd">⌘K</span>
     </button>
   `;
 
   const PANEL_HTML = `
     <div class="chek-backdrop" data-chek-close></div>
-    <aside class="chek-panel" role="dialog" aria-label="Chek AI assistant">
+    <aside class="chek-panel" role="dialog" aria-label="Vela AI assistant">
       <div class="chek-head">
         <div class="av">
           <svg viewBox="0 0 24 24"><path d="M12 2 13.5 8 19 9.5 13.5 11 12 17 10.5 11 5 9.5 10.5 8 Z"/><path d="M19 15 19.8 17.5 22 18.2 19.8 19 19 21.5 18.2 19 16 18.2 18.2 17.5 Z"/></svg>
         </div>
         <div class="ti">
-          <div class="t">Chek</div>
+          <div class="t">Vela</div>
         </div>
         <div class="acts">
           <button class="new" title="New conversation">
@@ -67,7 +67,7 @@
 
         <!-- Capabilities -->
         <div class="chek-caps">
-          <div class="h">Try asking Chek</div>
+          <div class="h">Try asking Vela</div>
           <div class="grid">
             <div class="chek-cap" data-prompt="How's my check-in rate this week?">
               <div class="ic"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg></div>
