@@ -222,29 +222,28 @@
   .res dt{font:500 12.5px var(--font-primary);color:var(--text-gray-dark);margin:0}
   .res dd{margin:0;font:600 12.5px var(--font-primary);color:var(--text-dark);font-variant-numeric:tabular-nums}
 
-  /* Progress (with urgency colour when has pending) */
-  .prg{border-left:3px solid var(--text-warn)}
-  .prg .hd{padding:16px 18px 10px;display:flex;align-items:center;justify-content:space-between}
-  .prg .hd .t{font:600 14px var(--font-primary)}
-  .prg .hd .urg{font:700 10.5px var(--font-primary);color:var(--text-warn);background:var(--bg-warn-light);padding:3px 9px;border-radius:999px;letter-spacing:.05em;text-transform:uppercase}
-  .prg .pct{display:flex;align-items:baseline;gap:6px;padding:0 18px}
-  .prg .pct .n{font:700 30px var(--font-primary);color:var(--text-brand);letter-spacing:-.01em}
-  .prg .pct .l{font:500 12.5px var(--font-primary);color:var(--text-gray-dark)}
-  .prg .bar{margin:8px 18px 14px;height:6px;background:var(--bg-neutral-light);border-radius:999px;overflow:hidden}
-  .prg .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--text-brand),#6B8CFF);border-radius:999px}
-  .prg .steps{display:grid;gap:8px;padding:0 18px 16px}
-  .prg .step{display:flex;align-items:center;gap:10px;font:500 12.5px var(--font-primary);color:var(--text-gray-dark)}
-  .prg .step.done{color:var(--text-dark)}
-  .prg .step.next{color:var(--text-warn);font-weight:600}
-  .prg .dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--stroke-gray-medium);background:#fff;flex-shrink:0;position:relative}
-  .prg .step.done .dot{background:var(--text-success);border-color:var(--text-success)}
-  .prg .step.done .dot::after{content:"";position:absolute;top:1px;left:3px;width:6px;height:3px;border:1.5px solid #fff;border-top:none;border-right:none;transform:rotate(-45deg)}
-  .prg .step.next .dot{border-color:var(--text-warn);background:var(--bg-warn-light);box-shadow:0 0 0 3px rgba(184,106,0,.12)}
-  .prg .step .time{margin-left:auto;font:500 11.5px var(--font-primary);color:var(--text-gray-medium)}
-  .prg .cta{margin:4px 18px 16px}
-  .prg .cta button{width:100%;height:36px;border-radius:8px;border:none;background:var(--text-brand);color:#fff;font:600 13px var(--font-primary);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px}
-  .prg .cta button:hover{background:var(--text-brand-dark)}
-  .prg .cta button svg{width:12px;height:12px;stroke:#fff;fill:none;stroke-width:2.2}
+  /* Progress — subtle, secondary card */
+  .prg .hd{padding:14px 16px 6px;display:flex;align-items:center;justify-content:space-between}
+  .prg .hd .t{font:500 12.5px var(--font-primary);color:var(--text-gray-dark);text-transform:uppercase;letter-spacing:.06em}
+  .prg .hd .urg{font:500 11px var(--font-primary);color:var(--text-gray-dark)}
+  .prg .pct{display:flex;align-items:baseline;gap:5px;padding:0 16px}
+  .prg .pct .n{font:600 16px var(--font-primary);color:var(--text-dark)}
+  .prg .pct .l{font:500 12px var(--font-primary);color:var(--text-gray-medium)}
+  .prg .bar{margin:6px 16px 12px;height:4px;background:var(--bg-neutral-light);border-radius:999px;overflow:hidden}
+  .prg .bar i{display:block;height:100%;background:var(--text-gray-medium);border-radius:999px}
+  .prg .steps{display:grid;gap:6px;padding:0 16px 12px}
+  .prg .step{display:flex;align-items:center;gap:9px;font:500 12px var(--font-primary);color:var(--text-gray-dark)}
+  .prg .step.done{color:var(--text-gray-dark)}
+  .prg .step.next{color:var(--text-dark);font-weight:600}
+  .prg .dot{width:10px;height:10px;border-radius:50%;border:1.5px solid var(--stroke-gray-medium);background:#fff;flex-shrink:0;position:relative}
+  .prg .step.done .dot{background:var(--text-gray-medium);border-color:var(--text-gray-medium)}
+  .prg .step.done .dot::after{content:"";position:absolute;top:1px;left:1.5px;width:5px;height:2px;border:1.2px solid #fff;border-top:none;border-right:none;transform:rotate(-45deg)}
+  .prg .step.next .dot{border-color:var(--text-dark)}
+  .prg .step .time{margin-left:auto;font:500 11px var(--font-primary);color:var(--text-gray-light)}
+  .prg .cta{margin:0 16px 14px}
+  .prg .cta button{width:100%;height:30px;border-radius:6px;border:1px solid var(--stroke-gray-medium);background:#fff;color:var(--text-dark);font:500 12px var(--font-primary);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px}
+  .prg .cta button:hover{background:var(--bg-neutral-light)}
+  .prg .cta button svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2}
 
   /* Upcoming / trip timeline */
   .upc .hd{padding:14px 18px 6px;font:600 14px var(--font-primary)}
@@ -546,13 +545,13 @@
         </dl>
       </div>
 
-      <!-- Progress (urgent) -->
+      <!-- Progress -->
       <div class="card prg">
         <div class="hd">
           <div class="t">Check-in progress</div>
           <div class="urg">2 pending</div>
         </div>
-        <div class="pct"><div class="n">50%</div><div class="l">· 2 of 4 steps</div></div>
+        <div class="pct"><div class="n">50%</div><div class="l">· 2 of 4</div></div>
         <div class="bar"><i style="width:50%"></i></div>
         <div class="steps">
           <div class="step done"><span class="dot"></span>Guest details<span class="time">Done</span></div>
