@@ -38,6 +38,8 @@
   .switcher button.active .v{background:rgba(255,255,255,.25);color:#fff}
   .switcher .sep{width:1px;background:var(--line);margin:6px 4px}
   .switcher .tag{font:700 9px var(--font-primary);padding:1px 6px;border-radius:4px;background:#161643;color:#fff;letter-spacing:.06em;margin-right:6px}
+  .switcher button .new{font:700 9px var(--font-primary);padding:1px 6px;border-radius:4px;background:#D5F5EC;color:#0F9F80;letter-spacing:.06em;margin-left:2px}
+  .switcher button.active .new{background:rgba(255,255,255,.25);color:#fff}
 
   .stage{position:relative;min-height:100vh}
   iframe.variant{width:100%;border:none;display:none;background:var(--bg)}
@@ -49,18 +51,16 @@
 <div class="switcher" role="tablist" aria-label="Guest App variants">
   <button class="active" data-v="v1" role="tab"><span class="v">V1</span>AI Concierge</button>
   <button data-v="v2" role="tab"><span class="v">V2</span>Guided journey</button>
-  <button data-v="v3" role="tab"><span class="v">V3</span>Local feed</button>
-  <button data-v="v5" role="tab"><span class="v">V5</span>Focused</button>
+  <button data-v="v6" role="tab"><span class="v">V6</span>Luggage<span class="new">NEW</span></button>
   <div class="sep"></div>
   <button data-v="v4" role="tab"><span class="v">V4</span>📱 Mobile</button>
 </div>
 
 <div class="stage">
   <iframe class="variant active" data-v="v1" src="variants/v1_concierge.html?v=5" title="V1 AI Concierge"></iframe>
-  <iframe class="variant" data-v="v2" data-src="variants/v2_journey.html?v=5" title="V2 Guided journey"></iframe>
-  <iframe class="variant" data-v="v3" data-src="variants/v3_feed.html?v=5" title="V3 Local feed"></iframe>
-  <iframe class="variant" data-v="v5" data-src="variants/v5_focused.html?v=1" title="V5 Focused single-column"></iframe>
-  <iframe class="variant" data-v="v4" data-src="variants/v4_mobile.html?v=4" title="V4 Mobile preview"></iframe>
+  <iframe class="variant" data-v="v2" data-src="variants/v2_journey.html?v=6" title="V2 Guided journey"></iframe>
+  <iframe class="variant" data-v="v6" data-src="variants/v6_loogage.html?v=2" title="V6 Luggage — drop-off"></iframe>
+  <iframe class="variant" data-v="v4" data-src="variants/v4_mobile.html?v=5" title="V4 Mobile preview"></iframe>
 </div>
 
 <script>
@@ -72,7 +72,7 @@
   sizeFrames();
   window.addEventListener('resize', sizeFrames);
 
-  const VIEW_MAP = { concierge:'v1', journey:'v2', feed:'v3' };
+  const VIEW_MAP = { concierge:'v1', journey:'v2', luggage:'v6', loogage:'v6', mobile:'v4' };
   const urlView = new URLSearchParams(location.search).get('view');
   const LS = 'chekin_guestapp_variant';
   const saved = localStorage.getItem(LS);
