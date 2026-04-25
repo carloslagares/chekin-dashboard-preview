@@ -396,8 +396,16 @@
           <!-- Luggage drop-off (NEW) — moved here for prime visibility -->
           <a href="../?view=luggage" target="_top" style="display:flex;align-items:stretch;background:linear-gradient(135deg,#F0F3FF,#EFF6FF);border:1px solid rgba(56,92,248,.18);border-radius:12px;overflow:hidden;text-decoration:none;color:inherit;box-shadow:0 4px 14px rgba(56,92,248,.12),0 1px 2px rgba(22,22,67,.04)">
             <div style="width:104px;flex-shrink:0;background:linear-gradient(135deg,#161643,#385CF8);position:relative;overflow:hidden">
-              <img src="https://images.unsplash.com/photo-1574169208507-84376144848b?w=400&h=400&auto=format&fit=crop&q=80" alt="Luggage lockers" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
-              <span style="position:absolute;top:6px;left:6px;font:700 8px var(--font-primary);color:#0F9F80;background:#fff;padding:2px 6px;border-radius:4px;letter-spacing:.06em;box-shadow:0 1px 3px rgba(0,0,0,.18)">NEW</span>
+              <svg viewBox="0 0 200 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;display:block">
+                <defs>
+                  <linearGradient id="lg-door-m" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#5C7CFF"/><stop offset="100%" stop-color="#385CF8"/></linearGradient>
+                </defs>
+                <circle cx="170" cy="40" r="60" fill="rgba(140,165,255,.22)"/>
+                <rect x="0" y="178" width="200" height="22" fill="rgba(0,0,0,.18)"/>
+                <g transform="translate(28,28)"><rect width="62" height="148" rx="5" fill="url(#lg-door-m)" stroke="rgba(255,255,255,.18)"/><rect x="5" y="5" width="52" height="138" rx="3" fill="#0E0E2E"/><rect x="11" y="50" width="40" height="62" rx="4" fill="#FFC76B" stroke="#A85800"/><rect x="20" y="42" width="22" height="10" rx="3" fill="#A85800"/><line x1="11" y1="80" x2="51" y2="80" stroke="#A85800" stroke-width=".8"/><text x="31" y="130" text-anchor="middle" font-family="Inter,system-ui" font-size="10" font-weight="700" fill="rgba(255,255,255,.6)">01</text></g>
+                <g transform="translate(110,28)"><rect width="62" height="148" rx="5" fill="url(#lg-door-m)" stroke="rgba(255,255,255,.18)"/><rect x="5" y="5" width="52" height="138" rx="3" fill="#0E0E2E"/><rect x="11" y="40" width="40" height="76" rx="5" fill="#1F2640" stroke="#0A0F22"/><rect x="20" y="32" width="22" height="10" rx="3" fill="#0A0F22"/><circle cx="19" cy="112" r="2.5" fill="#5A5F7A"/><circle cx="43" cy="112" r="2.5" fill="#5A5F7A"/><text x="31" y="134" text-anchor="middle" font-family="Inter,system-ui" font-size="10" font-weight="700" fill="rgba(255,255,255,.6)">02</text></g>
+              </svg>
+              <span style="position:absolute;top:6px;left:6px;font:700 8px var(--font-primary);color:#0F9F80;background:#fff;padding:2px 6px;border-radius:4px;letter-spacing:.06em;box-shadow:0 1px 3px rgba(0,0,0,.18);z-index:2">NEW</span>
             </div>
             <div style="padding:12px 12px;flex:1;display:flex;flex-direction:column;justify-content:center;gap:3px;min-width:0">
               <div style="font:700 8.5px var(--font-primary);color:var(--text-brand);text-transform:uppercase;letter-spacing:.08em">Drop-off service</div>
