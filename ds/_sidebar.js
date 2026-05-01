@@ -181,6 +181,43 @@
       top.location.href = new URL(href, top.location.href).href;
     }));
     initSupportMenu();
+    initSwitchFlyout();
+  }
+
+  function initSwitchFlyout(){
+    const wrap = document.querySelector('.l1 .switch-wrap');
+    if (!wrap) return;
+    const trigger = wrap.querySelector('.has-flyout');
+    const flyout = wrap.querySelector('.flyout');
+    if (!trigger || !flyout) return;
+    // Hoist to body so overflow on .foot can't clip it.
+    flyout.classList.add('l1-flyout');
+    document.body.appendChild(flyout);
+
+    let hideTimer = null;
+    function place(){
+      const r = trigger.getBoundingClientRect();
+      flyout.style.left = (r.right + 14) + 'px';
+      // Align flyout top with trigger top, but clamp inside viewport.
+      const fh = flyout.offsetHeight || 320;
+      let top = r.top - 4;
+      const maxTop = window.innerHeight - fh - 8;
+      if (top > maxTop) top = maxTop;
+      if (top < 8) top = 8;
+      flyout.style.top = top + 'px';
+    }
+    function open(){ clearTimeout(hideTimer); place(); flyout.classList.add('open'); }
+    function scheduleClose(){ clearTimeout(hideTimer); hideTimer = setTimeout(() => flyout.classList.remove('open'), 120); }
+
+    trigger.addEventListener('mouseenter', open);
+    trigger.addEventListener('focus', open);
+    trigger.addEventListener('click', e => { e.preventDefault(); open(); });
+    trigger.addEventListener('mouseleave', scheduleClose);
+    flyout.addEventListener('mouseenter', () => clearTimeout(hideTimer));
+    flyout.addEventListener('mouseleave', scheduleClose);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') flyout.classList.remove('open'); });
+    window.addEventListener('resize', () => { if (flyout.classList.contains('open')) place(); });
+    window.addEventListener('scroll', () => { if (flyout.classList.contains('open')) place(); }, true);
   }
 
   function initSupportMenu(){
