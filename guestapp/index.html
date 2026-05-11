@@ -49,8 +49,8 @@
 <body>
 
 <div class="switcher" role="tablist" aria-label="Guest App variants">
-  <button class="active" data-v="v1" role="tab"><span class="v">V1</span>AI Concierge</button>
-  <button data-v="v2" role="tab"><span class="v">V2</span>Guided journey</button>
+  <button data-v="v1" role="tab"><span class="v">V1</span>AI Concierge</button>
+  <button class="active" data-v="v2" role="tab"><span class="v">V2</span>Guided journey</button>
   <button data-v="v6" role="tab"><span class="v">V3</span>Luggage</button>
   <div class="sep"></div>
   <button data-v="v4" role="tab"><span class="v">V4</span>📱 Mobile</button>
@@ -58,8 +58,8 @@
 </div>
 
 <div class="stage">
-  <iframe class="variant active" data-v="v1" src="variants/v1_concierge.html?v=5" title="V1 AI Concierge"></iframe>
-  <iframe class="variant" data-v="v2" data-src="variants/v2_journey.html?v=6" title="V2 Guided journey"></iframe>
+  <iframe class="variant" data-v="v1" data-src="variants/v1_concierge.html?v=5" title="V1 AI Concierge"></iframe>
+  <iframe class="variant active" data-v="v2" src="variants/v2_journey.html?v=6" title="V2 Guided journey"></iframe>
   <iframe class="variant" data-v="v6" data-src="variants/v6_loogage.html?v=2" title="V6 Luggage — drop-off"></iframe>
   <iframe class="variant" data-v="v4" data-src="variants/v4_mobile.html?v=5" title="V4 Mobile preview"></iframe>
   <iframe class="variant" data-v="v5" data-src="variants/v5_itinerary.html?v=1" title="V5 Personalized Trip Guide"></iframe>
@@ -74,14 +74,31 @@
   sizeFrames();
   window.addEventListener('resize', sizeFrames);
 
-  const VIEW_MAP = { concierge:'v1', journey:'v2', luggage:'v6', loogage:'v6', mobile:'v4', trip:'v5', itinerary:'v5', guide:'v5' };
-  const urlView = new URLSearchParams(location.search).get('view');
+  // Each switcher key maps to a clean shareable URL slug. Aliases let you share /?view=concierge etc.
+  const VIEW_MAP = {
+    v1:'v1', v2:'v2', v3:'v6', v4:'v4', v5:'v5', v6:'v6',
+    concierge:'v1', journey:'v2', luggage:'v6', loogage:'v6', mobile:'v4',
+    trip:'v5', itinerary:'v5', guide:'v5'
+  };
+  const SLUG = { v1:'v1', v2:'v2', v6:'v3', v4:'v4', v5:'v5' };
+  const DEFAULT_VARIANT = 'v2';
   const LS = 'chekin_guestapp_variant';
-  const saved = localStorage.getItem(LS);
-  if (urlView && VIEW_MAP[urlView]) activate(VIEW_MAP[urlView]);
-  else if (saved && document.querySelector(`.switcher button[data-v="${saved}"]`)) activate(saved);
 
-  function activate(v){
+  function readUrlVariant(){
+    const params = new URLSearchParams(location.search);
+    const raw = params.get('view') || params.get('v');
+    if (!raw) return null;
+    return VIEW_MAP[raw.toLowerCase()] || null;
+  }
+
+  function setUrl(v, replace=false){
+    const url = new URL(location.href);
+    url.searchParams.set('view', SLUG[v] || v);
+    const method = replace ? 'replaceState' : 'pushState';
+    history[method]({ v }, '', url.toString());
+  }
+
+  function activate(v, opts={}){
     document.querySelectorAll('.switcher button').forEach(b => b.classList.toggle('active', b.dataset.v === v));
     document.querySelectorAll('iframe.variant').forEach(f => {
       const match = f.dataset.v === v;
@@ -89,7 +106,21 @@
       if (match && !f.hasAttribute('src') && f.dataset.src) f.setAttribute('src', f.dataset.src);
     });
     localStorage.setItem(LS, v);
+    if (opts.updateUrl !== false) setUrl(v, opts.replace);
   }
+
+  // Initial: URL > localStorage > default V2
+  const urlVariant = readUrlVariant();
+  const saved = localStorage.getItem(LS);
+  const initial = urlVariant
+    || (saved && document.querySelector(`.switcher button[data-v="${saved}"]`) ? saved : DEFAULT_VARIANT);
+  activate(initial, { replace:true });
+
+  // Browser back/forward
+  window.addEventListener('popstate', () => {
+    const v = readUrlVariant() || DEFAULT_VARIANT;
+    activate(v, { updateUrl:false });
+  });
 
   document.querySelectorAll('.switcher button').forEach(b => {
     b.addEventListener('click', () => activate(b.dataset.v));
