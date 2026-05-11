@@ -51,9 +51,10 @@
 <div class="switcher" role="tablist" aria-label="Guest App variants">
   <button class="active" data-v="v1" role="tab"><span class="v">V1</span>AI Concierge</button>
   <button data-v="v2" role="tab"><span class="v">V2</span>Guided journey</button>
-  <button data-v="v6" role="tab"><span class="v">V3</span>Luggage<span class="new">NEW</span></button>
+  <button data-v="v6" role="tab"><span class="v">V3</span>Luggage</button>
   <div class="sep"></div>
   <button data-v="v4" role="tab"><span class="v">V4</span>📱 Mobile</button>
+  <button data-v="v5" role="tab"><span class="v">V5</span>Trip Guide<span class="new">NEW</span></button>
 </div>
 
 <div class="stage">
@@ -61,6 +62,7 @@
   <iframe class="variant" data-v="v2" data-src="variants/v2_journey.html?v=6" title="V2 Guided journey"></iframe>
   <iframe class="variant" data-v="v6" data-src="variants/v6_loogage.html?v=2" title="V6 Luggage — drop-off"></iframe>
   <iframe class="variant" data-v="v4" data-src="variants/v4_mobile.html?v=5" title="V4 Mobile preview"></iframe>
+  <iframe class="variant" data-v="v5" data-src="variants/v5_itinerary.html?v=1" title="V5 Personalized Trip Guide"></iframe>
 </div>
 
 <script>
@@ -72,7 +74,7 @@
   sizeFrames();
   window.addEventListener('resize', sizeFrames);
 
-  const VIEW_MAP = { concierge:'v1', journey:'v2', luggage:'v6', loogage:'v6', mobile:'v4' };
+  const VIEW_MAP = { concierge:'v1', journey:'v2', luggage:'v6', loogage:'v6', mobile:'v4', trip:'v5', itinerary:'v5', guide:'v5' };
   const urlView = new URLSearchParams(location.search).get('view');
   const LS = 'chekin_guestapp_variant';
   const saved = localStorage.getItem(LS);
