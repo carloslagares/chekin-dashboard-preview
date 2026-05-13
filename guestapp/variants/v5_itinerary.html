@@ -631,9 +631,46 @@ html,body{margin:0;background:radial-gradient(1400px 700px at 50% -250px,#E4EAFF
   .stage{grid-template-columns:1fr;gap:40px 0;padding:14px 0 50px}
   .phone{transform:scale(.96);transform-origin:top center}
 }
+
+/* ──────────── Mobile app mode (single screen + bottom nav) ──────────── */
+.try-mobile{position:fixed;top:14px;right:14px;z-index:1001;background:var(--color-navy-blue);color:#fff;border:none;border-radius:999px;padding:9px 14px 9px 11px;font:600 12px var(--font-primary);cursor:pointer;box-shadow:0 6px 16px rgba(22,22,67,.25);display:inline-flex;align-items:center;gap:6px}
+.try-mobile:hover{background:var(--color-main-blue)}
+.try-mobile svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2}
+
+.mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:60px;background:#fff;border-top:1px solid var(--stroke-lighter);align-items:stretch;z-index:1000;padding-bottom:env(safe-area-inset-bottom,0)}
+.mobile-nav button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font:700 9.5px var(--font-primary);color:var(--color-gray-2);background:transparent;border:none;cursor:pointer;padding:6px 2px}
+.mobile-nav button .ic{font-size:18px;line-height:1}
+.mobile-nav button.active{color:var(--color-main-blue)}
+
+body.mobile-mode{overflow-x:hidden}
+body.mobile-mode .pagehead,
+body.mobile-mode .phone-label,
+body.mobile-mode .phone-caption{display:none}
+body.mobile-mode .try-mobile{background:var(--color-main-blue)}
+body.mobile-mode .stage{display:block;padding:0;max-width:none;margin:0;gap:0}
+body.mobile-mode .phone-col{display:none;width:100%;margin:0;padding:0;gap:0}
+body.mobile-mode .phone-col.show{display:block}
+body.mobile-mode .phone{
+  transform:none;width:100%;height:calc(100vh - 60px);height:calc(100dvh - 60px);
+  background:#fff;border-radius:0;padding:0;box-shadow:none;
+  margin:0;
+}
+body.mobile-mode .screen{border-radius:0}
+body.mobile-mode .island{display:none}
+body.mobile-mode .status{padding-top:max(8px,env(safe-area-inset-top,8px))}
+body.mobile-mode .mobile-nav{display:flex}
+@media (max-width:720px){
+  .try-mobile{top:auto;bottom:72px;right:10px;padding:7px 10px;font-size:11px}
+  body.mobile-mode .try-mobile{display:none}
+}
 </style>
 </head>
 <body>
+
+<button class="try-mobile" onclick="toggleMobile()" aria-label="Try mobile mode">
+  <svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+  <span class="lbl">Mobile preview</span>
+</button>
 
 <!-- ─── Page header ─── -->
 <header class="pagehead">
@@ -654,7 +691,7 @@ html,body{margin:0;background:radial-gradient(1400px 700px at 50% -250px,#E4EAFF
 <main class="stage">
 
   <!-- PHONE 1 — Cover (city poster) → Route preview -->
-  <div class="phone-col">
+  <div class="phone-col" data-mkey="M1">
     <div class="phone-label"><span class="num">M1</span><span class="stage-tag">Stage 1</span><span class="tag">Interactive</span>Cover · Route preview</div>
     <div class="phone" id="phone-cover">
       <div class="screen">
@@ -790,7 +827,7 @@ html,body{margin:0;background:radial-gradient(1400px 700px at 50% -250px,#E4EAFF
   </div>
 
   <!-- PHONE 2 — Interactive: Quiz → Loading → Itinerary (single phone, 3 states) -->
-  <div class="phone-col">
+  <div class="phone-col" data-mkey="M2">
     <div class="phone-label"><span class="num">M2</span><span class="stage-tag">Stage 1</span><span class="tag">Interactive</span>Quiz · Loading · Itinerary</div>
     <div class="phone" id="phone-flow">
       <div class="screen">
@@ -921,7 +958,7 @@ html,body{margin:0;background:radial-gradient(1400px 700px at 50% -250px,#E4EAFF
   </div>
 
   <!-- PHONE 2v — Alternative chip layout (compact 3-col grid) -->
-  <div class="phone-col">
+  <div class="phone-col" data-mkey="M2v">
     <div class="phone-label"><span class="num">M2v</span><span class="stage-tag">Stage 1</span><span class="tag">Variant</span>Compact chip grid</div>
     <div class="phone">
       <div class="screen">
@@ -1014,7 +1051,7 @@ html,body{margin:0;background:radial-gradient(1400px 700px at 50% -250px,#E4EAFF
 
 
   <!-- PHONE 3 — Embedded offer mid-itinerary -->
-  <div class="phone-col">
+  <div class="phone-col" data-mkey="M3">
     <div class="phone-label"><span class="num">M3</span><span class="stage-tag">Stage 1</span><span class="tag">Interactive</span>Embedded offer in context</div>
     <div class="phone">
       <div class="screen">
@@ -1117,7 +1154,7 @@ html,body{margin:0;background:radial-gradient(1400px 700px at 50% -250px,#E4EAFF
   </div>
 
   <!-- PHONE 4 — Today screen (Stage 2) with weather toggle -->
-  <div class="phone-col">
+  <div class="phone-col" data-mkey="M4">
     <div class="phone-label"><span class="num">M4</span><span class="stage-tag s2">Stage 2</span><span class="tag">Interactive</span>Today · weather-adaptive</div>
     <div class="phone" id="phone-today">
       <div class="screen">
@@ -1219,7 +1256,7 @@ html,body{margin:0;background:radial-gradient(1400px 700px at 50% -250px,#E4EAFF
   </div>
 
   <!-- PHONE 5 — Concierge chat (Stage 2) interactive -->
-  <div class="phone-col">
+  <div class="phone-col" data-mkey="M5">
     <div class="phone-label"><span class="num">M5</span><span class="stage-tag s2">Stage 2</span><span class="tag">Interactive</span>AI Concierge · replan</div>
     <div class="phone" id="phone-chat">
       <div class="screen">
@@ -1252,7 +1289,7 @@ html,body{margin:0;background:radial-gradient(1400px 700px at 50% -250px,#E4EAFF
   </div>
 
   <!-- PHONE 6 — Checkout-day assistant -->
-  <div class="phone-col">
+  <div class="phone-col" data-mkey="M6">
     <div class="phone-label"><span class="num">M6</span><span class="stage-tag s2">Stage 2</span>Checkout day · transition</div>
     <div class="phone">
       <div class="screen">
@@ -1308,7 +1345,7 @@ html,body{margin:0;background:radial-gradient(1400px 700px at 50% -250px,#E4EAFF
   </div>
 
   <!-- PHONE 7 — States: empty / error / loading skeleton compact -->
-  <div class="phone-col">
+  <div class="phone-col" data-mkey="M7">
     <div class="phone-label"><span class="num">M7</span><span class="stage-tag">States</span>Empty · loading · error</div>
     <div class="phone">
       <div class="screen">
@@ -1358,6 +1395,15 @@ html,body{margin:0;background:radial-gradient(1400px 700px at 50% -250px,#E4EAFF
   </div>
 
 </main>
+
+<nav class="mobile-nav" aria-label="Mobile preview tabs">
+  <button data-go="M1"><span class="ic">📍</span><span>Cover</span></button>
+  <button data-go="M2"><span class="ic">✨</span><span>Quiz</span></button>
+  <button data-go="M3"><span class="ic">🎟️</span><span>Offer</span></button>
+  <button data-go="M4"><span class="ic">☀️</span><span>Today</span></button>
+  <button data-go="M5"><span class="ic">💬</span><span>Vela</span></button>
+  <button data-go="M6"><span class="ic">🧳</span><span>Checkout</span></button>
+</nav>
 
 <style>@keyframes shim{0%{background-position:200% 0}100%{background-position:-200% 0}}</style>
 
@@ -1856,6 +1902,29 @@ function tickCountdown(){
   el.textContent = `${h}h ${String(m).padStart(2,'0')}m`;
 }
 setInterval(tickCountdown, 60000);
+
+/* ─────────── Mobile preview mode ─────────── */
+function showMobile(key){
+  document.querySelectorAll('.phone-col').forEach(c => c.classList.toggle('show', c.dataset.mkey === key));
+  document.querySelectorAll('.mobile-nav button').forEach(b => b.classList.toggle('active', b.dataset.go === key));
+  window.scrollTo(0,0);
+}
+function toggleMobile(){
+  const on = document.body.classList.toggle('mobile-mode');
+  if (on){
+    const cur = document.querySelector('.mobile-nav button.active');
+    showMobile(cur ? cur.dataset.go : 'M1');
+  }
+}
+document.querySelectorAll('.mobile-nav button').forEach(b => b.addEventListener('click', () => showMobile(b.dataset.go)));
+
+const params = new URLSearchParams(location.search);
+const wantsMobile = params.get('mode') === 'mobile' || window.matchMedia('(max-width:720px)').matches;
+if (wantsMobile){
+  document.body.classList.add('mobile-mode');
+  const start = params.get('screen') || 'M1';
+  showMobile(start);
+}
 
 /* ─────────── Init ─────────── */
 updatePreview();
