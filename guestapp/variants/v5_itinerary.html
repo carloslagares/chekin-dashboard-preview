@@ -473,9 +473,9 @@ html,body{margin:0;background:radial-gradient(1400px 700px at 50% -250px,#E4EAFF
 .offer .price-row .p small{font:500 11px var(--font-primary);color:var(--color-gray-1);margin-left:2px}
 .offer .trust{display:inline-flex;align-items:center;gap:4px;font:600 10.5px var(--font-primary);color:var(--color-success)}
 .offer .trust svg{width:11px;height:11px;fill:currentColor;stroke:none}
-.offer .act-row{display:flex;gap:8px}
-.offer .act-row .btn{flex:1;padding:9px 12px;font-size:12.5px}
-.offer .act-row .btn.ghost{flex:0 0 auto;padding:9px 10px;font-size:11.5px;color:var(--color-gray-1)}
+.offer .act-row{display:flex;gap:8px;align-items:stretch}
+.offer .act-row .btn{flex:1 1 0;width:auto;min-width:0;padding:9px 8px;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.offer .act-row .btn.ghost{color:var(--color-gray-1);font-size:11.5px}
 .offer.dismissed{
   max-height:50px;padding:0 12px;overflow:hidden;opacity:.65;
   display:flex;align-items:center;
@@ -900,7 +900,7 @@ html,body{margin:0;background:radial-gradient(1400px 700px at 50% -250px,#E4EAFF
           <div class="av">L</div>
         </div>
         <div class="body">
-          <div class="slot-row afternoon"><span class="em">🛬</span><div class="meta"><span class="lab">Arrival</span><span class="time">15:00 · Day 1</span></div><span class="count">1 stop</span></div>
+          <div class="slot-row afternoon"><span class="em">🛬</span><div class="meta"><span class="lab">Arrival</span><span class="time">15:00 · Day 1</span></div></div>
 
           <div class="act open">
             <div class="main">
@@ -931,7 +931,7 @@ html,body{margin:0;background:radial-gradient(1400px 700px at 50% -250px,#E4EAFF
             </div>
           </div>
 
-          <div class="slot-row afternoon"><span class="em">🌅</span><div class="meta"><span class="lab">Afternoon</span><span class="time">14:00 — 18:00</span></div><span class="count">2 stops</span></div>
+          <div class="slot-row afternoon"><span class="em">🌅</span><div class="meta"><span class="lab">Afternoon</span><span class="time">14:00 — 18:00</span></div></div>
 
           <div class="act open">
             <div class="main">
@@ -968,7 +968,7 @@ html,body{margin:0;background:radial-gradient(1400px 700px at 50% -250px,#E4EAFF
             </div>
           </div>
 
-          <div class="slot-row evening"><span class="em">🌙</span><div class="meta"><span class="lab">Evening</span><span class="time">20:00 — 23:00</span></div><span class="count">1 stop</span></div>
+          <div class="slot-row evening"><span class="em">🌙</span><div class="meta"><span class="lab">Evening</span><span class="time">20:00 — 23:00</span></div></div>
 
           <div class="act">
             <div class="main">
@@ -1023,7 +1023,7 @@ html,body{margin:0;background:radial-gradient(1400px 700px at 50% -250px,#E4EAFF
             </div>
           </div>
 
-          <div class="slot-row morning"><span class="em">🥐</span><div class="meta"><span class="lab">Morning</span><span class="time">09:00 — 13:00</span></div><span class="count">1 stop</span></div>
+          <div class="slot-row morning"><span class="em">🥐</span><div class="meta"><span class="lab">Morning</span><span class="time">09:00 — 13:00</span></div></div>
           <div class="act open" id="t-morn">
             <div class="main">
               <div class="ph nat" id="t-morn-ph">🌳</div>
@@ -1042,7 +1042,7 @@ html,body{margin:0;background:radial-gradient(1400px 700px at 50% -250px,#E4EAFF
             </div>
           </div>
 
-          <div class="slot-row afternoon"><span class="em">🌅</span><div class="meta"><span class="lab">Afternoon</span><span class="time">14:00 — 18:00</span></div><span class="count">1 stop</span></div>
+          <div class="slot-row afternoon"><span class="em">🌅</span><div class="meta"><span class="lab">Afternoon</span><span class="time">14:00 — 18:00</span></div></div>
           <div class="act" id="t-aft">
             <div class="main">
               <div class="ph beach" id="t-aft-ph">🏖</div>
@@ -1054,7 +1054,7 @@ html,body{margin:0;background:radial-gradient(1400px 700px at 50% -250px,#E4EAFF
             </div>
           </div>
 
-          <div class="slot-row evening"><span class="em">🌙</span><div class="meta"><span class="lab">Evening</span><span class="time">20:00 — 23:00</span></div><span class="count">1 stop</span></div>
+          <div class="slot-row evening"><span class="em">🌙</span><div class="meta"><span class="lab">Evening</span><span class="time">20:00 — 23:00</span></div></div>
           <div class="act" id="t-eve">
             <div class="main">
               <div class="ph food" id="t-eve-ph">🍴</div>
@@ -1474,8 +1474,7 @@ function renderDay(d){
   slots.forEach((s, idx) => {
     const a = plan[s.key];
     if (!a) return;
-    const count = '1 stop';
-    html += `<div class="slot-row ${s.key}"><span class="em">${s.em}</span><div class="meta"><span class="lab">${s.label}</span><span class="time">${s.time}</span></div><span class="count">${count}</span></div>`;
+    html += `<div class="slot-row ${s.key}"><span class="em">${s.em}</span><div class="meta"><span class="lab">${s.label}</span><span class="time">${s.time}</span></div></div>`;
     html += activityHTML(a, idx===0 && d===1);
     // insert one embedded offer on Day 1 afternoon
     if (d === 1 && s.key === 'afternoon'){
