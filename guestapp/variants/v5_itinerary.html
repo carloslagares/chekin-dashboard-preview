@@ -40,7 +40,7 @@
 html,body{margin:0;background:radial-gradient(1400px 700px at 50% -250px,#E4EAFF,transparent),var(--bg-screen);font-family:var(--font-primary);color:var(--color-navy-blue);min-height:100vh}
 
 /* ─────── Page header ─────── */
-.pagehead{max-width:1280px;margin:0 auto;padding:40px 28px 8px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.pagehead{max-width:1560px;margin:0 auto;padding:32px 24px 6px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
 .pagehead .brand{display:flex;align-items:center;gap:12px}
 .pagehead .brand .logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#385CF8,#274BF0);display:grid;place-items:center;color:#fff;font:800 14px var(--font-primary)}
 .pagehead .brand h1{margin:0;font:800 20px var(--font-primary);color:var(--color-dark);letter-spacing:-.01em}
@@ -52,27 +52,28 @@ html,body{margin:0;background:radial-gradient(1400px 700px at 50% -250px,#E4EAFF
 .pagehead .meta .pip .d{width:6px;height:6px;border-radius:50%;background:currentColor;box-shadow:0 0 0 3px rgba(15,159,128,.16)}
 
 /* ─────── Stage / phone deck ─────── */
-.stage{max-width:1280px;margin:0 auto;padding:24px 28px 60px;display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:36px 28px;align-items:start}
+.stage{max-width:1560px;margin:0 auto;padding:20px 24px 60px;display:grid;grid-template-columns:repeat(4,1fr);justify-items:center;gap:36px 12px;align-items:start}
 
-.phone-col{display:flex;flex-direction:column;align-items:center;gap:14px}
-.phone-label{font:700 11px var(--font-primary);color:var(--color-gray-1);letter-spacing:.1em;text-transform:uppercase;display:inline-flex;align-items:center;gap:8px;text-align:center;max-width:380px}
+.phone-col{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;max-width:340px}
+.phone-label{font:700 10.5px var(--font-primary);color:var(--color-gray-1);letter-spacing:.1em;text-transform:uppercase;display:inline-flex;align-items:center;gap:6px;text-align:center;max-width:100%;flex-wrap:wrap;justify-content:center}
 .phone-label .num{font:800 10px var(--font-primary);color:var(--color-main-blue);background:var(--bg-blue-light);padding:3px 7px;border-radius:5px;letter-spacing:.05em}
 .phone-label .tag{font:700 9px var(--font-primary);color:#fff;background:var(--color-success);padding:2px 7px;border-radius:4px;letter-spacing:.06em}
 .phone-label .tag.warn{background:#FF7A58}
+.phone-label .tag.alt{background:#6F4FE0}
 .phone-label .stage-tag{font:700 9px var(--font-primary);background:var(--color-navy-blue);color:#fff;padding:2px 7px;border-radius:4px;letter-spacing:.08em}
 .phone-label .stage-tag.s2{background:var(--color-main-blue)}
-.phone-caption{font:500 11.5px/16px var(--font-primary);color:var(--color-gray-1);max-width:360px;text-align:center;margin-top:-4px}
+.phone-caption{font:500 11px/15px var(--font-primary);color:var(--color-gray-1);max-width:100%;text-align:center;margin-top:-2px}
 
 .phone{
-  width:380px;height:780px;
-  background:#0B0B22;border-radius:48px;padding:8px;
-  box-shadow:0 24px 50px rgba(22,22,67,.22),0 6px 16px rgba(22,22,67,.1),0 0 0 1px rgba(22,22,67,.05),inset 0 0 0 1.5px rgba(255,255,255,.06);
+  width:320px;height:680px;
+  background:#0B0B22;border-radius:42px;padding:7px;
+  box-shadow:0 20px 40px rgba(22,22,67,.2),0 6px 14px rgba(22,22,67,.08),0 0 0 1px rgba(22,22,67,.05),inset 0 0 0 1.3px rgba(255,255,255,.06);
   position:relative;
 }
-.screen{width:100%;height:100%;background:var(--bg-white);border-radius:42px;overflow:hidden;position:relative;display:flex;flex-direction:column}
-.island{position:absolute;top:11px;left:50%;transform:translateX(-50%);width:118px;height:34px;background:#000;border-radius:18px;z-index:50}
+.screen{width:100%;height:100%;background:var(--bg-white);border-radius:36px;overflow:hidden;position:relative;display:flex;flex-direction:column}
+.island{position:absolute;top:9px;left:50%;transform:translateX(-50%);width:96px;height:28px;background:#000;border-radius:14px;z-index:50}
 
-.status{display:flex;align-items:center;justify-content:space-between;padding:14px 28px 8px;font:600 14px var(--font-primary);color:var(--color-navy-blue);font-variant-numeric:tabular-nums;flex-shrink:0;height:46px}
+.status{display:flex;align-items:center;justify-content:space-between;padding:12px 22px 6px;font:600 12px var(--font-primary);color:var(--color-navy-blue);font-variant-numeric:tabular-nums;flex-shrink:0;height:38px}
 .status .right{display:inline-flex;align-items:center;gap:6px;font-size:12px}
 .status .batt{display:inline-flex;align-items:center;gap:2px}
 .status .batt .b{width:22px;height:11px;border:1.4px solid currentColor;border-radius:3px;padding:1px;display:inline-block;position:relative}
@@ -134,6 +135,148 @@ html,body{margin:0;background:radial-gradient(1400px 700px at 50% -250px,#E4EAFF
 
 .skip-link{display:block;text-align:center;margin-top:4px;font:600 12px var(--font-primary);color:var(--color-gray-1);text-decoration:none;padding:10px;cursor:pointer}
 .skip-link:hover{color:var(--color-navy-blue)}
+
+/* ─────── Cover screen (M1) with AI city poster ─────── */
+.cover-body{padding:0;gap:0;background:var(--bg-white)}
+.cover-poster{
+  position:relative;width:100%;
+  background:#F3EBDA;
+  overflow:hidden;
+  flex-shrink:0;
+}
+.cover-poster img{
+  width:100%;display:block;
+  aspect-ratio:1.6/1;object-fit:cover;
+  background:linear-gradient(135deg,#1a1a30,#274BF0);
+}
+/* Portrait variant — show top of portrait poster, dissipate bottom into cover-info */
+.cover-poster--portrait img{
+  aspect-ratio:auto;
+  height:330px;
+  width:100%;
+  object-fit:cover;
+  object-position:top center;
+  background:#F3EBDA;
+}
+.cover-poster::after{
+  content:"";position:absolute;left:0;right:0;bottom:0;height:48px;
+  background:linear-gradient(180deg,rgba(243,235,218,0) 0%,#F3EBDA 70%,var(--bg-white) 100%);
+  pointer-events:none;
+}
+.cover-poster--portrait::after{height:80px}
+.cover-badge{
+  position:absolute;top:12px;left:12px;z-index:2;
+  display:inline-flex;align-items:center;gap:5px;
+  background:rgba(22,22,67,.82);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  color:#fff;font:700 9px var(--font-primary);
+  padding:5px 9px 5px 7px;border-radius:999px;
+  text-transform:uppercase;letter-spacing:.06em;
+  box-shadow:0 4px 10px rgba(22,22,67,.18);
+}
+.cover-badge svg{width:11px;height:11px;fill:#FFD27A;stroke:none}
+.cover-flag{
+  position:absolute;top:8px;right:10px;z-index:2;
+  font-size:22px;line-height:1;
+  filter:drop-shadow(0 2px 4px rgba(22,22,67,.35));
+}
+
+.cover-info{
+  padding:6px 16px 16px;
+  display:flex;flex-direction:column;gap:9px;
+  margin-top:-32px;
+  position:relative;z-index:3;
+  background:linear-gradient(180deg,rgba(255,255,255,0) 0%,var(--bg-white) 22%);
+}
+.cover-title{
+  font:700 18px/22px var(--font-primary);
+  color:var(--color-dark);margin:0;letter-spacing:-.01em;
+}
+.cover-sub{
+  font:500 12px/16px var(--font-primary);
+  color:var(--color-gray-1);margin:0;
+}
+.cover-meta{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:0;
+  padding:10px 4px;background:var(--bg-neutral-light);
+  border-radius:11px;margin-top:2px;
+}
+.cover-meta .m-item{
+  display:flex;flex-direction:column;gap:2px;
+  padding:0 8px;min-width:0;
+  border-right:1px solid var(--stroke-lighter);
+}
+.cover-meta .m-item:last-child{border-right:none}
+.cover-meta .m-item .l{
+  font:700 8.5px var(--font-primary);color:var(--color-gray-2);
+  text-transform:uppercase;letter-spacing:.08em;
+}
+.cover-meta .m-item .v{
+  font:700 12px var(--font-primary);color:var(--color-navy-blue);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+
+/* ─────── Route preview (M1 step 2) ─────── */
+.route-hero{
+  position:relative;border-radius:14px;overflow:hidden;
+  background:radial-gradient(280px 160px at 88% -10%,rgba(107,224,168,.18),transparent 60%),linear-gradient(135deg,#161643 0%,#274BF0 95%);
+  color:#fff;padding:14px 14px 0;
+}
+.route-hero .rh-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.route-hero .rh-top .eyebrow{color:rgba(255,255,255,.7);font-size:9px;letter-spacing:.14em}
+.route-hero .rh-flag{font-size:18px;filter:drop-shadow(0 1px 3px rgba(0,0,0,.3))}
+.route-hero .rh-title{margin:4px 0 8px;font:700 22px/26px var(--font-primary);letter-spacing:-.01em;color:#fff}
+.route-hero .rh-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:0;padding:8px 0;border-top:1px solid rgba(255,255,255,.15);border-bottom:1px solid rgba(255,255,255,.15);margin-bottom:10px}
+.route-hero .rh-stat{display:flex;flex-direction:column;align-items:center;gap:1px;border-right:1px solid rgba(255,255,255,.12)}
+.route-hero .rh-stat:last-child{border-right:none}
+.route-hero .rh-stat .v{font:700 15px var(--font-primary);color:#fff;font-variant-numeric:tabular-nums}
+.route-hero .rh-stat .l{font:600 9px var(--font-primary);color:rgba(255,255,255,.65);text-transform:uppercase;letter-spacing:.1em}
+.route-hero .rh-poster{margin:6px -14px 0;background:#000;height:108px;overflow:hidden}
+.route-hero .rh-poster img{width:100%;height:100%;object-fit:cover;display:block;opacity:.95}
+
+.route-list{
+  list-style:none;margin:6px 0 6px;padding:0;
+  position:relative;
+}
+.route-list::before{
+  content:"";position:absolute;
+  left:14px;top:22px;bottom:18px;width:2px;border-radius:2px;
+  background:linear-gradient(180deg,#FF9F45 0%,#FF6B58 50%,#6F4FE0 100%);
+  z-index:0;
+}
+.rl-item{
+  position:relative;
+  display:grid;grid-template-columns:30px 1fr auto;gap:10px;align-items:flex-start;
+  padding:10px 0 10px 0;
+  border-bottom:1px solid var(--stroke-lighter);
+}
+.rl-item:last-child{border-bottom:none}
+.rl-pin{
+  width:30px;height:30px;border-radius:50%;
+  background:#fff;color:var(--color-navy-blue);
+  border:2px solid currentColor;
+  display:grid;place-items:center;flex-shrink:0;
+  z-index:2;position:relative;
+  box-shadow:0 2px 5px rgba(22,22,67,.12);
+}
+.rl-pin .n{font:800 12px var(--font-primary);color:var(--color-navy-blue);line-height:1}
+.rl-item.morning .rl-pin{color:#FF9F45}
+.rl-item.afternoon .rl-pin{color:#FF6B58}
+.rl-item.evening .rl-pin{color:#6F4FE0}
+.rl-body{min-width:0}
+.rl-head{display:flex;align-items:baseline;gap:6px;margin-bottom:2px}
+.rl-time{font:700 10.5px var(--font-primary);color:var(--color-navy-blue);font-variant-numeric:tabular-nums}
+.rl-dur{font:500 10px var(--font-primary);color:var(--color-gray-2)}
+.rl-name{font:700 13.5px/16px var(--font-primary);color:var(--color-dark);letter-spacing:-.005em}
+.rl-desc{font:500 11px/15px var(--font-primary);color:var(--color-gray-1);margin-top:1px}
+.rl-icon{font-size:18px;line-height:1;align-self:center;opacity:.85}
+
+.trust-row{
+  display:flex;align-items:center;gap:6px;
+  padding:9px 11px;margin-top:4px;
+  border-radius:10px;background:var(--bg-success-light);
+  font:600 11px/15px var(--font-primary);color:var(--color-success);
+}
+.trust-row svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;flex-shrink:0}
 
 /* ─────── Questionnaire ─────── */
 .quiz-progress{display:flex;align-items:center;gap:6px;padding:0 2px}
@@ -205,11 +348,37 @@ html,body{margin:0;background:radial-gradient(1400px 700px at 50% -250px,#E4EAFF
 .day-tabs button .l{font:600 9.5px var(--font-primary);color:var(--color-gray-2);letter-spacing:.05em;text-transform:uppercase}
 .day-tabs button.active .l{color:var(--color-main-blue)}
 
-.timeline{display:flex;flex-direction:column;gap:11px;position:relative}
-.slot-row{display:flex;align-items:center;gap:8px;margin-top:4px}
-.slot-row .lab{font:700 10px var(--font-primary);color:var(--color-gray-2);text-transform:uppercase;letter-spacing:.1em}
-.slot-row .em{font-size:13px}
-.slot-row::after{content:"";flex:1;height:1px;background:var(--stroke-lighter)}
+.timeline{display:flex;flex-direction:column;gap:10px;position:relative}
+
+/* ─── Section header v2 (banded, time-range, count) ─── */
+.slot-row{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 11px;margin-top:6px;
+  border-radius:11px;
+  background:var(--bg-blue-light);
+  border-left:3px solid var(--color-main-blue);
+  position:relative;
+}
+.slot-row.morning{background:#FFF4E6;border-left-color:#FF9F45}
+.slot-row.afternoon{background:#FFEDE4;border-left-color:#FF6B58}
+.slot-row.evening{background:#EEE7FB;border-left-color:#6F4FE0}
+.slot-row .em{
+  font-size:15px;
+  width:28px;height:28px;border-radius:8px;
+  background:#fff;display:grid;place-items:center;flex-shrink:0;
+  box-shadow:0 1px 2px rgba(22,22,67,.06);
+}
+.slot-row .meta{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}
+.slot-row .lab{font:700 11px var(--font-primary);color:var(--color-navy-blue);text-transform:uppercase;letter-spacing:.08em;line-height:1.1}
+.slot-row .time{font:600 10px var(--font-primary);color:var(--color-gray-1);font-variant-numeric:tabular-nums;line-height:1.1}
+.slot-row .count{
+  font:700 9.5px var(--font-primary);color:var(--color-navy-blue);
+  background:#fff;padding:3px 7px;border-radius:999px;flex-shrink:0;
+  letter-spacing:.04em;
+}
+.slot-row.morning .count{color:#B86A00}
+.slot-row.afternoon .count{color:#C24A35}
+.slot-row.evening .count{color:#4E36A8}
 
 .act{
   background:#fff;border-radius:14px;border:1px solid var(--stroke-lighter);overflow:hidden;cursor:pointer;
@@ -244,10 +413,49 @@ html,body{margin:0;background:radial-gradient(1400px 700px at 50% -250px,#E4EAFF
 .act .why .tags span{background:#fff;border:1px solid rgba(56,92,248,.2);color:var(--color-main-blue);font:700 9.5px var(--font-primary);padding:2px 6px;border-radius:4px}
 
 .act .footrow{display:flex;border-top:1px solid var(--stroke-lighter)}
-.act .footrow button{flex:1;background:#fff;border:none;cursor:pointer;font:600 11.5px var(--font-primary);color:var(--color-main-blue);padding:9px 6px;display:inline-flex;align-items:center;justify-content:center;gap:5px}
+.act .footrow button{
+  flex:1;min-width:0;background:#fff;border:none;cursor:pointer;
+  font:600 11px var(--font-primary);color:var(--color-main-blue);
+  padding:9px 6px;
+  display:inline-flex;align-items:center;justify-content:center;gap:5px;
+  white-space:nowrap;
+}
 .act .footrow button + button{border-left:1px solid var(--stroke-lighter)}
-.act .footrow button svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8}
+.act .footrow button svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;flex-shrink:0;display:block}
 .act .footrow button.dim{color:var(--color-gray-1)}
+
+/* ─── Alternative timeline rail (M2b) ─── */
+.timeline-rail{position:relative;padding-left:36px;margin-top:6px}
+.timeline-rail::before{
+  content:"";position:absolute;
+  left:13px;top:12px;bottom:12px;width:2px;border-radius:2px;
+  background:linear-gradient(180deg,#FF9F45 0%,#FF6B58 50%,#6F4FE0 100%);
+}
+.rail-section{position:relative;margin-bottom:16px}
+.rail-section:last-child{margin-bottom:0}
+.rail-section.morning{color:#D17A1F}
+.rail-section.afternoon{color:#C24A35}
+.rail-section.evening{color:#5A41C2}
+.rail-dot{
+  position:absolute;left:-36px;top:2px;
+  width:28px;height:28px;border-radius:50%;background:#fff;
+  border:2px solid currentColor;display:grid;place-items:center;
+  font-size:14px;line-height:1;box-shadow:0 2px 4px rgba(22,22,67,.1);
+  z-index:2;
+}
+.rail-head{
+  display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;
+  margin-bottom:8px;padding-top:4px;
+}
+.rail-head .time{
+  font:700 10px var(--font-primary);color:currentColor;
+  background:#fff;padding:3px 7px;border-radius:5px;
+  font-variant-numeric:tabular-nums;letter-spacing:.04em;
+  border:1px solid currentColor;
+}
+.rail-head .title{font:700 14px var(--font-primary);color:var(--color-navy-blue);letter-spacing:-.01em}
+.rail-head .sub{font:500 10.5px var(--font-primary);color:var(--color-gray-1)}
+.rail-cards{display:flex;flex-direction:column;gap:8px}
 
 /* ─────── Offer card ─────── */
 .offer{
@@ -378,9 +586,11 @@ html,body{margin:0;background:radial-gradient(1400px 700px at 50% -250px,#E4EAFF
 .flow-screen{display:none;flex-direction:column;flex:1;min-height:0}
 .flow-screen.active{display:flex}
 
-@media (max-width:900px){
-  .stage{grid-template-columns:1fr;gap:50px 0;padding:16px 0 50px}
-  .phone{transform:scale(.92);transform-origin:top center}
+@media (max-width:1380px){ .stage{grid-template-columns:repeat(3,1fr)} }
+@media (max-width:1060px){ .stage{grid-template-columns:repeat(2,1fr)} }
+@media (max-width:720px){
+  .stage{grid-template-columns:1fr;gap:40px 0;padding:14px 0 50px}
+  .phone{transform:scale(.96);transform-origin:top center}
 }
 </style>
 </head>
@@ -404,51 +614,140 @@ html,body{margin:0;background:radial-gradient(1400px 700px at 50% -250px,#E4EAFF
 <!-- ─── Stage with phones ─── -->
 <main class="stage">
 
-  <!-- PHONE 1 — Landing -->
+  <!-- PHONE 1 — Cover (city poster) → Route preview -->
   <div class="phone-col">
-    <div class="phone-label"><span class="num">M1</span><span class="stage-tag">Stage 1</span>Landing · welcome</div>
-    <div class="phone">
+    <div class="phone-label"><span class="num">M1</span><span class="stage-tag">Stage 1</span><span class="tag">Interactive</span>Cover · Route preview</div>
+    <div class="phone" id="phone-cover">
       <div class="screen">
         <div class="island"></div>
         <div class="status"><span>9:41</span><span class="right">5G <span class="batt"><span class="b"></span></span></span></div>
         <div class="topbar">
-          <button class="icon-btn"><svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
-          <div class="brand-mini"><span class="t">Chekin</span><span class="s">Hotel Pulitzer · ready</span></div>
+          <button class="icon-btn" id="cover-back" onclick="coverPhase('cover')" style="visibility:hidden"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+          <div class="brand-mini"><span class="t" id="cover-title-bar">Chekin</span><span class="s" id="cover-sub-bar">Hotel Alfonso XIII · ready</span></div>
           <div class="av">L</div>
         </div>
-        <div class="body">
-          <div class="hero">
-            <div class="city">Your destination</div>
-            <h2>Barcelona</h2>
-            <p class="greet">Hi Laura, your trip starts in 3 days ✨</p>
-            <div class="dates">
-              <div class="slot"><span class="l">Check-in</span><span class="v">May 14</span><span class="s">Thu · from 15:00</span></div>
-              <div class="sep"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
-              <div class="slot"><span class="l">Check-out</span><span class="v">May 17</span><span class="s">Sun · by 12:00</span></div>
+
+        <!-- ──── COVER STATE ──── -->
+        <div class="flow-screen active" id="cover-screen-cover">
+          <div class="body cover-body">
+            <div class="cover-poster cover-poster--portrait">
+              <img src="images/poster_sevilla.png" alt="Personalized guide · Seville" loading="lazy" />
             </div>
-            <span class="area"><svg viewBox="0 0 24 24"><circle cx="12" cy="10" r="3"/><path d="M12 22s-7-7-7-12a7 7 0 0114 0c0 5-7 12-7 12z"/></svg> Eixample · 200m from Passeig de Gràcia</span>
-          </div>
+            <div class="cover-info">
+              <h2 class="cover-title">Hi Laura, your Seville route is ready</h2>
+              <p class="cover-sub">A daily itinerary made for your group, weather and pace — built before you land.</p>
 
-          <div style="padding:6px 2px 0">
-            <span class="eyebrow">Before you arrive</span>
-            <h2 class="h-screen" style="margin-top:4px">Want a guide made for your trip?</h2>
-            <p class="h-sub" style="margin-top:6px">4 quick questions. We'll build a 3-day plan around your family — distances, opening hours, kid-friendly stops, and a few honest local picks.</p>
-          </div>
+              <div class="cover-meta">
+                <div class="m-item"><span class="l">Stay</span><span class="v">14 — 17 May</span></div>
+                <div class="m-item"><span class="l">Area</span><span class="v">Santa Cruz</span></div>
+                <div class="m-item"><span class="l">Group</span><span class="v">Family of 4</span></div>
+              </div>
 
-          <div class="bullets">
-            <div class="b"><div class="ic"><svg viewBox="0 0 24 24"><path d="M12 3l3 6 6 1-4.5 4.4 1 6.6L12 18l-5.5 3 1-6.6L3 10l6-1z"/></svg></div><div><div class="t">Tuned to your group</div><div class="d">Family of 4 · kids 6 & 9 · Spanish & English</div></div></div>
-            <div class="b"><div class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><div><div class="t">Respects your time</div><div class="d">Walking distance, opening hours, breaks</div></div></div>
-            <div class="b"><div class="ic"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div><div><div class="t">No tourist traps</div><div class="d">Locals' picks alongside icons</div></div></div>
+              <button class="btn primary" onclick="coverPhase('route')">Open my guide
+                <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+              </button>
+              <a class="skip-link" onclick="generateDefault()">Skip questions · standard guide</a>
+            </div>
           </div>
+        </div>
 
-          <button class="btn primary" onclick="goPhase('quiz')">Create my personalized guide
-            <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-          </button>
-          <a class="skip-link" onclick="generateDefault()">Skip questions · show standard guide</a>
+        <!-- ──── ROUTE PREVIEW STATE ──── -->
+        <div class="flow-screen" id="cover-screen-route">
+          <div class="body">
+            <div class="route-hero">
+              <div class="rh-top">
+                <span class="eyebrow">Personalized guide · Seville</span>
+                <span class="rh-flag">🇪🇸</span>
+              </div>
+              <h2 class="rh-title">Your daily route</h2>
+              <div class="rh-stats">
+                <div class="rh-stat"><span class="v">7</span><span class="l">stops</span></div>
+                <div class="rh-stat"><span class="v">~6h 30m</span><span class="l">total</span></div>
+                <div class="rh-stat"><span class="v">5.4 km</span><span class="l">on foot</span></div>
+              </div>
+            </div>
+
+            <ol class="route-list">
+              <li class="rl-item morning">
+                <div class="rl-pin"><span class="n">1</span></div>
+                <div class="rl-body">
+                  <div class="rl-head"><span class="rl-time">08:30</span><span class="rl-dur">· 45 min</span></div>
+                  <div class="rl-name">Plaza Nueva</div>
+                  <div class="rl-desc">Coffee · start of the day</div>
+                </div>
+                <span class="rl-icon">☕</span>
+              </li>
+              <li class="rl-item morning">
+                <div class="rl-pin"><span class="n">2</span></div>
+                <div class="rl-body">
+                  <div class="rl-head"><span class="rl-time">09:15</span><span class="rl-dur">· 1h 30m</span></div>
+                  <div class="rl-name">Cathedral &amp; La Giralda</div>
+                  <div class="rl-desc">City icon · panoramic views</div>
+                </div>
+                <span class="rl-icon">⛪</span>
+              </li>
+              <li class="rl-item morning">
+                <div class="rl-pin"><span class="n">3</span></div>
+                <div class="rl-body">
+                  <div class="rl-head"><span class="rl-time">11:00</span><span class="rl-dur">· 1h 30m</span></div>
+                  <div class="rl-name">Real Alcázar</div>
+                  <div class="rl-desc">Mudéjar palace · gardens</div>
+                </div>
+                <span class="rl-icon">🏰</span>
+              </li>
+              <li class="rl-item afternoon">
+                <div class="rl-pin"><span class="n">4</span></div>
+                <div class="rl-body">
+                  <div class="rl-head"><span class="rl-time">13:00</span><span class="rl-dur">· 1h</span></div>
+                  <div class="rl-name">Plaza de España</div>
+                  <div class="rl-desc">Iconic architecture · tilework</div>
+                </div>
+                <span class="rl-icon">🎨</span>
+              </li>
+              <li class="rl-item afternoon">
+                <div class="rl-pin"><span class="n">5</span></div>
+                <div class="rl-body">
+                  <div class="rl-head"><span class="rl-time">14:30</span><span class="rl-dur">· 1h 15m</span></div>
+                  <div class="rl-name">Mercado de Triana</div>
+                  <div class="rl-desc">Tapas · local produce</div>
+                </div>
+                <span class="rl-icon">🥘</span>
+              </li>
+              <li class="rl-item afternoon">
+                <div class="rl-pin"><span class="n">6</span></div>
+                <div class="rl-body">
+                  <div class="rl-head"><span class="rl-time">17:00</span><span class="rl-dur">· 1h</span></div>
+                  <div class="rl-name">Paseo de las Delicias</div>
+                  <div class="rl-desc">Riverside walk · easy pace</div>
+                </div>
+                <span class="rl-icon">🌳</span>
+              </li>
+              <li class="rl-item evening">
+                <div class="rl-pin"><span class="n">7</span></div>
+                <div class="rl-body">
+                  <div class="rl-head"><span class="rl-time">19:00</span><span class="rl-dur">· sunset</span></div>
+                  <div class="rl-name">Torre del Oro</div>
+                  <div class="rl-desc">Sunset by the Guadalquivir</div>
+                </div>
+                <span class="rl-icon">🌅</span>
+              </li>
+            </ol>
+
+            <div class="trust-row">
+              <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>
+              Built from your check-in + Chekin local picks
+            </div>
+          </div>
+          <div class="quiz-foot">
+            <button class="btn ghost" onclick="generateDefault()">Use as-is</button>
+            <button class="btn primary" onclick="goPhase('quiz')">Personalize
+              <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+            </button>
+          </div>
         </div>
       </div>
     </div>
-    <div class="phone-caption">Pre-arrival entry point. Property data already filled (name, dates, district). CTA is the primary path; "skip" is visible but secondary.</div>
+    <div class="phone-caption"><b>Cover → Route preview.</b> Guest sees only the top of the poster (title + city + 1–2 pins, rest dissipates). Tap <i>Open my guide</i> → reveals the 7 stops in detail.</div>
   </div>
 
   <!-- PHONE 2 — Interactive: Quiz → Loading → Itinerary (single phone, 3 states) -->
@@ -587,6 +886,7 @@ html,body{margin:0;background:radial-gradient(1400px 700px at 50% -250px,#E4EAFF
     <div class="phone-caption"><b>Interactive:</b> tap chips → "Your vibe" preview updates live → <b>Generate</b> shows AI loading → 3-day plan rendered from your answers. Tap any activity to see "Why this fits".</div>
   </div>
 
+
   <!-- PHONE 3 — Embedded offer mid-itinerary -->
   <div class="phone-col">
     <div class="phone-label"><span class="num">M3</span><span class="stage-tag">Stage 1</span><span class="tag">Interactive</span>Embedded offer in context</div>
@@ -600,7 +900,7 @@ html,body{margin:0;background:radial-gradient(1400px 700px at 50% -250px,#E4EAFF
           <div class="av">L</div>
         </div>
         <div class="body">
-          <div class="slot-row"><span class="em">🛬</span><span class="lab">Arrival · 15:00</span></div>
+          <div class="slot-row afternoon"><span class="em">🛬</span><div class="meta"><span class="lab">Arrival</span><span class="time">15:00 · Day 1</span></div><span class="count">1 stop</span></div>
 
           <div class="act open">
             <div class="main">
@@ -631,7 +931,7 @@ html,body{margin:0;background:radial-gradient(1400px 700px at 50% -250px,#E4EAFF
             </div>
           </div>
 
-          <div class="slot-row"><span class="em">🌅</span><span class="lab">Afternoon</span></div>
+          <div class="slot-row afternoon"><span class="em">🌅</span><div class="meta"><span class="lab">Afternoon</span><span class="time">14:00 — 18:00</span></div><span class="count">2 stops</span></div>
 
           <div class="act open">
             <div class="main">
@@ -668,7 +968,7 @@ html,body{margin:0;background:radial-gradient(1400px 700px at 50% -250px,#E4EAFF
             </div>
           </div>
 
-          <div class="slot-row"><span class="em">🌙</span><span class="lab">Evening</span></div>
+          <div class="slot-row evening"><span class="em">🌙</span><div class="meta"><span class="lab">Evening</span><span class="time">20:00 — 23:00</span></div><span class="count">1 stop</span></div>
 
           <div class="act">
             <div class="main">
@@ -680,7 +980,7 @@ html,body{margin:0;background:radial-gradient(1400px 700px at 50% -250px,#E4EAFF
               </div>
             </div>
             <div class="footrow">
-              <button><svg viewBox="0 0 24 24"><circle cx="12" cy="10" r="3"/><path d="M12 22s-7-7-7-12a7 7 0 0114 0c0 5-7 12-7 12z"/></svg>Open in Maps</button>
+              <button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 10c0 7-8 13-8 13s-8-6-8-13a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>Maps</button>
               <button>Reserve</button>
             </div>
           </div>
@@ -723,7 +1023,7 @@ html,body{margin:0;background:radial-gradient(1400px 700px at 50% -250px,#E4EAFF
             </div>
           </div>
 
-          <div class="slot-row"><span class="em">🥐</span><span class="lab">Morning</span></div>
+          <div class="slot-row morning"><span class="em">🥐</span><div class="meta"><span class="lab">Morning</span><span class="time">09:00 — 13:00</span></div><span class="count">1 stop</span></div>
           <div class="act open" id="t-morn">
             <div class="main">
               <div class="ph nat" id="t-morn-ph">🌳</div>
@@ -742,7 +1042,7 @@ html,body{margin:0;background:radial-gradient(1400px 700px at 50% -250px,#E4EAFF
             </div>
           </div>
 
-          <div class="slot-row"><span class="em">🌅</span><span class="lab">Afternoon</span></div>
+          <div class="slot-row afternoon"><span class="em">🌅</span><div class="meta"><span class="lab">Afternoon</span><span class="time">14:00 — 18:00</span></div><span class="count">1 stop</span></div>
           <div class="act" id="t-aft">
             <div class="main">
               <div class="ph beach" id="t-aft-ph">🏖</div>
@@ -754,7 +1054,7 @@ html,body{margin:0;background:radial-gradient(1400px 700px at 50% -250px,#E4EAFF
             </div>
           </div>
 
-          <div class="slot-row"><span class="em">🌙</span><span class="lab">Evening</span></div>
+          <div class="slot-row evening"><span class="em">🌙</span><div class="meta"><span class="lab">Evening</span><span class="time">20:00 — 23:00</span></div><span class="count">1 stop</span></div>
           <div class="act" id="t-eve">
             <div class="main">
               <div class="ph food" id="t-eve-ph">🍴</div>
@@ -1028,7 +1328,26 @@ function updatePreview(){
   document.getElementById('qstep').textContent = `${done} / 4`;
 }
 
-/* ─────────── Phase switch in interactive phone ─────────── */
+/* ─────────── M1 cover ⇄ route preview ─────────── */
+function coverPhase(p){
+  document.querySelectorAll('#phone-cover .flow-screen').forEach(s => s.classList.remove('active'));
+  const back = document.getElementById('cover-back');
+  const titleBar = document.getElementById('cover-title-bar');
+  const subBar = document.getElementById('cover-sub-bar');
+  if (p === 'cover'){
+    document.getElementById('cover-screen-cover').classList.add('active');
+    back.style.visibility = 'hidden';
+    titleBar.textContent = 'Chekin';
+    subBar.textContent = 'Hotel Alfonso XIII · ready';
+  } else if (p === 'route'){
+    document.getElementById('cover-screen-route').classList.add('active');
+    back.style.visibility = 'visible';
+    titleBar.textContent = 'Your Seville route';
+    subBar.textContent = '7 stops · ~6h 30m';
+  }
+}
+
+/* ─────────── M2 phase switch ─────────── */
 function goPhase(p){
   document.querySelectorAll('#phone-flow .flow-screen').forEach(s => s.classList.remove('active'));
   if (p === 'quiz'){
@@ -1147,15 +1466,16 @@ function renderDay(d){
   document.querySelectorAll('#day-tabs button').forEach(b => b.classList.toggle('active', parseInt(b.dataset.day,10) === d));
   const plan = dayPlans[d];
   const slots = [
-    {key:'morning', label:'Morning', em:'🥐'},
-    {key:'afternoon', label:'Afternoon', em:'🌅'},
-    {key:'evening', label:'Evening', em:'🌙'},
+    {key:'morning',   label:'Morning',   em:'🥐', time:'09:00 — 13:00'},
+    {key:'afternoon', label:'Afternoon', em:'🌅', time:'14:00 — 18:00'},
+    {key:'evening',   label:'Evening',   em:'🌙', time:'20:00 — 23:00'},
   ];
   let html = '';
   slots.forEach((s, idx) => {
     const a = plan[s.key];
     if (!a) return;
-    html += `<div class="slot-row"><span class="em">${s.em}</span><span class="lab">${s.label}</span></div>`;
+    const count = '1 stop';
+    html += `<div class="slot-row ${s.key}"><span class="em">${s.em}</span><div class="meta"><span class="lab">${s.label}</span><span class="time">${s.time}</span></div><span class="count">${count}</span></div>`;
     html += activityHTML(a, idx===0 && d===1);
     // insert one embedded offer on Day 1 afternoon
     if (d === 1 && s.key === 'afternoon'){
@@ -1190,8 +1510,8 @@ function activityHTML(a, openByDefault){
         </div>
       </div>
       <div class="footrow">
-        <button><svg viewBox="0 0 24 24"><circle cx="12" cy="10" r="3"/><path d="M12 22s-7-7-7-12a7 7 0 0114 0c0 5-7 12-7 12z"/></svg>Open in Maps</button>
-        <button>Swap</button>
+        <button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 10c0 7-8 13-8 13s-8-6-8-13a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>Maps</button>
+        <button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>Swap</button>
         <button class="dim">Skip</button>
       </div>
     </div>
