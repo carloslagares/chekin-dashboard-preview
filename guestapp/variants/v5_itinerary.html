@@ -936,16 +936,6 @@ body.mobile-mode .mobile-nav{display:flex;padding-bottom:env(safe-area-inset-bot
         <!-- ──── ITINERARY STATE ──── -->
         <div class="flow-screen" id="screen-itin">
           <div class="body" id="itin-body">
-            <div class="itin-head">
-              <div class="row">
-                <div>
-                  <h3>Your Barcelona guide</h3>
-                  <div class="meta" id="itin-meta">3 days · tuned to your answers</div>
-                </div>
-                <button class="edit" onclick="goPhase('quiz')"><svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 113 3L7 19l-4 1 1-4z"/></svg>Edit</button>
-              </div>
-            </div>
-
             <div class="day-tabs" id="day-tabs">
               <button class="active" data-day="1"><span class="d">14</span><span class="l">Thu · Day 1</span></button>
               <button data-day="2"><span class="d">15</span><span class="l">Fri · Day 2</span></button>
@@ -1631,7 +1621,8 @@ function renderItinerary(){
     const b = answers.budget[0];
     labels.push(b==='low'?'Low budget':b==='balanced'?'Balanced budget':b==='premium'?'Premium':'Surprise');
   }
-  document.getElementById('itin-meta').textContent = `3 days · ${labels.join(' · ') || 'standard'}`;
+  const meta = document.getElementById('itin-meta');
+  if (meta) meta.textContent = `3 days · ${labels.join(' · ') || 'standard'}`;
 }
 
 function renderDay(d){
