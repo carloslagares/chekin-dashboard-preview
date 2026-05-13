@@ -816,15 +816,15 @@ html,body{margin:0;background:radial-gradient(1400px 700px at 50% -250px,#E4EAFF
             <div class="q-block">
               <div class="q">What kind of trip is this?</div>
               <div class="hint">Pick one or two — we'll mix them.</div>
-              <div class="chips" data-group="kind" data-multi="2">
-                <button class="chip" data-v="relaxed"><span class="em">🌿</span>Relaxed</button>
-                <button class="chip" data-v="cultural"><span class="em">🏛</span>Cultural</button>
-                <button class="chip" data-v="food"><span class="em">🍴</span>Food &amp; local life</button>
-                <button class="chip" data-v="family"><span class="em">👨‍👩‍👧</span>Family-friendly</button>
-                <button class="chip" data-v="romantic"><span class="em">💞</span>Romantic</button>
-                <button class="chip" data-v="nightlife"><span class="em">🌙</span>Nightlife</button>
-                <button class="chip" data-v="premium"><span class="em">✨</span>Premium</button>
-                <button class="chip" data-v="adventure"><span class="em">🥾</span>Adventure</button>
+              <div class="chips cols3" data-group="kind" data-multi="2">
+                <button class="chip" data-v="relaxed">Relaxed</button>
+                <button class="chip" data-v="cultural">Cultural</button>
+                <button class="chip" data-v="food">Food</button>
+                <button class="chip" data-v="family">Family</button>
+                <button class="chip" data-v="romantic">Romantic</button>
+                <button class="chip" data-v="nightlife">Nightlife</button>
+                <button class="chip" data-v="premium">Premium</button>
+                <button class="chip" data-v="adventure">Adventure</button>
               </div>
             </div>
 
@@ -850,18 +850,18 @@ html,body{margin:0;background:radial-gradient(1400px 700px at 50% -250px,#E4EAFF
             <div class="q-block">
               <div class="q">Anything you love or want to avoid?</div>
               <div class="hint">Multi-select. Avoids feel like real preferences.</div>
-              <div class="chips" data-group="interests" data-multi="6">
+              <div class="chips cols3" data-group="interests" data-multi="6">
                 <button class="chip" data-v="museums">Museums</button>
                 <button class="chip" data-v="restaurants">Restaurants</button>
                 <button class="chip" data-v="wellness">Wellness</button>
                 <button class="chip" data-v="gym">Gym</button>
                 <button class="chip" data-v="shopping">Shopping</button>
-                <button class="chip" data-v="kids">Kids activities</button>
+                <button class="chip" data-v="kids">Kids</button>
                 <button class="chip" data-v="nature">Nature</button>
                 <button class="chip" data-v="nightlife-int">Nightlife</button>
-                <button class="chip avoid" data-v="avoid-tourist">🚫 Tourist traps</button>
-                <button class="chip avoid" data-v="avoid-walks">🚫 Long walks</button>
-                <button class="chip avoid" data-v="avoid-loud">🚫 Loud places</button>
+                <button class="chip avoid" data-v="avoid-tourist">🚫 Traps</button>
+                <button class="chip avoid" data-v="avoid-walks">🚫 Walks</button>
+                <button class="chip avoid" data-v="avoid-loud">🚫 Loud</button>
               </div>
             </div>
 
@@ -872,9 +872,7 @@ html,body{margin:0;background:radial-gradient(1400px 700px at 50% -250px,#E4EAFF
           </div>
           <div class="quiz-foot">
             <button class="btn ghost" onclick="generateDefault()">Skip</button>
-            <button class="btn primary" id="generate-btn" onclick="startGenerate()" disabled>Generate plan
-              <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-            </button>
+            <button class="btn primary" id="generate-btn" onclick="startGenerate()" disabled>Generate plan</button>
           </div>
         </div>
 
@@ -1112,9 +1110,6 @@ html,body{margin:0;background:radial-gradient(1400px 700px at 50% -250px,#E4EAFF
               <button>Reserve</button>
             </div>
           </div>
-        </div>
-        <div class="sticky-bottom">
-          <button class="btn primary"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 01-8.5 8.5 8.5 8.5 0 01-7.6-4.7L3 21l1.7-1.9A8.38 8.38 0 0112.5 3a8.5 8.5 0 018.5 8.5z"/></svg>Ask concierge to adjust</button>
         </div>
       </div>
     </div>
