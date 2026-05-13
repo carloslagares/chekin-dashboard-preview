@@ -185,7 +185,7 @@ html,body{margin:0;background:radial-gradient(1400px 700px at 50% -250px,#E4EAFF
 /* Portrait variant — show top of portrait poster, dissipate bottom into cover-info */
 .cover-poster--portrait img{
   aspect-ratio:auto;
-  height:330px;
+  height:390px;
   width:100%;
   object-fit:cover;
   object-position:top center;
@@ -662,6 +662,10 @@ body.mobile-mode .phone{
 body.mobile-mode .screen{border-radius:0 !important;width:100% !important;max-width:100% !important;height:100% !important}
 body.mobile-mode .island{display:none}
 body.mobile-mode .status{display:none}
+body.mobile-mode .cover-poster--portrait{aspect-ratio:1024/1536;height:auto}
+body.mobile-mode .cover-poster--portrait img{height:100%;min-height:0;max-height:none;object-fit:cover;object-position:top center}
+body.mobile-mode .cover-poster--portrait::after{height:90px}
+body.mobile-mode .cover-info{margin-top:-40px}
 body.mobile-mode .mobile-nav{display:flex;padding-bottom:env(safe-area-inset-bottom,0)}
 @media (max-width:720px){
   .try-mobile{top:auto;bottom:72px;right:10px;padding:7px 10px;font-size:11px}
