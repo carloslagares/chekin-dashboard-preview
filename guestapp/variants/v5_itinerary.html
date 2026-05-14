@@ -585,6 +585,23 @@ html,body{margin:0;background:radial-gradient(1400px 700px at 50% -250px,#E4EAFF
   background:radial-gradient(280px 140px at 90% -20%,rgba(255,116,156,.3),transparent 60%),linear-gradient(135deg,#FF2467,#161643);
   position:relative;overflow:hidden;
 }
+.countdown.arrive{
+  background:radial-gradient(280px 140px at 90% -20%,rgba(120,170,255,.45),transparent 60%),linear-gradient(135deg,#385CF8,#161643);
+}
+.checkin-cta{
+  display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:14px;cursor:pointer;
+  background:linear-gradient(135deg,#0F9F80,#0B7A65);color:#fff;border:none;
+  box-shadow:0 8px 18px rgba(15,159,128,.32);position:relative;overflow:hidden;
+}
+.checkin-cta::after{
+  content:"";position:absolute;inset:0;border-radius:14px;pointer-events:none;
+  background:radial-gradient(220px 120px at 0% 0%,rgba(255,255,255,.18),transparent 70%);
+}
+.checkin-cta .ic{width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.18);display:grid;place-items:center;flex-shrink:0;font-size:18px}
+.checkin-cta .tx{flex:1;text-align:left;min-width:0}
+.checkin-cta .t{font:700 13.5px var(--font-primary);color:#fff;display:block;line-height:1.2}
+.checkin-cta .s{font:500 11px var(--font-primary);color:rgba(255,255,255,.85);display:block;margin-top:2px;line-height:1.3}
+.checkin-cta svg.arr{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2;flex-shrink:0}
 .countdown .l{font:700 9.5px var(--font-primary);text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.7)}
 .countdown .v{font:700 30px/32px var(--font-primary);letter-spacing:-.01em;margin-top:5px;font-variant-numeric:tabular-nums}
 .countdown .s{font:500 11px var(--font-primary);color:rgba(255,255,255,.78);margin-top:3px}
@@ -1058,6 +1075,70 @@ body.mobile-mode .mobile-nav{display:flex;padding-bottom:env(safe-area-inset-bot
     <div class="phone-caption">Offers live <i>inside</i> the day, never as a separate ad screen. Trust indicator, price, dismiss action. Max one prominent upsell per slot — <b>tap "Not interested" to collapse.</b></div>
   </div>
 
+  <!-- PHONE 3b — Check-in day (alternative arrival-day layout) -->
+  <div class="phone-col" data-mkey="M3b">
+    <div class="phone-label"><span class="num">M3b</span><span class="stage-tag">Stage 1</span><span class="tag alt">Variant</span>Check-in day · arrival</div>
+    <div class="phone">
+      <div class="screen">
+        <div class="island"></div>
+        <div class="status"><span>10:24</span><span class="right">5G <span class="batt"><span class="b"></span></span></span></div>
+        <div class="topbar">
+          <button class="icon-btn"><svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+          <div class="brand-mini"><span class="t">Today · check-in</span><span class="s">Wed May 14</span></div>
+          <button class="vela-btn" aria-label="Vela · AI concierge"><svg viewBox="0 0 24 24"><path d="M12 2.5l1.9 5.2 5.2 1.9-5.2 1.9L12 16.7l-1.9-5.2-5.2-1.9 5.2-1.9zM18 15l.9 2.4 2.4.9-2.4.9L18 21.6l-.9-2.4-2.4-.9 2.4-.9z"/></svg></button>
+        </div>
+        <div class="body">
+          <div class="today-greet">
+            <h3>Welcome to Barcelona, Laura</h3>
+            <p>Your stay starts today. A few things to sort before you reach Hotel Pulitzer.</p>
+          </div>
+
+          <div class="countdown arrive">
+            <span class="l">Check-in opens in</span>
+            <div class="v" id="ci-cd-v">3h 12m</div>
+            <div class="s">Doors open at 14:00 · early luggage drop available</div>
+          </div>
+
+          <button class="checkin-cta" type="button">
+            <div class="ic">🪪</div>
+            <div class="tx">
+              <span class="t">Start online check-in</span>
+              <span class="s">Skip the lobby line · 2 min · ID + signature</span>
+            </div>
+            <svg class="arr" viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </button>
+
+          <div class="eyebrow" style="margin-top:6px">Before you arrive</div>
+          <div class="task-list">
+            <div class="row"><div class="ic a">🧳</div><div><div class="t">Early luggage drop</div><div class="d">Free at Hotel Pulitzer · open from 09:00</div></div><svg class="chev" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+            <div class="row"><div class="ic c">🚖</div><div><div class="t">Airport transfer · BCN → Pulitzer</div><div class="d">Private car · 4 seats + 4 bags · €42 · 35 min</div></div><svg class="chev" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+            <div class="row"><div class="ic b">🗝️</div><div><div class="t">Express keys via app</div><div class="d">Available 30 min after check-in · skip the desk</div></div><svg class="chev" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+          </div>
+
+          <div class="eyebrow" style="margin-top:8px">Once you land</div>
+          <div class="act open">
+            <div class="main">
+              <div class="ph food">☕</div>
+              <div class="info">
+                <div class="name">Coffee at Federal Café · Born</div>
+                <div class="desc">5 min walk from Pulitzer. Light brunch, fast Wi-Fi, kid-friendly. Recover from the flight before the day opens up.</div>
+                <div class="row"><span>5 min walk</span><span class="dot"></span><span class="cost">€€</span></div>
+              </div>
+            </div>
+            <div class="why">
+              <div class="inner">
+                <div class="lab">Why now</div>
+                <p>Easy with luggage if your room isn't ready yet — slot between airport transfer and 14:00 check-in.</p>
+                <div class="tags"><span>arrival-fit</span><span>family</span><span>food</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="phone-caption"><b>Variant M3b:</b> arrival-day mirror of M6. Countdown to check-in → prominent CTA to start online check-in → "Before you arrive" tasks (luggage, transfer, keys) → one suggested first activity once they land.</div>
+  </div>
+
   <!-- PHONE 4 — Today screen (Stage 2) with weather toggle -->
   <div class="phone-col" data-mkey="M4">
     <div class="phone-label"><span class="num">M4</span><span class="stage-tag s2">Stage 2</span><span class="tag">Interactive</span>Today · weather-adaptive</div>
@@ -1305,6 +1386,7 @@ body.mobile-mode .mobile-nav{display:flex;padding-bottom:env(safe-area-inset-bot
   <button data-go="M1"><span class="ic">📍</span><span>Cover</span></button>
   <button data-go="M2"><span class="ic">✨</span><span>Quiz</span></button>
   <button data-go="M3"><span class="ic">🎟️</span><span>Offer</span></button>
+  <button data-go="M3b"><span class="ic">🪪</span><span>Check-in</span></button>
   <button data-go="M4"><span class="ic">☀️</span><span>Today</span></button>
   <button data-go="M5"><span class="ic">💬</span><span>Vela</span></button>
   <button data-go="M6"><span class="ic">🧳</span><span>Checkout</span></button>
