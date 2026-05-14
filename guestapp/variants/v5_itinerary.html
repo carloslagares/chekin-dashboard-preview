@@ -344,7 +344,7 @@ html,body{margin:0;background:radial-gradient(1400px 700px at 50% -250px,#E4EAFF
 .quiz-foot .btn{flex:1;white-space:nowrap;padding:13px 10px;gap:6px;font-size:13.5px;min-width:0}
 .quiz-foot .btn svg{width:13px;height:13px}
 
-/* Variant M2v — compact 3-column chip grid */
+/* Compact 3-column chip grid (kind / interests) */
 .chips.cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 .chips.cols3 .chip{justify-content:center;padding:8px 6px;font-size:11.5px;text-align:center;min-width:0;line-height:1.2}
 .chips.cols3 .chip .em{font-size:13px}
@@ -954,97 +954,6 @@ body.mobile-mode .mobile-nav{display:flex;padding-bottom:env(safe-area-inset-bot
     </div>
     <div class="phone-caption"><b>Interactive:</b> tap chips → "Your vibe" preview updates live → <b>Generate</b> shows AI loading → 3-day plan rendered from your answers. Tap any activity to see "Why this fits".</div>
   </div>
-
-  <!-- PHONE 2v — Alternative chip layout (compact 3-col grid) -->
-  <div class="phone-col" data-mkey="M2v">
-    <div class="phone-label"><span class="num">M2v</span><span class="stage-tag">Stage 1</span><span class="tag">Variant</span>Compact chip grid</div>
-    <div class="phone">
-      <div class="screen">
-        <div class="island"></div>
-        <div class="status"><span>9:42</span><span class="right">5G <span class="batt"><span class="b"></span></span></span></div>
-        <div class="topbar">
-          <button class="icon-btn"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
-          <div class="brand-mini"><span class="t">Personalize your trip</span><span class="s">4 quick questions</span></div>
-          <button class="vela-btn" aria-label="Vela · AI concierge"><svg viewBox="0 0 24 24"><path d="M12 2.5l1.9 5.2 5.2 1.9-5.2 1.9L12 16.7l-1.9-5.2-5.2-1.9 5.2-1.9zM18 15l.9 2.4 2.4.9-2.4.9L18 21.6l-.9-2.4-2.4-.9 2.4-.9z"/></svg></button>
-        </div>
-
-        <div class="flow-screen active">
-          <div class="body">
-            <div class="quiz-progress">
-              <span class="dot done"></span>
-              <span class="dot"></span>
-              <span class="dot"></span>
-              <span class="dot"></span>
-              <span class="step">1 / 4</span>
-            </div>
-
-            <div class="q-block">
-              <div class="q">What kind of trip is this?</div>
-              <div class="hint">Pick one or two — we'll mix them.</div>
-              <div class="chips cols3">
-                <button class="chip"><span class="em">🌿</span>Relaxed</button>
-                <button class="chip active"><span class="em">🏛</span>Cultural</button>
-                <button class="chip"><span class="em">🍴</span>Food</button>
-                <button class="chip"><span class="em">👨‍👩‍👧</span>Family</button>
-                <button class="chip"><span class="em">💞</span>Romantic</button>
-                <button class="chip"><span class="em">🌙</span>Nightlife</button>
-                <button class="chip"><span class="em">✨</span>Premium</button>
-                <button class="chip"><span class="em">🥾</span>Adventure</button>
-              </div>
-            </div>
-
-            <div class="q-block">
-              <div class="q">How intense should the plan be?</div>
-              <div class="chips">
-                <button class="chip">Light · 2 stops/day</button>
-                <button class="chip active">Balanced · 3 stops</button>
-                <button class="chip">Full · 4+ stops</button>
-              </div>
-            </div>
-
-            <div class="q-block">
-              <div class="q">What budget should we use?</div>
-              <div class="chips">
-                <button class="chip">Mostly free/low</button>
-                <button class="chip active">Balanced</button>
-                <button class="chip">Premium</button>
-                <button class="chip">Surprise me</button>
-              </div>
-            </div>
-
-            <div class="q-block">
-              <div class="q">Anything you love or want to avoid?</div>
-              <div class="hint">Multi-select. Avoids feel like real preferences.</div>
-              <div class="chips cols3">
-                <button class="chip">Museums</button>
-                <button class="chip">Restaurants</button>
-                <button class="chip">Wellness</button>
-                <button class="chip">Gym</button>
-                <button class="chip">Shopping</button>
-                <button class="chip">Kids</button>
-                <button class="chip">Nature</button>
-                <button class="chip">Nightlife</button>
-                <button class="chip avoid">🚫 Traps</button>
-                <button class="chip avoid">🚫 Walks</button>
-                <button class="chip avoid">🚫 Loud</button>
-              </div>
-            </div>
-
-            <div class="preview-pill">
-              <span class="lab">Your vibe</span>
-              <div class="tags"><span class="t">Cultural</span><span class="t">Balanced pace</span><span class="t">Balanced budget</span></div>
-            </div>
-          </div>
-          <div class="quiz-foot">
-            <button class="btn ghost" onclick="generateDefault()">Skip</button>
-            <button class="btn primary" onclick="startGenerate()">Generate plan</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="phone-caption"><b>Variant M2v:</b> kind-of-trip and interests use a 3-column grid → fewer rows, less scroll. Skip + Generate plan fixed to single line, same height as the M3 concierge button.</div>
-  </div>
-
 
   <!-- PHONE 3 — Embedded offer mid-itinerary -->
   <div class="phone-col" data-mkey="M3">
