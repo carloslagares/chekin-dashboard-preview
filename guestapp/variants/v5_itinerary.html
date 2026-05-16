@@ -6,7 +6,7 @@
 <title>Chekin — Personalized Trip Guide V5</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&display=swap" rel="stylesheet">
 <style>
 :root{
   /* Chekin tokens */
@@ -247,6 +247,62 @@ html,body{margin:0;background:radial-gradient(1400px 700px at 50% -250px,#E4EAFF
   font:700 12px var(--font-primary);color:var(--color-navy-blue);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
+
+/* ─────── Register hero (M1 step 1.5 — sign-in gate) ─────── */
+.register-hero{
+  position:relative;flex:1;display:flex;flex-direction:column;justify-content:flex-end;
+  background:#0B0B22 center/cover no-repeat;
+  background-image:
+    linear-gradient(180deg,rgba(11,11,34,0) 0%,rgba(11,11,34,.15) 32%,rgba(11,11,34,.7) 68%,rgba(11,11,34,.95) 100%),
+    url("images/poster_sevilla.png");
+  color:#fff;padding:18px 18px max(22px,env(safe-area-inset-bottom,22px));
+  overflow:hidden;min-height:0;
+}
+.register-hero::before{
+  content:"";position:absolute;inset:0;
+  background:radial-gradient(140% 70% at 50% 0%,rgba(11,11,34,.0),rgba(11,11,34,.0) 40%,rgba(11,11,34,.55) 100%);
+  pointer-events:none;
+}
+.register-hero .top-pill{
+  position:absolute;top:14px;left:50%;transform:translateX(-50%);z-index:2;
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  color:#fff;font:700 9.5px var(--font-primary);text-transform:uppercase;letter-spacing:.14em;
+  padding:5px 10px 5px 8px;border-radius:999px;display:inline-flex;align-items:center;gap:5px;
+}
+.register-hero .top-pill::before{content:"";width:5px;height:5px;border-radius:50%;background:#6BE0A8;box-shadow:0 0 0 3px rgba(107,224,168,.25)}
+.register-hero .stack{position:relative;z-index:1;display:flex;flex-direction:column;gap:14px}
+.register-hero .reg-eyebrow{font:700 10px var(--font-primary);letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.78)}
+.register-hero h2.reg-title{
+  margin:0;color:#fff;letter-spacing:-.01em;
+  font-family:"Playfair Display","Cormorant Garamond",Georgia,serif;
+  font-weight:700;font-size:34px;line-height:1.04;
+  text-shadow:0 2px 18px rgba(0,0,0,.25);
+}
+.register-hero h2.reg-title em{font-style:italic;color:#FFD27A;font-weight:600}
+.register-hero p.reg-sub{margin:0;font:500 13px/18px var(--font-primary);color:rgba(255,255,255,.86);max-width:300px}
+.register-hero .reg-actions{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.register-hero .reg-btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;border-radius:12px;padding:12px 14px;cursor:pointer;
+  font:600 13.5px var(--font-primary);border:none;
+  transition:transform .12s, box-shadow .12s;
+}
+.register-hero .reg-btn:active{transform:translateY(1px)}
+.register-hero .reg-btn.apple{background:#000;color:#fff;border:1px solid rgba(255,255,255,.12)}
+.register-hero .reg-btn.google{background:#fff;color:#161643}
+.register-hero .reg-btn.email{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.22)}
+.register-hero .reg-btn svg{width:16px;height:16px}
+.register-hero .reg-foot{margin-top:6px;text-align:center;font:500 11.5px var(--font-primary);color:rgba(255,255,255,.78)}
+.register-hero .reg-foot a{color:#fff;font-weight:700;text-decoration:underline;cursor:pointer}
+.register-hero .reg-legal{margin-top:10px;text-align:center;font:500 9.5px/14px var(--font-primary);color:rgba(255,255,255,.5);max-width:280px;margin-left:auto;margin-right:auto}
+.register-hero .reg-legal a{color:rgba(255,255,255,.78);text-decoration:underline;cursor:pointer}
+
+/* When the register screen is active, swap the topbar to a transparent on-photo look */
+.topbar.on-photo{background:transparent;border-bottom:0;position:absolute;top:38px;left:0;right:0;z-index:3}
+.topbar.on-photo .icon-btn{background:rgba(255,255,255,.18);color:#fff;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.topbar.on-photo .brand-mini .t,
+.topbar.on-photo .brand-mini .s{color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.45)}
+body.mobile-mode .topbar.on-photo{top:max(8px,env(safe-area-inset-top,8px))}
 
 /* ─────── Route preview (M1 step 2) ─────── */
 .route-hero{
@@ -744,10 +800,38 @@ body.mobile-mode .mobile-nav{display:flex;padding-bottom:env(safe-area-inset-bot
                 <div class="m-item"><span class="l">Group</span><span class="v">Family of 4</span></div>
               </div>
 
-              <button class="btn primary" onclick="coverPhase('route')">Open my guide
+              <button class="btn primary" onclick="coverPhase('register')">Open my guide
                 <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
               </button>
               <a class="skip-link" onclick="generateDefault()">Skip questions · standard guide</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- ──── REGISTER / SIGN-IN STATE ──── -->
+        <div class="flow-screen" id="cover-screen-register">
+          <div class="register-hero">
+            <span class="top-pill">Your guide is ready</span>
+            <div class="stack">
+              <span class="reg-eyebrow">Chekin · Personalized trip guide</span>
+              <h2 class="reg-title">Your Seville,<br/><em>made for you.</em></h2>
+              <p class="reg-sub">We built a day-by-day route around your family, your pace and your weather. Sign in to unlock it.</p>
+              <div class="reg-actions">
+                <button class="reg-btn apple" onclick="signIn('apple','signup')">
+                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.4 12.7c0-2.2 1.8-3.3 1.9-3.4-1-1.5-2.6-1.7-3.2-1.8-1.4-.1-2.7.8-3.4.8s-1.8-.8-2.9-.8c-1.5 0-2.9.9-3.7 2.2-1.6 2.7-.4 6.8 1.1 9 .8 1.1 1.7 2.3 2.9 2.2 1.2 0 1.6-.7 3-.7s1.8.7 3 .7c1.2 0 2-1.1 2.8-2.2.9-1.3 1.2-2.5 1.3-2.6-.1 0-2.5-1-2.5-3.4zM14.1 6.1c.6-.8 1.1-1.9 1-3-.9 0-2 .6-2.7 1.4-.6.7-1.1 1.8-.9 2.9 1 .1 2-.5 2.6-1.3z"/></svg>
+                  Continue with Apple
+                </button>
+                <button class="reg-btn google" onclick="signIn('google','signup')">
+                  <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M21.6 12.2c0-.6-.1-1.3-.2-1.9H12v3.6h5.4c-.2 1.2-.9 2.3-2 3v2.5h3.2c1.9-1.7 3-4.3 3-7.2z"/><path fill="#34A853" d="M12 22c2.7 0 5-.9 6.6-2.4l-3.2-2.5c-.9.6-2 1-3.4 1-2.6 0-4.9-1.8-5.7-4.2H3v2.6C4.6 19.8 8 22 12 22z"/><path fill="#FBBC05" d="M6.3 13.9c-.2-.6-.3-1.2-.3-1.9s.1-1.3.3-1.9V7.5H3C2.4 8.8 2 10.4 2 12s.4 3.2 1 4.5l3.3-2.6z"/><path fill="#EA4335" d="M12 5.9c1.5 0 2.8.5 3.8 1.5l2.9-2.9C16.9 2.9 14.7 2 12 2 8 2 4.6 4.2 3 7.5l3.3 2.6c.8-2.4 3.1-4.2 5.7-4.2z"/></svg>
+                  Continue with Google
+                </button>
+                <button class="reg-btn email" onclick="signIn('email','signup')">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+                  Continue with email
+                </button>
+              </div>
+              <p class="reg-foot">Already a Chekin guest? <a onclick="signIn('any','login')">Sign in</a></p>
+              <p class="reg-legal">By continuing you agree to our <a>Terms</a> and <a>Privacy Policy</a>. We use your trip details only to tailor this guide.</p>
             </div>
           </div>
         </div>
@@ -1490,16 +1574,34 @@ function coverPhase(p){
   const back = document.getElementById('cover-back');
   const titleBar = document.getElementById('cover-title-bar');
   const subBar = document.getElementById('cover-sub-bar');
+  const topbar = document.querySelector('#phone-cover .topbar');
+  if (topbar) topbar.classList.toggle('on-photo', p === 'register');
   if (p === 'cover'){
     document.getElementById('cover-screen-cover').classList.add('active');
     back.style.visibility = 'hidden';
     titleBar.textContent = 'Chekin';
     subBar.textContent = 'Hotel Alfonso XIII · ready';
+  } else if (p === 'register'){
+    document.getElementById('cover-screen-register').classList.add('active');
+    back.style.visibility = 'visible';
+    titleBar.textContent = '';
+    subBar.textContent = '';
   } else if (p === 'route'){
     document.getElementById('cover-screen-route').classList.add('active');
     back.style.visibility = 'visible';
     titleBar.textContent = 'Your Seville route';
     subBar.textContent = '7 stops · ~6h 30m';
+  }
+}
+function signIn(provider, kind){
+  // existing user (kind='login') → straight to check-in day flow
+  // new user (kind='signup') → quiz to personalize
+  if (kind === 'login'){
+    if (typeof showMobile === 'function' && document.body.classList.contains('mobile-mode')) showMobile('M3b');
+    else { const el = document.querySelector('[data-mkey="M3b"]'); if (el) el.scrollIntoView({behavior:'smooth',block:'start'}); }
+  } else {
+    if (typeof showMobile === 'function' && document.body.classList.contains('mobile-mode')) showMobile('M2');
+    else { const el = document.querySelector('[data-mkey="M2"]'); if (el) el.scrollIntoView({behavior:'smooth',block:'start'}); }
   }
 }
 
