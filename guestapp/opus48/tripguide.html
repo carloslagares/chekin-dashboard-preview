@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chekin Guest — Trip Guide (Opus 4.8)</title>
+<link rel="stylesheet" href="../../ds/colors_and_type.css">
+<link rel="stylesheet" href="../_chek.css">
+<script src="../_chek.js" defer></script>
+<style>
+  :root{
+    --bg-dark:#161643;
+    --bg-screen:#F6F7FC;
+    --bg-white:#FFFFFF;
+    --bg-neutral-light:#F4F6F8;
+    --bg-neutral-cold:#F0F0F8;
+    --bg-sky-light:#EFF6FF;
+    --bg-blue-light:#F0F3FF;
+    --bg-success-light:#E8FCF7;
+    --bg-warn-light:#FFF2E0;
+    --stroke-gray-lighter:#E8E9F1;
+    --stroke-gray-light:#DEDEEB;
+    --stroke-gray-medium:#CECEDE;
+    --text-dark:#161643;
+    --text-gray-dark:#6B6B95;
+    --text-gray-medium:#9696B9;
+    --text-gray-light:#CECEDE;
+    --text-brand:#385CF8;
+    --text-brand-dark:#2945C5;
+    --text-success:#0F9F80;
+    --text-warn:#B86A00;
+    --text-danger:#FF2467;
+    --radius-md:10px;
+    --radius-lg:16px;
+    --radius-xl:22px;
+    --shadow-card:0 1px 3px rgba(22,22,67,.05),0 0 0 1px rgba(22,22,67,.035);
+    --shadow-elev:0 12px 32px rgba(22,22,67,.09),0 3px 8px rgba(22,22,67,.05);
+    --shadow-hover:0 16px 36px rgba(56,92,248,.14),0 3px 8px rgba(22,22,67,.06);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg-screen);font-family:var(--font-primary);color:var(--text-dark);font-feature-settings:"ss01";-webkit-font-smoothing:antialiased}
+  @media (prefers-reduced-motion:no-preference){
+    .reveal{opacity:0;transform:translateY(10px);animation:rv .55s cubic-bezier(.2,.8,.2,1) forwards}
+    @keyframes rv{to{opacity:1;transform:none}}
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:24px 28px 64px;display:flex;flex-direction:column;gap:22px}
+
+  /* Topbar */
+  .top{display:flex;align-items:center;gap:14px}
+  .top .brand{display:flex;align-items:center;gap:10px;font:700 15px var(--font-primary)}
+  .top .brand .mk{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,#385CF8,#8CA5FF);display:grid;place-items:center;color:#fff}
+  .top .brand .mk svg{width:16px;height:16px;fill:#fff;stroke:none}
+  .top .sp{margin-left:auto}
+
+  /* Hero */
+  .hero{position:relative;border-radius:var(--radius-xl);overflow:hidden;min-height:280px;display:flex;align-items:flex-end;box-shadow:var(--shadow-elev)}
+  .hero .bgimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .hero .scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(21,21,63,.10) 0%,rgba(21,21,63,.30) 45%,rgba(21,21,63,.86) 100%)}
+  .hero .ct{position:relative;z-index:2;padding:28px 32px;color:#fff;width:100%}
+  .hero .kick{display:inline-flex;align-items:center;gap:8px;font:700 11px var(--font-primary);text-transform:uppercase;letter-spacing:.12em;color:#CBD4FF;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);padding:6px 12px;border-radius:999px;backdrop-filter:blur(4px)}
+  .hero .kick svg{width:13px;height:13px;fill:#fff;stroke:none}
+  .hero h1{font:700 38px/42px var(--font-primary);margin:14px 0 0;letter-spacing:-.02em}
+  .hero .meta{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;font:600 13px var(--font-primary);color:rgba(255,255,255,.92)}
+  .hero .meta span{display:inline-flex;align-items:center;gap:7px}
+  .hero .meta svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8}
+  .hero .acts{position:absolute;top:22px;right:24px;z-index:2;display:flex;gap:8px}
+  .hero .acts button{height:38px;padding:0 14px;border-radius:10px;border:1px solid rgba(255,255,255,.24);background:rgba(255,255,255,.14);color:#fff;font:600 13px var(--font-primary);cursor:pointer;display:inline-flex;align-items:center;gap:7px;backdrop-filter:blur(8px);transition:background .14s}
+  .hero .acts button:hover{background:rgba(255,255,255,.24)}
+  .hero .acts button svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2}
+  .hero .acts button.solid{background:#fff;color:var(--text-dark);border-color:#fff}
+
+  /* Layout */
+  .grid{display:grid;grid-template-columns:1fr 340px;gap:24px;align-items:start}
+
+  /* Day tabs */
+  .days{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+  .days::-webkit-scrollbar{display:none}
+  .day-tab{flex-shrink:0;min-width:96px;padding:12px 16px;border-radius:14px;border:1px solid var(--stroke-gray-lighter);background:#fff;cursor:pointer;text-align:left;transition:border-color .14s,box-shadow .14s,transform .1s}
+  .day-tab:hover{border-color:rgba(56,92,248,.3);transform:translateY(-1px)}
+  .day-tab .dn{font:700 11px var(--font-primary);color:var(--text-gray-medium);text-transform:uppercase;letter-spacing:.06em}
+  .day-tab .dd{font:700 18px var(--font-primary);color:var(--text-dark);margin-top:3px}
+  .day-tab .dw{font:500 11px var(--font-primary);color:var(--text-gray-dark);margin-top:1px}
+  .day-tab.active{background:linear-gradient(135deg,#15153F,#2E46C8);border-color:transparent;box-shadow:0 8px 20px rgba(56,92,248,.26)}
+  .day-tab.active .dn{color:#AEB7F5}
+  .day-tab.active .dd,.day-tab.active .dw{color:#fff}
+
+  /* Itinerary timeline */
+  .tl{position:relative;padding-left:8px}
+  .tl-block{display:flex;flex-direction:column;gap:12px}
+  .tl-part{display:flex;align-items:center;gap:10px;margin:8px 0 2px}
+  .tl-part .ic{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;flex-shrink:0}
+  .tl-part .ic svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.9}
+  .tl-part.morning .ic{background:var(--bg-warn-light);color:var(--text-warn)}
+  .tl-part.afternoon .ic{background:var(--bg-sky-light);color:var(--text-brand)}
+  .tl-part.evening .ic{background:#EDE9FF;color:#6B4FD8}
+  .tl-part .t{font:700 13px var(--font-primary);text-transform:uppercase;letter-spacing:.05em}
+  .tl-part .ln{flex:1;height:1px;background:var(--stroke-gray-lighter)}
+
+  .stop{display:flex;gap:14px;background:#fff;border:1px solid var(--stroke-gray-lighter);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-card);transition:transform .15s,box-shadow .15s;cursor:pointer}
+  .stop:hover{transform:translateY(-2px);box-shadow:var(--shadow-hover)}
+  .stop .media{width:128px;flex-shrink:0;position:relative;background:var(--bg-neutral-cold);overflow:hidden}
+  .stop .media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .stop .media .time{position:absolute;top:8px;left:8px;font:700 10.5px var(--font-primary);background:rgba(22,22,67,.82);color:#fff;padding:3px 8px;border-radius:999px;backdrop-filter:blur(4px);font-variant-numeric:tabular-nums}
+  .stop .b{flex:1;min-width:0;padding:14px 16px 14px 4px;display:flex;flex-direction:column;gap:4px}
+  .stop .cat{font:700 9.5px var(--font-primary);color:var(--text-brand);text-transform:uppercase;letter-spacing:.08em}
+  .stop .nm{font:600 15.5px/20px var(--font-primary)}
+  .stop .ds{font:400 12.5px/17px var(--font-primary);color:var(--text-gray-dark)}
+  .stop .foot{display:flex;align-items:center;gap:12px;margin-top:6px;flex-wrap:wrap}
+  .stop .tag{display:inline-flex;align-items:center;gap:5px;font:600 11px var(--font-primary);color:var(--text-gray-dark)}
+  .stop .tag svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2}
+  .stop .tag.open{color:var(--text-success)}
+  .stop .tag.vela{color:var(--text-brand)}
+  .stop .add{margin-left:auto;width:30px;height:30px;border-radius:8px;border:1px solid var(--stroke-gray-medium);background:#fff;color:var(--text-brand);display:grid;place-items:center;cursor:pointer;flex-shrink:0}
+  .stop .add svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2.2}
+
+  .transfer{display:flex;align-items:center;gap:10px;padding:7px 14px;margin-left:14px;color:var(--text-gray-medium);font:500 12px var(--font-primary)}
+  .transfer svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8}
+  .transfer .dline{flex:0 0 18px;border-left:2px dotted var(--stroke-gray-medium);height:18px;margin-left:8px}
+
+  /* Rail */
+  .rail{display:flex;flex-direction:column;gap:16px;position:sticky;top:20px}
+  .card{background:#fff;border:1px solid var(--stroke-gray-lighter);border-radius:var(--radius-lg);box-shadow:var(--shadow-card);overflow:hidden}
+  .map{position:relative;height:200px;background:linear-gradient(135deg,#EAF0FF,#DCE6FF)}
+  .map svg{position:absolute;inset:0;width:100%;height:100%}
+  .map .badge{position:absolute;left:12px;bottom:12px;font:700 10.5px var(--font-primary);background:#fff;color:var(--text-dark);padding:6px 11px;border-radius:999px;box-shadow:0 2px 8px rgba(22,22,67,.14);display:inline-flex;align-items:center;gap:6px}
+  .map .badge svg{position:static;width:12px;height:12px;stroke:var(--text-brand);fill:none;stroke-width:2}
+  .ch{padding:14px 16px 6px;font:700 11px var(--font-primary);text-transform:uppercase;letter-spacing:.07em;color:var(--text-gray-dark)}
+  .saved{padding:6px 10px 12px;display:flex;flex-direction:column;gap:2px}
+  .saved .row{display:flex;align-items:center;gap:11px;padding:9px 8px;border-radius:10px;cursor:pointer;transition:background .12s}
+  .saved .row:hover{background:var(--bg-neutral-light)}
+  .saved .thumb{width:38px;height:38px;border-radius:9px;flex-shrink:0;display:grid;place-items:center;color:#fff}
+  .saved .thumb svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.7}
+  .saved .nm{font:600 13px var(--font-primary)}
+  .saved .mt{font:500 11px var(--font-primary);color:var(--text-gray-medium);margin-top:1px}
+  .saved .pin{margin-left:auto;font:600 11px var(--font-primary);color:var(--text-gray-dark)}
+
+  .veltip{padding:16px;background:linear-gradient(135deg,#F0F3FF,#EFF6FF);border:1px solid #DCE3FF;border-radius:var(--radius-lg);position:relative;overflow:hidden}
+  .veltip::before{content:"";position:absolute;top:-26px;right:-18px;width:110px;height:110px;border-radius:50%;background:radial-gradient(circle,rgba(56,92,248,.14),transparent 65%)}
+  .veltip .hd{display:flex;align-items:center;gap:9px;position:relative;z-index:2}
+  .veltip .av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#385CF8,#8CA5FF);display:grid;place-items:center;color:#fff;box-shadow:0 3px 8px rgba(56,92,248,.3)}
+  .veltip .av svg{width:15px;height:15px;fill:#fff;stroke:none}
+  .veltip .hd .t{font:700 13px var(--font-primary)}
+  .veltip .d{font:400 12.5px/18px var(--font-primary);color:var(--text-gray-dark);margin-top:9px;position:relative;z-index:2}
+  .veltip .d b{color:var(--text-dark)}
+  .veltip button{margin-top:12px;height:34px;width:100%;border-radius:9px;border:none;background:var(--text-brand);color:#fff;font:600 12.5px var(--font-primary);cursor:pointer;position:relative;z-index:2}
+
+  @media (max-width:920px){ .grid{grid-template-columns:1fr} .rail{position:static;flex-direction:column} }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="top reveal">
+    <div class="brand"><span class="mk"><svg viewBox="0 0 24 24"><path d="M10 2.3l1.75 5.45L17 9.4l-5.25 1.65L10 16.5l-1.75-5.45L3 9.4l5.25-1.65z"/></svg></span>Trip Guide</div>
+    <div class="sp"></div>
+    <button class="chek-trigger" data-chek-trigger>Ask Vela</button>
+  </div>
+
+  <!-- Hero -->
+  <div class="hero reveal" style="animation-delay:.05s">
+    <img class="bgimg" src="https://images.unsplash.com/photo-1539037116277-4db20889f2d4?w=1400&auto=format&fit=crop&q=80" alt="Madrid skyline at golden hour">
+    <div class="scrim"></div>
+    <div class="acts">
+      <button><svg viewBox="0 0 24 24"><path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>Save</button>
+      <button class="solid"><svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v14"/></svg>Share</button>
+    </div>
+    <div class="ct">
+      <span class="kick"><svg viewBox="0 0 24 24"><path d="M10 2.3l1.75 5.45L17 9.4l-5.25 1.65L10 16.5l-1.75-5.45L3 9.4l5.25-1.65z"/></svg>Built by Vela for Carmen</span>
+      <h1>Your 5 days in Madrid</h1>
+      <div class="meta">
+        <span><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>18–23 May 2026</span>
+        <span><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1 1 18 0z"/></svg>Puerta del Sol</span>
+        <span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2"/></svg>24°C · clear</span>
+        <span><svg viewBox="0 0 24 24"><path d="m12 2 3.1 6.3L22 9.3l-5 4.8 1.2 6.9L12 17.8 5.8 21l1.2-6.9-5-4.8 6.9-1z"/></svg>14 picks · 6 saved</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Day tabs -->
+  <div class="days reveal" style="animation-delay:.1s">
+    <button class="day-tab active"><div class="dn">Day 1 · Mon</div><div class="dd">18</div><div class="dw">Arrival</div></button>
+    <button class="day-tab"><div class="dn">Day 2 · Tue</div><div class="dd">19</div><div class="dw">Old town</div></button>
+    <button class="day-tab"><div class="dn">Day 3 · Wed</div><div class="dd">20</div><div class="dw">Art & parks</div></button>
+    <button class="day-tab"><div class="dn">Day 4 · Thu</div><div class="dd">21</div><div class="dw">Markets</div></button>
+    <button class="day-tab"><div class="dn">Day 5 · Fri</div><div class="dd">22</div><div class="dw">Departure</div></button>
+  </div>
+
+  <div class="grid">
+    <!-- Itinerary -->
+    <div class="tl reveal" style="animation-delay:.14s">
+      <div class="tl-block">
+
+        <div class="tl-part afternoon"><div class="ic"><svg viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg></div><div class="t">Arrival · Afternoon</div><div class="ln"></div></div>
+
+        <div class="stop">
+          <div class="media"><img src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=400&auto=format&fit=crop&q=80" alt="Airport"><span class="time">13:20</span></div>
+          <div class="b">
+            <div class="cat">Transfer · Vela tip</div>
+            <div class="nm">Land at Barajas T4 → airport bus to Sol</div>
+            <div class="ds">Bus every 15 min, drops 4 min from the apartment. €5 vs €35 taxi.</div>
+            <div class="foot"><span class="tag"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>35 min</span><span class="tag vela"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Cheapest route</span><button class="add"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div>
+          </div>
+        </div>
+
+        <div class="transfer"><span class="dline"></span><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>4 min walk to your door</div>
+
+        <div class="stop">
+          <div class="media"><img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&auto=format&fit=crop&q=80" alt="Apartment"><span class="time">14:00</span></div>
+          <div class="b">
+            <div class="cat">Check-in</div>
+            <div class="nm">Settle into Puerta del Sol</div>
+            <div class="ds">Digital keys unlock once your balance is paid. Drop bags, freshen up.</div>
+            <div class="foot"><span class="tag open"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Keys ready</span><button class="add"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div>
+          </div>
+        </div>
+
+        <div class="tl-part evening"><div class="ic"><svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg></div><div class="t">Evening</div><div class="ln"></div></div>
+
+        <div class="stop">
+          <div class="media"><img src="https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=400&auto=format&fit=crop&q=80" alt="Tapas bar"><span class="time">20:30</span></div>
+          <div class="b">
+            <div class="cat">Dinner · Tapas · 3 min</div>
+            <div class="nm">Casa Revuelta — old-school Madrid</div>
+            <div class="ds">Tiny, legendary salt-cod tapas. Cash only, locals come early.</div>
+            <div class="foot"><span class="tag open"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg>Open till 23:00</span><span class="tag"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1 1 18 0z"/></svg>3 min</span><button class="add"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div>
+          </div>
+        </div>
+
+        <div class="stop">
+          <div class="media"><img src="https://images.unsplash.com/photo-1543832923-44667a44c804?w=400&auto=format&fit=crop&q=80" alt="Plaza Mayor at night"><span class="time">22:00</span></div>
+          <div class="b">
+            <div class="cat">Stroll · Free</div>
+            <div class="nm">Night walk through Plaza Mayor</div>
+            <div class="ds">Lamplit arcades, fewer crowds after 22:00. Loop back via Calle Mayor.</div>
+            <div class="foot"><span class="tag"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1 1 18 0z"/></svg>6 min</span><span class="tag vela"><svg viewBox="0 0 24 24"><path d="M10 2.3l1.75 5.45L17 9.4l-5.25 1.65L10 16.5l-1.75-5.45L3 9.4l5.25-1.65z"/></svg>Vela pick</span><button class="add"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Rail -->
+    <div class="rail reveal" style="animation-delay:.18s">
+      <div class="card">
+        <div class="map">
+          <svg viewBox="0 0 340 200" preserveAspectRatio="xMidYMid slice">
+            <rect width="340" height="200" fill="#E6EDFF"/>
+            <path d="M0 70 H340 M0 130 H340 M90 0 V200 M210 0 V200" stroke="#CBD8FF" stroke-width="6" fill="none"/>
+            <path d="M40 40 H300 V160" stroke="#B6C7FF" stroke-width="10" fill="none" opacity=".6"/>
+            <path d="M70 150 C 120 90, 180 150, 240 70" stroke="#385CF8" stroke-width="3" fill="none" stroke-dasharray="5 6"/>
+            <circle cx="70" cy="150" r="7" fill="#385CF8" stroke="#fff" stroke-width="3"/>
+            <circle cx="160" cy="120" r="6" fill="#0F9F80" stroke="#fff" stroke-width="3"/>
+            <circle cx="240" cy="70" r="6" fill="#FF7A58" stroke="#fff" stroke-width="3"/>
+          </svg>
+          <span class="badge"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1 1 18 0z"/></svg>Day 1 · 3 stops · 1.2 km</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="ch">Saved places</div>
+        <div class="saved">
+          <div class="row"><div class="thumb" style="background:linear-gradient(135deg,#8CA5FF,#385CF8)"><svg viewBox="0 0 24 24"><path d="M6 2 5 10h14l-1-8M5 10v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V10"/></svg></div><div><div class="nm">Casa Revuelta</div><div class="mt">Tapas · 3 min</div></div><span class="pin">Day 1</span></div>
+          <div class="row"><div class="thumb" style="background:linear-gradient(135deg,#FFD28C,#FFB872)"><svg viewBox="0 0 24 24"><path d="M17 8h1a4 4 0 1 1 0 8h-1M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4z"/></svg></div><div><div class="nm">Matilda Coffee</div><div class="mt">Café · 1 min</div></div><span class="pin">Day 2</span></div>
+          <div class="row"><div class="thumb" style="background:linear-gradient(135deg,#B99BFF,#6B4FD8)"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg></div><div><div class="nm">Museo del Prado</div><div class="mt">Art · 12 min</div></div><span class="pin">Day 3</span></div>
+        </div>
+      </div>
+
+      <div class="veltip">
+        <div class="hd"><div class="av"><svg viewBox="0 0 24 24"><path d="M10 2.3l1.75 5.45L17 9.4l-5.25 1.65L10 16.5l-1.75-5.45L3 9.4l5.25-1.65z"/><path d="M18.5 14l.75 2.25 2.25.75-2.25.75-.75 2.25-.75-2.25-2.25-.75 2.25-.75z"/></svg></div><div class="t">Vela's note for Day 1</div></div>
+        <div class="d">You land tired — I kept Day 1 light and walkable. <b>Casa Revuelta is cash-only</b>, so grab €30 at the airport ATM before the bus.</div>
+        <button>Reshape this day</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  document.querySelectorAll('.day-tab').forEach(function(t){
+    t.addEventListener('click', function(){
+      document.querySelectorAll('.day-tab').forEach(function(x){ x.classList.remove('active'); });
+      t.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>
