@@ -29,7 +29,8 @@
     --text-brand-light:#8CA5FF;
     --text-danger:#FF2467;
     --text-success:#0F9F80;
-    --shadow-card:0 0 5px 0 rgba(143,143,143,.2);
+    --shadow-card:0 1px 3px rgba(22,22,67,.05),0 0 0 1px rgba(22,22,67,.035);
+    --shadow-hover:0 10px 24px rgba(56,92,248,.10),0 2px 6px rgba(22,22,67,.05);
     --shadow-dropdown:0 4px 10px 0 rgba(143,143,143,.2);
     --shadow-modal:0 16px 48px rgba(22,22,67,.24);
     --radius-sm:6px;
@@ -38,10 +39,28 @@
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg-screen);font-family:var(--font-primary);color:var(--text-dark);font-feature-settings:"ss01"}
+  @media (prefers-reduced-motion:no-preference){
+    .reveal{opacity:0;transform:translateY(10px);animation:rv .5s cubic-bezier(.2,.8,.2,1) forwards}
+    @keyframes rv{to{opacity:1;transform:none}}
+  }
 
   /* ───────── TOP BAR ───────── */
   main{display:flex;flex-direction:column;min-width:0}
-  header.top{display:flex;align-items:center;gap:16px;padding:0 32px;height:64px;border-bottom:1px solid var(--stroke-gray-lighter);background:var(--bg-white);position:sticky;top:0;z-index:5}
+  header.top{display:flex;align-items:center;gap:16px;padding:0 32px;height:64px;border-bottom:1px solid var(--stroke-gray-lighter);background:rgba(255,255,255,.82);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);position:sticky;top:0;z-index:5}
+
+  /* ───────── KPI STRIP ───────── */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+  .kpi{background:#fff;border:1px solid var(--stroke-gray-lighter);border-radius:var(--radius-lg);padding:15px 18px;display:flex;align-items:center;gap:14px;box-shadow:var(--shadow-card);transition:transform .15s,box-shadow .15s}
+  .kpi:hover{transform:translateY(-2px);box-shadow:var(--shadow-hover)}
+  .kpi .ic{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;flex-shrink:0}
+  .kpi .ic svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.8}
+  .kpi .ic.blue{background:var(--bg-blue-light);color:var(--text-brand)}
+  .kpi .ic.amber{background:#FFF2E0;color:#C47A1B}
+  .kpi .ic.red{background:var(--bg-danger-light);color:var(--text-danger)}
+  .kpi .ic.green{background:var(--bg-success-light);color:var(--text-success)}
+  .kpi .v{font:700 24px/26px var(--font-primary);color:var(--text-dark);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+  .kpi .v small{font:600 13px var(--font-primary);color:var(--text-gray-medium);margin-left:3px}
+  .kpi .l{font:500 12.5px var(--font-primary);color:var(--text-gray-dark);margin-top:2px}
   .crumbs{font:500 14px var(--font-primary);color:var(--text-gray-dark)}
   .crumbs b{color:var(--text-dark);font-weight:600}
   .search-top{margin-left:auto;position:relative}
@@ -127,9 +146,9 @@
   th.num{width:40px;text-align:center}
   th.status-col{text-align:left;padding-left:16px}
 
-  tbody tr{border-bottom:1px solid var(--stroke-gray-lighter);transition:background .12s}
+  tbody tr{border-bottom:1px solid var(--stroke-gray-lighter);transition:background .12s,box-shadow .12s;box-shadow:inset 3px 0 0 transparent}
   tbody tr:last-child{border-bottom:none}
-  tbody tr:hover{background:#FBFBFE;cursor:pointer}
+  tbody tr:hover{background:#F7F9FF;cursor:pointer;box-shadow:inset 3px 0 0 var(--text-brand)}
   td{height:72px;padding:10px 12px;vertical-align:middle;font:500 14px/20px var(--font-primary);color:var(--text-dark)}
   td.num{text-align:center;color:var(--text-gray-dark);font-weight:600;font-size:13px;font-variant-numeric:tabular-nums}
   td.check{text-align:center}
@@ -255,6 +274,26 @@
         </div>
       </div>
 
+      <!-- KPI strip -->
+      <section class="kpis reveal">
+        <div class="kpi">
+          <div class="ic blue"><svg viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg></div>
+          <div><div class="v">18</div><div class="l">Arrivals · next 7 days</div></div>
+        </div>
+        <div class="kpi">
+          <div class="ic amber"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 7v5l3 2"/></svg></div>
+          <div><div class="v">34</div><div class="l">Awaiting online check-in</div></div>
+        </div>
+        <div class="kpi">
+          <div class="ic red"><svg viewBox="0 0 24 24"><path d="M10.3 3.8 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.8a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg></div>
+          <div><div class="v">5</div><div class="l">Action needed</div></div>
+        </div>
+        <div class="kpi">
+          <div class="ic green"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+          <div><div class="v">88 <small>/ 127</small></div><div class="l">Fully ready to arrive</div></div>
+        </div>
+      </section>
+
       <!-- Toolbar -->
       <div class="toolbar">
         <div class="search">
@@ -325,7 +364,7 @@
       </div>
 
       <!-- Table -->
-      <div class="table-wrap">
+      <div class="table-wrap reveal" style="animation-delay:.08s">
         <div class="table-scroll">
         <table>
           <colgroup>
