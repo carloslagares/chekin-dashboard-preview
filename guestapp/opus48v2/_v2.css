@@ -73,7 +73,7 @@ html,body{margin:0;background:var(--bg-screen);font-family:var(--font-primary);c
 
 /* ───── Main ───── */
 .main{padding:26px 32px 56px;display:flex;flex-direction:column;gap:22px;min-width:0}
-.shell{width:min(100%,640px)}
+.shell{width:min(100%,640px);margin-inline:auto}
 .back-link{display:inline-flex;align-items:center;gap:7px;font:600 13px var(--font-primary);color:var(--text-gray-dark);text-decoration:none;margin-bottom:4px}
 .back-link svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2}
 .back-link:hover{color:var(--text-brand)}
@@ -93,8 +93,8 @@ html,body{margin:0;background:var(--bg-screen);font-family:var(--font-primary);c
 .btn.dark:hover{background:#222268}
 .btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2}
 
-/* central CTA pill */
-.v-cta{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;max-width:340px;height:50px;margin:24px auto 0;border:0;border-radius:999px;background:var(--text-brand);color:#fff;font:600 15px var(--font-primary);cursor:pointer;box-shadow:0 6px 16px rgba(56,92,248,.24);transition:transform .12s,box-shadow .12s,background .12s}
+/* central CTA — square (rounded-rect, dashboard style; not a pill) */
+.v-cta{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;max-width:340px;height:50px;margin:24px auto 0;border:0;border-radius:12px;background:var(--text-brand);color:#fff;font:600 15px var(--font-primary);cursor:pointer;box-shadow:0 6px 16px rgba(56,92,248,.24);transition:transform .12s,box-shadow .12s,background .12s}
 .v-cta:hover{transform:translateY(-1px);background:var(--text-brand-dark);box-shadow:0 10px 22px rgba(56,92,248,.30)}
 .v-cta:disabled{opacity:.45;pointer-events:none}
 .v-cta svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2.2}
@@ -219,6 +219,18 @@ input[type=date].control{font-family:var(--font-primary)}
 .j-card b{display:block;font:600 16px var(--font-primary);color:var(--text-dark)}
 .j-card span{display:block;margin-top:3px;font:400 13px/1.5 var(--font-primary);color:var(--text-gray-dark)}
 
+/* ───── IV: intro steps as ONE checklist card (same structure as
+   "Complete your check-in": icon + text together, hairline dividers) ───── */
+.steplist{margin-top:18px;overflow:hidden}
+.steprow{display:flex;align-items:center;gap:16px;padding:16px 20px;border-top:1px solid var(--stroke-gray-lighter)}
+.steprow:first-child{border-top:0}
+.steprow .ic{width:44px;height:44px;border-radius:12px;background:var(--bg-blue-light);color:var(--text-brand);display:grid;place-items:center;flex-shrink:0}
+.steprow .ic svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8}
+.steprow .lt{flex:1;min-width:0}
+.steprow .t{font:600 15.5px var(--font-primary);color:var(--text-dark)}
+.steprow .d{font:400 13px/1.45 var(--font-primary);color:var(--text-gray-dark);margin-top:2px}
+.steprow .num{width:26px;height:26px;border-radius:50%;background:var(--bg-neutral-cold);color:var(--text-gray-dark);display:grid;place-items:center;font:700 12px var(--font-primary);flex-shrink:0}
+
 /* ───── IV: document choose ───── */
 .screen{display:none;animation:fade .32s ease}
 .screen.active{display:block}
@@ -281,7 +293,7 @@ input[type=date].control{font-family:var(--font-primary)}
 .cam-error b{color:#fff;font:800 16px var(--font-primary);text-shadow:0 2px 8px rgba(0,0,0,.32)}
 .cam-error span{color:#fff;font:600 12.5px/1.45 var(--font-primary);max-width:280px;text-shadow:0 1px 5px rgba(0,0,0,.28)}
 .cam-error .err-actions{display:flex;gap:10px;margin-top:4px}
-.cam-error .err-btn{height:38px;padding:0 18px;border:0;border-radius:999px;font:700 13.5px var(--font-primary);cursor:pointer}
+.cam-error .err-btn{height:38px;padding:0 18px;border:0;border-radius:10px;font:700 13.5px var(--font-primary);cursor:pointer}
 .cam-error .err-btn.primary{background:#fff;color:var(--text-danger)}
 .cam-error .err-btn.ghost{background:rgba(255,255,255,.2);color:#fff}
 @keyframes cap-pop{0%{transform:scale(.3);opacity:0}60%{transform:scale(1.12);opacity:1}100%{transform:scale(1);opacity:1}}
@@ -341,7 +353,7 @@ input[type=date].control{font-family:var(--font-primary)}
 .case.err .tag{background:var(--bg-danger-light);color:var(--text-danger)}
 .case h3{margin:0 0 6px;font:700 16px var(--font-primary);color:var(--text-dark)}
 .case p{margin:0 0 14px;font:400 13px/1.5 var(--font-primary);color:var(--text-gray-dark);flex:1}
-.case a{align-self:flex-start;display:inline-flex;align-items:center;gap:7px;height:38px;padding:0 16px;border-radius:999px;text-decoration:none;background:var(--text-brand);color:#fff;font:700 13px var(--font-primary);box-shadow:0 3px 10px rgba(56,92,248,.24)}
+.case a{align-self:flex-start;display:inline-flex;align-items:center;gap:7px;height:38px;padding:0 16px;border-radius:10px;text-decoration:none;background:var(--text-brand);color:#fff;font:700 13px var(--font-primary);box-shadow:0 3px 10px rgba(56,92,248,.24)}
 .case a:hover{background:var(--text-brand-dark)}
 .case a svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2.2}
 
