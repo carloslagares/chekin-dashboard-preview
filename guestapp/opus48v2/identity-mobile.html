@@ -13,7 +13,7 @@
   .stage{display:flex;flex-direction:column;align-items:center;gap:14px;padding:40px 24px 56px;min-height:100vh}
   .phone-label{font:600 11.5px var(--font-primary);color:var(--text-gray-dark);letter-spacing:.08em;text-transform:uppercase;display:inline-flex;align-items:center;gap:8px}
   .phone-label .pip{font:700 9px var(--font-primary);color:var(--text-brand);background:var(--bg-blue-light);padding:2px 7px;border-radius:4px;letter-spacing:.04em}
-  .phone{width:390px;max-width:100%;height:820px;background:#0A0A1A;border-radius:50px;padding:9px;
+  .device{width:390px;max-width:100%;height:820px;background:#0A0A1A;border-radius:50px;padding:9px;
     box-shadow:0 30px 60px rgba(22,22,67,.22),0 10px 24px rgba(22,22,67,.12),0 0 0 1px rgba(22,22,67,.06),inset 0 0 0 2px rgba(255,255,255,.06);position:relative}
   .pscreen{width:100%;height:100%;background:#fff;border-radius:42px;overflow:hidden;position:relative;display:flex;flex-direction:column}
   .island{position:absolute;top:11px;left:50%;transform:translateX(-50%);width:120px;height:34px;background:#000;border-radius:18px;z-index:50}
@@ -55,12 +55,26 @@
   .mbody .steprow .t{font-size:14.5px}
   .mbody .steprow .d{font-size:12px;line-height:1.4}
   .mbody .steprow .num{flex:0 0 26px;width:26px;height:26px}
+
+  /* On a real phone viewport, drop the desktop bezel mockup and render the
+     flow full-bleed with normal page scroll. Avoids the nested-scroll/dark-
+     chassis artifact a fixed-height bezel produces on narrow screens. */
+  @media (max-width:540px){
+    html,body{background:var(--bg-screen)}
+    .stage{padding:0;gap:0;display:block;min-height:0}
+    .phone-label{display:none}
+    .device{width:100%;max-width:100%;height:auto;min-height:100vh;background:transparent;border-radius:0;padding:0;box-shadow:none}
+    .pscreen{border-radius:0;height:auto;min-height:100vh}
+    .island,.status{display:none}
+    .topbar{position:sticky;top:0}
+    .mbody{overflow:visible;flex:initial}
+  }
 </style>
 </head>
 <body>
 <div class="stage">
   <div class="phone-label"><span class="pip">M</span>ID verification · Mobile</div>
-  <div class="phone"><div class="pscreen">
+  <div class="device"><div class="pscreen">
     <div class="island"></div>
     <div class="status"><span>9:41</span><span class="right">
       <svg viewBox="0 0 24 24"><path d="M2 17h2v3H2zm4-4h2v7H6zm4-4h2v11h-2zm4-4h2v15h-2zm4-4h2v19h-2z"/></svg>
