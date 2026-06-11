@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chekin Guest — Guest details (Opus 4.8 v2)</title>
+<link rel="stylesheet" href="../../ds/colors_and_type.css">
+<link rel="stylesheet" href="_v2.css">
+<link rel="stylesheet" href="../_chek.css">
+<script src="../_chek.js" defer></script>
+</head>
+<body>
+<div class="app">
+
+  <!-- Sidebar -->
+  <aside class="side">
+    <div class="prop">
+      <div class="av"><svg viewBox="0 0 24 24"><path d="M3 9 12 2l9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg></div>
+      <div>
+        <div class="name">Puerta del Sol</div>
+        <div class="ref">VH-2026-0847</div>
+      </div>
+    </div>
+    <nav>
+      <a class="n-item" href="journey.html" style="text-decoration:none;color:inherit">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Home
+      </a>
+      <div class="sgroup">Before your stay</div>
+      <a class="n-item active" href="guestdetails.html" style="text-decoration:none;color:inherit">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+        Registration
+        <span class="badge">2 left</span>
+      </a>
+      <div class="n-item">
+        <svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M2 10h20M6 14h4"/></svg>
+        Payments
+        <span class="badge">€340</span>
+      </div>
+      <div class="sgroup">Your stay</div>
+      <div class="n-item">
+        <svg viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="3.5"/><path d="m10 13 10-10M16 7l3 3"/></svg>
+        Virtual keys
+      </div>
+      <div class="n-item">
+        <svg viewBox="0 0 24 24"><path d="M4 4h10a4 4 0 0 1 4 4v12H8a4 4 0 0 1-4-4z"/><path d="M8 8h6M8 12h6"/></svg>
+        Guidebooks
+      </div>
+    </nav>
+    <div class="me">
+      <div class="av">CS</div>
+      <div>
+        <div class="n">Carmen Specimen</div>
+        <div class="e">carmen@email.com</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="shell">
+      <a class="back-link reveal" href="journey.html"><svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Back to Home</a>
+
+      <div class="head-top reveal" style="animation-delay:.02s">
+        <div class="page-head">
+          <div class="kicker">Guest Registration</div>
+          <h1>Review your details</h1>
+          <p class="intro">We pre-filled your form from your document scan — check everything before sending it to your host.</p>
+        </div>
+        <button class="chek-trigger" data-chek-trigger>Ask Vela</button>
+      </div>
+
+      <form class="form" autocomplete="off" onsubmit="return false" style="display:flex;flex-direction:column;gap:16px;margin-top:18px">
+
+        <!-- Nationality -->
+        <section class="card reveal" style="animation-delay:.04s">
+          <div class="fhead"><h2 class="ttl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 2.5 15.3 0 18M12 3c-2.5 2.7-2.5 15.3 0 18"/></svg>Nationality</h2></div>
+          <div class="frow" data-select data-value="ES">
+            <label>Nationality</label>
+            <div class="select">
+              <div class="control" tabindex="0"><span class="val"><span class="opt-flag">🇪🇸</span>Spain</span><svg class="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></div>
+              <div class="menu">
+                <div class="opt-row" data-v="ES"><span class="opt-flag">🇪🇸</span>Spain</div>
+                <div class="opt-row" data-v="FR"><span class="opt-flag">🇫🇷</span>France</div>
+                <div class="opt-row" data-v="DE"><span class="opt-flag">🇩🇪</span>Germany</div>
+                <div class="opt-row" data-v="PT"><span class="opt-flag">🇵🇹</span>Portugal</div>
+                <div class="opt-row" data-v="GB"><span class="opt-flag">🇬🇧</span>United Kingdom</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Legal name -->
+        <section class="card reveal" style="animation-delay:.06s">
+          <div class="fhead"><h2 class="ttl"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6"/></svg>Legal name</h2></div>
+          <div class="frow"><label>First name</label><input class="control" value="Carmen"></div>
+          <div class="frow"><label>Last name</label><input class="control" value="Spanish"></div>
+          <div class="frow"><label>Second last name <span class="optional">Optional</span></label><input class="control" value="Spanish"></div>
+        </section>
+
+        <!-- Personal information -->
+        <section class="card reveal" style="animation-delay:.08s">
+          <div class="fhead"><h2 class="ttl"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="11" r="2"/><path d="M5 16c.6-1.6 2-2.4 3.5-2.4S11.4 14.4 12 16M14 9h4M14 12.5h4M14 15.5h2.5"/></svg>Personal information</h2></div>
+          <div class="frow"><label>Date of birth</label>
+            <div class="date-field">
+              <input class="control" type="date" value="1980-01-01">
+              <svg class="cal" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg>
+            </div>
+          </div>
+          <div class="frow" data-select data-value="Female">
+            <label>Gender</label>
+            <div class="select">
+              <div class="control" tabindex="0"><span class="val">Female</span><svg class="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></div>
+              <div class="menu">
+                <div class="opt-row" data-v="Female">Female</div>
+                <div class="opt-row" data-v="Male">Male</div>
+                <div class="opt-row" data-v="Other">Other</div>
+                <div class="opt-row" data-v="Prefer not to say">Prefer not to say</div>
+              </div>
+            </div>
+          </div>
+          <div class="frow" data-select data-value="ES">
+            <label>Country of residence</label>
+            <div class="select">
+              <div class="control" tabindex="0"><span class="val"><span class="opt-flag">🇪🇸</span>Spain</span><svg class="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></div>
+              <div class="menu">
+                <div class="opt-row" data-v="ES"><span class="opt-flag">🇪🇸</span>Spain</div>
+                <div class="opt-row" data-v="FR"><span class="opt-flag">🇫🇷</span>France</div>
+                <div class="opt-row" data-v="PT"><span class="opt-flag">🇵🇹</span>Portugal</div>
+                <div class="opt-row" data-v="GB"><span class="opt-flag">🇬🇧</span>United Kingdom</div>
+              </div>
+            </div>
+          </div>
+          <div class="frow"><label>City of residence</label><input class="control" value="Madrid"></div>
+          <div class="frow"><label>Residence address</label><input class="control" value="Avda de Madrid s/n"></div>
+          <div class="frow"><label>Postal code</label><input class="control" value="28001"></div>
+        </section>
+
+        <!-- Document details -->
+        <section class="card reveal" style="animation-delay:.1s">
+          <div class="fhead"><h2 class="ttl"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>Document details</h2></div>
+          <div class="frow" data-select data-value="National ID card">
+            <label>Document type</label>
+            <div class="select">
+              <div class="control" tabindex="0"><span class="val">National ID card</span><svg class="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></div>
+              <div class="menu">
+                <div class="opt-row" data-v="Passport">Passport</div>
+                <div class="opt-row" data-v="National ID card">National ID card</div>
+                <div class="opt-row" data-v="Driver's license">Driver's license</div>
+              </div>
+            </div>
+          </div>
+          <div class="frow"><label>Document number</label><input class="control" value="99999999R"></div>
+        </section>
+
+        <!-- Contact information -->
+        <section class="card reveal" style="animation-delay:.12s">
+          <div class="fhead"><h2 class="ttl"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>Contact information</h2></div>
+          <div class="frow"><label>Email</label><input class="control" type="email" placeholder="you@email.com"></div>
+          <div class="frow">
+            <label>Phone number <span class="optional">Optional</span></label>
+            <div class="phone">
+              <div class="ccode" data-select data-value="+34">
+                <div class="select">
+                  <div class="control" tabindex="0"><span class="val"><span class="opt-flag">🇪🇸</span>+34</span><svg class="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></div>
+                  <div class="menu">
+                    <div class="opt-row" data-v="+34"><span class="opt-flag">🇪🇸</span>+34</div>
+                    <div class="opt-row" data-v="+33"><span class="opt-flag">🇫🇷</span>+33</div>
+                    <div class="opt-row" data-v="+49"><span class="opt-flag">🇩🇪</span>+49</div>
+                    <div class="opt-row" data-v="+44"><span class="opt-flag">🇬🇧</span>+44</div>
+                    <div class="opt-row" data-v="+351"><span class="opt-flag">🇵🇹</span>+351</div>
+                  </div>
+                </div>
+              </div>
+              <input class="control num" placeholder="612 345 678">
+            </div>
+          </div>
+        </section>
+
+        <!-- Your stay -->
+        <section class="card reveal" style="animation-delay:.14s">
+          <div class="fhead"><h2 class="ttl"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 4l9 6.5M5 9.5V20h14V9.5M9.5 20v-6h5v6"/></svg>Your stay</h2></div>
+          <div class="frow" data-select data-value="Holiday">
+            <label>Purpose of stay</label>
+            <div class="select">
+              <div class="control" tabindex="0"><span class="val">Holiday</span><svg class="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></div>
+              <div class="menu">
+                <div class="opt-row" data-v="Holiday">Holiday</div>
+                <div class="opt-row" data-v="Business">Business</div>
+                <div class="opt-row" data-v="Visiting family">Visiting family</div>
+                <div class="opt-row" data-v="Other">Other</div>
+              </div>
+            </div>
+          </div>
+          <div class="frow" data-select data-value="">
+            <label>Estimated arrival time</label>
+            <div class="select">
+              <div class="control" tabindex="0"><span class="val placeholder">Select a time</span><svg class="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></div>
+              <div class="menu">
+                <div class="opt-row" data-v="14:00">14:00</div>
+                <div class="opt-row" data-v="15:00">15:00</div>
+                <div class="opt-row" data-v="16:00">16:00</div>
+                <div class="opt-row" data-v="17:00">17:00</div>
+                <div class="opt-row" data-v="18:00">18:00</div>
+                <div class="opt-row" data-v="19:00">19:00</div>
+                <div class="opt-row" data-v="20:00">20:00</div>
+                <div class="opt-row" data-v="21:00">21:00</div>
+                <div class="opt-row" data-v="After 22:00">After 22:00</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Signature -->
+        <section class="card reveal" style="animation-delay:.16s">
+          <div class="fhead"><h2 class="ttl"><svg viewBox="0 0 24 24"><path d="M3 18c3-1 4-9 7-9s2 6 4 6 3-3 7-3"/><path d="m14 20 6-6"/></svg>Signature</h2></div>
+          <div class="sig-wrap" data-sig>
+            <canvas></canvas>
+            <div class="sig-hint">
+              <svg viewBox="0 0 24 24"><path d="M3 18c3-1 4-9 7-9s2 6 4 6 3-3 7-3"/><path d="m14 20 6-6"/></svg>
+              <b>Draw your signature here</b>
+              <span>Use your mouse or finger</span>
+            </div>
+          </div>
+          <button type="button" class="sig-clear" data-sig-clear><svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>Clear signature</button>
+        </section>
+
+        <!-- Agreements -->
+        <section class="card reveal" style="animation-delay:.18s">
+          <div class="fhead"><h2 class="ttl"><svg viewBox="0 0 24 24"><path d="M12 3 5 6v5c0 4.3 2.9 7.6 7 9 4.1-1.4 7-4.7 7-9V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg>Agreements</h2></div>
+          <div class="agree-row" data-check>
+            <span class="chk"><svg viewBox="0 0 24 24"><path d="m5 12 5 5L20 7"/></svg></span>
+            <span class="agree-text">Send me a copy of the <strong>contract</strong> by email.</span>
+          </div>
+          <div class="agree-row" data-check>
+            <span class="chk"><svg viewBox="0 0 24 24"><path d="m5 12 5 5L20 7"/></svg></span>
+            <span class="agree-text"><span class="optional">Optional</span> I agree to receive marketing emails and other communications from the host.</span>
+          </div>
+          <p class="legal">By submitting you agree to sign the form with your name and accept the <a>Contract</a> and our <a>Privacy Policy</a>.</p>
+        </section>
+
+        <div class="submit-row reveal" style="animation-delay:.2s">
+          <button class="submit" type="submit" id="submitBtn">Submit to host <span class="arw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <!-- Rail: Vela tips -->
+  <aside class="rail">
+    <div class="vrail reveal" style="animation-delay:.1s">
+      <div class="vh">
+        <div class="av"><svg viewBox="0 0 24 24"><path d="M10 2.3l1.75 5.45L17 9.4l-5.25 1.65L10 16.5l-1.75-5.45L3 9.4l5.25-1.65z"/><path d="M18.5 14l.75 2.25 2.25.75-2.25.75-.75 2.25-.75-2.25-2.25-.75 2.25-.75z"/></svg></div>
+        <div>
+          <div class="t">Vela</div>
+          <div class="d">Here to help</div>
+        </div>
+      </div>
+      <p class="intro">I can help you fill in your details, explain why each field is needed, and get you checked in faster.</p>
+
+      <div class="vela-prog">
+        <div class="eyebrow">Your verification</div>
+        <div class="vp-title"><svg viewBox="0 0 24 24"><path d="M12 3 5 6v5c0 4.3 2.9 7.6 7 9 4.1-1.4 7-4.7 7-9V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg>Where you are in your registration</div>
+        <p class="vp-sub">Identity verified — your details are ready to review.</p>
+        <div class="vela-prog-steps">
+          <span class="vp-node done"><svg viewBox="0 0 24 24"><path d="m5 12 5 5L20 7"/></svg></span>
+          <span class="vp-conn"><span class="vp-fill done"></span></span>
+          <span class="vp-node done"><svg viewBox="0 0 24 24"><path d="m5 12 5 5L20 7"/></svg></span>
+          <span class="vp-conn"><span class="vp-fill done"></span></span>
+          <span class="vp-node done"><svg viewBox="0 0 24 24"><path d="m5 12 5 5L20 7"/></svg></span>
+          <span class="vp-conn"><span class="vp-fill done"></span></span>
+          <span class="vp-node active"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg></span>
+        </div>
+      </div>
+
+      <div class="eyebrow">Good to know</div>
+      <div class="tip">
+        <div class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="m9 12 2 2 4-4"/></svg></div>
+        <div class="b"><strong>We filled in your details</strong><span>Imported from the document scan — please check everything is correct.</span></div>
+      </div>
+      <div class="tip">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M12 3 5 6v5c0 4.3 2.9 7.6 7 9 4.1-1.4 7-4.7 7-9V6l-7-3Z"/></svg></div>
+        <div class="b"><strong>Why we ask for this</strong><span>By local law, every tourist accommodation must keep a record of its guests.</span></div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<!-- Guest registered modal -->
+<div class="modal-overlay" id="doneModal" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="doneTitle">
+    <div class="modal-ic ok"><svg viewBox="0 0 24 24"><path d="m5 13 4 4L19 7"/></svg></div>
+    <h2 class="modal-title" id="doneTitle">Guest registered!</h2>
+    <p class="modal-text">You have registered <strong>3 of 7</strong> guests.</p>
+    <div class="modal-prog"><span class="bar"><i></i></span><span class="pct">3 / 7</span></div>
+    <div class="modal-actions">
+      <button type="button" class="modal-btn primary" id="doneNext">Register next guest <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+      <a class="modal-btn ghost" href="journey.html"><svg viewBox="0 0 24 24"><path d="M4 11.5 12 4l8 7.5M6 10v9h12v-9"/></svg>Go back to Home</a>
+    </div>
+  </div>
+</div>
+
+<script>
+/* custom selects */
+function clearOpenSel(){
+  document.querySelectorAll('.select.open').forEach(function(s){ s.classList.remove('open'); });
+  document.querySelectorAll('.open-sel').forEach(function(s){ s.classList.remove('open-sel'); });
+}
+document.querySelectorAll('[data-select]').forEach(function(wrap){
+  var sel = wrap.querySelector('.select');
+  var control = sel.querySelector('.control');
+  var valEl = sel.querySelector('.val');
+  var host = wrap.closest('.card') || wrap.closest('.frow');
+  control.addEventListener('click', function(e){
+    e.stopPropagation();
+    var willOpen = !sel.classList.contains('open');
+    clearOpenSel();
+    if(willOpen){ sel.classList.add('open'); wrap.classList.add('open-sel'); if(host) host.classList.add('open-sel'); }
+  });
+  sel.querySelectorAll('.opt-row').forEach(function(row){
+    row.addEventListener('click', function(){
+      valEl.innerHTML = row.innerHTML;
+      valEl.classList.remove('placeholder');
+      wrap.setAttribute('data-value', row.getAttribute('data-v'));
+      clearOpenSel();
+    });
+  });
+  var _rows = Array.prototype.slice.call(sel.querySelectorAll('.opt-row'));
+  if(_rows.length > 4){
+    var menu = sel.querySelector('.menu');
+    var search = document.createElement('input');
+    search.type='text'; search.className='sel-search'; search.placeholder='Search…'; search.setAttribute('autocomplete','off');
+    menu.insertBefore(search, menu.firstChild);
+    search.addEventListener('click', function(e){ e.stopPropagation(); });
+    search.addEventListener('input', function(){
+      var q=search.value.trim().toLowerCase();
+      _rows.forEach(function(r){ r.style.display = (!q || r.textContent.toLowerCase().indexOf(q)>=0) ? '' : 'none'; });
+    });
+    control.addEventListener('click', function(){ requestAnimationFrame(function(){ if(sel.classList.contains('open')){ search.value=''; _rows.forEach(function(r){ r.style.display=''; }); search.focus(); } }); });
+  }
+});
+document.addEventListener('click', clearOpenSel);
+/* checkboxes */
+document.querySelectorAll('[data-check]').forEach(function(row){
+  row.addEventListener('click', function(){ row.classList.toggle('on'); });
+});
+/* signature pad */
+document.querySelectorAll('[data-sig]').forEach(function(wrap){
+  var canvas = wrap.querySelector('canvas');
+  var hint = wrap.querySelector('.sig-hint');
+  var ctx = canvas.getContext('2d');
+  var drawing = false, dirty = false;
+  function resize(){
+    var r = wrap.getBoundingClientRect();
+    if(!r.width) return;
+    var dpr = window.devicePixelRatio || 1;
+    canvas.width = r.width * dpr; canvas.height = r.height * dpr;
+    ctx.scale(dpr, dpr);
+    ctx.lineWidth = 2.4; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = '#161643';
+  }
+  function pos(e){ var r = canvas.getBoundingClientRect(); var p = e.touches ? e.touches[0] : e; return { x:p.clientX-r.left, y:p.clientY-r.top }; }
+  function start(e){ e.preventDefault(); drawing = true; var p = pos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); if(!dirty){ dirty = true; wrap.classList.add('signed'); hint.style.display='none'; } }
+  function move(e){ if(!drawing) return; e.preventDefault(); var p = pos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); }
+  function end(){ drawing = false; }
+  setTimeout(resize, 30);
+  window.addEventListener('resize', function(){ var data = canvas.toDataURL(); resize(); var img = new Image(); img.onload = function(){ ctx.drawImage(img,0,0,canvas.width/(window.devicePixelRatio||1),canvas.height/(window.devicePixelRatio||1)); }; img.src = data; });
+  canvas.addEventListener('mousedown', start); canvas.addEventListener('mousemove', move); window.addEventListener('mouseup', end);
+  canvas.addEventListener('touchstart', start, {passive:false}); canvas.addEventListener('touchmove', move, {passive:false}); canvas.addEventListener('touchend', end);
+  var clearBtn = wrap.parentElement.querySelector('[data-sig-clear]');
+  if(clearBtn) clearBtn.addEventListener('click', function(){ ctx.clearRect(0,0,canvas.width,canvas.height); dirty=false; wrap.classList.remove('signed'); hint.style.display='flex'; });
+});
+/* submit → modal */
+var doneModal = document.getElementById('doneModal');
+var submitBtn = document.getElementById('submitBtn');
+if(submitBtn) submitBtn.addEventListener('click', function(e){ e.preventDefault(); if(doneModal) doneModal.hidden = false; });
+if(doneModal){
+  document.getElementById('doneNext').addEventListener('click', function(){ doneModal.hidden = true; });
+  doneModal.addEventListener('click', function(e){ if(e.target === doneModal) doneModal.hidden = true; });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && !doneModal.hidden) doneModal.hidden = true; });
+}
+</script>
+</body>
+</html>

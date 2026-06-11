@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chekin Guest — ID verification (Opus 4.8 v2)</title>
+<link rel="stylesheet" href="../../ds/colors_and_type.css">
+<link rel="stylesheet" href="_v2.css">
+<link rel="stylesheet" href="../_chek.css">
+<script src="../_chek.js" defer></script>
+</head>
+<body>
+<div class="app">
+
+  <!-- Sidebar -->
+  <aside class="side">
+    <div class="prop">
+      <div class="av"><svg viewBox="0 0 24 24"><path d="M3 9 12 2l9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg></div>
+      <div>
+        <div class="name">Puerta del Sol</div>
+        <div class="ref">VH-2026-0847</div>
+      </div>
+    </div>
+    <nav>
+      <a class="n-item" href="journey.html" style="text-decoration:none;color:inherit">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Home
+      </a>
+      <div class="sgroup">Before your stay</div>
+      <a class="n-item active" href="identity.html" style="text-decoration:none;color:inherit">
+        <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="12" r="2.5"/><path d="M14 10h4M14 14h4"/></svg>
+        ID verification
+        <span class="badge">Next up</span>
+      </a>
+      <a class="n-item" href="guestdetails.html" style="text-decoration:none;color:inherit">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+        Guest details
+      </a>
+      <a class="n-item" href="identity-cases.html" style="text-decoration:none;color:inherit">
+        <svg viewBox="0 0 24 24"><path d="m12 2 3.1 6.3L22 9.3l-5 4.8 1.2 6.9L12 17.8 5.8 21l1.2-6.9-5-4.8 6.9-1z"/></svg>
+        IV use cases
+        <span class="badge new">DEMO</span>
+      </a>
+    </nav>
+    <div class="me">
+      <div class="av">CS</div>
+      <div>
+        <div class="n">Carmen Specimen</div>
+        <div class="e">carmen@email.com</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="shell">
+      <a class="back-link reveal" href="journey.html"><svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Back to Home</a>
+
+      <!-- 1 · INTRO -->
+      <section class="screen active" data-screen="intro">
+        <div class="page-head">
+          <div class="kicker">Guest Registration</div>
+          <h1>Verify your identity</h1>
+          <p class="intro">Three quick steps. It takes less than a minute.</p>
+        </div>
+        <div class="journey">
+          <div class="j-step">
+            <div class="j-rail"><span class="j-node"><svg viewBox="0 0 24 24"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M7 12h10"/></svg></span></div>
+            <div class="j-card"><b>Scan your document</b><span>Passport, national ID or driver's license</span></div>
+          </div>
+          <div class="j-step">
+            <div class="j-rail"><span class="j-node"><svg viewBox="0 0 24 24"><circle cx="10" cy="8" r="3.4"/><path d="M4 19c.6-3 3-4.6 6-4.6 1 0 1.9.18 2.7.5"/><path d="m15.5 16.5 1.8 1.8 3.2-3.6"/></svg></span></div>
+            <div class="j-card"><b>Confirm it's you</b><span>A quick face scan, matched to your document photo</span></div>
+          </div>
+          <div class="j-step">
+            <div class="j-rail"><span class="j-node"><svg viewBox="0 0 24 24"><path d="M9 4h6a1 1 0 0 1 1 1v1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h1V5a1 1 0 0 1 1-1Z"/><path d="m9.5 13 1.8 1.8 3.4-3.6"/></svg></span></div>
+            <div class="j-card"><b>Confirm your details</b><span>Check the information on your entry form before it's sent</span></div>
+          </div>
+        </div>
+        <button class="v-cta" id="start">Begin verification</button>
+      </section>
+
+      <!-- 2 · CHOOSE DOCUMENT -->
+      <section class="screen" data-screen="doc">
+        <div class="page-head">
+          <div class="kicker">Guest Registration</div>
+          <h1>Choose your document</h1>
+          <p class="intro">Select your nationality, then the document you'll scan.</p>
+        </div>
+
+        <section class="card section" id="natSection" style="margin-top:18px">
+          <div class="fhead"><h2 class="ttl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 2.5 15.3 0 18M12 3c-2.5 2.7-2.5 15.3 0 18"/></svg>Nationality</h2></div>
+          <div class="frow" id="natField" data-select data-value="">
+            <label>Nationality</label>
+            <div class="select">
+              <div class="control" tabindex="0"><span class="val placeholder">Select your nationality</span><svg class="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></div>
+              <div class="menu">
+                <div class="opt-row" data-v="ES"><span class="opt-flag">🇪🇸</span>Spain</div>
+                <div class="opt-row" data-v="FR"><span class="opt-flag">🇫🇷</span>France</div>
+                <div class="opt-row" data-v="DE"><span class="opt-flag">🇩🇪</span>Germany</div>
+                <div class="opt-row" data-v="IT"><span class="opt-flag">🇮🇹</span>Italy</div>
+                <div class="opt-row" data-v="PT"><span class="opt-flag">🇵🇹</span>Portugal</div>
+                <div class="opt-row" data-v="GB"><span class="opt-flag">🇬🇧</span>United Kingdom</div>
+                <div class="opt-row" data-v="US"><span class="opt-flag">🇺🇸</span>United States</div>
+                <div class="opt-row" data-v="BR"><span class="opt-flag">🇧🇷</span>Brazil</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card section" id="docSection" style="display:none">
+          <div class="fhead"><h2 class="ttl"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.4"/><circle cx="8.5" cy="11" r="2.1"/><path d="M5 16c.6-1.5 2-2.3 3.5-2.3S11.4 14.5 12 16M14 9.5h4M14 13h3"/></svg>Document type</h2></div>
+          <div class="opt-list">
+            <div class="doc-opt" data-doc="passport">
+              <span class="doc-ic"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2.4"/><circle cx="12" cy="9" r="2.6"/><path d="M9 15.5h6"/></svg></span>
+              <span class="opt-name">Passport</span>
+              <span class="doc-radio"></span>
+            </div>
+            <div class="doc-opt selected" data-doc="id">
+              <span class="doc-ic"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.4"/><circle cx="8.5" cy="11" r="2.1"/><path d="M5 16c.6-1.5 2-2.3 3.5-2.3S11.4 14.5 12 16M14 9.5h4M14 13h3"/></svg></span>
+              <span class="opt-name">National ID</span>
+              <span class="doc-radio"></span>
+            </div>
+            <div class="doc-opt" data-doc="license">
+              <span class="doc-ic"><svg viewBox="0 0 24 24"><path d="M5 17h14M6 17l1.2-4.2A2 2 0 0 1 9.1 11h5.8a2 2 0 0 1 1.9 1.4L18 17"/><circle cx="7.5" cy="17.5" r="1.6"/><circle cx="16.5" cy="17.5" r="1.6"/></svg></span>
+              <span class="opt-name">Driver's license</span>
+              <span class="doc-radio"></span>
+            </div>
+          </div>
+        </section>
+
+        <button class="v-cta" id="docContinue" disabled>Continue <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+      </section>
+
+      <!-- 3 · CAPTURE -->
+      <section class="screen" data-screen="capture">
+        <div id="captureBody"></div>
+      </section>
+
+      <!-- 4 · DONE -->
+      <section class="screen" data-screen="done">
+        <div class="done-wrap">
+          <div class="done-badge"><svg viewBox="0 0 24 24"><path d="m5 13 4 4L19 7"/></svg></div>
+          <h2 class="done-title">Identity verified!</h2>
+          <p class="done-copy">Your document and selfie match. Next, take a quick look at your details before they're sent to your host.</p>
+          <a class="v-cta" href="guestdetails.html" style="margin-top:0">Review your details <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Rail: Vela tips + progress -->
+  <aside class="rail">
+    <div class="vrail reveal" style="animation-delay:.1s">
+      <div class="vh">
+        <div class="av"><svg viewBox="0 0 24 24"><path d="M10 2.3l1.75 5.45L17 9.4l-5.25 1.65L10 16.5l-1.75-5.45L3 9.4l5.25-1.65z"/><path d="M18.5 14l.75 2.25 2.25.75-2.25.75-.75 2.25-.75-2.25-2.25-.75 2.25-.75z"/></svg></div>
+        <div>
+          <div class="t">Vela</div>
+          <div class="d">Here to help</div>
+        </div>
+      </div>
+      <p class="intro">I'll guide you through verification: which documents work, how to get a clear photo, and why we ask for each step.</p>
+
+      <div id="railProg"></div>
+      <div id="railTips"></div>
+    </div>
+  </aside>
+</div>
+
+<!-- Skip verification modal -->
+<div class="modal-overlay" id="skipModal" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true">
+    <div class="modal-ic"><svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01M10.3 3.3 2.4 17a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.3a2 2 0 0 0-3.4 0Z"/></svg></div>
+    <h2 class="modal-title">Skip verification?</h2>
+    <p class="modal-text">You'll need to verify your identity later to complete your registration. Any details you've filled in so far will be lost.</p>
+    <div class="modal-actions">
+      <button type="button" class="modal-btn ghost" id="skipConfirm">Skip for now</button>
+      <button type="button" class="modal-btn primary" id="skipCancel">Continue verification</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===== Identity verification — state machine (adapted to 4.8 v2) ===== */
+var screens = document.querySelectorAll('.screen');
+var captureBody = document.getElementById('captureBody');
+var railProg = document.getElementById('railProg');
+var railTips = document.getElementById('railTips');
+
+var PARAMS = new URLSearchParams(location.search);
+var EU = ['ES','FR','DE','IT','PT','GB','NL','BE','IE','AT','SE','DK','FI','PL','GR'];
+var failParam = PARAMS.get('fail');
+var FAIL_KEY = failParam === 'selfie' ? 'face' : failParam;
+var state = {
+  screen:'intro',
+  doc: PARAMS.get('doc') || 'id',
+  nat: 'ES',
+  noSelfie: PARAMS.get('selfie') === '0',
+  steps: [], sub:0, phase:0,
+  failKey: FAIL_KEY, failedOnce:false
+};
+
+var STEP_DEFS = {
+  front:    { kind:'doc', side:'front', title:'Photo of the <span style="color:var(--text-brand)">front</span>', place:'Place your document inside the frame', okLabel:'Photo taken!',   okTitle:'Photo saved!' },
+  back:     { kind:'doc', side:'back',  title:'Now flip to the <span style="color:var(--text-brand)">back</span>', place:'Place your document inside the frame', okLabel:'Photo taken!',   okTitle:'Photo saved!' },
+  passport: { kind:'doc', side:'front', title:'Photo of the <span style="color:var(--text-brand)">passport</span> page', place:'Place the photo page inside the frame', okLabel:'Photo taken!', okTitle:'Photo saved!' },
+  face:     { kind:'face',              title:'Confirm it\'s <span style="color:var(--text-brand)">you</span>', place:'Look at the camera', okLabel:'Selfie captured!', okTitle:'Selfie ready!' }
+};
+var STEP_ICONS = {
+  front:'<rect x="3" y="5" width="18" height="14" rx="2.4"/><circle cx="8.5" cy="11" r="2.1"/><path d="M5 16c.6-1.5 2-2.3 3.5-2.3S11.4 14.5 12 16"/>',
+  back:'<rect x="3" y="6" width="18" height="12" rx="2.4"/><path d="M3 10h18"/>',
+  passport:'<rect x="5" y="3" width="14" height="18" rx="2.4"/><circle cx="12" cy="9" r="2.6"/><path d="M9 15.5h6"/>',
+  face:'<circle cx="12" cy="8" r="3.6"/><path d="M5 20c.8-3.6 3.6-5.4 7-5.4S18.2 16.4 19 20"/>',
+  form:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/>'
+};
+function buildSteps(){
+  var s = (state.doc === 'passport') ? ['passport'] : ['front','back'];
+  if(!state.noSelfie) s.push('face');
+  return s;
+}
+function curDef(){ return STEP_DEFS[state.steps[state.sub]]; }
+var capTimer = null, capRAF = null;
+function clearCapTimers(){ if(capTimer){ clearTimeout(capTimer); capTimer=null; } if(capRAF){ clearInterval(capRAF); capRAF=null; } }
+
+/* ---- Vela rail content ---- */
+var TIPS = {
+  intro: {eye:'Privacy & data', items:[['M12 3 5 6v5c0 4.3 2.9 7.6 7 9 4.1-1.4 7-4.7 7-9V6l-7-3Z','Your data is safe','Everything you share is encrypted and used only for your registration. Photos are deleted after your check-in date.']]},
+  doc:   {eye:'Choosing your document', items:[['M5 3h14v18l-7-3-7 3z','Pick whichever you have on hand','Any of the three works to verify you.']]},
+  capture:{eye:'How to take the best photo', items:[['M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10z M3 7h4l1.5-2h7L17 7h4v12H3z','Good light, no glare',"Keep the whole document visible, well lit and free of reflections."],['M4 4h16v12H4z M8 20h8','Rest it on a table','Lay it flat and shoot from directly above to frame it inside the marks.']]},
+  face:  {eye:'How to take the best selfie', items:[['M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10z','Good, even light','Take it in the shade — avoid backlight so your face is clearly lit.'],['M9 9 15 15 M15 9 9 15','Nothing covering your face','Remove glasses, hats or masks that hide your face.']]}
+};
+function railTipsHTML(key){
+  var t = TIPS[key]; if(!t) return '';
+  var h = '<div class="eyebrow">'+t.eye+'</div>';
+  t.items.forEach(function(it){
+    h += '<div class="tip"><div class="ic"><svg viewBox="0 0 24 24">'+'<path d="'+it[0]+'"/>'+'</svg></div><div class="b"><strong>'+it[1]+'</strong><span>'+it[2]+'</span></div></div>';
+  });
+  return h;
+}
+function railProgHTML(sub, allDone){
+  var keys = (state.steps && state.steps.length ? state.steps.slice() : ['front','back','face']).concat(['form']);
+  var check = '<svg viewBox="0 0 24 24"><path d="m5 12 5 5L20 7"/></svg>';
+  var h = '<div class="vela-prog"><div class="eyebrow">Your verification</div>'+
+    '<div class="vp-title"><svg viewBox="0 0 24 24"><path d="M12 3 5 6v5c0 4.3 2.9 7.6 7 9 4.1-1.4 7-4.7 7-9V6l-7-3Z"/></svg>Where you are in your registration</div>'+
+    '<p class="vp-sub">A few quick steps — we\'ll guide you through each one.</p>'+
+    '<div class="vela-prog-steps">';
+  keys.forEach(function(key, i){
+    if(i>0){ var cdone = allDone || i <= sub; h += '<span class="vp-conn"><span class="vp-fill'+(cdone?' done':'')+'"></span></span>'; }
+    var done = allDone || i < sub, active = !allDone && i === sub;
+    var cls = done ? 'done' : (active ? 'active' : '');
+    var icon = done ? check : '<svg viewBox="0 0 24 24">'+(STEP_ICONS[key]||STEP_ICONS.front)+'</svg>';
+    h += '<span class="vp-node '+cls+'">'+icon+'</span>';
+  });
+  return h + '</div></div>';
+}
+function setRail(key){
+  var showProg = state.screen==='capture' || state.screen==='done';
+  railProg.innerHTML = showProg ? railProgHTML(state.screen==='done' ? state.steps.length : state.sub, state.screen==='done') : '';
+  railTips.innerHTML = railTipsHTML(key);
+}
+
+/* ---- show screen ---- */
+function show(name){
+  state.screen = name;
+  screens.forEach(function(s){ s.classList.toggle('active', s.getAttribute('data-screen')===name); });
+  setRail(name==='capture' && curDef() && curDef().kind==='face' ? 'face' : name);
+  clearCapTimers();
+}
+
+/* ---- capture pieces ---- */
+function docCard(side){
+  if(side==='back'){
+    return '<div class="doc-card back"><div class="blk"></div><i style="display:block;height:9px;width:62%;border-radius:5px;background:rgba(22,22,67,.16)"></i><i style="display:block;height:9px;width:50%;border-radius:5px;background:rgba(22,22,67,.16)"></i><div class="mrz">P&lt;ESPGARCIA&lt;&lt;MARIA&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;<br>AB1234567ESP9103142F&lt;&lt;&lt;&lt;&lt;&lt;&lt;</div></div>';
+  }
+  return '<div class="doc-card"><div class="ph"><svg viewBox="0 0 24 24"><circle cx="12" cy="9" r="3.4"/><path d="M5 19c1-3.3 3.7-5 7-5s6 1.7 7 5"/></svg></div><div class="ll"><i style="width:82%"></i><i style="width:68%"></i><i style="width:74%"></i><i style="width:56%"></i><i style="width:40%"></i></div></div>';
+}
+function faceContent(){
+  return '<div class="face-oval"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c.8-3.6 3.6-5.4 7-5.4S18.2 16.4 19 20"/></svg></div>';
+}
+function camBadge(phase, info){
+  if(phase===3) return '<div class="cam-status"><span class="cam-dot fail"></span> Validation failed</div>';
+  if(phase===0) return '<div class="cam-status"><span class="cam-dot wait"></span> '+info.place+'</div>';
+  if(phase===1) return '<div class="cam-status"><span class="cap-ring" id="capRing"><i></i></span><span id="capText">'+(info.kind==='face'?'Detecting face':'Hold still')+' · 0%</span></div>';
+  return '<div class="cam-status"><span class="cap-done"><svg viewBox="0 0 24 24"><path d="m5 12 5 5L20 7"/></svg></span><span style="color:var(--text-success)">Capture complete</span></div>';
+}
+function camContent(info, phase){
+  var inner = info.kind==='face' ? faceContent() : docCard(info.side);
+  var view = '<div class="cam-view">'+inner+'</div>';
+  if(phase===0) return view+'<div class="cam-scan"></div>'+camBadge(0, info);
+  if(phase===1) return view+'<div class="cam-scan"></div>'+camBadge(1, info);
+  if(phase===3){
+    var retryUpload = info.kind==='doc' ? '<button class="err-btn ghost" id="errUpload">Upload a file</button>' : '';
+    var errOv = '<div class="cam-error"><span class="err-ic"><svg viewBox="0 0 24 24"><path d="M12 8v5M12 16.4h.01M10.3 4.3 3 17a2 2 0 0 0 1.7 3h14.6a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0Z"/></svg></span>'+
+      '<b>'+(info.kind==='face'?'Selfie':'Document')+' validation failed</b>'+
+      '<span>There was a problem validating your '+(info.kind==='face'?'selfie':'document')+'. Please try again.</span>'+
+      '<div class="err-actions"><button class="err-btn primary" id="errRetry">Try again</button>'+retryUpload+'</div></div>';
+    return view+errOv+camBadge(3, info);
+  }
+  var overlay = '<div class="cam-success"><span class="cap-check"><svg viewBox="0 0 24 24"><path d="m5 13 4 4L19 7"/></svg></span><span class="cap-label">'+info.okLabel+'</span></div>';
+  return view+overlay+camBadge(2, info);
+}
+function demoLabel(){ return curDef().kind==='face' ? 'Demo · take selfie' : 'Demo · place document'; }
+
+function renderCapture(){
+  var info = curDef(), phase = state.phase;
+  var title = phase===2 ? info.okTitle : info.title;
+  var sub = phase===2 ? 'Moving to the next step…'
+    : (info.kind==='face' ? 'Look at the camera — it captures automatically.' : 'No need to tap anything — the photo is taken automatically.');
+  var frameCls = 'cam-frame'+(info.kind==='face'?' face':'')+(phase===2?' ok':'')+(phase===3?' err':'');
+
+  var html = '<div class="page-head"><div class="head-top"><div class="kicker">Guest Registration</div><button type="button" class="skip-cta" id="skipCta">Skip for now</button></div><h1>'+title+'</h1><p class="intro">'+sub+'</p></div>';
+  html += '<div class="'+frameCls+'" id="capFrame">'+camContent(info, phase)+'</div>';
+  if(info.kind==='doc' && phase===0){
+    html += '<p class="cam-alt"><svg viewBox="0 0 24 24"><path d="M2 2l20 20"/><path d="M7 7H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h12M9.5 5h5L16 7h3a2 2 0 0 1 2 2v7"/></svg>No camera? <a id="upload">Upload a file</a></p>';
+  }
+  if(phase===0){
+    html += '<div class="cap-demo-row"><button class="demo-ctrl" id="demoBtn"><svg viewBox="0 0 24 24"><path d="m6 4 14 8-14 8V4Z"/></svg>'+demoLabel()+'</button></div>';
+  }
+  captureBody.innerHTML = html;
+
+  var demo = document.getElementById('demoBtn'); if(demo) demo.addEventListener('click', placeImage);
+  var up = document.getElementById('upload'); if(up) up.addEventListener('click', placeImage);
+  var sk = document.getElementById('skipCta'); if(sk) sk.addEventListener('click', openSkipModal);
+  function retry(){ state.failedOnce = true; state.phase = 0; renderCapture(); }
+  var er = document.getElementById('errRetry'); if(er) er.addEventListener('click', retry);
+  var eu = document.getElementById('errUpload'); if(eu) eu.addEventListener('click', retry);
+
+  setRail(info.kind==='face' ? 'face' : 'capture');
+}
+
+var CAPTURE_MS = 2200, VALIDATED_MS = 1300;
+function updateRing(p){
+  var ring = document.getElementById('capRing'), txt = document.getElementById('capText');
+  if(ring) ring.style.background = 'conic-gradient(var(--text-brand) '+(p*3.6)+'deg, var(--stroke-gray-light) 0)';
+  if(txt) txt.textContent = (curDef().kind==='face'?'Detecting face':'Hold still')+' · '+Math.round(p)+'%';
+}
+function placeImage(){
+  if(state.phase!==0) return;
+  state.phase = 1; renderCapture();
+  clearCapTimers();
+  var start = Date.now();
+  capRAF = setInterval(function(){
+    var p = Math.min(100, (Date.now()-start)/CAPTURE_MS*100);
+    updateRing(p);
+    if(p>=100){
+      clearInterval(capRAF); capRAF = null;
+      var key = state.steps[state.sub];
+      if(state.failKey === key && !state.failedOnce){ state.phase = 3; renderCapture(); }
+      else { state.phase = 2; renderCapture(); capTimer = setTimeout(capNextStep, VALIDATED_MS); }
+    }
+  }, 40);
+}
+function capNextStep(){
+  clearCapTimers();
+  if(state.sub < state.steps.length - 1){ state.sub++; state.phase = 0; renderCapture(); }
+  else { show('done'); window.scrollTo(0,0); }
+}
+
+/* ---- skip modal ---- */
+var skipModal = document.getElementById('skipModal');
+function openSkipModal(){ if(skipModal) skipModal.hidden = false; }
+function closeSkipModal(){ if(skipModal) skipModal.hidden = true; }
+if(skipModal){
+  document.getElementById('skipCancel').addEventListener('click', closeSkipModal);
+  document.getElementById('skipConfirm').addEventListener('click', function(){ closeSkipModal(); clearCapTimers(); window.location.href='guestdetails.html'; });
+  skipModal.addEventListener('click', function(e){ if(e.target === skipModal) closeSkipModal(); });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && !skipModal.hidden) closeSkipModal(); });
+}
+
+/* ---- navigation ---- */
+function goCapture(){ state.steps = buildSteps(); state.sub = 0; state.phase = 0; state.failedOnce = false; show('capture'); renderCapture(); }
+document.getElementById('start').addEventListener('click', function(){ show('doc'); });
+document.getElementById('docContinue').addEventListener('click', goCapture);
+
+/* ---- document selection ---- */
+document.querySelectorAll('.doc-opt').forEach(function(opt){
+  opt.addEventListener('click', function(){
+    document.querySelectorAll('.doc-opt').forEach(function(o){ o.classList.remove('selected'); });
+    opt.classList.add('selected');
+    state.doc = opt.getAttribute('data-doc');
+  });
+});
+
+/* ---- nationality select (also reveals document section) ---- */
+function allowedDocs(nat){ return EU.indexOf(nat) >= 0 ? ['passport','id','license'] : ['passport']; }
+function applyNationality(code){
+  state.nat = code;
+  var allow = allowedDocs(code);
+  document.querySelectorAll('#docSection .doc-opt').forEach(function(o){
+    o.style.display = allow.indexOf(o.getAttribute('data-doc')) >= 0 ? '' : 'none';
+  });
+  if(allow.indexOf(state.doc) < 0) state.doc = allow[0];
+  document.querySelectorAll('#docSection .doc-opt').forEach(function(o){ o.classList.toggle('selected', o.getAttribute('data-doc')===state.doc); });
+  document.getElementById('docSection').style.display='';
+  var cta=document.getElementById('docContinue'); cta.disabled=false;
+}
+
+/* ---- custom selects (nationality) ---- */
+function clearOpenSel(){
+  document.querySelectorAll('.select.open').forEach(function(s){ s.classList.remove('open'); });
+  document.querySelectorAll('.open-sel').forEach(function(s){ s.classList.remove('open-sel'); });
+}
+document.querySelectorAll('[data-select]').forEach(function(wrap){
+  var sel = wrap.querySelector('.select');
+  var control = sel.querySelector('.control');
+  var valEl = sel.querySelector('.val');
+  var host = wrap.closest('.card');
+  control.addEventListener('click', function(e){
+    e.stopPropagation();
+    var willOpen = !sel.classList.contains('open');
+    clearOpenSel();
+    if(willOpen){ sel.classList.add('open'); wrap.classList.add('open-sel'); if(host) host.classList.add('open-sel'); }
+  });
+  sel.querySelectorAll('.opt-row').forEach(function(row){
+    row.addEventListener('click', function(){
+      valEl.innerHTML = row.innerHTML;
+      valEl.classList.remove('placeholder');
+      wrap.setAttribute('data-value', row.getAttribute('data-v'));
+      clearOpenSel();
+      if(wrap.id === 'natField') applyNationality(row.getAttribute('data-v'));
+    });
+  });
+  var _rows = Array.prototype.slice.call(sel.querySelectorAll('.opt-row'));
+  if(_rows.length > 4){
+    var menu = sel.querySelector('.menu');
+    var search = document.createElement('input');
+    search.type='text'; search.className='sel-search'; search.placeholder='Search…'; search.setAttribute('autocomplete','off');
+    menu.insertBefore(search, menu.firstChild);
+    search.addEventListener('click', function(e){ e.stopPropagation(); });
+    search.addEventListener('input', function(){
+      var q=search.value.trim().toLowerCase();
+      _rows.forEach(function(r){ r.style.display = (!q || r.textContent.toLowerCase().indexOf(q)>=0) ? '' : 'none'; });
+    });
+    control.addEventListener('click', function(){ requestAnimationFrame(function(){ if(sel.classList.contains('open')){ search.value=''; _rows.forEach(function(r){ r.style.display=''; }); search.focus(); } }); });
+  }
+});
+document.addEventListener('click', clearOpenSel);
+
+/* ---- init: scenario params jump straight to capture ---- */
+var HAS_SCENARIO = PARAMS.has('doc') || PARAMS.has('fail') || PARAMS.has('selfie');
+setRail('intro');
+if(HAS_SCENARIO){ goCapture(); }
+</script>
+</body>
+</html>
