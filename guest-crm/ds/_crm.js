@@ -198,8 +198,10 @@
   function boot(opts) {
     opts = opts || {};
     if (opts.active) mountSubnav(opts.active);
+    // Demo-mode banner removed per product decision — campaigns stay safe via the
+    // draft/approval flow, not a banner. Drop the slot so it leaves no empty gap.
     var demoSlot = document.getElementById('crm-demo');
-    if (demoSlot) demoSlot.outerHTML = demoBanner();
+    if (demoSlot) demoSlot.parentNode && demoSlot.parentNode.removeChild(demoSlot);
   }
 
   window.CRM = {
