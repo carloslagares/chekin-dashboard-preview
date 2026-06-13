@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chekin — Guest CRM · Guests</title>
+<link rel="stylesheet" href="../ds/colors_and_type.css">
+<link rel="stylesheet" href="../ds/_sidebar.css">
+<link rel="stylesheet" href="../ds/_agent.css">
+<link rel="stylesheet" href="ds/_crm.css">
+<style>
+  /* layout-only helpers, reusing tokens/classes */
+  .lang-cell{display:flex;align-items:center;gap:8px;white-space:nowrap}
+  .lang-cell .fl{font-size:16px;line-height:1}
+  .tagcell{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .toolbar .chips{margin-left:0}
+  .chip-group-sep{width:1px;height:22px;background:var(--stroke-gray-lighter);margin:0 2px}
+</style>
+</head>
+<body>
+<div class="app">
+  <div id="sidebar-slot" data-nav="guest-crm"></div>
+  <main>
+    <header class="top">
+      <div class="crumbs"><b>Guest CRM</b> <span class="sep">/</span> Guests</div>
+      <span data-agent-trigger-slot style="margin-left:auto"></span>
+      <button class="iconbtn" aria-label="Help"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 1 1 5.8 1c0 2-3 2-3 4M12 17h.01"/></svg></button>
+      <button class="iconbtn" aria-label="Notifications"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><div class="pip"></div></button>
+      <div class="user-av">MR</div>
+    </header>
+
+    <div class="page">
+      <div id="crm-demo"></div>
+      <div id="crm-subnav"></div>
+
+      <!-- Page head -->
+      <div class="pagehead reveal">
+        <div>
+          <h1>Guests <span class="count" id="guest-count">0</span></h1>
+          <div class="sub">Every guest profile, unified across reservations, inbox, check-in and App Sales. Search, filter and open a profile to see the AI summary and recommended actions.</div>
+        </div>
+      </div>
+
+      <!-- Toolbar: search + filter chips -->
+      <div class="toolbar reveal" style="animation-delay:.05s">
+        <div class="search">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <input id="guest-search" type="search" placeholder="Search by name, email or phone…" autocomplete="off">
+        </div>
+        <div class="chips" id="stage-chips"></div>
+        <div class="chip-group-sep"></div>
+        <div class="chips" id="consent-chips"></div>
+        <div class="chip-group-sep"></div>
+        <div class="chips" id="upcoming-chips"></div>
+        <div class="spacer"></div>
+        <button class="tbtn" id="more-filters"><svg viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></svg> More filters</button>
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrap reveal" style="animation-delay:.1s">
+        <div class="table-scroll">
+          <table class="crm">
+            <thead>
+              <tr>
+                <th>Guest</th>
+                <th>Language</th>
+                <th>Next stay</th>
+                <th>Last stay</th>
+                <th>Consent</th>
+                <th class="num">Revenue</th>
+                <th>Tags</th>
+                <th>Recommended action</th>
+              </tr>
+            </thead>
+            <tbody id="guest-rows"></tbody>
+          </table>
+        </div>
+        <div id="guest-empty"></div>
+        <div class="pagination" id="guest-pagination">
+          <div class="info" id="guest-info">Showing 0 of 0 guests</div>
+          <div style="display:flex;gap:8px">
+            <button class="tbtn" disabled><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg> Prev</button>
+            <button class="tbtn" disabled>Next <svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="crm-drawer-root"></div>
+
+<script src="data/types.js"></script>
+<script src="data/fixtures.js"></script>
+<script src="services/crm-service.js"></script>
+<script src="agent/agent.js"></script>
+<script src="ds/_crm.js"></script>
+<script src="../ds/_sidebar.js"></script>
+<script src="../ds/_agent.js"></script>
+<script>
+(function(){
+  var S = window.CRMService;
+  CRM.boot({ active:'guests' });
+
+  var totalGuests = S.getGuests().length;
+  document.getElementById('guest-count').textContent = totalGuests;
+
+  // ---- filter state (one active value per group) ----
+  var state = { search:'', lifecycleStage:'', consent:'', upcoming:false };
+
+  // ---- chip groups ----
+  var stageChips = [
+    { label:'All stages', stage:'' },
+    { label:'Prospects', stage:'prospect' },
+    { label:'Guests', stage:'guest' },
+    { label:'In-house', stage:'in_house' },
+    { label:'Repeat', stage:'repeat' },
+    { label:'VIP', stage:'vip' },
+    { label:'Past', stage:'past' }
+  ];
+  document.getElementById('stage-chips').innerHTML = stageChips.map(function(c){
+    return '<button class="chip' + (c.stage === state.lifecycleStage ? ' active' : '') + '" data-stage="' + CRM.esc(c.stage) + '">' + CRM.esc(c.label) + '</button>';
+  }).join('');
+
+  document.getElementById('consent-chips').innerHTML =
+    '<button class="chip" data-consent="marketing">Marketing</button>' +
+    '<button class="chip" data-consent="no_marketing">No marketing</button>';
+
+  document.getElementById('upcoming-chips').innerHTML =
+    '<button class="chip" data-upcoming="1"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> Upcoming stay</button>';
+
+  // ---- render ----
+  function buildFilter(){
+    var f = {};
+    if (state.search) f.search = state.search;
+    if (state.lifecycleStage) f.lifecycleStage = state.lifecycleStage;
+    if (state.consent) f.consent = state.consent;
+    if (state.upcoming) f.upcoming = true;
+    return f;
+  }
+
+  function rowHtml(g){
+    var lang = '<div class="lang-cell"><span class="fl">' + g.flag + '</span>' + CRM.esc(g.languageName) + '</div>';
+
+    var tags = g.tags || [];
+    var shown = tags.slice(0, 2).map(function(t){ return '<span class="pill">' + CRM.esc(t.replace(/_/g, ' ')) + '</span>'; }).join('');
+    if (tags.length > 2) shown += '<span class="pill">+' + (tags.length - 2) + '</span>';
+    if (!tags.length) shown = '<span class="tiny">—</span>';
+
+    var rec = (g.recommendedActions && g.recommendedActions[0])
+      ? '<span class="badge blue">' + CRM.esc(g.recommendedActions[0].label) + '</span>'
+      : '<span class="tiny">—</span>';
+
+    return '<tr data-id="' + g.id + '">' +
+      '<td><div class="gname"><div class="gav">' + CRM.initials(g.fullName) + '</div>' +
+        '<div style="min-width:0"><div class="nm">' + CRM.esc(g.fullName) + '</div><div class="em">' + CRM.esc(g.email) + '</div></div></div></td>' +
+      '<td>' + lang + '</td>' +
+      '<td>' + CRM.relDate(g.nextStayAt) + '</td>' +
+      '<td>' + CRM.relDate(g.lastStayAt) + '</td>' +
+      '<td><div class="consent-row">' + CRM.consentBadges(g.consentSummary, { compact:true }) + '</div></td>' +
+      '<td class="num">' + CRM.money(g.totalRevenue) + '</td>' +
+      '<td><div class="tagcell">' + shown + '</div></td>' +
+      '<td>' + rec + '</td>' +
+    '</tr>';
+  }
+
+  function render(){
+    var rows = S.getGuests(buildFilter());
+    var tbody = document.getElementById('guest-rows');
+    var empty = document.getElementById('guest-empty');
+    var pag = document.getElementById('guest-pagination');
+
+    if (!rows.length) {
+      tbody.innerHTML = '';
+      pag.style.display = 'none';
+      empty.innerHTML =
+        '<div class="empty"><div class="ic"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></div>' +
+        '<h3>No guests match your filters</h3>' +
+        '<p>Try a different search term, or clear the active filters to see all ' + totalGuests + ' guests.</p>' +
+        '<button class="tbtn" id="clear-filters" style="margin-top:6px">Clear filters</button></div>';
+      empty.querySelector('#clear-filters').addEventListener('click', clearFilters);
+      return;
+    }
+
+    empty.innerHTML = '';
+    pag.style.display = '';
+    tbody.innerHTML = rows.map(rowHtml).join('');
+    document.getElementById('guest-info').textContent = 'Showing ' + rows.length + ' of ' + totalGuests + ' guests';
+  }
+
+  function syncChips(){
+    var sc = document.getElementById('stage-chips');
+    Array.prototype.forEach.call(sc.querySelectorAll('.chip'), function(b){
+      b.classList.toggle('active', b.getAttribute('data-stage') === state.lifecycleStage);
+    });
+    var cc = document.getElementById('consent-chips');
+    Array.prototype.forEach.call(cc.querySelectorAll('.chip'), function(b){
+      b.classList.toggle('active', b.getAttribute('data-consent') === state.consent);
+    });
+    var uc = document.getElementById('upcoming-chips');
+    Array.prototype.forEach.call(uc.querySelectorAll('.chip'), function(b){
+      b.classList.toggle('active', !!state.upcoming);
+    });
+  }
+
+  function clearFilters(){
+    state = { search:'', lifecycleStage:'', consent:'', upcoming:false };
+    document.getElementById('guest-search').value = '';
+    syncChips();
+    render();
+  }
+
+  // ---- events ----
+  document.getElementById('guest-search').addEventListener('input', function(e){
+    state.search = e.target.value.trim();
+    render();
+  });
+
+  document.getElementById('stage-chips').addEventListener('click', function(e){
+    var b = e.target.closest('.chip'); if (!b) return;
+    state.lifecycleStage = b.getAttribute('data-stage');
+    syncChips();
+    render();
+  });
+
+  document.getElementById('consent-chips').addEventListener('click', function(e){
+    var b = e.target.closest('.chip'); if (!b) return;
+    var v = b.getAttribute('data-consent');
+    state.consent = (state.consent === v) ? '' : v; // toggle
+    syncChips();
+    render();
+  });
+
+  document.getElementById('upcoming-chips').addEventListener('click', function(e){
+    var b = e.target.closest('.chip'); if (!b) return;
+    state.upcoming = !state.upcoming; // toggle
+    syncChips();
+    render();
+  });
+
+  document.getElementById('more-filters').addEventListener('click', function(){
+    CRM.toast('More filters: language, country, tags & revenue coming soon.');
+  });
+
+  // ---- row click → guest drawer ----
+  document.getElementById('guest-rows').addEventListener('click', function(e){
+    var tr = e.target.closest('tr[data-id]'); if (!tr) return;
+    CRM.openGuestDrawer(tr.getAttribute('data-id'));
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chekin — Guest CRM</title>
+<link rel="stylesheet" href="../ds/colors_and_type.css">
+<link rel="stylesheet" href="../ds/_sidebar.css">
+<link rel="stylesheet" href="../ds/_agent.css">
+<link rel="stylesheet" href="ds/_crm.css">
+<style>
+  .dash-grid{display:grid;grid-template-columns:1fr 380px;gap:18px;align-items:start}
+  @media (max-width:1080px){.dash-grid{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}}
+  .sug-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media (max-width:720px){.sug-grid{grid-template-columns:1fr}}
+  .dealrow{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--stroke-gray-lighter)}
+  .dealrow:last-child{border-bottom:none}
+  .dealrow .ic{width:34px;height:34px;border-radius:9px;background:var(--bg-blue-light);color:var(--text-brand);display:grid;place-items:center;flex-shrink:0}
+  .dealrow .ic svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.8}
+  .dealrow .nm{font:600 13.5px var(--font-primary)}
+  .dealrow .mt{font:400 12px var(--font-primary);color:var(--text-gray-medium);margin-top:1px}
+  .camprow{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--stroke-gray-lighter)}
+  .camprow:last-child{border-bottom:none}
+</style>
+</head>
+<body>
+<div class="app">
+  <div id="sidebar-slot" data-nav="guest-crm"></div>
+  <main>
+    <header class="top">
+      <div class="crumbs"><b>Guest CRM</b></div>
+      <span data-agent-trigger-slot style="margin-left:auto"></span>
+      <button class="iconbtn" aria-label="Help"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 1 1 5.8 1c0 2-3 2-3 4M12 17h.01"/></svg></button>
+      <button class="iconbtn" aria-label="Notifications"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><div class="pip"></div></button>
+      <div class="user-av">MR</div>
+    </header>
+
+    <div class="page">
+      <div id="crm-demo"></div>
+      <div id="crm-subnav"></div>
+
+      <!-- Agentic command -->
+      <section class="cmd reveal">
+        <span class="eyebrow"><svg viewBox="0 0 24 24"><path d="M12 2 13.5 8 19 9.5 13.5 11 12 17 10.5 11 5 9.5 10.5 8 Z"/></svg> Guest CRM Agent</span>
+        <h2>Tell Vela what you want to achieve. It drafts the segment, deals, copy and automation — you approve.</h2>
+        <div class="inputbar">
+          <svg class="lead" viewBox="0 0 24 24"><path d="M12 2 13.5 8 19 9.5 13.5 11 12 17 10.5 11 5 9.5 10.5 8 Z"/></svg>
+          <input id="cmd-input" placeholder="Ask the Guest CRM agent… e.g. Create a campaign for guests arriving this weekend">
+          <button class="go" id="cmd-go"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg> Generate</button>
+        </div>
+        <div class="examples" id="cmd-examples"></div>
+      </section>
+
+      <!-- KPIs -->
+      <section class="kpis reveal" id="kpis" style="animation-delay:.05s"></section>
+
+      <div class="dash-grid">
+        <div style="display:flex;flex-direction:column;gap:18px">
+          <!-- AI suggestions -->
+          <div class="card reveal" style="animation-delay:.1s">
+            <div class="hd"><h3><svg viewBox="0 0 24 24"><path d="M12 2 13.5 8 19 9.5 13.5 11 12 17 10.5 11 5 9.5 10.5 8 Z"/></svg> AI suggestions</h3><div class="act tiny">Ranked by revenue opportunity</div></div>
+            <div class="bd"><div class="sug-grid" id="suggestions"></div></div>
+          </div>
+
+          <!-- Top recommended campaigns -->
+          <div class="card reveal" style="animation-delay:.15s">
+            <div class="hd"><h3>Top campaigns</h3><div class="act"><a class="tbtn ghost" href="campaigns.html">View all</a></div></div>
+            <div class="bd" id="top-campaigns"></div>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:18px">
+          <!-- Top deals -->
+          <div class="card reveal" style="animation-delay:.12s">
+            <div class="hd"><h3>Top performing deals</h3></div>
+            <div class="bd" id="top-deals"></div>
+          </div>
+          <!-- Agent activity -->
+          <div class="card reveal" style="animation-delay:.18s">
+            <div class="hd"><h3>Agent activity</h3></div>
+            <div class="bd"><div class="timeline" id="agent-activity"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="crm-drawer-root"></div>
+
+<script src="data/types.js"></script>
+<script src="data/fixtures.js"></script>
+<script src="services/crm-service.js"></script>
+<script src="agent/agent.js"></script>
+<script src="ds/_crm.js"></script>
+<script src="../ds/_sidebar.js"></script>
+<script src="../ds/_agent.js"></script>
+<script>
+(function(){
+  var S = window.CRMService, A = window.CRMAgent, I = CRM.icons;
+  CRM.boot({ active:'overview' });
+
+  // ---- KPIs ----
+  var m = S.getDashboardMetrics();
+  var kpis = [
+    { ic:'blue', svg:'<path d="M16 7a4 4 0 1 0-8 0 4 4 0 0 0 8 0ZM3 21a7 7 0 0 1 14 0"/><path d="M19 8v6M22 11h-6"/>', v:m.totalGuests, l:'Total guests' },
+    { ic:'violet', svg:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>', v:m.upcoming, l:'Upcoming stays' },
+    { ic:'green', svg:'<path d="M3 9 12 2l9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/>', v:m.inHouse, l:'Guests in-house' },
+    { ic:'blue', svg:'<path d="M20 6 9 17l-5-5"/>', v:m.marketingConsent, l:'Marketing consent' },
+    { ic:'green', svg:'<path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/>', v:CRM.money(m.campaignRevenue), l:'Campaign revenue' },
+    { ic:'violet', svg:'<rect x="2" y="6" width="20" height="12" rx="2"/><path d="M2 10h20M6 14h4"/>', v:CRM.money(m.appSalesRevenue), l:'App Sales revenue' },
+    { ic:'blue', svg:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>', v:m.activeCampaigns, l:'Active campaigns' },
+    { ic:'amber', svg:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>', v:m.draftCampaigns, l:'Draft / review' }
+  ];
+  document.getElementById('kpis').innerHTML = kpis.map(function(k){
+    return '<div class="kpi"><div class="ic '+k.ic+'"><svg viewBox="0 0 24 24">'+k.svg+'</svg></div><div><div class="v">'+k.v+'</div><div class="l">'+k.l+'</div></div></div>';
+  }).join('');
+
+  // ---- command box ----
+  var examples = [
+    'Create a campaign for guests arriving this weekend with children, offering early check-in and a family restaurant deal',
+    'Sell late checkout to Sunday departures',
+    'Reactivate past summer family guests',
+    'Promote parking to arrivals asking about cars'
+  ];
+  document.getElementById('cmd-examples').innerHTML = examples.map(function(e){ return '<span class="ex">'+CRM.esc(e)+'</span>'; }).join('');
+  function go(){
+    var v = document.getElementById('cmd-input').value.trim();
+    if(!v) return;
+    location.href = 'campaign-new.html?prompt=' + encodeURIComponent(v);
+  }
+  document.getElementById('cmd-go').addEventListener('click', go);
+  document.getElementById('cmd-input').addEventListener('keydown', function(e){ if(e.key==='Enter') go(); });
+  document.getElementById('cmd-examples').addEventListener('click', function(e){
+    var ex = e.target.closest('.ex'); if(!ex) return;
+    document.getElementById('cmd-input').value = ex.textContent;
+    go();
+  });
+
+  // ---- AI suggestions ----
+  var iconKind = { upsell:{cls:'up', svg:'<path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/>'}, recover:{cls:'rec', svg:'<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>'}, reactivate:{cls:'react', svg:'<path d="M21 12a9 9 0 1 1-9-9"/><path d="M16 4h5v5"/>'} };
+  document.getElementById('suggestions').innerHTML = S.getSuggestions().map(function(s){
+    var k = iconKind[s.kind] || iconKind.upsell;
+    return '<div class="sug"><div class="top"><div class="ic '+k.cls+'"><svg viewBox="0 0 24 24">'+k.svg+'</svg></div>'+
+      '<div><h4>'+CRM.esc(s.title)+'</h4></div></div>'+
+      '<p>'+CRM.esc(s.detail)+'</p>'+
+      '<div class="ft"><span class="badge gray">'+CRM.esc(s.metric)+'</span>'+(s.estRevenue?'<span class="badge green">+'+CRM.money(s.estRevenue)+' est.</span>':'')+'</div>'+
+      '<button class="btn-primary" style="width:100%;justify-content:center;margin-top:4px" data-prompt="'+CRM.esc(s.title)+'">'+I.spark+' Create campaign</button>'+
+      '</div>';
+  }).join('');
+  document.getElementById('suggestions').addEventListener('click', function(e){
+    var b = e.target.closest('[data-prompt]'); if(!b) return;
+    location.href = 'campaign-new.html?prompt=' + encodeURIComponent(b.getAttribute('data-prompt'));
+  });
+
+  // ---- top campaigns ----
+  var camps = S.getCampaigns().slice().sort(function(a,b){ return (b.revenueEstimate.expectedRevenue)-(a.revenueEstimate.expectedRevenue); }).slice(0,4);
+  document.getElementById('top-campaigns').innerHTML = camps.map(function(c){
+    return '<a class="camprow" href="campaign-detail.html?id='+c.id+'">'+
+      '<div style="flex:1;min-width:0"><div class="nm" style="font:600 14px var(--font-primary)">'+CRM.esc(c.name)+'</div>'+
+      '<div class="mt tiny" style="margin-top:2px">'+CRM.esc(c.objective)+' · '+CRM.esc(c.channel)+' · est. '+CRM.money(c.revenueEstimate.expectedRevenue)+'</div></div>'+
+      CRM.statusBadge(c.status)+'</a>';
+  }).join('');
+
+  // ---- top deals ----
+  document.getElementById('top-deals').innerHTML = S.getTopDeals().map(function(d){
+    return '<div class="dealrow"><div class="ic"><svg viewBox="0 0 24 24"><path d="M20.6 8.4 12 17 3.4 8.4"/><path d="M3 8h18l-1 4H4z"/></svg></div>'+
+      '<div style="flex:1;min-width:0"><div class="nm">'+CRM.esc(d.title)+'</div><div class="mt">'+(d.providerType==='own'?'Own':d.providerName)+' · conv '+CRM.pct(d.conversionRate)+'</div></div>'+
+      '<div style="text-align:right"><div class="nm">'+CRM.money(d.averageRevenue)+'</div><div class="mt">avg</div></div></div>';
+  }).join('');
+
+  // ---- agent activity ----
+  document.getElementById('agent-activity').innerHTML = S.getAgentRuns().slice(0,5).map(function(r){
+    return '<div class="tl-item conversation"><div class="dot">'+I.spark+'</div><div class="ct"><div class="t">'+CRM.esc(r.type.replace(/_/g,' '))+'</div><div class="d">'+CRM.esc(r.reasoningSummary)+'</div><div class="when">'+CRM.relDate(r.createdAt.slice(0,10))+' · '+CRM.esc(r.createdBy)+'</div></div></div>';
+  }).join('');
+})();
+</script>
+</body>
+</html>

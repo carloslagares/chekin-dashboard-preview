@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chekin — Guest CRM · Deals</title>
+<link rel="stylesheet" href="../ds/colors_and_type.css">
+<link rel="stylesheet" href="../ds/_sidebar.css">
+<link rel="stylesheet" href="../ds/_agent.css">
+<link rel="stylesheet" href="ds/_crm.css">
+<style>
+  .deal-card{display:flex;flex-direction:column;gap:12px;padding:18px;position:relative}
+  .deal-card .dc-top{display:flex;align-items:flex-start;gap:10px}
+  .deal-card .dc-top h3{font:600 15.5px/20px var(--font-primary);margin:0;color:var(--text-dark);flex:1;min-width:0}
+  .deal-card .prov{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .deal-card .prov .pn{font:500 12.5px var(--font-primary);color:var(--text-gray-dark)}
+  .deal-card p.desc{font:400 13px/19px var(--font-primary);color:var(--text-gray-dark);margin:0}
+  .deal-card .price{font:700 19px var(--font-primary);color:var(--text-dark);font-variant-numeric:tabular-nums}
+  .deal-card .price small{font:600 12px var(--font-primary);color:var(--text-gray-medium);margin-left:3px}
+  .deal-card .stats{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .deal-card .stat{display:inline-flex;flex-direction:column;gap:1px;padding:7px 11px;background:var(--bg-neutral-light);border:1px solid var(--stroke-gray-lighter);border-radius:var(--radius-md);min-width:0}
+  .deal-card .stat .sv{font:700 13.5px var(--font-primary);color:var(--text-dark);font-variant-numeric:tabular-nums}
+  .deal-card .stat .sl{font:500 10.5px var(--font-primary);color:var(--text-gray-medium);text-transform:uppercase;letter-spacing:.03em}
+  .deal-card .meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+  .deal-card .fits{font:500 12px/17px var(--font-primary);color:var(--text-gray-medium);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .deal-card .fits .lbl{display:inline-flex;align-items:center;gap:5px;color:var(--text-violet);font-weight:600}
+  .deal-card .fits .lbl svg{width:12px;height:12px;fill:var(--text-violet)}
+  .deal-card .dc-foot{display:flex;align-items:center;gap:8px;margin-top:2px;padding-top:13px;border-top:1px solid var(--stroke-gray-lighter)}
+  .deal-card .dc-foot .spacer{flex:1}
+  .deal-card.inactive{opacity:.72}
+  @media (max-width:1080px){.grid3{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:720px){.grid3{grid-template-columns:1fr}}
+  .ddetail .price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .ddetail .pbox{padding:12px 14px;border:1px solid var(--stroke-gray-lighter);border-radius:var(--radius-md);background:#fff}
+  .ddetail .pbox .pv{font:700 18px var(--font-primary);color:var(--text-dark);font-variant-numeric:tabular-nums}
+  .ddetail .pbox .pl{font:500 11.5px var(--font-primary);color:var(--text-gray-medium);text-transform:uppercase;letter-spacing:.03em;margin-top:2px}
+</style>
+</head>
+<body>
+<div class="app">
+  <div id="sidebar-slot" data-nav="guest-crm"></div>
+  <main>
+    <header class="top">
+      <div class="crumbs"><b>Guest CRM</b> <span class="sep">/</span> Deals</div>
+      <span data-agent-trigger-slot style="margin-left:auto"></span>
+      <button class="iconbtn" aria-label="Help"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 1 1 5.8 1c0 2-3 2-3 4M12 17h.01"/></svg></button>
+      <button class="iconbtn" aria-label="Notifications"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><div class="pip"></div></button>
+      <div class="user-av">MR</div>
+    </header>
+
+    <div class="page">
+      <div id="crm-demo"></div>
+      <div id="crm-subnav"></div>
+
+      <!-- Page head -->
+      <div class="pagehead reveal">
+        <div>
+          <h1>Deals <span class="count" id="deal-count">—</span></h1>
+          <div class="sub">Catalog of upsell deals offered through App Sales — your own services and third-party partners. The agent draws on these when building campaigns.</div>
+        </div>
+      </div>
+
+      <!-- KPI strip -->
+      <section class="kpis reveal" id="kpis" style="animation-delay:.04s"></section>
+
+      <!-- Toolbar -->
+      <section class="toolbar reveal" style="animation-delay:.08s">
+        <div class="search">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input id="deal-search" placeholder="Search deals by title…">
+        </div>
+        <div class="spacer"></div>
+        <div class="chips" id="view-toggle">
+          <button class="tbtn brand" data-view="cards" aria-label="Card view"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg> Cards</button>
+          <button class="tbtn" data-view="table" aria-label="Table view"><svg viewBox="0 0 24 24"><path d="M3 5h18M3 12h18M3 19h18"/></svg> Table</button>
+        </div>
+      </section>
+
+      <!-- Filter chips -->
+      <section class="reveal" style="animation-delay:.1s;display:flex;flex-direction:column;gap:10px">
+        <div class="chips" id="f-provider" data-group="provider">
+          <span class="tiny" style="margin-right:2px">Provider</span>
+          <button class="chip active" data-val="">All</button>
+          <button class="chip" data-val="own">Own</button>
+          <button class="chip" data-val="third_party">Third-party</button>
+        </div>
+        <div class="chips" id="f-active" data-group="active">
+          <span class="tiny" style="margin-right:2px">Status</span>
+          <button class="chip active" data-val="">All</button>
+          <button class="chip" data-val="active">Active</button>
+          <button class="chip" data-val="inactive">Inactive</button>
+        </div>
+        <div class="chips" id="f-category" data-group="category">
+          <span class="tiny" style="margin-right:2px">Category</span>
+          <button class="chip active" data-val="">All</button>
+          <button class="chip" data-val="check_in">Check-in</button>
+          <button class="chip" data-val="check_out">Check-out</button>
+          <button class="chip" data-val="transport">Transport</button>
+          <button class="chip" data-val="wellness">Wellness</button>
+          <button class="chip" data-val="dining">Dining</button>
+          <button class="chip" data-val="family">Family</button>
+        </div>
+      </section>
+
+      <!-- Results -->
+      <div id="deal-grid" class="grid3 reveal" style="animation-delay:.14s"></div>
+      <div id="deal-table" style="display:none"></div>
+    </div>
+  </main>
+</div>
+
+<div id="crm-drawer-root"></div>
+
+<script src="data/types.js"></script>
+<script src="data/fixtures.js"></script>
+<script src="services/crm-service.js"></script>
+<script src="agent/agent.js"></script>
+<script src="ds/_crm.js"></script>
+<script src="../ds/_sidebar.js"></script>
+<script src="../ds/_agent.js"></script>
+<script>
+(function(){
+  var S = window.CRMService, I = CRM.icons;
+  CRM.boot({ active:'deals' });
+
+  var CAT_LABEL = { check_in:'Check-in', check_out:'Check-out', transport:'Transport', wellness:'Wellness', dining:'Dining', family:'Family', business:'Business' };
+  function catLabel(c){ return CAT_LABEL[c] || (c||'').replace(/_/g,' '); }
+
+  var state = { search:'', provider:'', active:'', category:'', view:'cards' };
+  var allSegments = S.getSegments();
+
+  // ---- KPI strip ----
+  (function(){
+    var all = S.getDeals();
+    var own = all.filter(function(d){ return d.providerType==='own'; });
+    var third = all.filter(function(d){ return d.providerType==='third_party'; });
+    var avgConv = all.length ? all.reduce(function(s,d){ return s + (d.conversionRate||0); },0) / all.length : 0;
+    var kpis = [
+      { ic:'blue', svg:'<path d="M20.6 8.4 12 17 3.4 8.4"/><path d="M3 8h18l-1 4H4z"/>', v:all.length, l:'Total deals' },
+      { ic:'blue', svg:'<path d="M3 9 12 2l9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/>', v:own.length, l:'Own deals' },
+      { ic:'violet', svg:'<path d="M16 7a4 4 0 1 0-8 0 4 4 0 0 0 8 0ZM3 21a7 7 0 0 1 14 0"/><path d="M19 8v6M22 11h-6"/>', v:third.length, l:'Third-party deals' },
+      { ic:'green', svg:'<path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/>', v:CRM.pct(avgConv), l:'Avg conversion' }
+    ];
+    document.getElementById('kpis').innerHTML = kpis.map(function(k){
+      return '<div class="kpi"><div class="ic '+k.ic+'"><svg viewBox="0 0 24 24">'+k.svg+'</svg></div><div><div class="v">'+k.v+'</div><div class="l">'+k.l+'</div></div></div>';
+    }).join('');
+  })();
+
+  // ---- segment fit (simple, clearly heuristic: deal tags/category vs segment name+description) ----
+  function fittingSegments(deal){
+    var keys = (deal.tags||[]).concat([deal.category]).map(function(t){ return String(t||'').replace(/_/g,' ').toLowerCase(); });
+    var matches = [];
+    allSegments.forEach(function(seg){
+      var hay = (seg.name + ' ' + seg.description + ' ' + (seg.naturalLanguageQuery||'')).toLowerCase();
+      var hit = keys.some(function(k){ return k && hay.indexOf(k) >= 0; });
+      if (hit) matches.push(seg.name);
+    });
+    return matches.slice(0,2);
+  }
+
+  // ---- provider badge ----
+  function providerBadge(deal){
+    return deal.providerType==='own'
+      ? '<span class="badge blue">Own</span>'
+      : '<span class="badge violet">Third-party</span>';
+  }
+  function activeBadge(deal){
+    return deal.active
+      ? '<span class="badge green"><span class="dot"></span>Active</span>'
+      : '<span class="badge gray"><span class="dot"></span>Inactive</span>';
+  }
+  function marginText(deal){
+    return deal.providerType==='own'
+      ? 'margin ' + CRM.pct(deal.margin)
+      : 'commission ' + CRM.pct(deal.commission);
+  }
+
+  // ---- current filtered list ----
+  function filtered(){
+    var f = {};
+    if (state.provider) f.providerType = state.provider;
+    if (state.active) f.active = (state.active === 'active');
+    if (state.category) f.category = state.category;
+    var rows = S.getDeals(f);
+    if (state.search){
+      var q = state.search.toLowerCase();
+      rows = rows.filter(function(d){ return d.title.toLowerCase().indexOf(q) >= 0; });
+    }
+    return rows;
+  }
+
+  // ---- card render ----
+  function cardHtml(d){
+    var fits = fittingSegments(d);
+    var fitsHtml = fits.length
+      ? fits.map(function(n){ return '<span class="pill">'+CRM.esc(n)+'</span>'; }).join('')
+      : '<span class="tiny">—</span>';
+    return '<div class="card deal-card'+(d.active?'':' inactive')+'">'+
+      '<div class="dc-top"><h3>'+CRM.esc(d.title)+'</h3>'+activeBadge(d)+'</div>'+
+      '<div class="prov">'+providerBadge(d)+'<span class="pn">'+CRM.esc(d.providerName)+'</span></div>'+
+      '<p class="desc">'+CRM.esc(d.description)+'</p>'+
+      '<div class="price">'+CRM.money(d.price, d.currency)+'<small>'+marginText(d)+'</small></div>'+
+      '<div class="stats">'+
+        '<div class="stat"><span class="sv">'+CRM.pct(d.conversionRate)+'</span><span class="sl">Conversion</span></div>'+
+        '<div class="stat"><span class="sv">'+CRM.money(d.averageRevenue, d.currency)+'</span><span class="sl">Avg revenue</span></div>'+
+      '</div>'+
+      '<div class="meta"><span class="pill brand">'+CRM.esc(catLabel(d.category))+'</span>'+CRM.tagPills(d.tags)+'</div>'+
+      '<div class="fits"><span class="lbl">'+I.spark+'Fits segments</span> '+fitsHtml+'</div>'+
+      '<div class="dc-foot"><span class="tiny">'+CRM.esc(d.availability)+'</span><span class="spacer"></span>'+
+        '<button class="tbtn" data-view-deal="'+d.id+'"><svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg> View</button>'+
+      '</div>'+
+    '</div>';
+  }
+
+  // ---- table render ----
+  function tableHtml(rows){
+    var body = rows.map(function(d){
+      return '<tr data-view-deal="'+d.id+'">'+
+        '<td><div class="gname"><div style="min-width:0"><div class="nm">'+CRM.esc(d.title)+'</div><div class="em">'+CRM.esc(d.providerName)+'</div></div></div></td>'+
+        '<td>'+providerBadge(d)+'</td>'+
+        '<td><span class="pill brand">'+CRM.esc(catLabel(d.category))+'</span></td>'+
+        '<td class="num">'+CRM.money(d.price, d.currency)+'</td>'+
+        '<td class="num">'+CRM.pct(d.conversionRate)+'</td>'+
+        '<td class="num">'+CRM.money(d.averageRevenue, d.currency)+'</td>'+
+        '<td class="num">'+CRM.esc(marginText(d))+'</td>'+
+        '<td>'+activeBadge(d)+'</td>'+
+      '</tr>';
+    }).join('');
+    return '<div class="table-wrap"><div class="table-scroll"><table class="crm">'+
+      '<thead><tr><th>Deal</th><th>Provider</th><th>Category</th><th class="num">Price</th><th class="num">Conv.</th><th class="num">Avg rev.</th><th class="num">Margin / Comm.</th><th>Status</th></tr></thead>'+
+      '<tbody>'+body+'</tbody></table></div></div>';
+  }
+
+  function emptyHtml(){
+    return '<div class="empty" style="grid-column:1/-1"><div class="ic"><svg viewBox="0 0 24 24"><path d="M20.6 8.4 12 17 3.4 8.4"/><path d="M3 8h18l-1 4H4z"/></svg></div>'+
+      '<h3>No deals match your filters</h3><p>Try clearing the search or switching the provider, status or category filters.</p></div>';
+  }
+
+  // ---- render ----
+  function render(){
+    var rows = filtered();
+    document.getElementById('deal-count').textContent = rows.length;
+    var grid = document.getElementById('deal-grid'), tbl = document.getElementById('deal-table');
+    if (state.view === 'cards'){
+      grid.style.display = '';
+      tbl.style.display = 'none';
+      grid.innerHTML = rows.length ? rows.map(cardHtml).join('') : emptyHtml();
+    } else {
+      grid.style.display = 'none';
+      tbl.style.display = '';
+      tbl.innerHTML = rows.length ? tableHtml(rows) : '<div class="card"><div class="bd">'+emptyHtml()+'</div></div>';
+    }
+  }
+
+  // ---- drawer detail ----
+  function openDealDrawer(id){
+    var d = S.getDealById(id); if (!d) return;
+    var fits = fittingSegments(d);
+    var props = S.getProperties();
+    var propNames = (d.propertyIds||[]).map(function(pid){ var p = props.filter(function(x){ return x.id===pid; })[0]; return p ? p.name : pid; });
+
+    var head =
+      '<div class="dhead">'+
+        '<div style="flex:1;min-width:0">'+
+          '<div style="font:600 18px var(--font-primary);display:flex;align-items:center;gap:8px;flex-wrap:wrap">'+CRM.esc(d.title)+'</div>'+
+          '<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">'+providerBadge(d)+activeBadge(d)+'<span class="badge gray">'+CRM.esc(d.providerName)+'</span></div>'+
+        '</div>'+
+        '<button class="dclose" data-drawer-close>'+I.x+'</button>'+
+      '</div>';
+
+    function section(title, inner){ return '<div class="card"><div class="hd"><h3>'+title+'</h3></div><div class="bd">'+inner+'</div></div>'; }
+
+    var priceInner =
+      '<div class="price-grid">'+
+        '<div class="pbox"><div class="pv">'+CRM.money(d.price, d.currency)+'</div><div class="pl">Price</div></div>'+
+        (d.providerType==='own'
+          ? '<div class="pbox"><div class="pv">'+CRM.pct(d.margin)+'</div><div class="pl">Margin</div></div>'
+          : '<div class="pbox"><div class="pv">'+CRM.pct(d.commission)+'</div><div class="pl">Commission</div></div>')+
+        '<div class="pbox"><div class="pv">'+CRM.pct(d.conversionRate)+'</div><div class="pl">Conversion</div></div>'+
+        '<div class="pbox"><div class="pv">'+CRM.money(d.averageRevenue, d.currency)+'</div><div class="pl">Avg revenue</div></div>'+
+        '<div class="pbox"><div class="pv">'+((d.propertyIds||[]).length)+'</div><div class="pl">Properties</div></div>'+
+      '</div>';
+
+    var fitsInner = fits.length
+      ? '<div style="display:flex;gap:6px;flex-wrap:wrap">'+fits.map(function(n){ return '<span class="pill">'+CRM.esc(n)+'</span>'; }).join('')+'</div>'
+      : '<div class="tiny">No saved segments clearly fit this deal yet.</div>';
+
+    var propsInner = propNames.length
+      ? '<div style="display:flex;gap:6px;flex-wrap:wrap">'+propNames.map(function(n){ return '<span class="pill">'+CRM.esc(n)+'</span>'; }).join('')+'</div>'
+      : '<div class="tiny">Available across all properties.</div>';
+
+    var body =
+      '<div class="dbody ddetail">'+
+        CRM.aiBlock('This '+(d.providerType==='own'?'<b>own</b>':'<b>third-party</b>')+' deal converts at '+CRM.pct(d.conversionRate)+' with an average of '+CRM.money(d.averageRevenue, d.currency)+' per buyer. '+(fits.length?'It fits '+fits.length+' saved segment'+(fits.length>1?'s':'')+'.':'Pair it with an audience to start selling.'))+
+        section('Description', '<p style="font:400 14px/21px var(--font-primary);color:var(--text-gray-dark);margin:0">'+CRM.esc(d.description)+'</p>')+
+        section('Pricing & performance', priceInner)+
+        section('Availability', '<div class="tiny" style="font-size:13.5px">'+CRM.esc(d.availability)+'</div>')+
+        section('Tags', '<div style="display:flex;gap:6px;flex-wrap:wrap">'+(d.tags&&d.tags.length?CRM.tagPills(d.tags):'<span class="tiny">No tags</span>')+'</div>')+
+        section('Properties ('+(d.propertyIds||[]).length+')', propsInner)+
+        section('Fitting segments', fitsInner)+
+      '</div>';
+
+    var foot =
+      '<button class="btn-primary" data-use-campaign="'+CRM.esc(d.title)+'">'+I.spark+' Use in campaign</button>'+
+      '<button class="tbtn" data-drawer-close>Close</button>';
+
+    CRM.openDrawer(head + body, foot);
+
+    var root = document.getElementById('crm-drawer-root');
+    var btn = root.querySelector('[data-use-campaign]');
+    if (btn) btn.addEventListener('click', function(){
+      location.href = 'campaign-new.html?prompt=' + encodeURIComponent('Promote ' + d.title + ' to a relevant audience');
+    });
+    root.querySelectorAll('[data-drawer-close]').forEach(function(b){ b.addEventListener('click', CRM.closeDrawer); });
+  }
+
+  // ---- events ----
+  document.getElementById('deal-search').addEventListener('input', function(e){ state.search = e.target.value.trim(); render(); });
+
+  ['f-provider','f-active','f-category'].forEach(function(gid){
+    var el = document.getElementById(gid);
+    var group = el.getAttribute('data-group');
+    el.addEventListener('click', function(e){
+      var chip = e.target.closest('.chip'); if (!chip) return;
+      el.querySelectorAll('.chip').forEach(function(c){ c.classList.remove('active'); });
+      chip.classList.add('active');
+      state[group] = chip.getAttribute('data-val');
+      render();
+    });
+  });
+
+  document.getElementById('view-toggle').addEventListener('click', function(e){
+    var b = e.target.closest('[data-view]'); if (!b) return;
+    state.view = b.getAttribute('data-view');
+    this.querySelectorAll('[data-view]').forEach(function(x){ x.classList.toggle('brand', x===b); });
+    render();
+  });
+
+  function delegateView(container){
+    container.addEventListener('click', function(e){
+      var t = e.target.closest('[data-view-deal]'); if (!t) return;
+      openDealDrawer(t.getAttribute('data-view-deal'));
+    });
+  }
+  delegateView(document.getElementById('deal-grid'));
+  delegateView(document.getElementById('deal-table'));
+
+  render();
+})();
+</script>
+</body>
+</html>
