@@ -170,7 +170,8 @@ table.crm td{height:62px;padding:0 14px;vertical-align:middle;font:500 14px/20px
 
 /* ── Agentic command box ── */
 .cmd{background:linear-gradient(135deg,#1B1B52 0%,#2A2A6E 60%,#385CF8 130%);border-radius:var(--radius-lg);padding:22px 22px;color:#fff;box-shadow:0 10px 30px rgba(22,22,67,.22);position:relative;overflow:hidden}
-.cmd::after{content:"";position:absolute;right:-40px;top:-40px;width:200px;height:200px;background:radial-gradient(circle,rgba(107,133,255,.5),transparent 70%);pointer-events:none}
+.cmd::after{content:"";position:absolute;right:-40px;top:-40px;width:200px;height:200px;background:radial-gradient(circle,rgba(107,133,255,.5),transparent 70%);pointer-events:none;z-index:0}
+.cmd > *{position:relative;z-index:1}
 .cmd .eyebrow{display:inline-flex;align-items:center;gap:7px;font:700 11px var(--font-primary);text-transform:uppercase;letter-spacing:.08em;color:#BFC8FF}
 .cmd .eyebrow svg{width:14px;height:14px;fill:#BFC8FF}
 .cmd h2{font:600 20px/26px var(--font-primary);margin:10px 0 14px;max-width:680px;color:#fff}

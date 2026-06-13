@@ -60,7 +60,7 @@
         </div>
         <div class="inputbar">
           <svg class="lead" viewBox="0 0 24 24"><path d="M12 2 13.5 8 19 9.5 13.5 11 12 17 10.5 11 5 9.5 10.5 8 Z"/></svg>
-          <input id="cmd-input" value="Sell late checkout to Sunday departures" placeholder="Ask the Guest CRM agent…">
+          <input id="cmd-input" placeholder="Sell late checkout to Sunday departures">
           <button class="go" id="cmd-go"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg> Generate</button>
         </div>
         <div class="examples" id="cmd-examples"></div>
@@ -141,7 +141,9 @@
   ];
   document.getElementById('cmd-examples').innerHTML = examples.map(function(e){ return '<span class="ex">'+CRM.esc(e)+'</span>'; }).join('');
   function go(){
-    var v = document.getElementById('cmd-input').value.trim();
+    var el = document.getElementById('cmd-input');
+    // Fall back to the placeholder suggestion when the field is left empty.
+    var v = (el.value.trim() || el.placeholder || '').trim();
     if(!v) return;
     location.href = 'campaign-new.html?prompt=' + encodeURIComponent(v);
   }
