@@ -21,18 +21,16 @@
   .dealrow .mt{font:400 12px var(--font-primary);color:var(--text-gray-medium);margin-top:1px}
   .camprow{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--stroke-gray-lighter)}
   .camprow:last-child{border-bottom:none}
-  /* command box: heading left, explainer video right */
-  .cmd-top{display:flex;align-items:center;justify-content:space-between;gap:20px}
-  .cmd-intro{min-width:0}
-  .cmd-intro h2{margin:10px 0 0}
-  .cmd-video{flex-shrink:0;display:flex;align-items:center;gap:12px;height:64px;padding:0 16px 0 12px;border-radius:12px;cursor:pointer;
-    background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.22);color:#fff;font-family:var(--font-primary);transition:.15s}
-  .cmd-video:hover{background:rgba(0,0,0,.28);border-color:rgba(255,255,255,.4)}
-  .cmd-video .play{width:40px;height:40px;border-radius:50%;background:#fff;display:grid;place-items:center;flex-shrink:0}
-  .cmd-video .play svg{width:16px;height:16px;fill:var(--text-brand);margin-left:2px}
-  .cmd-video .vlabel{display:flex;flex-direction:column;text-align:left;font:600 13px var(--font-primary);color:#fff;line-height:1.2}
-  .cmd-video .vlabel small{font:500 11px var(--font-primary);color:rgba(255,255,255,.7);margin-top:2px}
-  @media (max-width:760px){.cmd-top{flex-direction:column;align-items:stretch}.cmd-video{align-self:flex-start}}
+  /* command box: eyebrow left, subtle explainer-video chip right */
+  .cmd-top{display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .cmd .inputbar{margin-top:18px}
+  .cmd-video{flex-shrink:0;display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 12px 0 5px;border-radius:999px;cursor:pointer;
+    background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;font-family:var(--font-primary);transition:.15s}
+  .cmd-video:hover{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.36)}
+  .cmd-video .play{width:23px;height:23px;border-radius:50%;background:#fff;display:grid;place-items:center;flex-shrink:0}
+  .cmd-video .play svg{width:10px;height:10px;fill:var(--text-brand);margin-left:1px}
+  .cmd-video .vlabel{font:600 12px var(--font-primary);color:#fff;white-space:nowrap}
+  @media (max-width:560px){.cmd-video .vlabel{display:none}}
 </style>
 </head>
 <body>
@@ -54,13 +52,10 @@
       <!-- Agentic command -->
       <section class="cmd reveal">
         <div class="cmd-top">
-          <div class="cmd-intro">
-            <span class="eyebrow"><svg viewBox="0 0 24 24"><path d="M12 2 13.5 8 19 9.5 13.5 11 12 17 10.5 11 5 9.5 10.5 8 Z"/></svg> Guest CRM Agent</span>
-            <h2>Tell Vela what you want to achieve</h2>
-          </div>
+          <span class="eyebrow"><svg viewBox="0 0 24 24"><path d="M12 2 13.5 8 19 9.5 13.5 11 12 17 10.5 11 5 9.5 10.5 8 Z"/></svg> Guest CRM Agent</span>
           <button class="cmd-video" id="cmd-video" aria-label="Watch how it works">
             <span class="play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
-            <span class="vlabel">How it works<small>1 min walkthrough</small></span>
+            <span class="vlabel">How it works · 1 min</span>
           </button>
         </div>
         <div class="inputbar">
