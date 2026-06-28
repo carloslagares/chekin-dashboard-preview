@@ -29,8 +29,27 @@
       pastSummer: /(last summer|past summer|previous|stayed before|returning)/.test(p),
       noConsent: /(without.*consent|no.*consent|exclude.*consent|opted.out)/.test(p),
       transfer: /(transfer|airport|pickup)/.test(p),
-      days: parseWindowDays(p)
+      days: parseWindowDays(p),
+      // segmentation
+      whale: /\bwhale(s)?\b/.test(p),
+      vip: /\bvip\b/.test(p),
+      preferred: /\bpreferred\b/.test(p),
+      repeatGuest: /(repeat.guest|repeated.guest|returning.guest)/.test(p) || (/repeat/.test(p) && !/(restaurant|dining)/.test(p)),
+      highAppSales: /(high.app.sales|app.sales.potential|app.sales.prospect)/.test(p),
+      highOpportunity: /(high.opportunit|best.guest|top.guest|highest.opportunit|opportunit.score|score.above|score.over)/.test(p),
+      excludeNeg: /(exclude.unwanted|exclude.do.not|suppress.unwanted|without.unwanted|no.unwanted)/.test(p),
+      unwanted: /unwanted.guest/.test(p),
+      doNotContact: /do.not.contact/.test(p),
+      noFutureBooking: /(no.future|no.booking|not.rebook|haven.t.book|without.future)/.test(p),
+      scoreThreshold: parseScoreThreshold(p)
     };
+  }
+  function parseScoreThreshold(p) {
+    var m = p.match(/score\s+(above|over|greater.than|>)\s*(\d+)/);
+    if (m) return +m[2];
+    m = p.match(/(\d+)\s*\+?\s*score/);
+    if (m) return +m[1];
+    return null;
   }
   function parseWindowDays(p) {
     var m = p.match(/next (\d+)\s?(day|days|hour|hours|h)\b/);
@@ -77,6 +96,21 @@
     var parkingAsk = /(ask|asking|asked|inquir|interest).{0,24}(parking|car\b|garage)/.test((prompt || '').toLowerCase()) || /parking intent/.test((prompt || '').toLowerCase());
     if (i.parking && parkingAsk) { rules.push({ field: 'detectedIntent', operator: 'equals', value: 'parking_inquiry', label: 'Asked about parking' }); nlBits.push('who asked about parking'); }
     if (i.pastSummer) { rules.push({ field: 'lastStaySeason', operator: 'equals', value: 'summer_2025', label: 'Stayed last summer' }); rules.push({ field: 'nextStayAt', operator: 'is_false', value: null, label: 'No future booking' }); nlBits.push('who stayed last summer with no future booking'); }
+    // ---- segmentation tag / score rules ----
+    if (i.whale) { rules.push({ field: 'segmentTags', operator: 'contains', value: 'whale', label: 'Tagged: Whale' }); nlBits.push('Whale guests'); }
+    if (i.vip) { rules.push({ field: 'segmentTags', operator: 'contains', value: 'vip', label: 'Tagged: VIP' }); nlBits.push('VIP guests'); }
+    if (i.preferred) { rules.push({ field: 'segmentTags', operator: 'contains', value: 'preferred', label: 'Tagged: Preferred' }); nlBits.push('Preferred guests'); }
+    if (i.highAppSales) { rules.push({ field: 'segmentTags', operator: 'contains', value: 'high_app_sales_potential', label: 'Tagged: High App Sales Potential' }); nlBits.push('high app sales potential guests'); }
+    if (i.highOpportunity && !i.scoreThreshold) { rules.push({ field: 'opportunityScore', operator: 'greater_than', value: 70, label: 'Opportunity Score > 70' }); nlBits.push('high opportunity guests'); }
+    if (i.scoreThreshold) { rules.push({ field: 'opportunityScore', operator: 'greater_than', value: i.scoreThreshold, label: 'Score > ' + i.scoreThreshold }); nlBits.push('guests with score above ' + i.scoreThreshold); }
+    if (i.repeatGuest && !i.family && !i.couple && !i.arriving) { rules.push({ field: 'segmentTags', operator: 'contains', value: 'repeat_guest', label: 'Tagged: Repeat Guest' }); nlBits.push('repeat guests'); }
+    if (i.noFutureBooking) { rules.push({ field: 'nextStayAt', operator: 'is_false', value: null, label: 'No future booking' }); nlBits.push('with no future booking'); }
+    if (i.excludeNeg || i.doNotContact || i.unwanted) {
+      rules.push({ field: 'segmentTags', operator: 'not_contains', value: 'do_not_contact', label: 'Exclude Do Not Contact' });
+      rules.push({ field: 'segmentTags', operator: 'not_contains', value: 'unwanted_guest', label: 'Exclude Unwanted Guests' });
+      rules.push({ field: 'segmentTags', operator: 'not_contains', value: 'do_not_promote', label: 'Exclude Do Not Promote' });
+      nlBits.push('excluding unwanted/suppressed guests');
+    }
     if (!rules.length) rules.push({ field: 'lifecycleStage', operator: 'equals', value: 'guest', label: 'Active guests' });
 
     var preview = window.CRMService.previewSegmentAudience(rules);
@@ -276,7 +310,13 @@
     'Guests arriving in the next 7 days who have not completed check-in',
     'Families who stayed last summer and have no future booking',
     'Couples arriving this weekend who have not bought spa deals',
-    'Guests who asked about parking and arrive in the next 72 hours'
+    'Guests who asked about parking and arrive in the next 72 hours',
+    'Whale guests with no future reservation',
+    'VIP guests arriving this month',
+    'Guests with Opportunity Score above 70',
+    'Repeat guests that have not booked again',
+    'Guests tagged as High App Sales Potential',
+    'Exclude Unwanted Guests and Do Not Contact'
   ];
 
   window.CRMAgent = {

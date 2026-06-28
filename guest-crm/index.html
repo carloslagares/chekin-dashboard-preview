@@ -77,6 +77,18 @@
             <div class="bd"><div class="sug-grid" id="suggestions"></div></div>
           </div>
 
+          <!-- Segmentation widgets -->
+          <div class="card reveal" style="animation-delay:.13s">
+            <div class="hd">
+              <h3><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg> Guest Segmentation</h3>
+              <div class="act"><a class="tbtn ghost" href="guests.html">View all guests</a></div>
+            </div>
+            <div class="bd">
+              <div class="seg-widgets" id="seg-widgets"></div>
+              <div class="seg-insights-list" id="seg-insights" style="margin-top:16px"></div>
+            </div>
+          </div>
+
           <!-- Top recommended campaigns -->
           <div class="card reveal" style="animation-delay:.15s">
             <div class="hd"><h3>Top campaigns</h3><div class="act"><a class="tbtn ghost" href="campaigns.html">View all</a></div></div>
@@ -192,6 +204,47 @@
   document.getElementById('agent-activity').innerHTML = S.getAgentRuns().slice(0,5).map(function(r){
     return '<div class="tl-item conversation"><div class="dot">'+I.spark+'</div><div class="ct"><div class="t">'+CRM.esc(r.type.replace(/_/g,' '))+'</div><div class="d">'+CRM.esc(r.reasoningSummary)+'</div><div class="when">'+CRM.relDate(r.createdAt.slice(0,10))+' · '+CRM.esc(r.createdBy)+'</div></div></div>';
   }).join('');
+
+  // ---- segmentation widgets ----
+  var sm = S.getSegmentationMetrics();
+  var segWidgets = [
+    { ic:'dark', svg:'<path d="M12 2 15 8.5 22 9.4l-5 4.9 1.2 6.9L12 18l-6.2 3.2 1.2-6.9-5-4.9 7-1Z"/>', v: sm.highOpportunity, l:'High Opportunity', tag:'', score: 70 },
+    { ic:'dark', svg:'<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>', v: sm.whales, l:'Whale Guests', tag:'whale' },
+    { ic:'violet', svg:'<path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>', v: sm.vips, l:'VIP Guests', tag:'vip' },
+    { ic:'green', svg:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>', v: sm.repeatGuests, l:'Repeat Guests', tag:'repeat_guest' },
+    { ic:'amber', svg:'<path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/>', v: sm.highAppSalesPotential, l:'High App Sales', tag:'high_app_sales_potential' },
+    { ic:'red', svg:'<circle cx="12" cy="12" r="10"/><path d="M4.93 4.93l14.14 14.14"/>', v: sm.excluded, l:'Excluded Guests', tag:'do_not_contact' }
+  ];
+  document.getElementById('seg-widgets').innerHTML = segWidgets.map(function(w){
+    var href = w.tag ? 'guests.html' : 'guests.html';
+    var dataAttr = w.tag ? ' data-seg-tag="'+CRM.esc(w.tag)+'"' : (w.score ? ' data-min-score="'+w.score+'"' : '');
+    return '<div class="seg-stat"'+dataAttr+' style="cursor:pointer">'+
+      '<div class="ic '+w.ic+'"><svg viewBox="0 0 24 24" style="stroke:currentColor;fill:none;stroke-width:1.8">'+w.svg+'</svg></div>'+
+      '<div><div class="v">'+w.v+'</div><div class="l">'+CRM.esc(w.l)+'</div></div>'+
+    '</div>';
+  }).join('');
+  // navigate to filtered guests on click
+  document.getElementById('seg-widgets').addEventListener('click', function(e){
+    var stat = e.target.closest('[data-seg-tag]');
+    if (stat) { location.href = 'guests.html'; CRM.toast('Filtering by tag: '+stat.getAttribute('data-seg-tag')); return; }
+    var stat2 = e.target.closest('[data-min-score]');
+    if (stat2) { location.href = 'guests.html'; }
+  });
+
+  // ---- segmentation insights ----
+  var insightDots = { whale:'dot-dark', opportunity:'dot-blue', repeat:'dot-green', excluded:'dot-red' };
+  document.getElementById('seg-insights').innerHTML = sm.insights.map(function(ins){
+    var dotCls = insightDots[ins.kind] || 'dot-blue';
+    return '<div class="seg-insight">'+
+      '<span class="dot '+dotCls+'"></span>'+
+      '<span class="t">'+CRM.esc(ins.text)+'</span>'+
+      (ins.action && ins.prompt ? '<span class="act seg-insight-act" data-prompt="'+CRM.esc(ins.prompt)+'">'+CRM.esc(ins.action)+' →</span>' : '')+
+    '</div>';
+  }).join('')||'<div class="tiny" style="color:var(--text-gray-medium)">No segmentation alerts right now.</div>';
+  document.getElementById('seg-insights').addEventListener('click', function(e){
+    var act = e.target.closest('.seg-insight-act');
+    if (act) location.href = 'campaign-new.html?prompt='+encodeURIComponent(act.getAttribute('data-prompt'));
+  });
 })();
 </script>
 </body>

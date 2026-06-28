@@ -322,6 +322,47 @@
     { id: 'sug_parking', title: 'Promote parking to arrivals asking about cars', detail: '3 arrivals asked about parking and arrive within 72 hours.', metric: '3 guests', estRevenue: 54, kind: 'upsell', dealId: 'deal_parking', segmentHint: 'Parking intent' }
   ];
 
+  // ---- segmentation tags (CRM-managed, user-editable, drive campaign inclusion/exclusion) ----
+  // Separate from descriptive guest.tags (family/couple/etc); these are CRM operator decisions.
+  var SEG_TAGS = {
+    guest_001: ['repeat_guest', 'family'],
+    guest_002: ['whale', 'vip', 'high_app_sales_potential'],
+    guest_003: ['couple'],
+    guest_004: ['business'],
+    guest_005: ['couple'],
+    guest_006: ['family'],
+    guest_007: ['family'],
+    guest_008: ['needs_review'],
+    guest_009: ['repeat_guest', 'business', 'high_app_sales_potential'],
+    guest_010: ['couple'],
+    guest_011: [],
+    guest_012: ['vip', 'preferred', 'family'],
+    guest_013: ['do_not_contact'],
+    guest_014: ['couple', 'high_app_sales_potential'],
+    guest_015: [],
+    guest_016: ['family'],
+    guest_017: ['whale', 'repeat_guest', 'business', 'high_app_sales_potential'],
+    guest_018: ['couple'],
+    guest_019: ['repeat_guest', 'family'],
+    guest_020: ['preferred', 'high_app_sales_potential'],
+    guest_021: ['business'],
+    guest_022: ['family'],
+    guest_023: ['couple'],
+    guest_024: ['couple'],
+    guest_025: [],
+    guest_026: ['couple'],
+    guest_027: ['family'],
+    guest_028: ['whale', 'vip', 'high_app_sales_potential'],
+    guest_029: ['repeat_guest', 'business']
+  };
+  var SEG_TAG_NOTES = {
+    guest_013: { do_not_contact: 'Guest requested complete suppression from all marketing.' }
+  };
+  guests.forEach(function (g) {
+    g.segmentTags = SEG_TAGS[g.id] || [];
+    g.segmentTagNotes = SEG_TAG_NOTES[g.id] || {};
+  });
+
   window.CRM_DATA = {
     organizationId: ORG, currency: CUR, today: date(0),
     properties: properties, guests: guests, reservations: reservations, deals: deals,

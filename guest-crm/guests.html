@@ -52,6 +52,8 @@
         <div class="chips" id="consent-chips"></div>
         <div class="chip-group-sep"></div>
         <div class="chips" id="upcoming-chips"></div>
+        <div class="chip-group-sep"></div>
+        <div class="chips" id="segtag-chips"></div>
         <div class="spacer"></div>
         <button class="tbtn" id="more-filters"><svg viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></svg> More filters</button>
       </div>
@@ -68,8 +70,8 @@
                 <th>Last stay</th>
                 <th>Consent</th>
                 <th class="num">Revenue</th>
+                <th class="num" title="Opportunity Score 0–100. Rule-based: upcoming stay, repeat guest, App Sales history, consent, profile completeness.">Score</th>
                 <th>Tags</th>
-                <th>Recommended action</th>
               </tr>
             </thead>
             <tbody id="guest-rows"></tbody>
@@ -106,7 +108,7 @@
   document.getElementById('guest-count').textContent = totalGuests;
 
   // ---- filter state (one active value per group) ----
-  var state = { search:'', lifecycleStage:'', consent:'', upcoming:false };
+  var state = { search:'', lifecycleStage:'', consent:'', upcoming:false, segmentTag:'' };
 
   // ---- chip groups ----
   var stageChips = [
@@ -129,6 +131,18 @@
   document.getElementById('upcoming-chips').innerHTML =
     '<button class="chip" data-upcoming="1"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> Upcoming stay</button>';
 
+  // seg tag quick-filter chips
+  var segTagChips = [
+    { label:'🐳 Whale', tag:'whale' },
+    { label:'⭐ VIP', tag:'vip' },
+    { label:'🔁 Repeat', tag:'repeat_guest' },
+    { label:'📈 High App Sales', tag:'high_app_sales_potential' },
+    { label:'⚠ Excluded', tag:'do_not_contact' }
+  ];
+  document.getElementById('segtag-chips').innerHTML = segTagChips.map(function(c){
+    return '<button class="chip" data-segtag="' + CRM.esc(c.tag) + '">' + CRM.esc(c.label) + '</button>';
+  }).join('');
+
   // ---- render ----
   function buildFilter(){
     var f = {};
@@ -136,20 +150,20 @@
     if (state.lifecycleStage) f.lifecycleStage = state.lifecycleStage;
     if (state.consent) f.consent = state.consent;
     if (state.upcoming) f.upcoming = true;
+    if (state.segmentTag) f.segmentTag = state.segmentTag;
     return f;
   }
 
   function rowHtml(g){
     var lang = '<div class="lang-cell"><span class="fl">' + g.flag + '</span>' + CRM.esc(g.languageName) + '</div>';
 
-    var tags = g.tags || [];
-    var shown = tags.slice(0, 2).map(function(t){ return '<span class="pill">' + CRM.esc(t.replace(/_/g, ' ')) + '</span>'; }).join('');
-    if (tags.length > 2) shown += '<span class="pill">+' + (tags.length - 2) + '</span>';
-    if (!tags.length) shown = '<span class="tiny">—</span>';
-
-    var rec = (g.recommendedActions && g.recommendedActions[0])
-      ? '<span class="badge blue">' + CRM.esc(g.recommendedActions[0].label) + '</span>'
-      : '<span class="tiny">—</span>';
+    // segmentation tags (first 2, then +N)
+    var stags = g.segmentTags || [];
+    var stagShown = stags.slice(0, 2).map(function(t){
+      return '<span class="seg-tag ' + CRM.segTagClass(t) + '">' + CRM.esc(CRM.segTagLabel(t)) + '</span>';
+    }).join('');
+    if (stags.length > 2) stagShown += '<span class="seg-tag neutral">+' + (stags.length - 2) + '</span>';
+    if (!stags.length) stagShown = '<span class="tiny">—</span>';
 
     return '<tr data-id="' + g.id + '">' +
       '<td><div class="gname"><div class="gav">' + CRM.initials(g.fullName) + '</div>' +
@@ -159,8 +173,8 @@
       '<td>' + CRM.relDate(g.lastStayAt) + '</td>' +
       '<td><div class="consent-row">' + CRM.consentBadges(g.consentSummary, { compact:true }) + '</div></td>' +
       '<td class="num">' + CRM.money(g.totalRevenue) + '</td>' +
-      '<td><div class="tagcell">' + shown + '</div></td>' +
-      '<td>' + rec + '</td>' +
+      '<td class="num">' + CRM.scorePill(g.id) + '</td>' +
+      '<td><div class="tagcell">' + stagShown + '</div></td>' +
     '</tr>';
   }
 
@@ -201,10 +215,14 @@
     Array.prototype.forEach.call(uc.querySelectorAll('.chip'), function(b){
       b.classList.toggle('active', !!state.upcoming);
     });
+    var stc = document.getElementById('segtag-chips');
+    if (stc) Array.prototype.forEach.call(stc.querySelectorAll('.chip'), function(b){
+      b.classList.toggle('active', b.getAttribute('data-segtag') === state.segmentTag);
+    });
   }
 
   function clearFilters(){
-    state = { search:'', lifecycleStage:'', consent:'', upcoming:false };
+    state = { search:'', lifecycleStage:'', consent:'', upcoming:false, segmentTag:'' };
     document.getElementById('guest-search').value = '';
     syncChips();
     render();
@@ -238,8 +256,16 @@
     render();
   });
 
+  document.getElementById('segtag-chips').addEventListener('click', function(e){
+    var b = e.target.closest('.chip'); if (!b) return;
+    var v = b.getAttribute('data-segtag');
+    state.segmentTag = (state.segmentTag === v) ? '' : v;
+    syncChips();
+    render();
+  });
+
   document.getElementById('more-filters').addEventListener('click', function(){
-    CRM.toast('More filters: language, country, tags & revenue coming soon.');
+    CRM.toast('More filters: language, country, revenue range coming soon.');
   });
 
   // ---- row click → guest drawer ----

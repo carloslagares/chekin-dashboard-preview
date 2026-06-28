@@ -25,8 +25,11 @@
       if (filter.consent === 'marketing') rows = rows.filter(function (g) { return g.consentSummary.emailMarketing === 'granted' && !g.consentSummary.globalUnsubscribe; });
       if (filter.consent === 'no_marketing') rows = rows.filter(function (g) { return g.consentSummary.emailMarketing !== 'granted' || g.consentSummary.globalUnsubscribe; });
       if (filter.tag) rows = rows.filter(function (g) { return g.tags.indexOf(filter.tag) >= 0; });
+      if (filter.segmentTag) rows = rows.filter(function (g) { return g.segmentTags && g.segmentTags.indexOf(filter.segmentTag) >= 0; });
       if (filter.upcoming) rows = rows.filter(function (g) { return !!g.nextStayAt; });
       if (filter.minRevenue) rows = rows.filter(function (g) { return g.totalRevenue >= filter.minRevenue; });
+      if (filter.minScore != null) rows = rows.filter(function (g) { return computeOpportunityScore(g.id).score >= filter.minScore; });
+      if (filter.excludeNegative) { rows = rows.filter(function (g) { return !g.segmentTags || !NEG_TAGS.some(function (t) { return g.segmentTags.indexOf(t) >= 0; }); }); }
     }
     return rows;
   }
@@ -112,6 +115,16 @@
         case 'lastStaySeason': return g.tags.indexOf('summer') >= 0;
         case 'language': return g.language === r.value;
         case 'country': return g.country === r.value;
+        case 'opportunityScore': {
+          var sr = computeOpportunityScore(g.id);
+          if (r.operator === 'greater_than') return sr.score > r.value;
+          if (r.operator === 'less_than') return sr.score < r.value;
+          if (r.operator === 'between') return sr.score >= r.value[0] && sr.score <= r.value[1];
+          return sr.score === r.value;
+        }
+        case 'segmentTags':
+          if (!g.segmentTags) return r.operator === 'not_contains';
+          return r.operator === 'contains' ? g.segmentTags.indexOf(r.value) >= 0 : g.segmentTags.indexOf(r.value) < 0;
         default: return true;
       }
     });
@@ -216,6 +229,100 @@
 
   function hash(s) { s = String(s); var h = 0; for (var i = 0; i < s.length; i++) { h = (h << 5) - h + s.charCodeAt(i); h |= 0; } return h; }
 
+  // ---------- Opportunity Score (rule-based, always explainable) ----------
+  var NEG_TAGS = ['do_not_contact', 'unwanted_guest', 'do_not_promote'];
+  function computeOpportunityScore(guestId) {
+    var g = getGuestById(guestId);
+    if (!g) return { score: 0, reasons: [], tier: 'low', excluded: false };
+    // Negative tags → excluded immediately
+    var segtags = g.segmentTags || [];
+    for (var ni = 0; ni < NEG_TAGS.length; ni++) {
+      if (segtags.indexOf(NEG_TAGS[ni]) >= 0) {
+        var label = NEG_TAGS[ni].replace(/_/g, ' ').replace(/\b\w/g, function (c) { return c.toUpperCase(); });
+        return { score: 0, reasons: ['Tagged as ' + label + ' — excluded from campaigns'], tier: 'excluded', excluded: true };
+      }
+    }
+    var score = 0, reasons = [];
+    var checkins = getGuestCheckins(guestId);
+    // +25 upcoming reservation
+    if (g.nextStayAt) { score += 25; reasons.push('Upcoming reservation'); }
+    // +15 repeat guest
+    if (g.lifecycleStage === 'repeat' || g.lifecycleStage === 'vip' || g.tags.indexOf('repeat') >= 0) { score += 15; reasons.push('Repeat guest'); }
+    // +15 previous app sales
+    if (g.appSalesRevenue > 0) { score += 15; reasons.push('Purchased App Sales before'); }
+    // +10 high lifetime revenue
+    if (g.totalRevenue >= 2000) { score += 10; reasons.push('High booking value'); }
+    // +10 email marketing consent
+    if (g.consentSummary.emailMarketing === 'granted' && !g.consentSummary.globalUnsubscribe) { score += 10; reasons.push('Email marketing consent'); }
+    // +10 complete profile
+    if (g.profileCompleteness >= 75) { score += 10; reasons.push('Complete guest profile'); }
+    // +5 whatsapp consent
+    if (g.consentSummary.whatsappMarketing === 'granted' && !g.consentSummary.globalUnsubscribe) { score += 5; reasons.push('WhatsApp consent'); }
+    // +5 completed instant check-in
+    var completedCk = checkins.filter(function (c) { return c.status === 'completed'; }).length > 0;
+    if (completedCk) { score += 5; reasons.push('Completed instant check-in'); }
+    // +5 currently in-house
+    if (g.lifecycleStage === 'in_house') { score += 5; reasons.push('Currently in-house'); }
+    // penalty: global unsubscribe
+    if (g.consentSummary.globalUnsubscribe) score = Math.max(0, score - 20);
+    score = Math.min(100, Math.max(0, score));
+    var tier = score >= 70 ? 'high' : score >= 40 ? 'mid' : 'low';
+    return { score: score, reasons: reasons.slice(0, 5), tier: tier, excluded: false };
+  }
+
+  // ---------- Segment Tag Management ----------
+  var ALL_SEG_TAGS = ['whale', 'vip', 'preferred', 'repeat_guest', 'family', 'business', 'couple', 'high_app_sales_potential', 'needs_review', 'do_not_contact', 'do_not_promote', 'unwanted_guest'];
+  function addGuestSegmentTag(guestId, tag, note) {
+    var g = getGuestById(guestId); if (!g) return null;
+    if (!g.segmentTags) g.segmentTags = [];
+    if (!g.segmentTagNotes) g.segmentTagNotes = {};
+    if (g.segmentTags.indexOf(tag) < 0) g.segmentTags.push(tag);
+    if (note) g.segmentTagNotes[tag] = note;
+    return g;
+  }
+  function removeGuestSegmentTag(guestId, tag) {
+    var g = getGuestById(guestId); if (!g) return null;
+    g.segmentTags = (g.segmentTags || []).filter(function (t) { return t !== tag; });
+    if (g.segmentTagNotes) delete g.segmentTagNotes[tag];
+    return g;
+  }
+  function getAllSegmentTags() { return ALL_SEG_TAGS.slice(); }
+
+  // ---------- Segmentation Metrics (dashboard widgets) ----------
+  function getSegmentationMetrics() {
+    var gs = D.guests;
+    function hasTag(g, t) { return g.segmentTags && g.segmentTags.indexOf(t) >= 0; }
+    function hasAnyTag(g, arr) { return arr.some(function (t) { return hasTag(g, t); }); }
+    var whales = gs.filter(function (g) { return hasTag(g, 'whale'); });
+    var vips = gs.filter(function (g) { return hasTag(g, 'vip'); });
+    var repeats = gs.filter(function (g) { return hasTag(g, 'repeat_guest'); });
+    var highAps = gs.filter(function (g) { return hasTag(g, 'high_app_sales_potential'); });
+    var excluded = gs.filter(function (g) { return hasAnyTag(g, NEG_TAGS); });
+    var today = new Date(D.today);
+    function daysDiff(dateStr) { return (new Date(dateStr) - today) / 864e5; }
+    // High opportunity: score >= 70 and not excluded
+    var highOpp = gs.filter(function (g) { var r = computeOpportunityScore(g.id); return r.score >= 70 && !r.excluded; });
+    var whalesNoRebook = whales.filter(function (g) { return !g.nextStayAt && !hasAnyTag(g, NEG_TAGS); });
+    var repeatsNoRebook = repeats.filter(function (g) { return !g.nextStayAt && !hasAnyTag(g, NEG_TAGS); });
+    var highOppArriving = highOpp.filter(function (g) { return g.nextStayAt && daysDiff(g.nextStayAt) >= 0 && daysDiff(g.nextStayAt) <= 3; });
+    var insights = [];
+    if (whalesNoRebook.length) insights.push({ text: whalesNoRebook.length + ' Whale guest' + (whalesNoRebook.length > 1 ? 's have' : ' has') + ' no future reservation.', kind: 'whale', action: 'Create win-back campaign', prompt: 'Create a win-back campaign for Whale guests with no future reservation' });
+    if (highOppArriving.length) insights.push({ text: highOppArriving.length + ' High Opportunity guest' + (highOppArriving.length > 1 ? 's arrive' : ' arrives') + ' this weekend.', kind: 'opportunity', action: 'Send pre-arrival upsell', prompt: 'Create an upsell campaign for High Opportunity guests arriving this weekend' });
+    if (repeatsNoRebook.length) insights.push({ text: repeatsNoRebook.length + ' Repeat guest' + (repeatsNoRebook.length > 1 ? 's' : '') + ' could receive a rebooking campaign.', kind: 'repeat', action: 'Create rebooking campaign', prompt: 'Create a rebooking campaign for repeat guests with no future booking' });
+    if (excluded.length) insights.push({ text: excluded.length + ' guest' + (excluded.length > 1 ? 's are' : ' is') + ' tagged as excluded and will be suppressed from all campaigns.', kind: 'excluded', action: null, prompt: null });
+    return { highOpportunity: highOpp.length, whales: whales.length, vips: vips.length, repeatGuests: repeats.length, highAppSalesPotential: highAps.length, excluded: excluded.length, insights: insights };
+  }
+
+  // ---------- Top rebooking candidates ----------
+  function getTopRebookingCandidates(limit) {
+    limit = limit || 5;
+    return D.guests.filter(function (g) {
+      return !g.nextStayAt && g.lastStayAt && (g.segmentTags || []).indexOf('repeat_guest') >= 0 && !NEG_TAGS.some(function (t) { return (g.segmentTags || []).indexOf(t) >= 0; });
+    }).sort(function (a, b) {
+      return computeOpportunityScore(b.id).score - computeOpportunityScore(a.id).score;
+    }).slice(0, limit);
+  }
+
   window.CRMService = {
     getGuests: getGuests, getGuestById: getGuestById, getGuestReservations: getGuestReservations,
     getGuestConsents: getGuestConsents, getGuestPreferences: getGuestPreferences, getGuestConversations: getGuestConversations,
@@ -227,6 +334,9 @@
     approveCampaign: approveCampaign, scheduleCampaign: scheduleCampaign, summarizeCampaignPerformance: summarizeCampaignPerformance, getApprovalsFor: getApprovalsFor,
     getAutomationTriggers: getAutomationTriggers, getAutomations: getAutomations, setAutomationStatus: setAutomationStatus, simulateAutomationRun: simulateAutomationRun,
     getDashboardMetrics: getDashboardMetrics, getSuggestions: getSuggestions, getTopDeals: getTopDeals, getAgentRuns: getAgentRuns,
-    getProperties: function () { return D.properties.slice(); }
+    getProperties: function () { return D.properties.slice(); },
+    computeOpportunityScore: computeOpportunityScore, getAllSegmentTags: getAllSegmentTags,
+    addGuestSegmentTag: addGuestSegmentTag, removeGuestSegmentTag: removeGuestSegmentTag,
+    getSegmentationMetrics: getSegmentationMetrics, getTopRebookingCandidates: getTopRebookingCandidates
   };
 })();

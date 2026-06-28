@@ -38,6 +38,65 @@
     info: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>'
   };
 
+  // ---------- opportunity score helpers ----------
+  function scorePill(guestId) {
+    var r = S.computeOpportunityScore(guestId);
+    if (r.excluded) return '<span class="score-num score-excluded">—</span>';
+    var cls = r.tier === 'high' ? 'score-high' : r.tier === 'mid' ? 'score-mid' : 'score-low';
+    return '<div class="score-cell ' + cls + '"><span class="score-num ' + cls + '">' + r.score + '</span>' +
+      '<div class="score-mini-bar"><i style="width:' + r.score + '%"></i></div></div>';
+  }
+  function scorePanel(guestId) {
+    var r = S.computeOpportunityScore(guestId);
+    var boxCls = r.excluded ? 'excluded' : r.tier;
+    var html = '<div class="score-panel">' +
+      '<div class="score-box ' + boxCls + '">' +
+        '<span class="sn">' + (r.excluded ? '—' : r.score) + '</span>' +
+        '<span class="sl">/ 100</span>' +
+      '</div>' +
+      '<div class="score-reasons">' +
+        (r.reasons.length ? r.reasons.map(function (reason) {
+          return '<div class="score-reason-item ' + boxCls + '">' + esc(reason) + '</div>';
+        }).join('') : '<div class="score-reason-item">No signals yet</div>') +
+      '</div>' +
+    '</div>';
+    return html;
+  }
+
+  // ---------- segmentation tag helpers ----------
+  var NEG_TAGS_LIST = ['do_not_contact', 'do_not_promote', 'unwanted_guest'];
+  var WHALE_TAGS = ['whale'];
+  var VIP_TAGS = ['vip'];
+  var AMBER_TAGS = ['preferred', 'needs_review'];
+
+  function segTagClass(tag) {
+    if (WHALE_TAGS.indexOf(tag) >= 0) return 'whale';
+    if (VIP_TAGS.indexOf(tag) >= 0) return 'vip';
+    if (AMBER_TAGS.indexOf(tag) >= 0) return 'preferred';
+    if (NEG_TAGS_LIST.indexOf(tag) >= 0) return 'negative';
+    return 'default';
+  }
+  function segTagLabel(tag) {
+    var labels = { whale: 'Whale', vip: 'VIP', preferred: 'Preferred', repeat_guest: 'Repeat Guest', family: 'Family', business: 'Business', couple: 'Couple', high_app_sales_potential: 'High App Sales Potential', needs_review: 'Needs Review', do_not_contact: 'Do Not Contact', do_not_promote: 'Do Not Promote', unwanted_guest: 'Unwanted Guest' };
+    return labels[tag] || tag.replace(/_/g, ' ').replace(/\b\w/g, function (c) { return c.toUpperCase(); });
+  }
+  function renderSegTags(g, withRemove) {
+    var tags = g.segmentTags || [];
+    if (!tags.length && !withRemove) return '<span class="tiny">No tags yet</span>';
+    var out = tags.map(function (t) {
+      var cls = segTagClass(t);
+      var rmBtn = withRemove ? '<span class="rm" data-remove-tag="' + esc(t) + '" title="Remove tag"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></span>' : '';
+      return '<span class="seg-tag ' + cls + '">' + esc(segTagLabel(t)) + rmBtn + '</span>';
+    }).join('');
+    return out;
+  }
+  function segTagManagerHtml(g) {
+    var existing = renderSegTags(g, true);
+    return '<div class="tag-manager" id="seg-tag-manager">' + existing +
+      '<button class="tag-add-btn" id="seg-tag-add-btn"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Add tag</button>' +
+    '</div>';
+  }
+
   // ---------- badges ----------
   function statusBadge(status) {
     var label = { draft: 'Draft', needs_review: 'Needs review', approved: 'Approved', scheduled: 'Scheduled', active: 'Active', paused: 'Paused', completed: 'Completed' }[status] || status;
@@ -177,6 +236,8 @@
 
     var body =
       '<div class="dbody">' +
+        section('Opportunity Score', scorePanel(guestId)) +
+        section('Guest Tags', segTagManagerHtml(g)) +
         section('AI summary', aiHtml) +
         section('Consent', consentHtml) +
         section('Recommended actions', oppHtml) +
@@ -192,6 +253,83 @@
       '<button class="tbtn" onclick="CRM.toast(\'Finding similar guests…\')">Find similar guests</button>';
 
     openDrawer(head + body, foot);
+
+    // ---- wire seg tag manager ----
+    var root = document.getElementById('crm-drawer-root');
+    if (root) {
+      // remove previous tag handler to prevent stacking on multiple drawer opens
+      if (root._tagClickHandler) root.removeEventListener('click', root._tagClickHandler);
+      root._tagClickHandler = function handleTagClick(e) {
+        var rm = e.target.closest('[data-remove-tag]');
+        if (rm) {
+          var tag = rm.getAttribute('data-remove-tag');
+          S.removeGuestSegmentTag(guestId, tag);
+          var mgr = document.getElementById('seg-tag-manager');
+          if (mgr) mgr.innerHTML = renderSegTags(S.getGuestById(guestId), true) + '<button class="tag-add-btn" id="seg-tag-add-btn"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Add tag</button>';
+          toast('Tag removed');
+          return;
+        }
+        // add tag button
+        var addBtn = e.target.closest('#seg-tag-add-btn');
+        if (addBtn) { showTagPicker(guestId, addBtn); return; }
+        // tag picker option
+        var opt = e.target.closest('[data-add-tag]');
+        if (opt) {
+          var newTag = opt.getAttribute('data-add-tag');
+          var isNeg = NEG_TAGS_LIST.indexOf(newTag) >= 0;
+          if (isNeg) {
+            var reason = window.prompt('Add a note for "' + segTagLabel(newTag) + '" (required):');
+            if (!reason) return;
+            S.addGuestSegmentTag(guestId, newTag, reason);
+          } else {
+            S.addGuestSegmentTag(guestId, newTag);
+          }
+          var picker = document.getElementById('seg-tag-picker');
+          if (picker) picker.remove();
+          var mgr2 = document.getElementById('seg-tag-manager');
+          if (mgr2) mgr2.innerHTML = renderSegTags(S.getGuestById(guestId), true) + '<button class="tag-add-btn" id="seg-tag-add-btn"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Add tag</button>';
+          toast('Tag added: ' + segTagLabel(newTag));
+          return;
+        }
+        // close picker on backdrop click
+        var picker2 = document.getElementById('seg-tag-picker');
+        if (picker2 && !picker2.contains(e.target)) { picker2.remove(); }
+      };
+      root.addEventListener('click', root._tagClickHandler);
+    }
+  }
+
+  function showTagPicker(guestId, anchorEl) {
+    var existing = document.getElementById('seg-tag-picker');
+    if (existing) { existing.remove(); return; }
+    var g = S.getGuestById(guestId);
+    var current = g.segmentTags || [];
+    var allTags = S.getAllSegmentTags();
+    var groups = [
+      { label: 'Premium', tags: ['whale', 'vip', 'preferred'] },
+      { label: 'Segment', tags: ['repeat_guest', 'family', 'business', 'couple', 'high_app_sales_potential'] },
+      { label: 'Review', tags: ['needs_review'] },
+      { label: 'Exclusion', tags: ['do_not_contact', 'do_not_promote', 'unwanted_guest'] }
+    ];
+    var html = '<div id="seg-tag-picker" class="tag-picker">';
+    groups.forEach(function (group) {
+      html += '<h4>' + esc(group.label) + '</h4><div class="tag-picker-grid">';
+      group.tags.forEach(function (t) {
+        var added = current.indexOf(t) >= 0;
+        html += '<button class="tag-opt' + (added ? ' added' : '') + '" data-add-tag="' + esc(t) + '"' + (added ? ' disabled title="Already added"' : '') + '>' + esc(segTagLabel(t)) + '</button>';
+      });
+      html += '</div>';
+    });
+    html += '<p class="tag-picker-note">⚠ Exclusion tags require a note and suppress this guest from all campaigns.</p>';
+    html += '</div>';
+    var picker = document.createElement('div');
+    picker.style.cssText = 'position:fixed;z-index:90';
+    picker.innerHTML = html;
+    document.body.appendChild(picker);
+    var rect = anchorEl.getBoundingClientRect();
+    var pickerEl = picker.querySelector('#seg-tag-picker');
+    pickerEl.style.top = (rect.bottom + 6) + 'px';
+    pickerEl.style.left = Math.min(rect.left, window.innerWidth - 300) + 'px';
   }
 
   // ---------- boot ----------
@@ -210,6 +348,8 @@
     statusBadge: statusBadge, consentBadges: consentBadges, tagPills: tagPills, aiBlock: aiBlock,
     subnav: subnav, mountSubnav: mountSubnav, demoBanner: demoBanner, toast: toast,
     openDrawer: openDrawer, closeDrawer: closeDrawer, openGuestDrawer: openGuestDrawer,
-    boot: boot, ROUTES: ROUTES
+    boot: boot, ROUTES: ROUTES,
+    scorePill: scorePill, scorePanel: scorePanel,
+    segTagLabel: segTagLabel, segTagClass: segTagClass, renderSegTags: renderSegTags
   };
 })();
