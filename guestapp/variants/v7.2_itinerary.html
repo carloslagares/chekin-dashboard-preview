@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Chekin — Personalized Trip Guide V7</title>
+<title>Chekin — Personalized Trip Guide V7.2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -228,6 +228,8 @@ img{max-width:100%;display:block}
 }
 .quiz-hint.attn{color:var(--navy);font-weight:600;animation:nudge .3s var(--ease)}
 @keyframes nudge{0%{transform:translateY(2px);opacity:.4}100%{transform:none;opacity:1}}
+.quiz-skip{display:block;width:100%;text-align:center;margin-top:10px;padding:4px;font-size:11.5px;font-weight:600;color:var(--muted);transition:color .15s var(--ease)}
+.quiz-skip:hover{color:var(--navy)}
 
 /* ---------- Screen 3 · Generating ---------- */
 .gen-wrap{flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 32px 48px}
@@ -290,7 +292,30 @@ img{max-width:100%;display:block}
 .dtab.on::after{
   content:"";position:absolute;left:22%;right:22%;bottom:-1px;height:2px;border-radius:1px;background:var(--blue);
 }
+.stage-tabs{display:flex;gap:2px;margin:16px -4px 0}
+.stab{
+  flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:8px 2px 9px;border-radius:8px;position:relative;color:var(--faint);
+  transition:color .15s var(--ease),background .15s var(--ease);
+}
+.stab .sw{font-size:8.5px;font-weight:600;letter-spacing:.03em;text-transform:uppercase;color:inherit;white-space:nowrap}
+.stab .sn{font-size:8.5px;font-weight:500;color:var(--faint);margin-top:1px;line-height:1.25;text-align:center}
+.stab.on{color:var(--blue);background:var(--blue-soft)}
+.stab.on .sn{color:var(--blue-press)}
+.day-tabs.sub{margin:10px 0 0;border-bottom:1px solid var(--line-soft)}
 .day-body{padding:20px 24px 24px}
+.pre-card{
+  margin-bottom:12px;padding:14px 16px;border-radius:14px;border:1px solid var(--line);background:#fff;
+  display:flex;align-items:flex-start;gap:12px;
+}
+.pre-card .t-ic{width:34px;height:34px;border-radius:10px;background:var(--blue-soft);color:var(--blue);flex:none;display:flex;align-items:center;justify-content:center}
+.pre-card .t-ic .ic{width:16px;height:16px}
+.pre-card .p-txt{flex:1;min-width:0}
+.pre-card .p-name{display:block;font-size:12.5px;font-weight:600;color:var(--navy)}
+.pre-card .p-desc{display:block;font-size:11px;color:var(--muted);margin-top:2px;line-height:1.5}
+.stage-note{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;background:var(--blue-soft);color:var(--navy);font-size:11.5px;font-weight:600;margin-bottom:14px}
+.stage-note .ic{width:14px;height:14px;color:var(--blue);flex:none}
+.day-body .checkin-card{margin:0 0 16px}
 .glance{
   display:flex;align-items:center;gap:10px;
   font-size:12px;color:var(--muted);padding-bottom:18px;
@@ -523,13 +548,13 @@ body.preview .phone{
 </style>
 <div class="chk-verswitch tr" id="chkVerSwitch">
   <button class="chk-vs-trigger" id="chkVsTrigger" type="button" aria-haspopup="menu" aria-expanded="false">
-    V7 <svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+    V7.2 <svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
   </button>
   <div class="chk-vs-menu" id="chkVsMenu" role="menu">
     <a class="chk-vs-opt" href="v5_itinerary.html">V5<small>Original design</small></a>
     <a class="chk-vs-opt" href="v6_itinerary.html">V6<small>UX refinements</small></a>
-    <a class="chk-vs-opt active" href="v7_itinerary.html">V7<small>Fable redesign</small></a>
-    <a class="chk-vs-opt" href="v7.2_itinerary.html">V7.2<small>Pre-stay · check-in · stay · departure</small></a>
+    <a class="chk-vs-opt" href="v7_itinerary.html">V7<small>Fable redesign</small></a>
+    <a class="chk-vs-opt active" href="v7.2_itinerary.html">V7.2<small>Pre-stay · check-in · stay · departure</small></a>
   </div>
 </div>
 <script>
@@ -569,7 +594,7 @@ body.preview .phone{
 <header class="page-head">
   <div>
     <div class="eyebrow">Chekin Guest App</div>
-    <h1>Personalized Trip Guide · V7</h1>
+    <h1>Personalized Trip Guide · V7.2</h1>
     <p class="sub">A continuous, click-through prototype — one phone, seven moments, from arrival to departure. Move through the flow on the left or use the app’s own navigation.</p>
   </div>
   <div class="head-actions">
@@ -614,8 +639,8 @@ body.preview .phone{
             <h1>Seville</h1>
             <p>Four days in Andalusia’s capital. Answer three quick questions and we’ll shape a day-by-day plan around your stay.</p>
             <div class="cover-cta">
-              <button class="btn" data-go="quiz" type="button">Build my trip guide <svg class="ic" style="width:16px;height:16px"><use href="#i-arrow-right"/></svg></button>
-              <button class="btn ghost" data-go="today" type="button">Skip for now — see today’s info</button>
+              <button class="btn" data-go="quiz" type="button">Open my trip guide <svg class="ic" style="width:16px;height:16px"><use href="#i-arrow-right"/></svg></button>
+              <button class="btn ghost" id="skipCoverBtn" type="button">Skip for now</button>
             </div>
           </div>
         </section>
@@ -633,6 +658,7 @@ body.preview .phone{
           <div class="quiz-foot">
             <p class="quiz-hint" id="quizHint" aria-live="polite"></p>
             <button class="btn" id="quizNext" type="button">Continue</button>
+            <button class="quiz-skip" id="quizSkipAll" type="button">Skip everything — show me the guide</button>
           </div>
         </section>
 
@@ -659,7 +685,8 @@ body.preview .phone{
               <button class="textlink" data-go="quiz" type="button">Adjust</button>
             </div>
             <p class="plan-sub" id="planSummary"></p>
-            <div class="day-tabs" id="dayTabs"></div>
+            <div class="stage-tabs" id="stageTabs"></div>
+            <div class="day-tabs sub" id="daySubTabs" style="display:none"></div>
           </div>
           <div class="scroll">
             <div class="day-body" id="dayBody"></div>
@@ -820,7 +847,7 @@ body.preview .phone{
 
 <button class="exit-preview" id="exitPreview" type="button">Exit preview</button>
 
-<footer class="page-foot">V7 · Chekin design exploration · Montserrat · #385BF8 / #161643 · Static prototype, no data leaves this page.</footer>
+<footer class="page-foot">V7.2 · Pre-stay · check-in · your stay · departure, staged inside the same guide · Montserrat · #385BF8 / #161643 · Static prototype, no data leaves this page.</footer>
 
 <script>
 (function(){
@@ -1092,6 +1119,23 @@ body.preview .phone{
     else goTo('cover');
   });
 
+  // Skipping (from the cover, or mid-quiz) still produces a guide — just a
+  // generic one: unanswered questions fall back to defaults instead of
+  // blocking guide generation.
+  function finalizeAndGenerate(){
+    QUIZ.forEach(function(s){
+      if (s.type === 'multi'){
+        if (!answers[s.key].length) answers[s.key] = DEFAULTS[s.key].slice();
+      } else if (!answers[s.key]){
+        answers[s.key] = DEFAULTS[s.key];
+      }
+    });
+    quizDone = true;
+    goTo('generating');
+  }
+  $('#skipCoverBtn').addEventListener('click', finalizeAndGenerate);
+  $('#quizSkipAll').addEventListener('click', finalizeAndGenerate);
+
   /* ================= Generating ================= */
   var genTimers = [];
   function clearGen(){ genTimers.forEach(clearTimeout); genTimers = []; }
@@ -1117,9 +1161,21 @@ body.preview .phone{
     genTimers.push(setTimeout(function(){ goTo('itinerary'); }, 700 + steps.length*620));
   }
 
-  /* ================= Itinerary ================= */
-  var activeDay = 1; // land on the first full day
-  var dayTabs = $('#dayTabs'), dayBody = $('#dayBody'), planSummary = $('#planSummary');
+  /* ================= Itinerary — 4 trip stages ================= */
+  // Pre-stay (before arrival) / Arrival & check-in (day 0) / Your stay
+  // (the "full" days) / Departure (last day) — same DAYS data, grouped so
+  // stage-relevant context (early check-in, the check-in moment itself,
+  // late check-out, pending balance) shows up inside the guide itself
+  // instead of only on the separate Today/Stay screens.
+  var STAGES = [
+    { key:'prestay',   label:'Pre-stay',   sub:'Before arrival' },
+    { key:'checkin',   label:'Arrival',    sub:'Check-in day', days:[0] },
+    { key:'body',      label:'Your stay',  sub:'Thu–Sat',      days:[1,2,3] },
+    { key:'departure', label:'Departure',  sub:'Check-out day', days:[4] }
+  ];
+  var activeStage = 'checkin'; // land on arrival day once the guide is ready
+  var activeDay = 1; // which "Your stay" day is open (only meaningful in the body stage)
+  var stageTabs = $('#stageTabs'), daySubTabs = $('#daySubTabs'), dayBody = $('#dayBody'), planSummary = $('#planSummary');
 
   function prefs(){
     var a = quizDone ? answers : DEFAULTS;
@@ -1138,8 +1194,22 @@ body.preview .phone{
     return 'Built for a <b>' + p.pace.toLowerCase() + '</b> pace · ' + ints + ' · ' + p.traveler;
   }
 
-  function renderTabs(){
-    dayTabs.innerHTML = DAYS.map(function(d,i){
+  function bodyDays(){
+    return STAGES.filter(function(s){ return s.key === 'body'; })[0].days;
+  }
+
+  function renderStageTabs(){
+    stageTabs.innerHTML = STAGES.map(function(s){
+      return '<button class="stab'+(s.key===activeStage?' on':'')+'" data-stage="'+s.key+'" type="button">'
+        + '<span class="sw">'+s.label+'</span><span class="sn">'+s.sub+'</span></button>';
+    }).join('');
+    daySubTabs.style.display = activeStage === 'body' ? 'flex' : 'none';
+    if (activeStage === 'body') renderSubTabs();
+  }
+
+  function renderSubTabs(){
+    daySubTabs.innerHTML = bodyDays().map(function(i){
+      var d = DAYS[i];
       return '<button class="dtab'+(i===activeDay?' on':'')+'" data-day="'+i+'" type="button">'
         + '<span class="dw">'+d.dow+'</span><span class="dn">'+d.num+'</span></button>';
     }).join('');
@@ -1149,52 +1219,122 @@ body.preview .phone{
     return '<span><svg class="ic"><use href="#'+icon+'"/></svg>'+txt+'</span>';
   }
 
-  function renderDay(){
-    var d = DAYS[activeDay];
+  function renderActItem(it){
+    var html = '<div class="act"><span class="a-time">'+it.time+'</span><div class="a-main">'
+      + '<div class="a-name">'+it.title+'</div>'
+      + '<div class="a-cat">'+it.cat+'</div>'
+      + '<p class="a-desc">'+it.desc+'</p>';
+    var meta = '';
+    if (it.dur) meta += metaSpan('i-clock', it.dur);
+    if (it.cost) meta += '<span>'+it.cost+'</span>';
+    if (meta) html += '<div class="a-meta">'+meta+'</div>';
+    if (it.why){
+      html += '<button class="why-btn" type="button" aria-expanded="false">Why this pick'
+        + '<svg class="ic"><use href="#i-chevron-down"/></svg></button>'
+        + '<div class="why-panel"><div><div class="why-inner">'+it.why+'</div></div></div>';
+    }
+    html += '</div></div>';
+    return html;
+  }
+
+  function renderDayGroups(d){
     var html = '<div class="glance"><svg class="ic"><use href="#i-map"/></svg>'+d.glance+'</div>';
     d.groups.forEach(function(g){
       html += '<div class="part-label">'+g.part+'</div>';
-      g.items.forEach(function(it){
-        html += '<div class="act"><span class="a-time">'+it.time+'</span><div class="a-main">'
-          + '<div class="a-name">'+it.title+'</div>'
-          + '<div class="a-cat">'+it.cat+'</div>'
-          + '<p class="a-desc">'+it.desc+'</p>';
-        var meta = '';
-        if (it.dur) meta += metaSpan('i-clock', it.dur);
-        if (it.cost) meta += '<span>'+it.cost+'</span>';
-        if (meta) html += '<div class="a-meta">'+meta+'</div>';
-        if (it.why){
-          html += '<button class="why-btn" type="button" aria-expanded="false">Why this pick'
-            + '<svg class="ic"><use href="#i-chevron-down"/></svg></button>'
-            + '<div class="why-panel"><div><div class="why-inner">'+it.why+'</div></div></div>';
-        }
-        html += '</div></div>';
-      });
+      g.items.forEach(function(it){ html += renderActItem(it); });
     });
+    return html;
+  }
+
+  function renderPrestay(){
+    return '<div class="glance"><svg class="ic"><use href="#i-map"/></svg>Before you arrive · worth arranging now</div>'
+      + '<div class="pre-card"><span class="t-ic"><svg class="ic"><use href="#i-key"/></svg></span>'
+        + '<span class="p-txt"><span class="p-name">Guarantee early check-in</span>'
+        + '<span class="p-desc">Landing before 15:00? Reserve check-in from 12:00 so the apartment is ready the moment you arrive.</span></span>'
+        + '<button class="mini-btn" id="earlyBtn" type="button">Add · €15</button></div>'
+      + '<div class="pre-card"><span class="t-ic"><svg class="ic"><use href="#i-bag"/></svg></span>'
+        + '<span class="p-txt"><span class="p-name">Drop your bags at the airport</span>'
+        + '<span class="p-desc">We collect your luggage on landing and have it waiting at Casa Alameda — start exploring straight away.</span></span>'
+        + '<button class="mini-btn" id="pickupBtn" type="button">Add · €10</button></div>'
+      + '<div class="part-label">Before you travel</div>'
+      + '<div class="task"><span class="t-ic ok"><svg class="ic"><use href="#i-check"/></svg></span>'
+        + '<span class="t-txt"><span class="t-name">Booking confirmed</span><span class="t-desc">Casa Alameda · 2 guests · 4 nights</span></span></div>'
+      + '<div class="task"><span class="t-ic"><svg class="ic"><use href="#i-id"/></svg></span>'
+        + '<span class="t-txt"><span class="t-name">ID verification</span><span class="t-desc">Complete it now to skip the wait at check-in</span></span>'
+        + '<svg class="ic"><use href="#i-chevron-right"/></svg></div>';
+  }
+
+  function renderGuideBody(){
+    var html;
+    if (activeStage === 'prestay'){
+      html = renderPrestay();
+    } else if (activeStage === 'checkin'){
+      html = '<div class="checkin-card"><div class="cc-eyebrow">Required before arrival</div>'
+        + '<h3>Complete your online check-in</h3>'
+        + '<p>Verify your ID and get your door code before you arrive — no keys, no front desk, no waiting.</p>'
+        + '<button class="btn" id="checkinBtnGuide" type="button">Start check-in · about 2 min</button></div>'
+        + renderDayGroups(DAYS[0]);
+    } else if (activeStage === 'departure'){
+      html = '<div class="stage-note"><svg class="ic"><use href="#i-clock"/></svg>Short on time today — a light plan before your 11:00 check-out.</div>'
+        + '<div class="pre-card"><span class="t-ic"><svg class="ic"><use href="#i-clock"/></svg></span>'
+          + '<span class="p-txt"><span class="p-name">Late check-out until 14:00</span>'
+          + '<span class="p-desc">Keep the apartment three extra hours for €25. Cleaning starts at 15:00.</span></span>'
+          + '<button class="mini-btn" id="lateBtnGuide" type="button">Add · €25</button></div>'
+        + '<div class="pre-card"><span class="t-ic"><svg class="ic"><use href="#i-calendar"/></svg></span>'
+          + '<span class="p-txt"><span class="p-name">Outstanding balance</span>'
+          + '<span class="p-desc">€45 city tax, payable on departure.</span></span>'
+          + '<button class="mini-btn" id="payBtnGuide" type="button">Pay now</button></div>'
+        + renderDayGroups(DAYS[4]);
+    } else {
+      html = renderDayGroups(DAYS[activeDay]);
+    }
     dayBody.innerHTML = html;
     dayBody.closest('.scroll').scrollTop = 0;
   }
 
   function renderItinerary(){
     planSummary.innerHTML = summaryLine();
-    renderTabs();
-    renderDay();
+    renderStageTabs();
+    renderGuideBody();
   }
 
-  dayTabs.addEventListener('click', function(e){
+  stageTabs.addEventListener('click', function(e){
+    var t = e.target.closest('[data-stage]');
+    if (!t) return;
+    activeStage = t.getAttribute('data-stage');
+    if (activeStage === 'body' && bodyDays().indexOf(activeDay) < 0) activeDay = bodyDays()[0];
+    renderStageTabs();
+    renderGuideBody();
+  });
+
+  daySubTabs.addEventListener('click', function(e){
     var t = e.target.closest('[data-day]');
     if (!t) return;
     activeDay = +t.getAttribute('data-day');
-    renderTabs();
-    renderDay();
+    renderSubTabs();
+    renderGuideBody();
   });
 
   dayBody.addEventListener('click', function(e){
-    var b = e.target.closest('.why-btn');
+    var why = e.target.closest('.why-btn');
+    if (why){
+      var open = why.getAttribute('aria-expanded') === 'true';
+      why.setAttribute('aria-expanded', String(!open));
+      why.nextElementSibling.classList.toggle('open', !open);
+      return;
+    }
+    var b = e.target.closest('button');
     if (!b) return;
-    var open = b.getAttribute('aria-expanded') === 'true';
-    b.setAttribute('aria-expanded', String(!open));
-    b.nextElementSibling.classList.toggle('open', !open);
+    // Check-in / late check-out / balance cards deep-link into the screen
+    // that owns that state, so there's one source of truth for it.
+    if (b.id === 'checkinBtnGuide'){ goTo('today'); return; }
+    if (b.id === 'lateBtnGuide' || b.id === 'payBtnGuide'){ goTo('stay'); return; }
+    // Pre-stay upsells are self-contained — just toggle in place.
+    if (b.id === 'earlyBtn' || b.id === 'pickupBtn'){
+      var added = b.classList.toggle('added');
+      var price = b.id === 'earlyBtn' ? '€15' : '€10';
+      b.textContent = added ? 'Added' : ('Add · ' + price);
+    }
   });
 
   /* ================= Concierge chat ================= */
