@@ -748,6 +748,41 @@ body.mobile-mode .mobile-nav{display:flex;padding-bottom:env(safe-area-inset-bot
 </head>
 <body>
 
+<!-- ─── Version switcher (V5/V6/V7) ─── -->
+<style>
+.chk-verswitch{position:fixed;z-index:9999;font-family:'Montserrat',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+.chk-verswitch.tl{top:14px;left:14px}
+.chk-verswitch.tl .chk-vs-menu{left:0}
+.chk-vs-trigger{display:flex;align-items:center;gap:6px;height:32px;padding:0 10px 0 12px;border:1px solid rgba(255,255,255,.14);border-radius:999px;background:#161643;color:#fff;font:700 11px inherit;letter-spacing:.02em;cursor:pointer;box-shadow:0 4px 14px rgba(22,22,67,.28);transition:background .15s}
+.chk-vs-trigger:hover{background:#22225C}
+.chk-vs-trigger svg{width:12px;height:12px;stroke:#fff;fill:none;stroke-width:2.4;transition:transform .18s}
+.chk-verswitch.open .chk-vs-trigger svg{transform:rotate(180deg)}
+.chk-vs-menu{position:absolute;top:38px;min-width:190px;background:#fff;border:1px solid #E5E6EE;border-radius:12px;box-shadow:0 12px 32px rgba(22,22,67,.18);padding:6px;opacity:0;visibility:hidden;transform:translateY(-4px);pointer-events:none;transition:opacity .15s,transform .15s,visibility .15s}
+.chk-verswitch.open .chk-vs-menu{opacity:1;visibility:visible;transform:none;pointer-events:auto}
+.chk-vs-opt{display:flex;align-items:baseline;gap:8px;padding:8px 10px;border-radius:8px;text-decoration:none;color:#161643;font:700 12.5px inherit}
+.chk-vs-opt:hover{background:#F0F3FF}
+.chk-vs-opt small{font:500 10.5px inherit;color:#6B6B95}
+.chk-vs-opt.active{background:#EFF6FF;color:#385BF8}
+</style>
+<div class="chk-verswitch tl" id="chkVerSwitch">
+  <button class="chk-vs-trigger" id="chkVsTrigger" type="button" aria-haspopup="menu" aria-expanded="false">
+    V5 <svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+  </button>
+  <div class="chk-vs-menu" id="chkVsMenu" role="menu">
+    <a class="chk-vs-opt active" href="v5_itinerary.html">V5<small>Original design</small></a>
+    <a class="chk-vs-opt" href="v6_itinerary.html">V6<small>UX refinements</small></a>
+    <a class="chk-vs-opt" href="v7_itinerary.html">V7<small>Fable redesign</small></a>
+  </div>
+</div>
+<script>
+(function(){
+  var w=document.getElementById('chkVerSwitch'), t=document.getElementById('chkVsTrigger');
+  t.addEventListener('click',function(e){e.stopPropagation();w.classList.toggle('open');});
+  document.addEventListener('click',function(e){ if(!w.contains(e.target)) w.classList.remove('open'); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') w.classList.remove('open'); });
+})();
+</script>
+
 <button class="try-mobile" onclick="toggleMobile()" aria-label="Try mobile mode">
   <svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
   <span class="lbl">Mobile preview</span>
