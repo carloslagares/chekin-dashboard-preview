@@ -24,6 +24,7 @@
   .trigger .gen.g47{background:rgba(22,22,67,.07);color:var(--ink2)}
   .trigger .gen.g48{background:#D5F5EC;color:var(--success)}
   .trigger .gen.g48v2{background:#EDE4FF;color:#7C4DFF}
+  .trigger .gen.gfab{background:#FBE7DA;color:#BD5B33}
   .trigger .chev{width:16px;height:16px;stroke:var(--ink2);fill:none;stroke-width:2;margin-right:6px;transition:transform .2s}
   .switcher.open .trigger .chev{transform:rotate(180deg)}
 
@@ -34,7 +35,9 @@
   .menu .group .pill.g47{background:rgba(22,22,67,.07);color:var(--ink2)}
   .menu .group .pill.g48{background:#D5F5EC;color:var(--success)}
   .menu .group .pill.g48v2{background:#EDE4FF;color:#7C4DFF}
+  .menu .group .pill.gfab{background:#FBE7DA;color:#BD5B33}
   .opt .new.v2{background:#EDE4FF;color:#7C4DFF}
+  .opt .new.fab{background:#FBE7DA;color:#BD5B33}
   .menu .group .ln{flex:1;height:1px;background:var(--line)}
   .opt{width:100%;appearance:none;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:10px;font:600 13.5px var(--font-primary);color:var(--ink);text-align:left;transition:background .12s}
   .opt:hover{background:var(--blue-chip)}
@@ -62,8 +65,12 @@
   </button>
 
   <div class="menu" id="menu" role="menu">
+    <div class="group"><span class="pill gfab">Fable</span>Journey · new model<span class="ln"></span></div>
+    <button class="opt active" data-v="fj7"  data-label="Journey V7"    data-gen="fab" data-src="fable/journey-v7.html"   role="menuitem"><span class="v">V1</span><span class="t">Journey — V7</span><span class="new fab">Fable</span><svg class="check" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button>
+    <button class="opt" data-v="fj72" data-label="Journey V7.2"  data-gen="fab" data-src="fable/journey-v7v2.html" role="menuitem"><span class="v">V2</span><span class="t">Journey — V7.2</span><span class="new fab">Fable</span><svg class="check" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button>
+
     <div class="group"><span class="pill g48v2">4.8 v2</span>Guest flow · Opus<span class="ln"></span></div>
-    <button class="opt active" data-v="gv2d" data-label="Desktop" data-gen="48v2" data-src="opus48v2/journey.html" role="menuitem"><span class="v">V1</span><span class="t">🖥️ Desktop</span><span class="new v2">v2</span><svg class="check" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button>
+    <button class="opt" data-v="gv2d" data-label="Desktop" data-gen="48v2" data-src="opus48v2/journey.html" role="menuitem"><span class="v">V1</span><span class="t">🖥️ Desktop</span><span class="new v2">v2</span><svg class="check" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button>
     <button class="opt" data-v="gv2m" data-label="Mobile" data-gen="48v2" data-src="opus48v2/mobile.html" role="menuitem"><span class="v">V2</span><span class="t">📱 Mobile</span><span class="new v2">v2</span><svg class="check" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button>
 
     <div class="group"><span class="pill g48">4.8</span>Refined · Opus<span class="ln"></span></div>
@@ -81,7 +88,9 @@
 </div>
 
 <div class="stage">
-  <iframe class="variant active" data-v="gv2d" src="opus48v2/journey.html" title="Desktop 4.8 v2"></iframe>
+  <iframe class="variant active" data-v="fj7" src="fable/journey-v7.html" title="Journey Fable V7"></iframe>
+  <iframe class="variant" data-v="fj72" title="Journey Fable V7.2"></iframe>
+  <iframe class="variant" data-v="gv2d" title="Desktop 4.8 v2"></iframe>
   <iframe class="variant" data-v="gv2m" title="Mobile 4.8 v2"></iframe>
   <iframe class="variant" data-v="gj48" title="Journey 4.8"></iframe>
   <iframe class="variant" data-v="gt48" title="Trip Guide 4.8"></iframe>
@@ -108,6 +117,7 @@
 
   // Deep-link ?view=journey|tripguide|mobile|concierge|luggage (+ originals)
   var VIEW_MAP = {
+    fable:'fj7', fablev7:'fj7', v7:'fj7', fablev72:'fj72', v72:'fj72', fablev2:'fj72',
     desktop:'gv2d', desktopv2:'gv2d', v2:'gv2d', mobilev2:'gv2m',
     journey:'gj48', trip:'gt48', tripguide:'gt48', guide:'gt48', mobile:'gm48',
     concierge:'gc47', luggage:'gl47', loogage:'gl47', itinerary:'gtr47'
@@ -135,8 +145,8 @@
     curV.textContent = opt.querySelector('.v').textContent;
     curLabel.textContent = opt.getAttribute('data-label');
     var gen = opt.getAttribute('data-gen');
-    var genMap = { '48v2':'4.8 v2', '48':'4.8', '47':'4.7' };
-    var genCls = { '48v2':'g48v2', '48':'g48', '47':'g47' };
+    var genMap = { 'fab':'Fable', '48v2':'4.8 v2', '48':'4.8', '47':'4.7' };
+    var genCls = { 'fab':'gfab', '48v2':'g48v2', '48':'g48', '47':'g47' };
     curGen.textContent = genMap[gen] || '4.7';
     curGen.className = 'gen ' + (genCls[gen] || 'g47');
     try{ localStorage.setItem(LS, v); }catch(err){}
@@ -144,7 +154,7 @@
 
   var saved = null; try{ saved = localStorage.getItem(LS); }catch(err){}
   var initial = (urlView && VIEW_MAP[urlView]) ? VIEW_MAP[urlView]
-              : (saved && menu.querySelector('.opt[data-v="'+saved+'"]') ? saved : 'gv2d');
+              : (saved && menu.querySelector('.opt[data-v="'+saved+'"]') ? saved : 'fj7');
   activate(initial);
 
   menu.querySelectorAll('.opt').forEach(function(o){ o.addEventListener('click', function(){ activate(o.dataset.v); closeMenu(); }); });
