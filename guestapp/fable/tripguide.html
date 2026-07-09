@@ -125,27 +125,27 @@
   .part-label::after{content:"";flex:1;height:1px;background:var(--stroke-gray-lighter)}
 
   /* Flat activity row — no elevation, hairline border only, per "match Journey V7 flat cards" */
-  .act-row{display:flex;gap:14px;align-items:flex-start;padding:14px 4px;border-bottom:1px solid var(--stroke-gray-lighter)}
+  .act-row{display:flex;flex-direction:column;gap:8px;padding:16px 4px;border-bottom:1px solid var(--stroke-gray-lighter)}
   .act-row:last-child{border-bottom:0}
-  .act-row .thumb{width:76px;height:76px;border-radius:12px;flex-shrink:0;overflow:hidden;background:var(--bg-neutral-cold)}
+  .act-top{display:flex;align-items:center;gap:12px}
+  .act-row .thumb{width:56px;height:56px;border-radius:10px;flex-shrink:0;overflow:hidden;background:var(--bg-neutral-cold)}
   .act-row .thumb img{width:100%;height:100%;object-fit:cover;display:block}
   .act-row .main{flex:1;min-width:0}
-  .act-row .top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
   .act-row .t{font:600 14.5px/19px var(--font-primary);letter-spacing:-.005em}
-  .act-row .cat{display:flex;align-items:center;gap:6px;font:600 10.5px var(--font-primary);color:var(--text-gray-medium);text-transform:uppercase;letter-spacing:.05em;margin-top:2px}
+  .act-row .cat{display:flex;align-items:center;gap:6px;font:600 10.5px var(--font-primary);color:var(--text-gray-medium);text-transform:uppercase;letter-spacing:.05em;margin-top:3px}
   .cat-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;background:var(--stroke-gray-medium)}
   .cat-dot.food{background:#C1663A}
   .cat-dot.culture{background:#6E56C8}
   .cat-dot.nature{background:#3F9163}
   .cat-dot.music{background:#B23E74}
   .cat-dot.views{background:#2C82B8}
-  .act-row .dd{font:400 12.5px/18px var(--font-primary);color:var(--text-gray-dark);margin-top:6px;max-width:560px}
-  .act-row .meta-row{display:flex;align-items:center;gap:14px;margin-top:8px;font:500 12px var(--font-primary);color:var(--text-gray-medium)}
+  .act-row .dd{font:400 12.5px/18px var(--font-primary);color:var(--text-gray-dark)}
+  .act-row .meta-row{display:flex;align-items:center;gap:14px;font:500 12px var(--font-primary);color:var(--text-gray-medium)}
   .act-row .meta-row span{display:inline-flex;align-items:center;gap:5px}
   .act-row .meta-row svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8}
   .free-tag{font:700 9.5px var(--font-primary);text-transform:uppercase;letter-spacing:.04em;color:var(--text-success);background:var(--bg-success-light);padding:2px 7px;border-radius:5px}
   .sponsor-tag{font:700 9px var(--font-primary);text-transform:uppercase;letter-spacing:.05em;color:var(--text-gold);background:var(--bg-gold-light);padding:2px 7px;border-radius:5px;margin-left:8px}
-  .act-cta{display:flex;flex-shrink:0;flex-direction:column;align-items:flex-end;gap:8px;margin-left:8px}
+  .act-cta{display:flex;flex-shrink:0;align-items:center;justify-content:flex-end;gap:16px;margin-top:2px;padding-top:10px;border-top:1px solid var(--stroke-gray-lighter)}
   .dismiss-link{font:600 11.5px var(--font-primary);color:var(--text-gray-medium);background:none;border:none;cursor:pointer;padding:2px 0;transition:color .12s}
   .dismiss-link:hover{color:var(--text-gray-dark)}
   .buy-btn{font:700 12px var(--font-primary);color:#fff;background:var(--text-brand);border:none;border-radius:8px;padding:7px 14px;cursor:pointer;white-space:nowrap;transition:background .12s}
@@ -164,7 +164,7 @@
   .ob-step{display:none;width:100%;max-width:480px}
   .ob-step.on{display:block}
   #guideReady{display:flex;flex-direction:column;align-items:center;gap:20px}
-  #guideReady>.head,#guideReady>.stages,#guideReady>section{width:100%;max-width:900px}
+  #guideReady>.head,#guideReady>.stages,#guideReady>section{width:100%;max-width:640px}
   .ob-cover{overflow:hidden}
   .ob-cover-media{position:relative;height:280px;background:#161643 center 30%/cover no-repeat}
   .ob-cover-media img{width:100%;height:100%;object-fit:cover;display:block}
@@ -406,26 +406,22 @@
           <div class="panel">
             <div class="glance"><svg viewBox="0 0 24 24"><path d="M9 4 3.5 5.8v14L9 18l6 1.8 5.5-1.8v-14L15 5.8 9 4Z"/><path d="M9 4v14M15 5.8v14"/></svg>Before you arrive · worth arranging now</div>
             <div class="act-row">
-              <div class="thumb"><img src="https://images.unsplash.com/photo-1553051021-9f94520a6cad?w=300&auto=format&fit=crop&q=80" alt="Luggage lockers" loading="lazy"></div>
-              <div class="main">
-                <div class="top">
-                  <div><div class="t">Drop your bags before check-in<span class="sponsor-tag">Sponsored</span></div></div>
-                </div>
-                <div class="dd">5 lockers within 800 m of Puerta del Sol — leave your bags and start exploring while your room is prepared.</div>
+              <div class="act-top">
+                <div class="thumb"><img src="https://images.unsplash.com/photo-1553051021-9f94520a6cad?w=300&auto=format&fit=crop&q=80" alt="Luggage lockers" loading="lazy"></div>
+                <div class="main"><div class="t">Drop your bags before check-in<span class="sponsor-tag">Sponsored</span></div></div>
               </div>
+              <div class="dd">5 lockers within 800 m of Puerta del Sol — leave your bags and start exploring while your room is prepared.</div>
               <div class="act-cta">
                 <button class="dismiss-link" data-dismiss type="button">Dismiss</button>
                 <button class="buy-btn" data-buy type="button">Add · €6</button>
               </div>
             </div>
             <div class="act-row">
-              <div class="thumb"><img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=300&auto=format&fit=crop&q=80" alt="Bright apartment interior" loading="lazy"></div>
-              <div class="main">
-                <div class="top">
-                  <div><div class="t">Early check-in from 10:00<span class="sponsor-tag">Sponsored</span></div></div>
-                </div>
-                <div class="dd">Landing early? Arrive up to four hours ahead of the standard 14:00 check-in.</div>
+              <div class="act-top">
+                <div class="thumb"><img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=300&auto=format&fit=crop&q=80" alt="Bright apartment interior" loading="lazy"></div>
+                <div class="main"><div class="t">Early check-in from 10:00<span class="sponsor-tag">Sponsored</span></div></div>
               </div>
+              <div class="dd">Landing early? Arrive up to four hours ahead of the standard 14:00 check-in.</div>
               <div class="act-cta">
                 <button class="dismiss-link" data-dismiss type="button">Dismiss</button>
                 <button class="buy-btn" data-buy type="button">Add · €25</button>
@@ -441,17 +437,15 @@
             <div class="glance"><svg viewBox="0 0 24 24"><path d="M9 4 3.5 5.8v14L9 18l6 1.8 5.5-1.8v-14L15 5.8 9 4Z"/><path d="M9 4v14M15 5.8v14"/></svg>Arrival day · an easy first afternoon</div>
             <div class="part-label">Afternoon</div>
             <div class="act-row">
-              <div class="thumb"><img src="https://images.unsplash.com/photo-1539037116277-4db20889f2d4?w=300&auto=format&fit=crop&q=80" alt="Retiro Park" loading="lazy"></div>
-              <div class="main">
-                <div class="top">
-                  <div>
-                    <div class="t">Crystal Palace (Retiro Park)</div>
-                    <div class="cat"><span class="cat-dot nature"></span>Retiro / Paseo del Arte</div>
-                  </div>
+              <div class="act-top">
+                <div class="thumb"><img src="https://images.unsplash.com/photo-1539037116277-4db20889f2d4?w=300&auto=format&fit=crop&q=80" alt="Retiro Park" loading="lazy"></div>
+                <div class="main">
+                  <div class="t">Crystal Palace (Retiro Park)</div>
+                  <div class="cat"><span class="cat-dot nature"></span>Retiro / Paseo del Arte</div>
                 </div>
-                <div class="dd">A slow first walk two minutes from your door — photos, architecture and no plans to rush.</div>
-                <div class="meta-row"><span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>30–45 min</span><span class="free-tag">Free</span></div>
               </div>
+              <div class="dd">A slow first walk two minutes from your door — photos, architecture and no plans to rush.</div>
+              <div class="meta-row"><span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>30–45 min</span><span class="free-tag">Free</span></div>
               <div class="act-cta">
                 <button class="dismiss-link" data-dismiss type="button">Dismiss</button>
               </div>
@@ -476,24 +470,22 @@
           <div class="panel">
             <div class="stage-note"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Short on time today — a light plan before your 10:00 check-out.</div>
             <div class="act-row">
-              <div class="thumb"><img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=300&auto=format&fit=crop&q=80" alt="Bright apartment interior" loading="lazy"></div>
-              <div class="main">
-                <div class="top">
-                  <div><div class="t">Late check-out until 13:00<span class="sponsor-tag">Sponsored</span></div></div>
-                </div>
-                <div class="dd">Keep the apartment three extra hours. Cleaning starts at 14:00.</div>
+              <div class="act-top">
+                <div class="thumb"><img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=300&auto=format&fit=crop&q=80" alt="Bright apartment interior" loading="lazy"></div>
+                <div class="main"><div class="t">Late check-out until 13:00<span class="sponsor-tag">Sponsored</span></div></div>
               </div>
+              <div class="dd">Keep the apartment three extra hours. Cleaning starts at 14:00.</div>
               <div class="act-cta">
                 <button class="dismiss-link" data-dismiss type="button">Dismiss</button>
                 <button class="buy-btn" data-buy type="button">Add · €25</button>
               </div>
             </div>
             <div class="act-row">
-              <div class="thumb" style="background:var(--bg-warn-light);display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" width="26" height="26" stroke="var(--text-warn)" fill="none" stroke-width="1.7"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M2 10h20M6 14h4"/></svg></div>
-              <div class="main">
-                <div class="top"><div><div class="t">Outstanding balance</div></div></div>
-                <div class="dd">€340 due, payable on departure.</div>
+              <div class="act-top">
+                <div class="thumb" style="background:var(--bg-warn-light);display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" width="24" height="24" stroke="var(--text-warn)" fill="none" stroke-width="1.7"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M2 10h20M6 14h4"/></svg></div>
+                <div class="main"><div class="t">Outstanding balance</div></div>
               </div>
+              <div class="dd">€340 due, payable on departure.</div>
               <div class="act-cta">
                 <button class="buy-btn" type="button">Pay now</button>
               </div>
@@ -746,8 +738,9 @@
   function renderItem(it){
     var slug = CAT_SLUG[it.cat] || '';
     var html = '<div class="act-row">'
+      + '<div class="act-top">'
       + '<div class="thumb"><img src="'+it.img+'" alt="" loading="lazy"></div>'
-      + '<div class="main"><div class="top"><div>'
+      + '<div class="main">'
       + '<div class="t">'+it.title+(it.sponsored ? '<span class="sponsor-tag">Sponsored</span>' : '')+'</div>'
       + '<div class="cat"><span class="cat-dot'+(slug?' '+slug:'')+'"></span>'+it.loc
       + '</div></div></div>'
@@ -756,7 +749,6 @@
     if (it.dur) meta += metaSpan(CLOCK_ICON, it.dur);
     if (it.cost === 'Free') meta += '<span class="free-tag">Free</span>';
     if (meta) html += '<div class="meta-row">'+meta+'</div>';
-    html += '</div>';
     html += '<div class="act-cta"><button class="dismiss-link" data-dismiss type="button">Dismiss</button>'
       + (isPaid(it.cost) ? '<button class="buy-btn" data-buy type="button">Add · '+it.cost+'</button>' : '')
       + '</div></div>';
