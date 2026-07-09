@@ -67,6 +67,14 @@
   .side .n-item.active{background:linear-gradient(135deg,rgba(56,92,248,.38),rgba(56,92,248,.16));color:#fff;box-shadow:inset 0 0 0 1px rgba(140,165,255,.2)}
   .side .n-item .badge{margin-left:auto;font:700 10.5px var(--font-primary);padding:2px 8px;border-radius:999px;background:rgba(140,165,255,.2);color:#C9D5FF;white-space:nowrap}
   .side .n-item .badge.new{background:rgba(107,224,168,.24);color:#7FE7B4}
+  .side .n-item[data-nav-toggle]{cursor:pointer}
+  .side .n-chev{margin-left:auto;width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;flex-shrink:0;transition:transform .15s}
+  .side .n-item[data-nav-toggle].open .n-chev{transform:rotate(90deg)}
+  .side .n-sub{display:none;flex-direction:column;padding:2px 12px 4px 44px}
+  .side .n-sub.open{display:flex}
+  .side .n-subitem{display:block;padding:7px 10px;border-radius:8px;font:500 13px var(--font-primary);color:rgba(255,255,255,.62);text-decoration:none;transition:background .12s,color .12s}
+  .side .n-subitem:hover{background:rgba(255,255,255,.07);color:#fff}
+  .side .n-subitem.active{color:#fff;font-weight:600}
   .side .me{margin-top:auto;padding:15px 16px;border-top:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:10px}
   .side .me .av{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.1);color:#fff;display:grid;place-items:center;font:700 11px var(--font-primary)}
   .side .me .n{font:600 13px/16px var(--font-primary)}
@@ -151,6 +159,59 @@
   .stagewrap{display:none}
   .stagewrap.on{display:block}
 
+  /* ───── Onboarding: cover → sign-in → quiz → generating (body-only, shell stays mounted) ───── */
+  .ob-step{display:none;max-width:600px}
+  .ob-step.on{display:block}
+  .ob-cover{overflow:hidden}
+  .ob-cover-media{position:relative;height:280px;background:#161643 center 30%/cover no-repeat}
+  .ob-cover-media img{width:100%;height:100%;object-fit:cover;display:block}
+  .ob-flag{position:absolute;top:16px;right:18px;font-size:26px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.35))}
+  .ob-cover-body{padding:24px 28px 28px}
+  .ob-h1{font:700 30px var(--font-primary);letter-spacing:-.02em;color:var(--text-dark);margin:6px 0 10px}
+  .ob-p{font:500 13px/1.6 var(--font-primary);color:var(--text-gray-dark);max-width:420px}
+  .ob-actions{display:flex;gap:10px;margin-top:18px}
+  .ob-actions .btn{height:42px;padding:0 20px}
+  .ob-foot{margin-top:16px;font:500 12px var(--font-primary);color:var(--text-gray-dark)}
+  .ob-foot a{color:var(--text-dark);font-weight:700;text-decoration:underline;cursor:pointer}
+  .ob-skip{display:block;margin-top:10px;font:600 11.5px var(--font-primary);color:var(--text-gray-medium);background:none;border:none;cursor:pointer;padding:0}
+  .ob-skip:hover{color:var(--text-gray-dark)}
+
+  .ob-quiz{padding:28px 32px}
+  .ob-quiz-top{display:flex;align-items:center;gap:14px;margin-bottom:20px}
+  .ob-quiz-count{font:600 11.5px var(--font-primary);color:var(--text-gray-medium);flex-shrink:0}
+  .ob-quiz-progress{display:flex;gap:6px;flex:1}
+  .ob-quiz-progress i{flex:1;height:3px;border-radius:2px;background:var(--stroke-gray-lighter)}
+  .ob-quiz-progress i.done{background:var(--text-brand)}
+  .ob-quiz h2{font:700 22px var(--font-primary);letter-spacing:-.015em;color:var(--text-dark);margin:0}
+  .ob-quiz .q-sub{font:500 12.5px var(--font-primary);color:var(--text-gray-dark);margin:6px 0 20px}
+  .ob-opt-list{display:flex;flex-direction:column;gap:8px}
+  .ob-opt{display:flex;align-items:center;gap:12px;text-align:left;width:100%;padding:14px 16px;border-radius:12px;border:1px solid var(--stroke-gray-lighter);background:#fff;cursor:pointer;transition:border-color .12s,background .12s}
+  .ob-opt:hover{border-color:var(--stroke-gray-medium)}
+  .ob-opt .o-name{font:600 13.5px var(--font-primary);color:var(--text-dark);display:block}
+  .ob-opt .o-desc{font:400 12px var(--font-primary);color:var(--text-gray-dark);display:block;margin-top:2px}
+  .ob-opt .o-check{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--stroke-gray-medium);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff}
+  .ob-opt .o-check svg{width:11px;height:11px;opacity:0}
+  .ob-opt.sel{border-color:var(--text-brand);background:var(--bg-blue-light)}
+  .ob-opt.sel .o-check{border-color:var(--text-brand);background:var(--text-brand)}
+  .ob-opt.sel .o-check svg{opacity:1}
+  .ob-chip-grid{display:flex;flex-wrap:wrap;gap:8px}
+  .ob-chip{font:500 12.5px var(--font-primary);color:var(--text-dark);padding:9px 15px;border-radius:20px;border:1px solid var(--stroke-gray-lighter);background:#fff;cursor:pointer;transition:all .12s}
+  .ob-chip:hover{border-color:var(--stroke-gray-medium)}
+  .ob-chip.sel{border-color:var(--text-brand);background:var(--text-brand);color:#fff;font-weight:600}
+  .ob-quiz-foot{margin-top:24px;padding-top:18px;border-top:1px solid var(--stroke-gray-lighter);display:flex;flex-direction:column;align-items:center;gap:10px}
+  .ob-quiz-foot .btn{width:100%}
+
+  .ob-gen{padding:40px 32px}
+  .ob-gen h2{font:700 22px var(--font-primary);letter-spacing:-.015em;color:var(--text-dark);margin:0}
+  .ob-gen-bar{height:3px;border-radius:2px;background:var(--stroke-gray-lighter);overflow:hidden;margin-bottom:28px}
+  .ob-gen-bar i{display:block;height:100%;width:0;background:var(--text-brand);border-radius:2px;transition:width .6s cubic-bezier(.3,.7,.3,1)}
+  .ob-gstep{display:flex;align-items:center;gap:12px;font:500 13px var(--font-primary);color:var(--text-gray-light);padding:9px 0;transition:color .25s}
+  .ob-gstep::before{content:"";width:18px;height:18px;border-radius:50%;border:1.5px solid var(--stroke-gray-lighter);flex-shrink:0}
+  .ob-gstep.on{color:var(--text-dark)}
+  .ob-gstep.on::before{border-color:var(--text-brand);background:var(--text-brand)}
+  .ob-gstep.done{color:var(--text-gray-dark)}
+  .ob-gstep.done::before{border-color:var(--text-brand);background:var(--text-brand)}
+
   /* ───── Rail (same as journey-v7.html) ───── */
   .rail{padding:28px 24px 56px;display:flex;flex-direction:column;gap:16px;border-left:1px solid var(--stroke-gray-lighter);background:#fff}
   .weather{display:flex;align-items:center;gap:12px;padding:14px 18px}
@@ -217,9 +278,13 @@
         Trip guide
         <span class="badge new">NEW</span>
       </div>
-      <div class="n-item">
+      <div class="n-item open" data-nav-toggle="guidebooks">
         <svg viewBox="0 0 24 24"><path d="M4 4h10a4 4 0 0 1 4 4v12H8a4 4 0 0 1-4-4z"/><path d="M8 8h6M8 12h6"/></svg>
         Guidebooks
+        <svg class="n-chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg>
+      </div>
+      <div class="n-sub open" id="nav-guidebooks">
+        <a class="n-subitem active" href="tripguide.html">Trip guides</a>
       </div>
       <div class="n-item">
         <svg viewBox="0 0 24 24"><path d="m12 2 3.1 6.3L22 9.3l-5 4.8 1.2 6.9L12 17.8 5.8 21l1.2-6.9-5-4.8 6.9-1z"/></svg>
@@ -243,10 +308,81 @@
   <!-- Main -->
   <main class="main">
 
+    <!-- ══════ Onboarding: cover → sign-in → quiz → generating ══════ -->
+    <div id="onboard">
+
+      <div class="ob-step on" data-ob="cover">
+        <div class="card ob-cover">
+          <div class="ob-cover-media"><img src="https://images.unsplash.com/photo-1543783207-ec64e4d95325?w=900&auto=format&fit=crop&q=80" alt="Madrid"></div>
+          <div class="ob-cover-body">
+            <div class="eyebrow" style="color:var(--text-brand)">Puerta del Sol · 18 – 23 May</div>
+            <h1 class="ob-h1">Madrid</h1>
+            <p class="ob-p">Five nights in the heart of the capital. Answer three quick questions and we'll shape a day-by-day plan around your stay.</p>
+            <div class="ob-actions">
+              <button class="btn primary" data-ob-go="login" type="button">Open my trip guide <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></button>
+              <button class="btn ghost" data-ob-skip type="button">Skip for now</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ob-step" data-ob="login">
+        <div class="card ob-cover">
+          <div class="ob-cover-media"><img src="https://images.unsplash.com/photo-1543783207-ec64e4d95325?w=900&auto=format&fit=crop&q=80" alt="Madrid"><span class="ob-flag">🇪🇸</span></div>
+          <div class="ob-cover-body">
+            <div class="eyebrow" style="color:var(--text-brand)">Chekin · Trip guide</div>
+            <h1 class="ob-h1" style="font-size:26px">Your Madrid guide is ready</h1>
+            <p class="ob-p">Sign in to save it and unlock check-in when you arrive.</p>
+            <div class="ob-actions">
+              <button class="btn primary" data-ob-go="quiz" type="button">
+                <svg viewBox="0 0 24 24" style="width:15px;height:15px"><path fill="#4285F4" d="M21.6 12.2c0-.6-.1-1.3-.2-1.9H12v3.6h5.4c-.2 1.2-.9 2.3-2 3v2.5h3.2c1.9-1.7 3-4.3 3-7.2z"/><path fill="#34A853" d="M12 22c2.7 0 5-.9 6.6-2.4l-3.2-2.5c-.9.6-2 1-3.4 1-2.6 0-4.9-1.8-5.7-4.2H3v2.6C4.6 19.8 8 22 12 22z"/><path fill="#FBBC05" d="M6.3 13.9c-.2-.6-.3-1.2-.3-1.9s.1-1.3.3-1.9V7.5H3C2.4 8.8 2 10.4 2 12s.4 3.2 1 4.5l3.3-2.6z"/><path fill="#EA4335" d="M12 5.9c1.5 0 2.8.5 3.8 1.5l2.9-2.9C16.9 2.9 14.7 2 12 2 8 2 4.6 4.2 3 7.5l3.3 2.6c.8-2.4 3.1-4.2 5.7-4.2z"/></svg>
+                Continue with Google
+              </button>
+              <button class="btn ghost" data-ob-go="quiz" type="button">Continue with email</button>
+            </div>
+            <p class="ob-foot">Already a Chekin guest? <a data-ob-go="quiz">Sign in</a></p>
+            <button class="ob-skip" data-ob-go="quiz" type="button">Just browsing? Continue without an account</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="ob-step" data-ob="quiz">
+        <div class="card ob-quiz">
+          <div class="ob-quiz-top">
+            <span class="ob-quiz-count" id="obQuizCount">1 of 3</span>
+            <div class="ob-quiz-progress" id="obQuizProgress"><i></i><i></i><i></i></div>
+          </div>
+          <div id="obQuizBody"></div>
+          <div class="ob-quiz-foot">
+            <button class="btn primary" id="obQuizNext" type="button">Continue</button>
+            <button class="ob-skip" id="obQuizSkipAll" type="button">Skip everything — show me the guide</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="ob-step" data-ob="generating">
+        <div class="card ob-gen">
+          <h2>Building your guide</h2>
+          <p class="ob-p" style="margin:6px 0 24px">This usually takes a few seconds.</p>
+          <div class="ob-gen-bar"><i id="obGenBar"></i></div>
+          <div id="obGenSteps">
+            <div class="ob-gstep">Reading your preferences</div>
+            <div class="ob-gstep">Mapping Madrid around Puerta del Sol</div>
+            <div class="ob-gstep">Checking opening hours for 18 – 23 May</div>
+            <div class="ob-gstep">Balancing big mornings with slow afternoons</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════ Guide (revealed once onboarding completes) ══════ -->
+    <div id="guideReady" style="display:none">
+
     <div class="head reveal" style="animation-delay:.02s">
       <div>
         <h1>Your Madrid trip guide</h1>
-        <div class="sub">Built around Carmen's stay at Puerta del Sol · 18–23 May 2026.</div>
+        <div class="sub" id="guideSummary">Built around your stay at Puerta del Sol · 18 – 23 May.</div>
       </div>
       <button class="btn ghost" data-chek-trigger>Ask Vela</button>
     </div>
@@ -411,6 +547,138 @@
   };
   var isPaid = function(cost){ return !!cost && cost !== 'Free'; };
 
+  /* ================= Onboarding: cover → sign-in → quiz → generating ================= */
+  var OB_QUIZ = [
+    { key:'pace', type:'single',
+      q:'What pace feels right?', sub:'This decides how much we plan into each day.',
+      options:[
+        { id:'Relaxed', name:'Relaxed', desc:'Two or three things a day, long lunches' },
+        { id:'Balanced', name:'Balanced', desc:'A full morning, an easy afternoon' },
+        { id:'See everything', name:'See everything', desc:'Early starts, late nights, no regrets' }
+      ]},
+    { key:'interests', type:'multi', min:2, max:6,
+      q:'What are you here for?', sub:'Pick two to six — we’ll build your days around them.',
+      options:[
+        { id:'Architecture', name:'Architecture' }, { id:'Food & tapas', name:'Food & tapas' },
+        { id:'Art & museums', name:'Art & museums' }, { id:'Flamenco & live music', name:'Flamenco & live music' },
+        { id:'Markets & shopping', name:'Markets & shopping' }, { id:'Rooftops & views', name:'Rooftops & views' },
+        { id:'Parks & gardens', name:'Parks & gardens' }, { id:'Local nightlife', name:'Local nightlife' }
+      ]},
+    { key:'traveler', type:'single',
+      q:'Who’s travelling?', sub:'Helps us pick the right tables, tickets and timings.',
+      options:[
+        { id:'Solo', name:'Solo', desc:'Counter seats and flexible plans' },
+        { id:'Couple', name:'Couple', desc:'Tables for two, golden-hour views' },
+        { id:'Family', name:'Family with kids', desc:'Shade, gelato and shorter walks' },
+        { id:'Friends', name:'Friends', desc:'Shared plates and late nights' }
+      ]}
+  ];
+  var OB_DEFAULTS = { pace:'Relaxed', interests:['Architecture','Food & tapas','Flamenco & live music','Rooftops & views'], traveler:'Couple' };
+  var obAnswers = { pace:null, interests:[], traveler:null };
+  var obStep = 0;
+
+  var obQuizBody = $('#obQuizBody'), obQuizNext = $('#obQuizNext'), obQuizCount = $('#obQuizCount'), obQuizProgress = $('#obQuizProgress');
+
+  function obStepComplete(i){
+    var s = OB_QUIZ[i];
+    if (s.type === 'multi') return obAnswers[s.key].length >= s.min;
+    return !!obAnswers[s.key];
+  }
+
+  function obRenderQuiz(){
+    var s = OB_QUIZ[obStep];
+    obQuizCount.textContent = (obStep+1) + ' of 3';
+    var html = '<h2>'+s.q+'</h2><p class="q-sub">'+s.sub+'</p>';
+    if (s.type === 'multi'){
+      html += '<div class="ob-chip-grid">' + s.options.map(function(o){
+        var sel = obAnswers.interests.indexOf(o.id) >= 0;
+        return '<button class="ob-chip'+(sel?' sel':'')+'" data-ob-opt="'+o.id+'" type="button">'+o.name+'</button>';
+      }).join('') + '</div>';
+    } else {
+      html += '<div class="ob-opt-list">' + s.options.map(function(o){
+        var sel = obAnswers[s.key] === o.id;
+        return '<button class="ob-opt'+(sel?' sel':'')+'" data-ob-opt="'+o.id+'" type="button">'
+          + '<span><span class="o-name">'+o.name+'</span><span class="o-desc">'+o.desc+'</span></span>'
+          + '<span class="o-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>'
+          + '</button>';
+      }).join('') + '</div>';
+    }
+    obQuizBody.innerHTML = html;
+    obQuizNext.textContent = obStep === 2 ? 'Generate my plan' : 'Continue';
+    $$('.ob-quiz-progress i', obQuizProgress.parentNode).forEach(function(seg,i){
+      seg.classList.toggle('done', i < obStep || (i === obStep && obStepComplete(obStep)));
+    });
+  }
+
+  obQuizBody.addEventListener('click', function(e){
+    var b = e.target.closest('[data-ob-opt]');
+    if (!b) return;
+    var s = OB_QUIZ[obStep], v = b.getAttribute('data-ob-opt');
+    if (s.type === 'multi'){
+      var idx = obAnswers.interests.indexOf(v);
+      if (idx >= 0){ obAnswers.interests.splice(idx,1); b.classList.remove('sel'); }
+      else if (obAnswers.interests.length < s.max){ obAnswers.interests.push(v); b.classList.add('sel'); }
+    } else {
+      obAnswers[s.key] = v;
+      $$('[data-ob-opt]', obQuizBody).forEach(function(o){ o.classList.toggle('sel', o === b); });
+    }
+    obRenderQuiz();
+  });
+
+  obQuizNext.addEventListener('click', function(){
+    if (!obStepComplete(obStep)) return;
+    if (obStep < 2){ obStep++; obRenderQuiz(); }
+    else obGoTo('generating');
+  });
+
+  function obFinalize(){
+    OB_QUIZ.forEach(function(s){
+      if (s.type === 'multi'){ if (!obAnswers[s.key].length) obAnswers[s.key] = OB_DEFAULTS[s.key].slice(); }
+      else if (!obAnswers[s.key]) obAnswers[s.key] = OB_DEFAULTS[s.key];
+    });
+  }
+
+  $('#obQuizSkipAll').addEventListener('click', function(){ obFinalize(); obGoTo('generating'); });
+  $$('[data-ob-skip]').forEach(function(b){ b.addEventListener('click', function(){ obFinalize(); obGoTo('generating'); }); });
+
+  var obGenTimers = [];
+  function obRunGenerating(){
+    obGenTimers.forEach(clearTimeout); obGenTimers = [];
+    var steps = $$('.ob-gstep', $('#obGenSteps'));
+    var bar = $('#obGenBar');
+    steps.forEach(function(s){ s.classList.remove('on','done'); });
+    bar.style.transition = 'none'; bar.style.width = '0'; void bar.offsetWidth; bar.style.transition = 'width .6s cubic-bezier(.3,.7,.3,1)';
+    steps.forEach(function(s,i){
+      obGenTimers.push(setTimeout(function(){
+        if (i > 0) steps[i-1].classList.replace('on','done');
+        s.classList.add('on');
+        bar.style.width = ((i+1)/(steps.length+1)*100) + '%';
+      }, 150 + i*550));
+    });
+    obGenTimers.push(setTimeout(function(){ steps[steps.length-1].classList.replace('on','done'); bar.style.width = '100%'; }, 150 + steps.length*550));
+    obGenTimers.push(setTimeout(revealGuide, 700 + steps.length*550));
+  }
+
+  function revealGuide(){
+    var p = obAnswers.pace ? obAnswers : OB_DEFAULTS;
+    var ints = p.interests.slice(0,2).join(', ');
+    var extra = p.interests.length - 2;
+    if (extra > 0) ints += ' +' + extra;
+    $('#guideSummary').innerHTML = 'Built for a <b>' + p.pace.toLowerCase() + '</b> pace · ' + ints + ' · ' + p.traveler;
+    $('#onboard').style.display = 'none';
+    $('#guideReady').style.display = '';
+  }
+
+  function obGoTo(step){
+    obGenTimers.forEach(clearTimeout); obGenTimers = [];
+    $$('.ob-step', $('#onboard')).forEach(function(s){ s.classList.toggle('on', s.getAttribute('data-ob') === step); });
+    if (step === 'quiz'){ obStep = 0; obAnswers = { pace:null, interests:[], traveler:null }; obRenderQuiz(); }
+    if (step === 'generating') obRunGenerating();
+  }
+  $$('[data-ob-go]').forEach(function(b){
+    b.addEventListener('click', function(){ obGoTo(b.getAttribute('data-ob-go')); });
+  });
+
   var DAYS = [
     { glance:'4 stops · a full but unhurried day', groups:[
       { part:'Morning', items:[
@@ -543,6 +811,15 @@
       }
       buy.classList.toggle('added');
     }
+  });
+
+  // Sidebar nav disclosure — e.g. Guidebooks → Trip guides
+  $$('[data-nav-toggle]').forEach(function(t){
+    t.addEventListener('click', function(){
+      t.classList.toggle('open');
+      var sub = document.getElementById('nav-' + t.getAttribute('data-nav-toggle'));
+      if (sub) sub.classList.toggle('open');
+    });
   });
 })();
 </script>

@@ -65,6 +65,14 @@
   .side .n-item.active{background:linear-gradient(135deg,rgba(56,92,248,.38),rgba(56,92,248,.16));color:#fff;box-shadow:inset 0 0 0 1px rgba(140,165,255,.2)}
   .side .n-item .badge{margin-left:auto;font:700 10.5px var(--font-primary);padding:2px 8px;border-radius:999px;background:rgba(140,165,255,.2);color:#C9D5FF;white-space:nowrap}
   .side .n-item .badge.new{background:rgba(107,224,168,.24);color:#7FE7B4}
+  .side .n-item[data-nav-toggle]{cursor:pointer}
+  .side .n-chev{margin-left:auto;width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;flex-shrink:0;transition:transform .15s}
+  .side .n-item[data-nav-toggle].open .n-chev{transform:rotate(90deg)}
+  .side .n-sub{display:none;flex-direction:column;padding:2px 12px 4px 44px}
+  .side .n-sub.open{display:flex}
+  .side .n-subitem{display:block;padding:7px 10px;border-radius:8px;font:500 13px var(--font-primary);color:rgba(255,255,255,.62);text-decoration:none;transition:background .12s,color .12s}
+  .side .n-subitem:hover{background:rgba(255,255,255,.07);color:#fff}
+  .side .n-subitem.active{color:#fff;font-weight:600}
   .side .n-item .check{margin-left:auto;width:16px;height:16px;border-radius:50%;background:var(--text-success);display:grid;place-items:center;flex-shrink:0}
   .side .n-item .check svg{width:9px;height:9px;stroke:#fff;stroke-width:3}
   .side .me{margin-top:auto;padding:15px 16px;border-top:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:10px}
@@ -300,9 +308,13 @@
         Trip guide
         <span class="badge new">NEW</span>
       </a>
-      <div class="n-item">
+      <div class="n-item" data-nav-toggle="guidebooks">
         <svg viewBox="0 0 24 24"><path d="M4 4h10a4 4 0 0 1 4 4v12H8a4 4 0 0 1-4-4z"/><path d="M8 8h6M8 12h6"/></svg>
         Guidebooks
+        <svg class="n-chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg>
+      </div>
+      <div class="n-sub" id="nav-guidebooks">
+        <a class="n-subitem" href="tripguide.html">Trip guides</a>
       </div>
       <div class="n-item">
         <svg viewBox="0 0 24 24"><path d="m12 2 3.1 6.3L22 9.3l-5 4.8 1.2 6.9L12 17.8 5.8 21l1.2-6.9-5-4.8 6.9-1z"/></svg>
@@ -585,6 +597,14 @@
       requestAnimationFrame(tick);
     });
   })();
+  // Sidebar nav disclosure — e.g. Guidebooks → Trip guides
+  document.querySelectorAll('[data-nav-toggle]').forEach(function(t){
+    t.addEventListener('click', function(){
+      t.classList.toggle('open');
+      var sub = document.getElementById('nav-' + t.getAttribute('data-nav-toggle'));
+      if (sub) sub.classList.toggle('open');
+    });
+  });
 </script>
 </body>
 </html>
