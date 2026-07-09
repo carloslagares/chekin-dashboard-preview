@@ -367,10 +367,16 @@ img{max-width:100%;display:block}
 .part-label:first-of-type{margin-top:0}
 .act{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--line-soft)}
 .act:last-child{border-bottom:0}
+.act .a-lead{flex:none;width:40px;display:flex;flex-direction:column;align-items:center}
 .act .a-time{
-  flex:none;width:40px;font-size:11.5px;font-weight:600;color:var(--navy);
+  width:100%;font-size:11.5px;font-weight:600;color:var(--navy);
   font-variant-numeric:tabular-nums;padding-top:1px;
 }
+.act .a-thumb{
+  width:40px;height:48px;border-radius:8px;overflow:hidden;margin-top:18px;
+  background:var(--line-soft);flex:none;
+}
+.act .a-thumb img{width:100%;height:100%;object-fit:cover;display:block}
 .act .a-main{flex:1;min-width:0}
 .act .a-name{font-size:13.5px;font-weight:600;color:var(--navy);line-height:1.3}
 .act .a-cat{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin-top:4px}
@@ -388,13 +394,6 @@ img{max-width:100%;display:block}
   font-size:9.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
   color:var(--green);background:var(--green-soft);padding:2px 6px;border-radius:5px;
 }
-.why-inline{
-  margin-left:auto;display:inline-flex;align-items:center;gap:2px;flex:none;
-  font-size:10px;font-weight:600;letter-spacing:.02em;text-transform:none;color:var(--muted);
-}
-.why-inline:hover{color:var(--navy)}
-.why-inline .ic{width:10px;height:10px;transition:transform .2s var(--ease)}
-.why-inline[aria-expanded="true"] .ic{transform:rotate(180deg)}
 .act-cta{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px}
 .dismiss-link{
   font-size:10.5px;font-weight:600;color:var(--faint);padding:2px 0;
@@ -413,15 +412,6 @@ img{max-width:100%;display:block}
   color:var(--gold);background:var(--gold-soft);padding:2px 6px;border-radius:5px;flex:none;
 }
 .p-cta{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex:none}
-.why-panel{display:grid;grid-template-rows:0fr;transition:grid-template-rows .22s var(--ease)}
-.why-panel.open{grid-template-rows:1fr}
-.why-panel>div{overflow:hidden}
-.why-inner{
-  margin-top:10px;padding:10px 14px;border-left:2px solid var(--blue);
-  background:#F8F9FE;border-radius:0 10px 10px 0;
-  font-size:11.5px;color:var(--text);line-height:1.6;
-}
-.why-inner b{color:var(--navy)}
 
 /* ---------- Screen 5 · Today ---------- */
 .today-head{padding:60px 24px 0}
@@ -956,17 +946,19 @@ body.preview .phone{
         { part:'Afternoon', items:[
           { time:'15:00', title:'Check in at Casa Alameda', cat:'Your stay',
             desc:'Your door code unlocks once online check-in is complete. The rooftop terrace catches the evening breeze.',
-            dur:null, cost:null, why:null }
+            dur:null, cost:null, why:null, img:'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=160&h=192&auto=format&fit=crop&q=80' }
         ]},
         { part:'Evening', items:[
           { time:'19:30', title:'Alameda de Hércules stroll', cat:'Neighbourhood',
             desc:'The plaza outside your door — Roman columns, orange trees and half the city out for the evening paseo.',
             dur:'45 min', cost:'Free',
-            why:'You chose a <b>relaxed pace</b>, so there are no tickets on arrival day — just a walk to get your bearings, two minutes from your stay.' },
+            why:'You chose a <b>relaxed pace</b>, so there are no tickets on arrival day — just a walk to get your bearings, two minutes from your stay.',
+            img:'https://images.unsplash.com/photo-1539037116277-4db20889f2d4?w=160&h=192&auto=format&fit=crop&q=80' },
           { time:'20:30', title:'Tapas at Eslava', cat:'Food & tapas',
             desc:'A thirty-year neighbourhood institution. Order the slow-cooked egg on mushroom cake and the cinnamon-glazed pork rib.',
             dur:'1.5 h', cost:'€18–25 pp',
-            why:'You picked <b>Food & tapas</b> — Eslava is the most-awarded tapas bar in Seville and a 6-minute walk from Casa Alameda. Arrive by 20:30 to beat the queue.' }
+            why:'You picked <b>Food & tapas</b> — Eslava is the most-awarded tapas bar in Seville and a 6-minute walk from Casa Alameda. Arrive by 20:30 to beat the queue.',
+            img:'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=160&h=192&auto=format&fit=crop&q=80' }
         ]}
       ]
     },
@@ -977,27 +969,32 @@ body.preview .phone{
           { time:'09:30', title:'Real Alcázar', cat:'Architecture',
             desc:'A thousand years of Mudéjar palaces, tiled courtyards and gardens still used by the Spanish royal family.',
             dur:'2 h', cost:'€14.50',
-            why:'You picked <b>Architecture</b> — this is the city’s masterpiece. The 9:30 slot gets you in ahead of the tour groups and the worst of the heat. Book the timed entry tonight.' },
+            why:'You picked <b>Architecture</b> — this is the city’s masterpiece. The 9:30 slot gets you in ahead of the tour groups and the worst of the heat. Book the timed entry tonight.',
+            img:'https://images.unsplash.com/photo-1558370781-d6196949e317?w=160&h=192&auto=format&fit=crop&q=80' },
           { time:'11:45', title:'Barrio Santa Cruz', cat:'Neighbourhood',
             desc:'The old Jewish quarter — whitewashed lanes barely two metres wide, opening onto quiet orange-tree squares.',
             dur:'45 min', cost:'Free',
-            why:'Its narrow streets were built for July: you stay in shade the whole walk, and it starts right at the Alcázar exit.' }
+            why:'Its narrow streets were built for July: you stay in shade the whole walk, and it starts right at the Alcázar exit.',
+            img:'https://images.unsplash.com/photo-1509840841025-9088ba78a826?w=160&h=192&auto=format&fit=crop&q=80' }
         ]},
         { part:'Afternoon', items:[
           { time:'13:30', title:'Bodega Santa Cruz "Las Columnas"', cat:'Food & tapas',
             desc:'Chalkboard tapas shouted over a marble counter — montaditos, pringá and very cold beer.',
             dur:'1 h', cost:'€10–15 pp',
-            why:'You picked <b>Food & tapas</b> — this is a locals’ counter, not a tourist menu, and it sits on your walking route out of Santa Cruz.' },
+            why:'You picked <b>Food & tapas</b> — this is a locals’ counter, not a tourist menu, and it sits on your walking route out of Santa Cruz.',
+            img:'https://images.unsplash.com/photo-1544025162-d76694265947?w=160&h=192&auto=format&fit=crop&q=80' },
           { time:'15:00', title:'Siesta at Casa Alameda', cat:'Your stay',
             desc:'Seville pauses from three to five. So should you — the terrace is shaded by mid-afternoon.',
             dur:'2 h', cost:null,
-            why:'A <b>relaxed pace</b> means we keep the hottest hours free. Today peaks at 38° around 18:00.' }
+            why:'A <b>relaxed pace</b> means we keep the hottest hours free. Today peaks at 38° around 18:00.',
+            img:'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=160&h=192&auto=format&fit=crop&q=80' }
         ]},
         { part:'Evening', items:[
           { time:'21:00', title:'La Casa del Flamenco', cat:'Flamenco & live music',
             desc:'An hour of serious flamenco in a 15th-century courtyard. No dinner show, no microphones — just four performers and the room.',
             dur:'1 h', cost:'€25',
-            why:'You picked <b>Flamenco & live music</b> — this is the venue Sevillanos actually recommend, and the intimate patio suits a table for two.' }
+            why:'You picked <b>Flamenco & live music</b> — this is the venue Sevillanos actually recommend, and the intimate patio suits a table for two.',
+            img:'https://images.unsplash.com/photo-1516307365426-b7f1c7ecb0a8?w=160&h=192&auto=format&fit=crop&q=80' }
         ]}
       ]
     },
@@ -1008,27 +1005,32 @@ body.preview .phone{
           { time:'09:00', title:'Catedral & La Giralda', cat:'Architecture',
             desc:'The largest Gothic cathedral on earth, with Columbus’s tomb inside and a 12th-century minaret you climb by ramp.',
             dur:'1 h 45', cost:'€13',
-            why:'You picked <b>Rooftops & views</b> — the Giralda climb ends 96 m above the old town, and at 9:00 you’ll have the ramps nearly to yourselves.' },
+            why:'You picked <b>Rooftops & views</b> — the Giralda climb ends 96 m above the old town, and at 9:00 you’ll have the ramps nearly to yourselves.',
+            img:'https://images.unsplash.com/photo-1519677100203-a0e668c92439?w=160&h=192&auto=format&fit=crop&q=80' },
           { time:'11:15', title:'Churros at Bar Comercio', cat:'Food & tapas',
             desc:'Frying churros on the same corner since 1904. Order a media with thick chocolate, stand at the bar.',
             dur:'30 min', cost:'€4 pp',
-            why:'You picked <b>Food & tapas</b> — this is the post-cathedral ritual, three streets from the exit.' }
+            why:'You picked <b>Food & tapas</b> — this is the post-cathedral ritual, three streets from the exit.',
+            img:'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=160&h=192&auto=format&fit=crop&q=80' }
         ]},
         { part:'Afternoon', items:[
           { time:'13:30', title:'Lunch at Mercado de Triana', cat:'Food & tapas',
             desc:'Cross the bridge and eat where Triana shops — grilled tuna, salmorejo and sherry among the market stalls.',
             dur:'1.5 h', cost:'€12–18 pp',
-            why:'You picked <b>Food & tapas</b> — market counters here serve what came in that morning, at half the old-town price.' },
+            why:'You picked <b>Food & tapas</b> — market counters here serve what came in that morning, at half the old-town price.',
+            img:'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=160&h=192&auto=format&fit=crop&q=80' },
           { time:'16:30', title:'Triana ceramics & river walk', cat:'Neighbourhood',
             desc:'Calle Alfarería’s azulejo workshops, then the shaded river path along Calle Betis.',
             dur:'1 h', cost:'Free',
-            why:'A <b>relaxed pace</b> afternoon: no tickets, riverside shade, and you end exactly where the evening starts.' }
+            why:'A <b>relaxed pace</b> afternoon: no tickets, riverside shade, and you end exactly where the evening starts.',
+            img:'https://images.unsplash.com/photo-1509840841025-9088ba78a826?w=160&h=192&auto=format&fit=crop&q=80' }
         ]},
         { part:'Evening', items:[
           { time:'21:15', title:'Sunset at Las Setas', cat:'Rooftops & views',
             desc:'The world’s largest wooden structure — a rooftop skywalk over the old town, five minutes from your door.',
             dur:'45 min', cost:'€15',
-            why:'You picked <b>Rooftops & views</b> — sunset is at 21:36 in early July. Go up twenty minutes early and walk the full loop.' }
+            why:'You picked <b>Rooftops & views</b> — sunset is at 21:36 in early July. Go up twenty minutes early and walk the full loop.',
+            img:'https://images.unsplash.com/photo-1543783207-ec64e4d95325?w=160&h=192&auto=format&fit=crop&q=80' }
         ]}
       ]
     },
@@ -1039,23 +1041,27 @@ body.preview .phone{
           { time:'09:30', title:'Plaza de España', cat:'Architecture',
             desc:'A half-moon of bridges, canals and tiled alcoves — one for every province in Spain. Built for the 1929 Expo.',
             dur:'1 h', cost:'Free',
-            why:'You picked <b>Architecture</b> — and arriving before the 11:00 coach tours means you’ll have the colonnade almost to yourselves.' },
+            why:'You picked <b>Architecture</b> — and arriving before the 11:00 coach tours means you’ll have the colonnade almost to yourselves.',
+            img:'https://images.unsplash.com/photo-1558370781-d6196949e317?w=160&h=192&auto=format&fit=crop&q=80' },
           { time:'10:45', title:'Parque de María Luisa', cat:'Neighbourhood',
             desc:'A slow green hour under the pergolas — tiled fountains, hidden pavilions and resident peacocks.',
             dur:'1 h', cost:'Free',
-            why:'A <b>relaxed pace</b> Saturday: the park holds its shade until noon, and it’s on your way back from the plaza.' }
+            why:'A <b>relaxed pace</b> Saturday: the park holds its shade until noon, and it’s on your way back from the plaza.',
+            img:'https://images.unsplash.com/photo-1519331379826-f10be5486c6f?w=160&h=192&auto=format&fit=crop&q=80' }
         ]},
         { part:'Afternoon', items:[
           { time:'13:45', title:'Lunch at Casa Morales', cat:'Food & tapas',
             desc:'Wine from the barrel and chicharrones on butcher paper — barely changed since 1850.',
             dur:'1.5 h', cost:'€15–20 pp',
-            why:'You picked <b>Food & tapas</b> — one of the last true abacerías, and quiet on Saturday afternoons once the tour groups clear.' }
+            why:'You picked <b>Food & tapas</b> — one of the last true abacerías, and quiet on Saturday afternoons once the tour groups clear.',
+            img:'https://images.unsplash.com/photo-1544025162-d76694265947?w=160&h=192&auto=format&fit=crop&q=80' }
         ]},
         { part:'Evening', items:[
           { time:'20:30', title:'Rooftop at La Terraza del EME', cat:'Rooftops & views',
             desc:'Cathedral-facing terrace for a final drink — the Giralda lit up close enough to count the bells.',
             dur:'1.5 h', cost:'€12–16 pp',
-            why:'You picked <b>Rooftops & views</b> — this is the closest view of the Giralda you can get with a drink in hand. Book the 20:30 slot for golden hour.' }
+            why:'You picked <b>Rooftops & views</b> — this is the closest view of the Giralda you can get with a drink in hand. Book the 20:30 slot for golden hour.',
+            img:'https://images.unsplash.com/photo-1543783207-ec64e4d95325?w=160&h=192&auto=format&fit=crop&q=80' }
         ]}
       ]
     },
@@ -1066,10 +1072,12 @@ body.preview .phone{
           { time:'09:00', title:'Breakfast at La Cacharrería', cat:'Food & tapas',
             desc:'Toast stacked with tomato and jamón, good coffee, mismatched armchairs. Two streets from your door.',
             dur:'45 min', cost:'€8 pp',
-            why:'No rush before an 11:00 check-out — you picked <b>Food & tapas</b>, so the last morning ends the way the trip started.' },
+            why:'No rush before an 11:00 check-out — you picked <b>Food & tapas</b>, so the last morning ends the way the trip started.',
+            img:'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=160&h=192&auto=format&fit=crop&q=80' },
           { time:'11:00', title:'Check out of Casa Alameda', cat:'Your stay',
             desc:'Leave the keys on the kitchen table and pull the door shut. Luggage storage is 400 m away if your flight is later.',
-            dur:null, cost:null, why:null }
+            dur:null, cost:null, why:null,
+            img:'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=160&h=192&auto=format&fit=crop&q=80' }
         ]}
       ]
     }
@@ -1317,19 +1325,17 @@ body.preview .phone{
   function renderActItem(it){
     var slug = CAT_SLUG[it.cat] || '';
     var ownStay = it.cat === 'Your stay';
-    var html = '<div class="act"><span class="a-time">'+it.time+'</span><div class="a-main">'
+    var html = '<div class="act"><div class="a-lead"><span class="a-time">'+it.time+'</span>'
+      + (it.img ? '<div class="a-thumb"><img src="'+it.img+'" alt="" loading="lazy"></div>' : '')
+      + '</div><div class="a-main">'
       + '<div class="a-name">'+it.title+'</div>'
       + '<div class="a-cat"><span class="cat-dot'+(slug?' cat-'+slug:'')+'"></span>'+it.cat
-        + (it.why ? '<button class="why-inline" type="button" aria-expanded="false">Why<svg class="ic"><use href="#i-chevron-down"/></svg></button>' : '')
       + '</div>'
       + '<p class="a-desc">'+it.desc+'</p>';
     var meta = '';
     if (it.dur) meta += metaSpan('i-clock', it.dur);
     if (it.cost === 'Free') meta += '<span class="free-tag">Free</span>';
     if (meta) html += '<div class="a-meta">'+meta+'</div>';
-    if (it.why){
-      html += '<div class="why-panel"><div><div class="why-inner">'+it.why+'</div></div></div>';
-    }
     if (!ownStay){
       html += '<div class="act-cta"><button class="dismiss-link" data-dismiss type="button">Dismiss</button>'
         + (isPaid(it.cost) ? '<button class="buy-btn" data-buy type="button">Buy now · '+it.cost+'</button>' : '')
@@ -1417,13 +1423,6 @@ body.preview .phone{
   });
 
   dayBody.addEventListener('click', function(e){
-    var why = e.target.closest('.why-inline');
-    if (why){
-      var open = why.getAttribute('aria-expanded') === 'true';
-      why.setAttribute('aria-expanded', String(!open));
-      why.closest('.a-main').querySelector('.why-panel').classList.toggle('open', !open);
-      return;
-    }
     var dismiss = e.target.closest('[data-dismiss]');
     if (dismiss){
       var card = dismiss.closest('.act, .pre-card, .dep-task');

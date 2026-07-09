@@ -67,6 +67,7 @@
   <div class="menu" id="menu" role="menu">
     <div class="group"><span class="pill gfab">Fable</span>Journey · new model<span class="ln"></span></div>
     <button class="opt active" data-v="fj7"  data-label="Journey V7"    data-gen="fab" data-src="fable/journey-v7.html"   role="menuitem"><span class="v">V1</span><span class="t">Journey — V7</span><span class="new fab">Fable</span><svg class="check" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button>
+    <button class="opt" data-v="fj7t" data-label="Trip Guide V7" data-gen="fab" data-src="fable/tripguide.html" role="menuitem"><span class="v">V2</span><span class="t">Trip Guide — V7</span><span class="new fab">Fable</span><svg class="check" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button>
 
     <div class="group"><span class="pill g48v2">4.8 v2</span>Guest flow · Opus<span class="ln"></span></div>
     <button class="opt" data-v="gv2d" data-label="Desktop" data-gen="48v2" data-src="opus48v2/journey.html" role="menuitem"><span class="v">V1</span><span class="t">🖥️ Desktop</span><span class="new v2">v2</span><svg class="check" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button>
@@ -88,6 +89,7 @@
 
 <div class="stage">
   <iframe class="variant active" data-v="fj7" src="fable/journey-v7.html" title="Journey Fable V7"></iframe>
+  <iframe class="variant" data-v="fj7t" title="Trip Guide Fable V7"></iframe>
   <iframe class="variant" data-v="gv2d" title="Desktop 4.8 v2"></iframe>
   <iframe class="variant" data-v="gv2m" title="Mobile 4.8 v2"></iframe>
   <iframe class="variant" data-v="gj48" title="Journey 4.8"></iframe>
@@ -115,7 +117,7 @@
 
   // Deep-link ?view=journey|tripguide|mobile|concierge|luggage (+ originals)
   var VIEW_MAP = {
-    fable:'fj7', fablev7:'fj7', v7:'fj7',
+    fable:'fj7', fablev7:'fj7', v7:'fj7', fabletrip:'fj7t', fablev7trip:'fj7t',
     desktop:'gv2d', desktopv2:'gv2d', v2:'gv2d', mobilev2:'gv2m',
     journey:'gj48', trip:'gt48', tripguide:'gt48', guide:'gt48', mobile:'gm48',
     concierge:'gc47', luggage:'gl47', loogage:'gl47', itinerary:'gtr47'
