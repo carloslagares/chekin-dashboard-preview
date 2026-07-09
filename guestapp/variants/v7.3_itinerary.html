@@ -210,6 +210,8 @@ img{max-width:100%;display:block}
 .btn.login-email:hover{background:rgba(255,255,255,.18)}
 .login-foot{margin-top:4px;text-align:center;font-size:11px;color:rgba(255,255,255,.72)}
 .login-link{font-weight:700;color:#fff;text-decoration:underline}
+.login-skip{display:block;width:100%;text-align:center;margin-top:8px;font-size:10px;color:rgba(255,255,255,.5);transition:color .15s var(--ease)}
+.login-skip:hover{color:rgba(255,255,255,.8)}
 
 /* ---------- Screen 2 · Quiz ---------- */
 .quiz-top{flex:none;padding:60px 24px 0}
@@ -727,6 +729,7 @@ body.preview .phone{
                 <button class="btn login-email" data-go="quiz" type="button">Continue with email</button>
               </div>
               <p class="login-foot">Already a Chekin guest? <button class="login-link" data-go="quiz" type="button">Sign in</button></p>
+              <button class="login-skip" data-go="quiz" type="button">Just browsing? Continue without an account</button>
             </div>
           </div>
         </section>
