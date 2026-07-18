@@ -114,11 +114,12 @@
 
     <div class="group"><span class="pill gf5">Fable</span>Claude 5<span class="ln"></span></div>
     <button class="opt" data-v="v8" data-label="Fable refine" data-gen="f5" role="menuitem"><span class="v">V8</span><span class="t">Fable refine</span><span class="new f5">NEW</span><svg class="check" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button>
+    <button class="opt" data-v="onb" data-label="Onboarding" data-gen="f5" role="menuitem"><span class="v">OB</span><span class="t">Onboarding</span><span class="new f5">NEW</span><svg class="check" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button>
   </div>
 </div>
 
 <div class="stage">
-  <iframe class="variant active" data-v="v1" src="variants/v1_original.html" title="V1 Original"></iframe>
+  <iframe class="variant" data-v="v1" data-src="variants/v1_original.html" title="V1 Original"></iframe>
   <iframe class="variant" data-v="v2" data-src="variants/v2_agenda.html" title="V2 Today's agenda"></iframe>
   <iframe class="variant" data-v="v3" data-src="variants/v3_compliance.html" title="V3 Compliance first"></iframe>
   <iframe class="variant" data-v="v4" data-src="variants/v4_ai.html" title="V4 AI assistant"></iframe>
@@ -126,6 +127,7 @@
   <iframe class="variant" data-v="v6" data-src="variants/v6_mobile.html" title="V6 Mobile preview"></iframe>
   <iframe class="variant" data-v="v7" data-src="variants/v7_opus48.html" title="V7 Refined — Opus 4.8"></iframe>
   <iframe class="variant" data-v="v8" data-src="variants/v8_fable.html" title="V8 Fable refine — Fable 5"></iframe>
+  <iframe class="variant" data-v="onb" data-src="onboarding.html" title="Onboarding — Fable 5"></iframe>
 </div>
 
 <script>
@@ -143,7 +145,7 @@
   var curGen   = document.getElementById('curGen');
 
   // Deep-link via ?view=agenda|compliance|ai|calendar|refined (from sidebar)
-  var VIEW_MAP = { agenda:'v2', compliance:'v3', ai:'v4', calendar:'v5', refined:'v7', mobile:'v6', fable:'v8' };
+  var VIEW_MAP = { agenda:'v2', compliance:'v3', ai:'v4', calendar:'v5', refined:'v7', mobile:'v6', fable:'v8', onboarding:'onb' };
   var urlView = new URLSearchParams(location.search).get('view');
 
   var LS = 'chekin_welcome_variant';
@@ -175,8 +177,9 @@
 
   // Initial: URL > localStorage > default V1
   var saved = null; try{ saved = localStorage.getItem(LS); }catch(err){}
+  // Default landing is the dashboard (V8 Fable) — onboarding only via menu or ?view=onboarding
   var initial = (urlView && VIEW_MAP[urlView]) ? VIEW_MAP[urlView]
-              : (saved && menu.querySelector('.opt[data-v="'+saved+'"]') ? saved : 'v1');
+              : (saved && saved !== 'onb' && menu.querySelector('.opt[data-v="'+saved+'"]') ? saved : 'v8');
   activate(initial);
 
   menu.querySelectorAll('.opt').forEach(function(o){
