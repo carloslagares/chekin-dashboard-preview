@@ -9,7 +9,7 @@
 <style>
   :root{
     --bg-dark:#161643;
-    --bg-screen:#FDFDFF;
+    --bg-screen:#FAFBFF;
     --bg-white:#FFFFFF;
     --bg-neutral-light:#F4F6F8;
     --bg-neutral-cold:#F0F0F8;
@@ -29,15 +29,16 @@
     --bg-danger-light:#FFE4EC;
     --text-success:#0F9F80;
     --bg-success-light:#E8FCF7;
-    --shadow-card:0 1px 3px rgba(22,22,67,.05),0 0 0 1px rgba(22,22,67,.035);
-    --shadow-hover:0 10px 24px rgba(56,92,248,.10),0 2px 6px rgba(22,22,67,.05);
+    --shadow-card:0 1px 3px rgba(22,22,67,.04),0 1px 2px rgba(22,22,67,.03);
+    --shadow-hover:0 12px 28px rgba(56,92,248,.12),0 2px 6px rgba(22,22,67,.05);
     --shadow-dropdown:0 4px 10px 0 rgba(143,143,143,.2);
     --radius-sm:6px;
     --radius-md:8px;
     --radius-lg:14px;
   }
   *{box-sizing:border-box}
-  body{margin:0;background:var(--bg-screen);font-family:var(--font-primary);color:var(--text-dark);font-feature-settings:"ss01"}
+  body{margin:0;background:var(--bg-screen);font-family:var(--font-primary);color:var(--text-dark);font-feature-settings:"ss01";-webkit-font-smoothing:antialiased}
+  :focus-visible{outline:2px solid var(--text-brand);outline-offset:2px;border-radius:4px}
   @media (prefers-reduced-motion:no-preference){
     .reveal{opacity:0;transform:translateY(10px);animation:rv .5s cubic-bezier(.2,.8,.2,1) forwards}
     @keyframes rv{to{opacity:1;transform:none}}
@@ -49,8 +50,12 @@
 
   /* KPI strip */
   .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
-  .kpi{background:#fff;border:1px solid var(--stroke-gray-lighter);border-radius:var(--radius-lg);padding:15px 18px;display:flex;align-items:center;gap:14px;box-shadow:var(--shadow-card);transition:transform .15s,box-shadow .15s}
-  .kpi:hover{transform:translateY(-2px);box-shadow:var(--shadow-hover)}
+  .kpi{background:#fff;border:1px solid var(--stroke-gray-lighter);border-radius:var(--radius-lg);padding:15px 18px;display:flex;align-items:center;gap:14px;box-shadow:var(--shadow-card);transition:transform .15s,box-shadow .15s,border-color .15s;cursor:pointer;position:relative}
+  .kpi:hover{transform:translateY(-2px);box-shadow:var(--shadow-hover);border-color:rgba(56,92,248,.28)}
+  .kpi .go{position:absolute;top:50%;right:14px;transform:translateY(-50%) translateX(-4px);opacity:0;transition:opacity .15s,transform .15s;color:var(--text-brand)}
+  .kpi:hover .go{opacity:1;transform:translateY(-50%) translateX(0)}
+  .kpi .go svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2.2}
+  .kpi.filtering{border-color:var(--text-brand);box-shadow:0 0 0 3px rgba(56,92,248,.14),var(--shadow-card)}
   .kpi .ic{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;flex-shrink:0}
   .kpi .ic svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.8}
   .kpi .ic.blue{background:var(--bg-blue-light);color:var(--text-brand)}
@@ -218,21 +223,25 @@
 
       <!-- KPI strip -->
       <section class="kpis reveal">
-        <div class="kpi">
+        <div class="kpi" data-kpi="all" title="Show all properties" tabindex="0">
           <div class="ic blue"><svg viewBox="0 0 24 24"><path d="M3 9 12 2l9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg></div>
           <div><div class="v">24</div><div class="l">Active properties</div></div>
+          <span class="go"><svg viewBox="0 0 24 24"><path d="M22 3H2l8 9.5V19l4 2v-8.5z"/></svg></span>
         </div>
-        <div class="kpi">
+        <div class="kpi" data-kpi="configured" title="Filter: fully configured" tabindex="0">
           <div class="ic green"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
           <div><div class="v">11</div><div class="l">Fully configured</div></div>
+          <span class="go"><svg viewBox="0 0 24 24"><path d="M22 3H2l8 9.5V19l4 2v-8.5z"/></svg></span>
         </div>
-        <div class="kpi">
+        <div class="kpi" data-kpi="police" title="Filter: police setup needed" tabindex="0">
           <div class="ic amber"><svg viewBox="0 0 24 24"><path d="M10.3 3.8 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.8a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg></div>
           <div><div class="v">4</div><div class="l">Police setup needed</div></div>
+          <span class="go"><svg viewBox="0 0 24 24"><path d="M22 3H2l8 9.5V19l4 2v-8.5z"/></svg></span>
         </div>
-        <div class="kpi">
+        <div class="kpi" data-kpi="upselling" title="Filter: upselling not enabled" tabindex="0">
           <div class="ic violet"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg></div>
           <div><div class="v">9</div><div class="l">Upselling not enabled</div></div>
+          <span class="go"><svg viewBox="0 0 24 24"><path d="M22 3H2l8 9.5V19l4 2v-8.5z"/></svg></span>
         </div>
       </section>
 
@@ -396,6 +405,11 @@
 
   rows.forEach((r, i) => {
     const tr = document.createElement('tr');
+    const states = featOrder.map(k => r.feats[k] || 'off');
+    tr.dataset.all = '1';
+    tr.dataset.configured = states.every(s => s === 'on') ? '1' : '';
+    tr.dataset.police = r.feats.police === 'warn' ? '1' : '';
+    tr.dataset.upselling = r.feats.upselling === 'off' ? '1' : '';
     let fc = '';
     featOrder.forEach(k => {
       const state = r.feats[k] || 'off';
@@ -450,6 +464,25 @@
   // Pre-select 2 rows for demo of bulk bar (so the user sees it)
   document.querySelectorAll('.cb[data-row="1"], .cb[data-row="4"]').forEach(c => c.classList.add('on'));
   updateBulk();
+
+  // KPI cards act as quick filters (click again to clear)
+  let activeKpi = null;
+  const pageInfo = document.querySelector('.pagination .info');
+  function applyKpiFilter(key){
+    activeKpi = (activeKpi === key || key === 'all') ? null : key;
+    document.querySelectorAll('.kpi[data-kpi]').forEach(k => k.classList.toggle('filtering', k.dataset.kpi === activeKpi));
+    let shown = 0;
+    document.querySelectorAll('#tbody tr').forEach(tr => {
+      const show = !activeKpi || tr.dataset[activeKpi] === '1';
+      tr.style.display = show ? '' : 'none';
+      if (show) shown++;
+    });
+    pageInfo.textContent = activeKpi ? `Showing ${shown} filtered properties` : 'Showing 1–8 of 24 properties';
+  }
+  document.querySelectorAll('.kpi[data-kpi]').forEach(k => {
+    k.addEventListener('click', () => applyKpiFilter(k.dataset.kpi));
+    k.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); applyKpiFilter(k.dataset.kpi); } });
+  });
 </script>
 <script src="ds/_sidebar.js"></script>
 <script src="ds/_agent.js"></script>
