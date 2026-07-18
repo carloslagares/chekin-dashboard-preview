@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Chekin — First-run Home (Fable 5)</title>
+<link rel="stylesheet" href="../ds/colors_and_type.css">
+<link rel="stylesheet" href="../ds/_sidebar.css">
+<link rel="stylesheet" href="../ds/_agent.css">
+<style>
+  :root{
+    --bg-dark:#161643;
+    --bg-screen:#FAFBFF;
+    --bg-white:#FFFFFF;
+    --bg-neutral-light:#F4F6F8;
+    --bg-sky-light:#EFF6FF;
+    --bg-blue-light:#F0F3FF;
+    --bg-success-light:#E8FCF7;
+    --warn-bg:#FFF4E5;
+    --stroke-gray-lighter:#E8E9F1;
+    --stroke-gray-light:#DEDEEB;
+    --stroke-gray-medium:#CECEDE;
+    --text-dark:#161643;
+    --text-gray-dark:#6B6B95;
+    --text-gray-medium:#9696B9;
+    --text-gray-light:#CECEDE;
+    --text-white:#FFFFFF;
+    --text-brand:#385CF8;
+    --text-danger:#FF2467;
+    --text-warn:#B86A00;
+    --icon-success-light:#35E5BC;
+    --success:#0F9F80;
+    --shadow-card:0 1px 3px rgba(22,22,67,.04), 0 1px 2px rgba(22,22,67,.03);
+    --shadow-raised:0 4px 12px rgba(22,22,67,.06), 0 1px 3px rgba(22,22,67,.04);
+    --shadow-hover:0 12px 28px rgba(56,92,248,.12), 0 2px 6px rgba(22,22,67,.05);
+    --radius-sm:6px;--radius-md:8px;--radius-lg:14px;--radius-xl:18px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg-screen);font-family:var(--font-primary);color:var(--text-dark);font-feature-settings:"ss01";-webkit-font-smoothing:antialiased}
+  :focus-visible{outline:2px solid var(--text-brand);outline-offset:2px;border-radius:4px}
+  @media (prefers-reduced-motion: no-preference){
+    .reveal{opacity:0;transform:translateY(10px);animation:reveal .55s cubic-bezier(.2,.8,.2,1) forwards}
+    @keyframes reveal{to{opacity:1;transform:none}}
+  }
+
+  main{display:flex;flex-direction:column;min-width:0}
+  header.top{display:flex;align-items:center;gap:16px;padding:0 32px;height:64px;border-bottom:1px solid var(--stroke-gray-lighter);background:rgba(255,255,255,.82);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);position:sticky;top:0;z-index:5}
+  .crumbs{font:500 14px var(--font-primary);color:var(--text-gray-dark)}
+  .crumbs b{color:var(--text-dark);font-weight:600}
+  .iconbtn{width:40px;height:40px;border-radius:var(--radius-md);background:#fff;border:1px solid var(--stroke-gray-lighter);display:grid;place-items:center;cursor:pointer;position:relative;transition:background .15s,border-color .15s}
+  .iconbtn svg{width:18px;height:18px;stroke:var(--text-gray-dark);fill:none;stroke-width:1.6}
+  .iconbtn:hover{background:var(--bg-neutral-light);border-color:var(--stroke-gray-medium)}
+  .iconbtn .pip{position:absolute;top:8px;right:8px;width:8px;height:8px;border-radius:50%;background:var(--text-danger);border:2px solid #fff}
+
+  .page{padding:32px 48px 64px;max-width:1280px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+
+  /* ───── Hero: your plan ───── */
+  .hero{position:relative;border-radius:var(--radius-xl);overflow:hidden;background:linear-gradient(135deg,#1B1B5A 0%,#23235D 42%,#2E3FB0 100%);color:#fff;padding:30px 34px 26px;box-shadow:var(--shadow-raised)}
+  .hero::before{content:"";position:absolute;top:-60px;right:-40px;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(56,92,248,.55),transparent 62%)}
+  .hero::after{content:"";position:absolute;bottom:-90px;right:120px;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(53,229,188,.20),transparent 65%)}
+  .hero-row{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center;gap:32px;flex-wrap:wrap}
+  .hero .greet{font:500 13px var(--font-primary);color:#B9C2FF;letter-spacing:.02em;display:flex;align-items:center;gap:8px}
+  .hero .greet .dot{width:6px;height:6px;border-radius:50%;background:var(--icon-success-light);box-shadow:0 0 0 4px rgba(53,229,188,.18)}
+  .hero h1{font:700 28px/34px var(--font-primary);margin:8px 0 0;letter-spacing:-.015em;color:#fff}
+  .hero .sub{font:400 14px/21px var(--font-primary);color:#C9D0FF;margin-top:8px;max-width:460px}
+  .ring-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;flex-shrink:0}
+  .ring{position:relative;width:128px;height:128px}
+  .ring svg{transform:rotate(-90deg);width:128px;height:128px}
+  .ring .track{stroke:rgba(255,255,255,.14);fill:none;stroke-width:11}
+  .ring .fill{stroke:url(#ringGrad);fill:none;stroke-width:11;stroke-linecap:round;stroke-dasharray:339.292;stroke-dashoffset:339.292;transition:stroke-dashoffset .8s cubic-bezier(.3,.9,.3,1)}
+  .ring .ctr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .ring .ctr .pct{font:700 30px var(--font-primary);color:#fff;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .ring .ctr .lbl{font:600 10px var(--font-primary);color:#AEB7F5;text-transform:uppercase;letter-spacing:.08em;margin-top:2px}
+  .ring-wrap .eta{font:500 12px var(--font-primary);color:#C9D0FF}
+  .ring-wrap .eta b{color:#fff;font-weight:600}
+
+  .rail{position:relative;z-index:1;display:flex;align-items:center;gap:14px;margin-top:26px;padding-top:20px;border-top:1px solid rgba(255,255,255,.13);flex-wrap:wrap}
+  .rl{display:flex;align-items:center;gap:9px;padding:4px 6px;border-radius:8px;cursor:pointer;transition:background .14s}
+  .rl:hover{background:rgba(255,255,255,.06)}
+  .rl .bub{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font:700 12px var(--font-primary);flex-shrink:0}
+  .rl .bub svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:3}
+  .rl.done .bub{background:rgba(53,229,188,.18);color:var(--icon-success-light)}
+  .rl.done .lbl{color:#AEB7F5}
+  .rl.active .bub{background:#fff;color:#1B1B5A;box-shadow:0 0 0 4px rgba(255,255,255,.18)}
+  .rl.active .lbl{color:#fff;font-weight:600}
+  .rl.todo .bub{background:rgba(255,255,255,.10);color:#AEB7F5;border:1px solid rgba(255,255,255,.16)}
+  .rl.todo .lbl{color:#AEB7F5}
+  .rl .lbl{font:500 12.5px var(--font-primary);white-space:nowrap}
+  .rl-ln{flex:1;min-width:14px;height:1px;background:rgba(255,255,255,.16)}
+
+  /* ───── Guided setup ───── */
+  .sechead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px}
+  .sechead h2{font:700 13px var(--font-primary);color:var(--text-gray-dark);margin:0;text-transform:uppercase;letter-spacing:.07em}
+  .guided{display:grid;grid-template-columns:1.35fr 1fr;gap:24px;align-items:start}
+
+  .current{background:var(--bg-white);border:1px solid var(--stroke-gray-lighter);border-radius:var(--radius-lg);box-shadow:var(--shadow-raised);padding:26px 28px;position:relative;overflow:hidden}
+  .current::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#385CF8,#35E5BC)}
+  .current .stepchip{display:inline-flex;align-items:center;gap:7px;font:700 11px var(--font-primary);letter-spacing:.07em;text-transform:uppercase;color:var(--text-brand);background:var(--bg-blue-light);padding:5px 12px;border-radius:999px;margin-bottom:14px}
+  .current h3{font:700 21px/27px var(--font-primary);margin:0 0 8px;letter-spacing:-.01em}
+  .current .d{font:400 14px/21px var(--font-primary);color:var(--text-gray-dark);margin-bottom:18px;max-width:480px}
+  .current .bullets{display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
+  .current .bl{display:flex;gap:10px;font:500 13.5px/19px var(--font-primary);color:var(--text-dark)}
+  .current .bl svg{width:17px;height:17px;stroke:var(--success);fill:none;stroke-width:2.4;flex-shrink:0;margin-top:1px}
+  .current .acts{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .btn-primary{height:44px;padding:0 22px;background:var(--text-brand);border:none;color:#fff;font:600 14px var(--font-primary);border-radius:var(--radius-md);cursor:pointer;display:inline-flex;align-items:center;gap:8px;box-shadow:0 4px 12px rgba(56,92,248,.28);transition:transform .12s,box-shadow .12s}
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(56,92,248,.36)}
+  .btn-primary svg{width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2.5}
+  .later{font:600 13px var(--font-primary);color:var(--text-gray-medium);cursor:pointer;background:none;border:none}
+  .later:hover{color:var(--text-dark)}
+  .current .eta-note{margin-left:auto;font:600 12px var(--font-primary);color:var(--text-gray-medium);display:inline-flex;align-items:center;gap:5px}
+  .current .eta-note svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2}
+
+  /* Done state */
+  .current.alldone{text-align:center;padding:44px 28px}
+  .current.alldone .party{font-size:44px;margin-bottom:10px}
+  .current.alldone h3{font-size:24px}
+  .current.alldone .d{margin:0 auto 22px}
+  .current.alldone .acts{justify-content:center}
+
+  /* Checklist panel */
+  .panel{background:var(--bg-white);border:1px solid var(--stroke-gray-lighter);border-radius:var(--radius-lg);box-shadow:var(--shadow-card);padding:20px 22px}
+  .panel > h3{font:600 15px var(--font-primary);color:var(--text-dark);margin:0 0 4px}
+  .panel .psub{font:400 13px var(--font-primary);color:var(--text-gray-medium);margin:0 0 12px}
+  .cl{display:flex;flex-direction:column}
+  .cl-item{display:flex;align-items:flex-start;gap:12px;padding:11px 8px;border-radius:var(--radius-md);cursor:pointer;transition:background .13s}
+  .cl-item:hover{background:var(--bg-neutral-light)}
+  .cl-item .st{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font:700 11px var(--font-primary);flex-shrink:0;margin-top:1px}
+  .cl-item .st svg{width:12px;height:12px;stroke:#fff;fill:none;stroke-width:3}
+  .cl-item.done .st{background:var(--success)}
+  .cl-item.active .st{background:var(--text-brand);color:#fff;box-shadow:0 0 0 3px rgba(56,92,248,.18)}
+  .cl-item.todo .st{background:var(--bg-neutral-light);color:var(--text-gray-medium);border:1px solid var(--stroke-gray-light)}
+  .cl-item .t{font:600 13.5px/18px var(--font-primary);color:var(--text-dark)}
+  .cl-item.done .t{color:var(--text-gray-medium);text-decoration:line-through;text-decoration-color:rgba(150,150,185,.5)}
+  .cl-item.active .t{color:var(--text-brand)}
+  .cl-item .d{font:400 12px/16px var(--font-primary);color:var(--text-gray-medium);margin-top:2px}
+  .cl-item .eta{margin-left:auto;flex-shrink:0;font:600 11px var(--font-primary);color:var(--text-gray-medium);padding-top:4px;white-space:nowrap;font-variant-numeric:tabular-nums}
+  .cl-foot{margin-top:12px;padding-top:12px;border-top:1px solid var(--stroke-gray-lighter);display:flex;align-items:center;gap:8px;font:500 12.5px var(--font-primary);color:var(--text-gray-dark)}
+  .cl-foot svg{width:14px;height:14px;stroke:var(--success);fill:none;stroke-width:2.2}
+
+  /* Locked teaser KPIs */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+  .kpi{background:var(--bg-white);border:1px dashed var(--stroke-gray-light);border-radius:var(--radius-lg);padding:18px 20px;display:flex;flex-direction:column;gap:8px;opacity:.75}
+  .kpi .l{font:600 12.5px var(--font-primary);color:var(--text-gray-medium);display:flex;align-items:center;gap:7px}
+  .kpi .l .badge{width:24px;height:24px;border-radius:7px;display:grid;place-items:center;background:var(--bg-neutral-light);color:var(--text-gray-medium)}
+  .kpi .l .badge svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.9}
+  .kpi .v{font:700 28px/30px var(--font-primary);color:var(--text-gray-light);letter-spacing:-.02em}
+  .kpi .lock{font:500 11.5px var(--font-primary);color:var(--text-gray-medium);display:inline-flex;align-items:center;gap:5px}
+  .kpi .lock svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2}
+
+  @media (max-width:1180px){
+    .page{padding:28px 32px 56px}
+    .guided{grid-template-columns:1fr}
+    .kpis{grid-template-columns:repeat(2,1fr)}
+  }
+  @media (max-width:860px){.rail .rl-ln{display:none}.rl{flex:1 1 40%}}
+</style>
+</head>
+<body>
+
+<div class="app" data-screen-label="00 First-run Home — Fable 5">
+  <div id="sidebar-slot" data-nav="home"></div>
+
+  <main>
+    <header class="top">
+      <div class="crumbs"><b>Home</b></div>
+      <div style="margin-left:auto"></div>
+      <span data-agent-trigger-slot></span>
+      <button class="iconbtn" aria-label="Notifications"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><div class="pip"></div></button>
+    </header>
+
+    <div class="page">
+
+      <!-- Hero: plan progress -->
+      <section class="hero reveal" style="animation-delay:.02s">
+        <div class="hero-row">
+          <div>
+            <div class="greet"><span class="dot"></span><span id="greetLine">Your workspace is ready</span></div>
+            <h1>Let's get you live, Maria 🚀</h1>
+            <div class="sub" id="heroSub">Follow your plan step by step — most hosts finish in one sitting.</div>
+          </div>
+          <div class="ring-wrap">
+            <div class="ring">
+              <svg viewBox="0 0 128 128">
+                <defs><linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5B79FF"/><stop offset="1" stop-color="#35E5BC"/></linearGradient></defs>
+                <circle class="track" cx="64" cy="64" r="54"/>
+                <circle class="fill" id="ringFill" cx="64" cy="64" r="54"/>
+              </svg>
+              <div class="ctr"><span class="pct" id="ringPct">0%</span><span class="lbl">Setup</span></div>
+            </div>
+            <div class="eta" id="ringEta"></div>
+          </div>
+        </div>
+        <div class="rail" id="heroRail"></div>
+      </section>
+
+      <!-- Guided setup -->
+      <section class="reveal" style="animation-delay:.1s">
+        <div class="sechead"><h2>Guided setup — one step at a time</h2></div>
+        <div class="guided">
+          <div class="current" id="currentCard"><!-- filled by JS --></div>
+          <div class="panel">
+            <h3>Your plan</h3>
+            <p class="psub" id="planSub"></p>
+            <div class="cl" id="checklist"></div>
+            <div class="cl-foot"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg><span id="clFoot"></span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Locked KPI teaser -->
+      <section class="reveal" style="animation-delay:.18s">
+        <div class="sechead"><h2>At a glance</h2></div>
+        <div class="kpis">
+          <div class="kpi">
+            <div class="l"><span class="badge"><svg viewBox="0 0 24 24"><path d="M3 9 12 2l9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span>Properties</div>
+            <div class="v">—</div>
+            <span class="lock"><svg viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Unlocks after your first sync</span>
+          </div>
+          <div class="kpi">
+            <div class="l"><span class="badge"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span>Bookings</div>
+            <div class="v">—</div>
+            <span class="lock"><svg viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Unlocks after your first sync</span>
+          </div>
+          <div class="kpi">
+            <div class="l"><span class="badge"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>Check-ins ready</div>
+            <div class="v">—</div>
+            <span class="lock"><svg viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Unlocks after your first booking</span>
+          </div>
+          <div class="kpi">
+            <div class="l"><span class="badge"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span>Reports submitted</div>
+            <div class="v">—</div>
+            <span class="lock"><svg viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Unlocks with police reporting</span>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<script src="../ds/_sidebar.js"></script>
+<script src="../ds/_agent.js"></script>
+<script>
+(function(){
+  /* ───── Load plan from onboarding (falls back to a compliance demo) ───── */
+  const FALLBACK = {
+    countries:[{code:'ES',name:'Spain',flag:'🇪🇸',reg:true,scheme:'SES.HOSPEDAJES',tax:true}],
+    regions:[], ptype:'vr', ptypeOther:'', size:'6-20', manage:'pms', pms:'Guesty',
+    prios:['compliance'],
+    steps:[
+      {k:'pms',t:'Connect Guesty',d:'Properties and bookings sync automatically from day one.',eta:2},
+      {k:'police',t:'Activate police reporting',d:'SES.HOSPEDAJES — submitted automatically per stay.',eta:4},
+      {k:'tax',t:'Enable tourist tax auto-calculation',d:'Calculated and collected per stay, per your local rates.',eta:2},
+      {k:'test',t:'Send yourself a test check-in link',d:'Experience exactly what your guests will see.',eta:1},
+    ],
+    mods:['checkin','id','guestapp','police','tax'],
+  };
+  let plan = FALLBACK;
+  try {
+    const raw = localStorage.getItem('chekin_onboarding');
+    if (raw){ const p = JSON.parse(raw); if (p && Array.isArray(p.steps) && p.steps.length) plan = p; }
+  } catch(e){}
+
+  const PTYPE_LABELS = { vr:'vacation rentals', hotel:'hotel / aparthotel', camping:'camping / glamping', other:'properties' };
+
+  /* Per-step guidance: what "working the step" looks like */
+  const DETAILS = {
+    pms:    { bullets:['We pull your listings, calendars and guest details automatically','Two-way sync — changes in your PMS appear here in seconds','No double data entry, ever'], cta:'Connect now' },
+    ota:    { bullets:['Paste your Airbnb / Booking.com calendar links','New reservations import on their own','Upgrade to a PMS connection anytime'], cta:'Link calendars' },
+    manual: { bullets:['A guided form for your first property — 5 minutes','Bulk-import the rest later via spreadsheet','You can always connect a PMS later'], cta:'Add property' },
+    police: { bullets:['We register your property with the authorities','Every guest is submitted automatically, within the legal deadline','Full audit trail of every submission'], cta:'Set up reporting' },
+    tax:    { bullets:['Rates applied automatically by municipality and season','Collected from guests during online check-in','Ready-to-file summaries every period'], cta:'Enable tourist tax' },
+    ops:    { bullets:['One inbox for every channel — Airbnb, Booking, WhatsApp','Smart locks issue a unique code per stay','Automated messages from booking to check-out'], cta:'Set up inbox & locks' },
+    cleaning:{ bullets:['Turnovers auto-schedule the moment a guest checks out','Assign cleaners and track completion with photos','Maintenance issues logged per property'], cta:'Invite your team' },
+    test:   { bullets:['We send a real check-in link to your email','Complete it like a guest — ID scan included','Takes about a minute'], cta:'Send me a test link' },
+  };
+
+  /* ───── State ───── */
+  const steps = plan.steps;
+  const doneParam = parseInt(new URLSearchParams(location.search).get('done') || '0', 10);
+  let done = Math.min(Math.max(doneParam, 0), steps.length);
+
+  const $ = s => document.querySelector(s);
+  const totalEta = steps.reduce((a,s) => a + (s.eta||0), 0);
+  const CIRC = 339.292;
+
+  const flags = (plan.countries||[]).map(c => c.flag).join(' ');
+  const tp = plan.ptype === 'other' && plan.ptypeOther ? plan.ptypeOther.toLowerCase() : (PTYPE_LABELS[plan.ptype] || 'properties');
+  $('#greetLine').textContent = `${flags} ${plan.size || ''} ${tp} · ${plan.pms ? plan.pms + ' ready to connect' : 'workspace ready'}`;
+
+  function render(){
+    const pct = Math.round(done / steps.length * 100);
+    const remaining = steps.slice(done).reduce((a,s) => a + (s.eta||0), 0);
+
+    // Ring
+    $('#ringPct').textContent = pct + '%';
+    $('#ringFill').style.strokeDashoffset = CIRC * (1 - pct/100);
+    $('#ringEta').innerHTML = done === steps.length
+      ? '<b>All done</b> · you\'re live 🎉'
+      : `<b>${done} of ${steps.length}</b> done · ~${remaining} min left`;
+    $('#heroSub').textContent = done === steps.length
+      ? 'Setup complete. Your dashboard is switching to live mode.'
+      : 'Follow your plan step by step — most hosts finish in one sitting.';
+
+    // Hero rail
+    const rail = $('#heroRail');
+    rail.innerHTML = '';
+    steps.forEach((s, i) => {
+      if (i > 0){ const ln = document.createElement('span'); ln.className = 'rl-ln'; rail.appendChild(ln); }
+      const el = document.createElement('div');
+      el.className = 'rl ' + (i < done ? 'done' : i === done ? 'active' : 'todo');
+      el.innerHTML = `<span class="bub">${i < done ? '<svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>' : i+1}</span><span class="lbl">${s.t}</span>`;
+      rail.appendChild(el);
+    });
+
+    // Current step card
+    const card = $('#currentCard');
+    if (done >= steps.length){
+      card.className = 'current alldone';
+      card.innerHTML = `
+        <div class="party">🎉</div>
+        <h3>You're live!</h3>
+        <div class="d">Every step of your plan is done. From now on, this page becomes your daily dashboard — arrivals, compliance and revenue at a glance.</div>
+        <div class="acts"><button class="btn-primary" id="goLive">See my live dashboard <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></button></div>`;
+      const go = $('#goLive');
+      go.addEventListener('click', () => {
+        const top = window.top || window;
+        top.location.href = new URL('index.html?view=fable', top.location.href).href;
+      });
+    } else {
+      const s = steps[done];
+      const det = DETAILS[s.k] || { bullets:[], cta:'Start' };
+      card.className = 'current';
+      card.innerHTML = `
+        <div class="stepchip">Step ${done+1} of ${steps.length} · up next</div>
+        <h3>${s.t}</h3>
+        <div class="d">${s.d}</div>
+        <div class="bullets">${det.bullets.map(b => `<div class="bl"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>${b}</div>`).join('')}</div>
+        <div class="acts">
+          <button class="btn-primary" id="doStep">${det.cta} <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></button>
+          <button class="later" id="laterStep">Do this later</button>
+          <span class="eta-note"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 7v5l3 2"/></svg>~${s.eta} min</span>
+        </div>`;
+      $('#doStep').addEventListener('click', advance);   // prototype: completing == doing
+      $('#laterStep').addEventListener('click', advance); // prototype: skip also advances
+    }
+
+    // Checklist
+    const cl = $('#checklist');
+    cl.innerHTML = '';
+    steps.forEach((s, i) => {
+      const st = i < done ? 'done' : i === done ? 'active' : 'todo';
+      const el = document.createElement('div');
+      el.className = 'cl-item ' + st;
+      el.innerHTML = `<span class="st">${i < done ? '<svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>' : i+1}</span>
+        <div style="min-width:0"><div class="t">${s.t}</div><div class="d">${s.d}</div></div>
+        <span class="eta">~${s.eta} min</span>`;
+      cl.appendChild(el);
+    });
+    $('#planSub').textContent = `${steps.length} steps · ~${totalEta} min total, in the order that gets you live fastest.`;
+    $('#clFoot').textContent = done === steps.length
+      ? 'Plan complete — nice work.'
+      : `Finish all ${steps.length} and your first check-in automates itself.`;
+  }
+
+  function advance(){ done = Math.min(done + 1, steps.length); render(); }
+  render();
+})();
+</script>
+</body>
+</html>

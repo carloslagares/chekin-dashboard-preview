@@ -105,6 +105,14 @@
   .rchip.sel{background:var(--bg-blue-light);border-color:var(--text-brand);color:var(--text-brand)}
 
   /* Step 2 — portfolio */
+  .subq{font:600 14px var(--font-primary);color:var(--text-dark);margin-bottom:12px}
+  .ptypes{display:flex;gap:10px;flex-wrap:wrap}
+  .ptype{display:inline-flex;align-items:center;gap:9px;padding:11px 16px;border:1.5px solid var(--stroke-gray-lighter);border-radius:12px;background:#fff;font:600 14px var(--font-primary);color:var(--text-dark);cursor:pointer;transition:all .13s;box-shadow:var(--shadow-card)}
+  .ptype .em{font-size:17px;line-height:1}
+  .ptype:hover{border-color:var(--stroke-gray-medium);transform:translateY(-1px)}
+  .ptype.sel{border-color:var(--text-brand);background:var(--bg-blue-light);color:var(--text-brand);box-shadow:0 0 0 3px rgba(56,92,248,.12)}
+  .ptype-other{margin-top:12px;width:100%;max-width:420px;height:42px;padding:0 14px;border-radius:10px;border:1.5px solid var(--stroke-gray-light);font:500 13.5px var(--font-primary);color:var(--text-dark);outline:none;background:#fff}
+  .ptype-other:focus{border-color:var(--text-brand);box-shadow:0 0 0 3px rgba(56,92,248,.12)}
   .size{display:flex;flex-direction:column;gap:6px;padding:20px;text-align:left}
   .size .n{font:700 22px var(--font-primary);letter-spacing:-.01em}
   .size .t{font:600 13.5px var(--font-primary)}
@@ -246,8 +254,19 @@
       <!-- STEP 2 · Portfolio -->
       <section class="panel" data-panel="2">
         <div class="stepno">Step 2 of 5</div>
-        <h1>How many properties do you manage?</h1>
+        <h1>Tell us about your portfolio</h1>
         <p class="lead">We'll calibrate the dashboard — a single apartment and a 200-unit operation need very different tools.</p>
+
+        <div class="subq">What type of property do you manage?</div>
+        <div class="ptypes" id="ptypeCards">
+          <button class="ptype" data-ptype="vr"><span class="em">🏠</span>Vacation rentals</button>
+          <button class="ptype" data-ptype="hotel"><span class="em">🏨</span>Hotel / aparthotel</button>
+          <button class="ptype" data-ptype="camping"><span class="em">⛺</span>Camping / glamping</button>
+          <button class="ptype" data-ptype="other"><span class="em">✳️</span>Other</button>
+        </div>
+        <input class="ptype-other" id="ptypeOther" placeholder="Tell us what you manage — e.g. hostel, coliving, marina…" style="display:none">
+
+        <div class="subq" style="margin-top:28px">How many properties?</div>
         <div class="cards c2" id="sizeCards">
           <div class="card size" data-size="1-5" tabindex="0"><span class="tick"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span><span class="n">1–5</span><span class="t">Independent host</span><span class="d">You run everything yourself — we automate the boring parts.</span></div>
           <div class="card size" data-size="6-20" tabindex="0"><span class="tick"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span><span class="n">6–20</span><span class="t">Growing portfolio</span><span class="d">Repetitive tasks start to hurt. Bulk actions and templates help.</span></div>
@@ -402,7 +421,8 @@
   ];
 
   /* ───── State ───── */
-  const state = { countries:[], regions:[], size:null, manage:null, pms:null, prios:[] };
+  const state = { countries:[], regions:[], ptype:null, ptypeOther:'', size:null, manage:null, pms:null, prios:[] };
+  const PTYPE_LABELS = { vr:'Vacation rentals', hotel:'Hotel / aparthotel', camping:'Camping / glamping', other:'Other' };
   let step = 1;
   const TOTAL = 5;
 
@@ -443,6 +463,17 @@
     else state.regions = state.regions.filter(x => x !== name);
     refresh();
   }));
+
+  /* ───── Step 2: property type (single select) ───── */
+  $$('#ptypeCards .ptype').forEach(b => b.addEventListener('click', () => {
+    $$('#ptypeCards .ptype').forEach(x => x.classList.remove('sel'));
+    b.classList.add('sel');
+    state.ptype = b.dataset.ptype;
+    $('#ptypeOther').style.display = state.ptype === 'other' ? '' : 'none';
+    if (state.ptype !== 'other') state.ptypeOther = '';
+    refresh();
+  }));
+  $('#ptypeOther').addEventListener('input', e => { state.ptypeOther = e.target.value.trim(); refresh(); });
 
   /* ───── Step 2: size (single select) ───── */
   $$('#sizeCards .card').forEach(c => {
@@ -519,24 +550,24 @@
     const steps = [];
     if (state.manage === 'pms'){
       const n = state.pms && state.pms.id !== 'other' ? state.pms.name : 'your PMS';
-      steps.push({ t:`Connect ${n}`, d:'Properties and bookings sync automatically from day one.', eta:2 });
+      steps.push({ k:'pms', t:`Connect ${n}`, d:'Properties and bookings sync automatically from day one.', eta:2 });
     } else if (state.manage === 'ota'){
-      steps.push({ t:'Link your Airbnb & Booking.com calendars', d:'New reservations import on their own — no PMS needed.', eta:3 });
+      steps.push({ k:'ota', t:'Link your Airbnb & Booking.com calendars', d:'New reservations import on their own — no PMS needed.', eta:3 });
     } else {
-      steps.push({ t:'Add your first property', d:'A guided form — import the rest later via spreadsheet.', eta:5 });
+      steps.push({ k:'manual', t:'Add your first property', d:'A guided form — import the rest later via spreadsheet.', eta:5 });
     }
     if (regulated()){
       const s = [...new Set(schemes())].join(' · ');
-      steps.push({ t:'Activate police reporting', d:`${s}${state.regions.length ? ' + ' + state.regions.join(', ') : ''} — submitted automatically per stay.`, eta:4 });
+      steps.push({ k:'police', t:'Activate police reporting', d:`${s}${state.regions.length ? ' + ' + state.regions.join(', ') : ''} — submitted automatically per stay.`, eta:4 });
     }
-    if (anyTax()) steps.push({ t:'Enable tourist tax auto-calculation', d:'Calculated and collected per stay, per your local rates.', eta:2 });
+    if (anyTax()) steps.push({ k:'tax', t:'Enable tourist tax auto-calculation', d:'Calculated and collected per stay, per your local rates.', eta:2 });
     if (state.prios.includes('ops')){
-      steps.push({ t:'Set up your guest inbox & smart locks', d:'One inbox for every channel, keyless entry for every guest.', eta:5 });
+      steps.push({ k:'ops', t:'Set up your guest inbox & smart locks', d:'One inbox for every channel, keyless entry for every guest.', eta:5 });
     }
     if (state.prios.includes('cleaning')){
-      steps.push({ t:'Invite your cleaning & maintenance team', d:'Turnovers auto-schedule from check-outs.', eta:4 });
+      steps.push({ k:'cleaning', t:'Invite your cleaning & maintenance team', d:'Turnovers auto-schedule from check-outs.', eta:4 });
     }
-    steps.push({ t:'Send yourself a test check-in link', d:'Experience exactly what your guests will see.', eta:1 });
+    steps.push({ k:'test', t:'Send yourself a test check-in link', d:'Experience exactly what your guests will see.', eta:1 });
     return steps;
   }
 
@@ -580,7 +611,8 @@
       r.innerHTML = `<span class="b">${i+1}</span>${s.t}`;
       rail.appendChild(r);
     });
-    $('#pvGreet').textContent = state.countries.map(c => c.flag).join(' ') + ' · ' + (state.size || '') + ' properties';
+    const tp = state.ptype ? (state.ptype === 'other' && state.ptypeOther ? state.ptypeOther : PTYPE_LABELS[state.ptype]) : '';
+    $('#pvGreet').textContent = state.countries.map(c => c.flag).join(' ') + ' · ' + (state.size || '') + ' ' + (tp || 'properties');
 
     // Modules
     const mods = buildMods();
@@ -618,6 +650,7 @@
     const chips = [];
     state.countries.forEach(c => chips.push(`${c.flag} ${c.name}${c.reg ? ' · compliance' : ''}`));
     state.regions.forEach(r => chips.push(`+ ${r}`));
+    if (state.ptype) chips.push(state.ptype === 'other' && state.ptypeOther ? state.ptypeOther : PTYPE_LABELS[state.ptype]);
     if (state.size) chips.push(`${state.size} properties`);
     if (state.manage === 'pms') chips.push(state.pms && state.pms.id !== 'other' ? `${state.pms.name} sync` : 'PMS sync');
     if (state.manage === 'ota') chips.push('OTA calendars');
@@ -632,7 +665,7 @@
   /* ───── Validation + navigation ───── */
   function valid(){
     if (step === 1) return state.countries.length > 0;
-    if (step === 2) return !!state.size;
+    if (step === 2) return !!state.size && !!state.ptype;
     if (step === 3) return state.manage && (state.manage !== 'pms' || !!state.pms);
     if (step === 4) return state.prios.length > 0; // regulated markets always have compliance locked in
     return true;
@@ -665,16 +698,30 @@
     window.scrollTo({top:0});
   }
   // Navigate the top window so this also works when embedded in the variant switcher iframe
-  function goDashboard(){
+  function goTop(view){
     const top = window.top || window;
-    top.location.href = new URL('index.html?view=fable', top.location.href).href;
+    top.location.href = new URL('index.html?view=' + view, top.location.href).href;
+  }
+  function savePlan(){
+    try {
+      localStorage.setItem('chekin_onboarding', JSON.stringify({
+        countries: state.countries.map(c => ({ code:c.code, name:c.name, flag:c.flag, reg:c.reg, scheme:c.scheme, tax:c.tax })),
+        regions: state.regions,
+        ptype: state.ptype, ptypeOther: state.ptypeOther,
+        size: state.size, manage: state.manage,
+        pms: state.pms ? state.pms.name : null,
+        prios: state.prios,
+        steps: buildPlan(),
+        mods: buildMods(),
+      }));
+    } catch(e){}
   }
   $('#btnNext').addEventListener('click', () => {
-    if (step === TOTAL){ goDashboard(); return; }
+    if (step === TOTAL){ savePlan(); goTop('firstrun'); return; }
     show(step + 1);
   });
   $('#btnBack').addEventListener('click', () => show(step - 1));
-  $('#btnSkip').addEventListener('click', goDashboard);
+  $('#btnSkip').addEventListener('click', () => goTop('fable'));
 
   /* ───── Demo presets: ?demo=compliance|ops|cleaning ───── */
   const demo = new URLSearchParams(location.search).get('demo');
@@ -682,16 +729,16 @@
     const byCode = code => COUNTRIES.find(c => c.code === code);
     if (demo === 'compliance'){
       state.countries = [byCode('ES'), byCode('IT')]; state.regions = ['Catalonia'];
-      state.size = '6-20'; state.manage = 'pms'; state.pms = PMS[0]; state.prios = ['compliance'];
+      state.ptype = 'vr'; state.size = '6-20'; state.manage = 'pms'; state.pms = PMS[0]; state.prios = ['compliance'];
     } else if (demo === 'ops'){
       state.countries = [byCode('AE'), byCode('US')];
-      state.size = '21-100'; state.manage = 'pms'; state.pms = PMS[1]; state.prios = ['ops'];
+      state.ptype = 'hotel'; state.size = '21-100'; state.manage = 'pms'; state.pms = PMS[1]; state.prios = ['ops'];
     } else if (demo === 'cleaning'){
       state.countries = [byCode('GB')];
-      state.size = '6-20'; state.manage = 'ota'; state.prios = ['cleaning'];
+      state.ptype = 'camping'; state.size = '6-20'; state.manage = 'ota'; state.prios = ['cleaning'];
     } else if (demo === 'all'){
       state.countries = [byCode('ES')];
-      state.size = '100+'; state.manage = 'pms'; state.pms = PMS[0]; state.prios = ['compliance','ops','cleaning'];
+      state.ptype = 'vr'; state.size = '100+'; state.manage = 'pms'; state.pms = PMS[0]; state.prios = ['compliance','ops','cleaning'];
     }
     show(5);
   } else {
