@@ -16,15 +16,52 @@ aside.l1{background:var(--bg-dark);color:var(--text-white);display:flex;flex-dir
 
 /* Main nav */
 .l1 nav.side{flex:1;padding:16px;display:flex;flex-direction:column;gap:2px;overflow-y:auto;min-height:0}
-.l1 .nav-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;cursor:pointer;font:500 16px/24px var(--font-primary);color:#CECEDE;user-select:none}
-.l1 .nav-item svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.l1 .nav-item{position:relative;display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:8px;cursor:pointer;font:500 15px/22px var(--font-primary);color:#CECEDE;user-select:none;transition:background .13s,color .13s}
+.l1 .nav-item svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
 .l1 .nav-item:hover{background:rgba(255,255,255,.05);color:#fff}
-.l1 .nav-item.active{background:rgba(56,92,248,.18);color:#fff}
+.l1 .nav-item.active{background:rgba(56,92,248,.20);color:#fff;font-weight:600}
+.l1 .nav-item.active::before{content:"";position:absolute;left:-8px;top:50%;transform:translateY(-50%);width:3px;height:20px;border-radius:999px;background:#6E8BFF}
 .l1 .nav-item .count{margin-left:auto;font:600 12px var(--font-primary);background:rgba(255,255,255,.1);color:#fff;padding:2px 8px;border-radius:999px}
 .l1 .sgroup{font:600 11px var(--font-primary);color:#6B6B95;text-transform:uppercase;letter-spacing:.08em;padding:18px 12px 6px}
 
 /* ───── Footer (accordions) ───── */
 .l1 .foot{border-top:1px solid rgba(255,255,255,.06);padding:10px 10px 12px;display:flex;flex-direction:column;gap:2px;flex-shrink:0;max-height:58vh;overflow-y:auto;position:relative}
+
+/* ───── Referral promo banner (Claude-style dismissible card) ─────
+   Sits at the bottom of the sidebar, above the account block.
+   Replaces the old fixed "Gana hasta 500€" nav item. */
+.l1 .promo-banner{
+  position:relative;margin:0 2px 8px;border-radius:12px;
+  background:linear-gradient(135deg, rgba(56,92,248,.22), rgba(56,92,248,.08));
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:0 4px 14px rgba(0,0,0,.18);
+  overflow:hidden;transition:opacity .2s ease, transform .2s ease, margin .2s ease, max-height .2s ease;
+  max-height:120px;
+}
+.l1 .promo-banner.closing{opacity:0;transform:translateY(6px);max-height:0;margin-bottom:0;border-color:transparent}
+.l1 .promo-body{
+  display:flex;align-items:center;gap:12px;padding:12px 38px 12px 12px;
+  text-decoration:none;color:#fff;cursor:pointer;
+}
+.l1 .promo-body:hover{background:rgba(255,255,255,.04)}
+.l1 .promo-ic{
+  width:34px;height:34px;border-radius:9px;flex-shrink:0;display:grid;place-items:center;
+  background:linear-gradient(180deg,#385CF8,#274BF0);box-shadow:0 2px 8px rgba(56,92,248,.4);
+}
+.l1 .promo-ic svg{width:19px;height:19px;stroke:#fff;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.l1 .promo-txt{min-width:0;flex:1}
+.l1 .promo-txt .t{font:700 14px/18px var(--font-primary);color:#fff}
+.l1 .promo-txt .s{font:500 12px/16px var(--font-primary);color:#B9C0E8;margin-top:1px}
+.l1 .promo-arrow{width:16px;height:16px;stroke:#9FB0FF;fill:none;stroke-width:2;flex-shrink:0;transition:transform .15s}
+.l1 .promo-body:hover .promo-arrow{transform:translateX(2px)}
+.l1 .promo-close{
+  position:absolute;top:6px;right:6px;z-index:2;
+  width:22px;height:22px;border:none;border-radius:6px;cursor:pointer;
+  display:grid;place-items:center;padding:0;
+  background:rgba(255,255,255,.08);color:#CFD3EC;transition:background .15s, color .15s;
+}
+.l1 .promo-close:hover{background:rgba(255,255,255,.18);color:#fff}
+.l1 .promo-close svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
 
 /* Accordion container (details) */
 .l1 .acc{margin:0}

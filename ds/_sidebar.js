@@ -54,7 +54,23 @@
 
   <div class="foot">
 
-    <details class="acc" data-acc="account" open>
+    <div class="promo-banner" id="referralPromo" role="region" aria-label="Programa de referidos">
+      <button class="promo-close" type="button" aria-label="Cerrar" title="Cerrar">
+        <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+      <a class="promo-body" href="#referral">
+        <div class="promo-ic">
+          <svg viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M5 12v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8M12 8V21"/><path d="M12 8S10.5 3.5 8 4.5 8.5 8 12 8M12 8s1.5-4.5 4-3.5S15.5 8 12 8"/></svg>
+        </div>
+        <div class="promo-txt">
+          <div class="t">Gana hasta 500€</div>
+          <div class="s">Refiere y gana</div>
+        </div>
+        <svg class="promo-arrow" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg>
+      </a>
+    </div>
+
+    <details class="acc" data-acc="account">
       <summary>
         <div class="acc-head account">
           <div class="av">SM</div>
@@ -191,6 +207,23 @@
     }));
     initSupportMenu();
     initSwitchFlyout();
+    initReferralPromo();
+  }
+
+  function initReferralPromo(){
+    const promo = document.getElementById('referralPromo');
+    if (!promo) return;
+    let dismissed = false;
+    try { dismissed = localStorage.getItem('chekin_referral_dismissed') === '1'; } catch(e){}
+    if (dismissed){ promo.remove(); return; }
+    const close = promo.querySelector('.promo-close');
+    close?.addEventListener('click', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      promo.classList.add('closing');
+      try { localStorage.setItem('chekin_referral_dismissed', '1'); } catch(err){}
+      promo.addEventListener('transitionend', () => promo.remove(), { once:true });
+    });
   }
 
   function initSwitchFlyout(){

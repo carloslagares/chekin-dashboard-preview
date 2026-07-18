@@ -42,6 +42,7 @@
   .trigger .gen{font:800 9px var(--font-primary);padding:2px 7px;border-radius:5px;letter-spacing:.06em}
   .trigger .gen.g47{background:rgba(22,22,67,.07);color:var(--ink2)}
   .trigger .gen.g48{background:#D5F5EC;color:var(--success)}
+  .trigger .gen.gf5{background:#EEE9FF;color:#6C4CF1}
   .trigger .chev{width:16px;height:16px;stroke:var(--ink2);fill:none;stroke-width:2;margin-right:6px;transition:transform .2s}
   .switcher.open .trigger .chev{transform:rotate(180deg)}
 
@@ -62,6 +63,7 @@
   .menu .group .pill{font:800 9px var(--font-primary);padding:2px 7px;border-radius:5px;letter-spacing:.06em}
   .menu .group .pill.g47{background:rgba(22,22,67,.07);color:var(--ink2)}
   .menu .group .pill.g48{background:#D5F5EC;color:var(--success)}
+  .menu .group .pill.gf5{background:#EEE9FF;color:#6C4CF1}
   .menu .group .ln{flex:1;height:1px;background:var(--line)}
 
   .opt{
@@ -75,6 +77,7 @@
   .opt .v{font:700 10px var(--font-primary);padding:3px 7px;border-radius:999px;background:rgba(22,22,67,.08);color:var(--ink2);flex-shrink:0}
   .opt .t{flex:1;min-width:0}
   .opt .new{font:800 9px var(--font-primary);padding:2px 7px;border-radius:5px;background:#D5F5EC;color:var(--success);letter-spacing:.06em}
+  .opt .new.f5{background:#EEE9FF;color:#6C4CF1}
   .opt .check{width:16px;height:16px;stroke:var(--blue);fill:none;stroke-width:2.6;opacity:0}
   .opt.active{background:var(--blue-light)}
   .opt.active .v{background:var(--blue);color:#fff}
@@ -108,6 +111,9 @@
 
     <div class="group"><span class="pill g48">4.8</span>Refined · Opus<span class="ln"></span></div>
     <button class="opt" data-v="v7" data-label="Refined" data-gen="48" role="menuitem"><span class="v">V7</span><span class="t">Refined home</span><span class="new">4.8</span><svg class="check" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button>
+
+    <div class="group"><span class="pill gf5">Fable</span>Claude 5<span class="ln"></span></div>
+    <button class="opt" data-v="v8" data-label="Fable refine" data-gen="f5" role="menuitem"><span class="v">V8</span><span class="t">Fable refine</span><span class="new f5">NEW</span><svg class="check" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button>
   </div>
 </div>
 
@@ -119,6 +125,7 @@
   <iframe class="variant" data-v="v5" data-src="variants/v5_calendar.html" title="V5 Weekly calendar"></iframe>
   <iframe class="variant" data-v="v6" data-src="variants/v6_mobile.html" title="V6 Mobile preview"></iframe>
   <iframe class="variant" data-v="v7" data-src="variants/v7_opus48.html" title="V7 Refined — Opus 4.8"></iframe>
+  <iframe class="variant" data-v="v8" data-src="variants/v8_fable.html" title="V8 Fable refine — Fable 5"></iframe>
 </div>
 
 <script>
@@ -136,7 +143,7 @@
   var curGen   = document.getElementById('curGen');
 
   // Deep-link via ?view=agenda|compliance|ai|calendar|refined (from sidebar)
-  var VIEW_MAP = { agenda:'v2', compliance:'v3', ai:'v4', calendar:'v5', refined:'v7', mobile:'v6' };
+  var VIEW_MAP = { agenda:'v2', compliance:'v3', ai:'v4', calendar:'v5', refined:'v7', mobile:'v6', fable:'v8' };
   var urlView = new URLSearchParams(location.search).get('view');
 
   var LS = 'chekin_welcome_variant';
@@ -160,8 +167,9 @@
     curV.textContent = v.toUpperCase();
     curLabel.textContent = opt.getAttribute('data-label');
     var gen = opt.getAttribute('data-gen');
-    curGen.textContent = gen === '48' ? '4.8' : '4.7';
-    curGen.className = 'gen ' + (gen === '48' ? 'g48' : 'g47');
+    var GEN_LABEL = { '47':'4.7', '48':'4.8', 'f5':'Fable' };
+    curGen.textContent = GEN_LABEL[gen] || gen;
+    curGen.className = 'gen ' + (gen === '48' ? 'g48' : gen === 'f5' ? 'gf5' : 'g47');
     try{ localStorage.setItem(LS, v); }catch(err){}
   }
 
