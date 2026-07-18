@@ -287,14 +287,25 @@
         '<h3>No data yet</h3><p>This campaign has not run, so there are no performance metrics to show.</p></div>';
       return card('Performance analytics', body, { span:true, icon:perfIcon() });
     }
-    body = '<div class="metric-grid">'+
-      metric(a.sent, 'Sent')+
-      metric(a.delivered, 'Delivered')+
-      metric(a.opened, 'Opened')+
-      metric(a.clicked, 'Clicked')+
-    '</div>'+
-    '<div class="metric-grid" style="margin-top:14px">'+
-      metric(a.converted, 'Converted')+
+    // Funnel: each stage as a bar relative to Sent, so drop-off is visible
+    // at a glance instead of eight equal tiles.
+    var stages = [
+      { l:'Sent', v:a.sent },
+      { l:'Delivered', v:a.delivered },
+      { l:'Opened', v:a.opened },
+      { l:'Clicked', v:a.clicked },
+      { l:'Converted', v:a.converted, hot:true }
+    ];
+    var fmax = a.sent || 1;
+    body = '<div class="funnel">'+stages.map(function(s){
+      var p = Math.round((s.v/fmax)*100);
+      return '<div class="fstage'+(s.hot?' hot':'')+'">'+
+        '<span class="fl">'+s.l+'</span>'+
+        '<div class="fbar"><i style="width:'+Math.max(p,3)+'%"></i></div>'+
+        '<span class="fv">'+s.v+'</span><span class="fp">'+p+'%</span>'+
+      '</div>';
+    }).join('')+'</div>'+
+    '<div class="metric-grid" style="margin-top:16px">'+
       metric(CRM.money(a.revenue), 'Revenue')+
       metric(CRM.pct(a.conversionRate), 'Conversion rate')+
       metric(CRM.pct(a.clickRate), 'Click rate')+

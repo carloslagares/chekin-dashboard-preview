@@ -55,10 +55,20 @@
       <!-- KPIs -->
       <section class="kpis reveal" id="kpis" style="animation-delay:.05s"></section>
 
-      <!-- How consent works -->
-      <div class="card reveal" id="explainer-card" style="animation-delay:.08s">
-        <div class="hd"><h3><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg> How consent works</h3></div>
-        <div class="bd">
+      <!-- Admin settings: the levers an operator actually changes — keep them
+           above the educational material, not buried at the bottom. -->
+      <div class="card reveal" style="animation-delay:.08s">
+        <div class="hd"><h3><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Activation safeguards</h3></div>
+        <div class="bd" id="admin-settings"></div>
+      </div>
+
+      <!-- How consent works (collapsible — educational, read once) -->
+      <div class="card reveal" id="explainer-card" style="animation-delay:.1s">
+        <div class="hd" id="explainer-toggle" style="cursor:pointer;user-select:none">
+          <h3><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg> How consent works</h3>
+          <div class="act"><svg id="explainer-chev" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text-gray-medium);fill:none;stroke-width:2;transition:transform .2s"><path d="m6 9 6 6 6-6"/></svg></div>
+        </div>
+        <div class="bd" id="explainer-body">
           <p class="sub" style="margin:0 0 14px;max-width:760px">Every message is classified into a consent <b>category</b>. Transactional and operational messages always send — they are required to deliver the booking. Marketing and partner marketing require an explicit opt-in on the channel, and a global unsubscribe overrides them all.</p>
           <div class="cat-grid" id="categories"></div>
         </div>
@@ -102,11 +112,6 @@
         </div>
       </div>
 
-      <!-- Admin settings -->
-      <div class="card reveal" style="animation-delay:.18s">
-        <div class="hd"><h3><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Activation safeguards</h3></div>
-        <div class="bd" id="admin-settings"></div>
-      </div>
     </div>
   </main>
 </div>
@@ -254,6 +259,22 @@
     var on = sw.classList.toggle('on');
     sw.setAttribute('aria-checked', on);
     CRM.toast(on ? 'Campaign approval required.' : 'Campaign approval turned off.');
+  });
+
+  // ---- collapsible explainer: open on first visit, remembered after ----
+  var expBody = document.getElementById('explainer-body');
+  var expChev = document.getElementById('explainer-chev');
+  var expKey = 'crm_consent_explainer_collapsed';
+  function setExplainer(collapsed){
+    expBody.style.display = collapsed ? 'none' : '';
+    expChev.style.transform = collapsed ? 'rotate(-90deg)' : '';
+    try{ localStorage.setItem(expKey, collapsed ? '1' : '0'); }catch(e){}
+  }
+  var startCollapsed = false;
+  try{ startCollapsed = localStorage.getItem(expKey) === '1'; }catch(e){}
+  setExplainer(startCollapsed);
+  document.getElementById('explainer-toggle').addEventListener('click', function(){
+    setExplainer(expBody.style.display !== 'none');
   });
 })();
 </script>

@@ -306,16 +306,15 @@
   function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
   function pct(x) { return Math.round(x * 100) + '%'; }
 
+  // Six examples, one per distinct rule family (arrival window, past-stay
+  // season, intent, premium tag, score, exclusion) — more chips than this
+  // reads as noise rather than guidance.
   var SEGMENT_EXAMPLES = [
     'Guests arriving in the next 7 days who have not completed check-in',
     'Families who stayed last summer and have no future booking',
-    'Couples arriving this weekend who have not bought spa deals',
     'Guests who asked about parking and arrive in the next 72 hours',
     'Whale guests with no future reservation',
-    'VIP guests arriving this month',
     'Guests with Opportunity Score above 70',
-    'Repeat guests that have not booked again',
-    'Guests tagged as High App Sales Potential',
     'Exclude Unwanted Guests and Do Not Contact'
   ];
 

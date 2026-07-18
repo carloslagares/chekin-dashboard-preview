@@ -187,7 +187,9 @@
       var sub = c.content && c.content.subject ? c.content.subject : c.objective;
       return '<tr data-id="'+c.id+'">'+
         '<td><div class="camp-name"><span class="nm">'+CRM.esc(c.name)+'</span><span class="sb">'+CRM.esc(sub)+'</span></div></td>'+
-        '<td>'+CRM.statusBadge(c.status)+'</td>'+
+        '<td><div style="display:flex;align-items:center;gap:8px">'+CRM.statusBadge(c.status)+
+          (c.status==='needs_review'||c.status==='draft' ? '<button class="tbtn sm brand" data-approve="'+c.id+'">'+I.check+' Approve</button>' : '')+
+        '</div></td>'+
         '<td><span class="badge blue">'+CRM.esc(c.channel)+'</span></td>'+
         '<td>'+audienceCell(c)+'</td>'+
         '<td>'+dealsCell(c)+'</td>'+
@@ -199,6 +201,16 @@
   }
 
   document.getElementById('rows').addEventListener('click', function(e){
+    var ap = e.target.closest('[data-approve]');
+    if(ap){
+      e.stopPropagation();
+      try{
+        S.approveCampaign(ap.getAttribute('data-approve'), 'You');
+        CRM.toast('Campaign approved — ready to schedule.');
+        renderChips(); render();
+      }catch(err){ CRM.toast(err.message || 'Could not approve campaign.'); }
+      return;
+    }
     var tr = e.target.closest('tr[data-id]'); if(!tr) return;
     location.href = 'campaign-detail.html?id=' + tr.getAttribute('data-id');
   });

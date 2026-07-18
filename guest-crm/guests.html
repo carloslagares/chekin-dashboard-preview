@@ -58,6 +58,9 @@
         <button class="tbtn" id="more-filters"><svg viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></svg> More filters</button>
       </div>
 
+      <!-- Contextual CTA: appears when a filter narrows the list -->
+      <div id="filter-cta"></div>
+
       <!-- Table -->
       <div class="table-wrap reveal" style="animation-delay:.1s">
         <div class="table-scroll">
@@ -154,6 +157,45 @@
     return f;
   }
 
+  // Compact consent: one icon per channel instead of two labelled chips —
+  // the column reads at a glance and the tooltip carries the detail.
+  function consentIcons(cs){
+    if (cs.globalUnsubscribe) return '<span class="cicon-row"><span class="cicon denied" title="Globally unsubscribed — all marketing blocked"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></span></span>';
+    function one(st, label, path){
+      var word = st === 'granted' ? 'granted' : st === 'denied' ? 'denied' : 'unknown';
+      return '<span class="cicon ' + word + '" title="' + label + ' marketing: ' + word + '"><svg viewBox="0 0 24 24">' + path + '</svg></span>';
+    }
+    return '<span class="cicon-row">' +
+      one(cs.emailMarketing, 'Email', '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/>') +
+      one(cs.whatsappMarketing, 'WhatsApp', '<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z"/>') +
+    '</span>';
+  }
+
+  // Filter-aware prompt so the CTA hands Vela a ready-made audience brief.
+  function filterPrompt(){
+    var stageLabels = { prospect:'prospect', guest:'current guest', in_house:'in-house', repeat:'repeat', vip:'VIP', past:'past' };
+    var who = state.segmentTag ? CRM.segTagLabel(state.segmentTag) + ' guests'
+      : state.lifecycleStage ? stageLabels[state.lifecycleStage] + ' guests'
+      : 'these guests';
+    var parts = ['Create a campaign for ' + who];
+    if (state.upcoming) parts.push('with an upcoming stay');
+    if (state.consent === 'marketing') parts.push('who have marketing consent');
+    return parts.join(' ');
+  }
+  function renderFilterCta(count){
+    var el = document.getElementById('filter-cta');
+    var filtered = state.lifecycleStage || state.consent || state.upcoming || state.segmentTag;
+    var excluded = state.segmentTag === 'do_not_contact';
+    if (!filtered || excluded || !count) { el.innerHTML = ''; return; }
+    el.innerHTML = '<div class="filter-cta reveal">' +
+      '<div class="tx">' + CRM.icons.spark + '<span><b>' + count + ' guest' + (count > 1 ? 's' : '') + '</b> match this filter — let Vela draft a campaign for them.</span></div>' +
+      '<button class="btn-primary" id="cta-campaign">' + CRM.icons.spark + ' Create campaign</button>' +
+    '</div>';
+    el.querySelector('#cta-campaign').addEventListener('click', function(){
+      location.href = 'campaign-new.html?prompt=' + encodeURIComponent(filterPrompt());
+    });
+  }
+
   function rowHtml(g){
     var lang = '<div class="lang-cell"><span class="fl">' + g.flag + '</span>' + CRM.esc(g.languageName) + '</div>';
 
@@ -171,7 +213,7 @@
       '<td>' + lang + '</td>' +
       '<td>' + CRM.relDate(g.nextStayAt) + '</td>' +
       '<td>' + CRM.relDate(g.lastStayAt) + '</td>' +
-      '<td><div class="consent-row">' + CRM.consentBadges(g.consentSummary, { compact:true }) + '</div></td>' +
+      '<td>' + consentIcons(g.consentSummary) + '</td>' +
       '<td class="num">' + CRM.money(g.totalRevenue) + '</td>' +
       '<td class="num">' + CRM.scorePill(g.id) + '</td>' +
       '<td><div class="tagcell">' + stagShown + '</div></td>' +
@@ -183,6 +225,8 @@
     var tbody = document.getElementById('guest-rows');
     var empty = document.getElementById('guest-empty');
     var pag = document.getElementById('guest-pagination');
+
+    renderFilterCta(rows.length);
 
     if (!rows.length) {
       tbody.innerHTML = '';

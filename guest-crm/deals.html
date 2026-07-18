@@ -210,7 +210,8 @@
         '<div class="stat"><span class="sv">'+CRM.pct(d.conversionRate)+'</span><span class="sl">Conversion</span></div>'+
         '<div class="stat"><span class="sv">'+CRM.money(d.averageRevenue, d.currency)+'</span><span class="sl">Avg revenue</span></div>'+
       '</div>'+
-      '<div class="meta"><span class="pill brand">'+CRM.esc(catLabel(d.category))+'</span>'+CRM.tagPills(d.tags)+'</div>'+
+      '<div class="meta"><span class="pill brand">'+CRM.esc(catLabel(d.category))+'</span>'+
+        CRM.tagPills((d.tags||[]).filter(function(t){ return t.toLowerCase() !== String(d.category).toLowerCase(); }))+'</div>'+
       fitsRow+
       '<div class="dc-foot"><span class="tiny">'+CRM.esc(d.availability)+'</span><span class="spacer"></span>'+
         '<button class="tbtn" data-view-deal="'+d.id+'"><svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg> View</button>'+

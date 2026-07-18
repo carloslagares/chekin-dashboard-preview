@@ -175,7 +175,13 @@
       '<div class="field"><label>What do you want to achieve?</label>'+
       '<textarea id="brief-input" placeholder="Describe your campaign in plain language…">'+CRM.esc(state.prompt)+'</textarea></div>'+
       '<div class="tiny" style="margin-bottom:8px">Examples</div>'+
-      '<div class="chips" id="brief-examples">'+examples.map(function(e){ return '<span class="chip">'+CRM.esc(e.length>52?e.slice(0,52)+'…':e)+'</span>'; }).join('')+'</div>'+
+      '<div class="chips" id="brief-examples">'+examples.map(function(e){
+        // Cut on a word boundary and keep the full prompt in the tooltip —
+        // mid-word truncation ("…this weekend w…") reads as a rendering bug.
+        var label = e;
+        if(e.length>64){ var cut = e.lastIndexOf(' ', 64); label = e.slice(0, cut>40?cut:64)+'…'; }
+        return '<span class="chip" title="'+CRM.esc(e)+'">'+CRM.esc(label)+'</span>';
+      }).join('')+'</div>'+
       '<div class="tiny" style="margin:16px 0 8px">Objective (optional — Vela infers one if you skip)</div>'+
       '<div class="objgrid" id="objgrid">'+OBJECTIVES.map(function(o){ return '<div class="obj" data-obj="'+o.k+'"><div class="t">'+o.t+'</div><div class="d">'+o.d+'</div></div>'; }).join('')+'</div>';
     document.getElementById('step-body').innerHTML =
