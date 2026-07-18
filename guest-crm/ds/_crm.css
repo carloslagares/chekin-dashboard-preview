@@ -87,6 +87,34 @@ header.top{display:flex;align-items:center;gap:16px;padding:0 32px;height:64px;b
 .kpi .v{font:700 24px/26px var(--font-primary);color:var(--text-dark);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
 .kpi .v small{font:600 13px var(--font-primary);color:var(--text-gray-medium);margin-left:3px}
 .kpi .l{font:500 12.5px var(--font-primary);color:var(--text-gray-dark);margin-top:2px}
+.kpi .d{display:inline-flex;align-items:center;gap:4px;font:600 11.5px var(--font-primary);margin-top:4px}
+.kpi .d.up{color:var(--text-success)}
+.kpi .d.down{color:var(--text-danger)}
+.kpi .d.flat{color:var(--text-gray-medium)}
+.kpi .d.warn{color:var(--text-amber)}
+.kpi .d svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2.2}
+
+/* ── Review queue (human-in-the-loop) ── */
+.rev-item{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--stroke-gray-lighter)}
+.rev-item:last-child{border-bottom:none;padding-bottom:2px}
+.rev-item:first-child{padding-top:2px}
+.rev-item .ic{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;flex-shrink:0;background:var(--bg-amber-light);color:var(--text-amber)}
+.rev-item .ic.guest{background:var(--bg-blue-light);color:var(--text-brand)}
+.rev-item .ic svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8}
+.rev-item .tx{flex:1;min-width:0}
+.rev-item .tx .t{display:block;font:600 13.5px/18px var(--font-primary);color:var(--text-dark);text-decoration:none}
+.rev-item .tx .t:hover{color:var(--text-brand)}
+.rev-item .tx .mt{font:400 12px/16px var(--font-primary);color:var(--text-gray-medium);margin-top:1px}
+.rev-item .acts{display:flex;gap:6px;flex-shrink:0;padding-top:2px}
+.tbtn.sm{height:30px;padding:0 10px;font:600 12.5px var(--font-primary);text-decoration:none}
+.tbtn.sm svg{width:12px;height:12px}
+.rev-empty{display:flex;align-items:center;gap:9px;padding:6px 2px;font:500 13px var(--font-primary);color:var(--text-gray-dark)}
+.rev-empty svg{width:16px;height:16px;stroke:var(--text-success);fill:none;stroke-width:2;flex-shrink:0}
+
+/* segmentation card substats strip */
+.seg-substats{display:flex;align-items:center;gap:12px;margin-bottom:14px;font:500 12.5px var(--font-primary);color:var(--text-gray-dark)}
+.seg-substats b{font-weight:700;color:var(--text-dark);font-variant-numeric:tabular-nums}
+.seg-substats i{width:1px;height:14px;background:var(--stroke-gray-light)}
 
 /* ── Generic card ── */
 .card{background:#fff;border:1px solid var(--stroke-gray-lighter);border-radius:var(--radius-lg);box-shadow:var(--shadow-card)}

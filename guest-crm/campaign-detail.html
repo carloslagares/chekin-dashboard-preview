@@ -146,6 +146,17 @@
       return '<button class="btn-primary" data-act="schedule">'+I.check+' Schedule / activate</button>'+
         '<button class="tbtn" data-act="edit">'+I.spark+' Edit in studio</button>';
     }
+    if(st==='active' || st==='scheduled'){
+      return '<button class="tbtn" data-act="pause"><svg viewBox="0 0 24 24"><path d="M10 4H6v16h4zM18 4h-4v16h4z"/></svg> Pause</button>'+
+        '<button class="tbtn" data-act="duplicate"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Duplicate</button>';
+    }
+    if(st==='paused'){
+      return '<button class="btn-primary" data-act="resume"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Resume</button>'+
+        '<button class="tbtn" data-act="duplicate"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Duplicate</button>';
+    }
+    if(st==='completed'){
+      return '<button class="tbtn" data-act="duplicate"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Run again</button>';
+    }
     return '';
   }
 
@@ -351,6 +362,17 @@
         } else if(act==='edit'){
           CRM.toast('Opening Campaign Studio…');
           setTimeout(function(){ location.href = 'campaign-new.html?id=' + encodeURIComponent(cid); }, 600);
+        } else if(act==='pause'){
+          S.getCampaignById(cid).status = 'paused';
+          CRM.toast('Campaign paused — no more sends until you resume.');
+          render();
+        } else if(act==='resume'){
+          S.getCampaignById(cid).status = 'active';
+          CRM.toast('Campaign resumed.');
+          render();
+        } else if(act==='duplicate'){
+          CRM.toast('Opening Campaign Studio with this campaign as a starting point…');
+          setTimeout(function(){ location.href = 'campaign-new.html?prompt=' + encodeURIComponent(camp.name); }, 600);
         }
       });
     });

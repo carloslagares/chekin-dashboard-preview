@@ -52,7 +52,7 @@
       <!-- Agentic command -->
       <section class="cmd reveal">
         <div class="cmd-top">
-          <span class="eyebrow"><svg viewBox="0 0 24 24"><path d="M12 2 13.5 8 19 9.5 13.5 11 12 17 10.5 11 5 9.5 10.5 8 Z"/></svg> Guest CRM Agent</span>
+          <span class="eyebrow"><svg viewBox="0 0 24 24"><path d="M12 2 13.5 8 19 9.5 13.5 11 12 17 10.5 11 5 9.5 10.5 8 Z"/></svg> Vela · Guest CRM Agent</span>
           <button class="cmd-video" id="cmd-video" aria-label="Watch how it works">
             <span class="play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
             <span class="vlabel">How it works · 1 min</span>
@@ -60,7 +60,7 @@
         </div>
         <div class="inputbar">
           <svg class="lead" viewBox="0 0 24 24"><path d="M12 2 13.5 8 19 9.5 13.5 11 12 17 10.5 11 5 9.5 10.5 8 Z"/></svg>
-          <input id="cmd-input" placeholder="Sell late checkout to Sunday departures">
+          <input id="cmd-input" placeholder="Describe a campaign — audience, offer, channel…">
           <button class="go" id="cmd-go"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg> Generate</button>
         </div>
         <div class="examples" id="cmd-examples"></div>
@@ -84,6 +84,7 @@
               <div class="act"><a class="tbtn ghost" href="guests.html">View all guests</a></div>
             </div>
             <div class="bd">
+              <div class="seg-substats" id="seg-substats"></div>
               <div class="seg-widgets" id="seg-widgets"></div>
               <div class="seg-insights-list" id="seg-insights" style="margin-top:16px"></div>
             </div>
@@ -97,6 +98,11 @@
         </div>
 
         <div style="display:flex;flex-direction:column;gap:18px">
+          <!-- Review queue: everything Vela is waiting on a human for -->
+          <div class="card reveal" style="animation-delay:.09s">
+            <div class="hd"><h3><svg viewBox="0 0 24 24"><path d="M12 22s8-3.5 8-10V5l-8-3-8 3v7c0 6.5 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg> Needs your review</h3><div class="act"><span class="badge amber" id="review-count" style="display:none"></span></div></div>
+            <div class="bd" id="review-queue"></div>
+          </div>
           <!-- Top deals -->
           <div class="card reveal" style="animation-delay:.12s">
             <div class="hd"><h3>Top performing deals</h3></div>
@@ -127,36 +133,34 @@
   var S = window.CRMService, A = window.CRMAgent, I = CRM.icons;
   CRM.boot({ active:'overview' });
 
-  // ---- KPIs ----
+  // ---- KPIs: 4 primary outcomes, each with a trend/context line ----
   var m = S.getDashboardMetrics();
+  var upArrow = '<svg viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></svg>';
   var kpis = [
-    { ic:'blue', svg:'<path d="M16 7a4 4 0 1 0-8 0 4 4 0 0 0 8 0ZM3 21a7 7 0 0 1 14 0"/><path d="M19 8v6M22 11h-6"/>', v:m.totalGuests, l:'Total guests' },
-    { ic:'violet', svg:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>', v:m.upcoming, l:'Upcoming stays' },
-    { ic:'green', svg:'<path d="M3 9 12 2l9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/>', v:m.inHouse, l:'Guests in-house' },
-    { ic:'blue', svg:'<path d="M20 6 9 17l-5-5"/>', v:m.marketingConsent, l:'Marketing consent' },
-    { ic:'green', svg:'<path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/>', v:CRM.money(m.campaignRevenue), l:'Campaign revenue' },
-    { ic:'violet', svg:'<rect x="2" y="6" width="20" height="12" rx="2"/><path d="M2 10h20M6 14h4"/>', v:CRM.money(m.appSalesRevenue), l:'App Sales revenue' },
-    { ic:'blue', svg:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>', v:m.activeCampaigns, l:'Active campaigns' },
-    { ic:'amber', svg:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>', v:m.draftCampaigns, l:'Draft / review' }
+    { ic:'green', svg:'<path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/>', v:CRM.money(m.campaignRevenue), l:'Campaign revenue', delta:{cls:'up', ic:upArrow, t:'+18% vs May'} },
+    { ic:'violet', svg:'<rect x="2" y="6" width="20" height="12" rx="2"/><path d="M2 10h20M6 14h4"/>', v:CRM.money(m.appSalesRevenue), l:'App Sales revenue', delta:{cls:'up', ic:upArrow, t:'+12% vs May'} },
+    { ic:'blue', svg:'<path d="M20 6 9 17l-5-5"/>', v:m.marketingConsent+'<small>/ '+m.totalGuests+'</small>', l:'Marketing consent', delta:{cls:'flat', t:Math.round(m.marketingConsent/m.totalGuests*100)+'% of guests'} },
+    { ic:'blue', svg:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>', v:m.activeCampaigns, l:'Active campaigns', delta:{cls:'warn', t:m.draftCampaigns+' awaiting review'} }
   ];
   document.getElementById('kpis').innerHTML = kpis.map(function(k){
-    return '<div class="kpi"><div class="ic '+k.ic+'"><svg viewBox="0 0 24 24">'+k.svg+'</svg></div><div><div class="v">'+k.v+'</div><div class="l">'+k.l+'</div></div></div>';
+    var d = k.delta ? '<div class="d '+k.delta.cls+'">'+(k.delta.ic||'')+k.delta.t+'</div>' : '';
+    return '<div class="kpi"><div class="ic '+k.ic+'"><svg viewBox="0 0 24 24">'+k.svg+'</svg></div><div><div class="v">'+k.v+'</div><div class="l">'+k.l+'</div>'+d+'</div></div>';
   }).join('');
 
   // ---- command box ----
-  // Short examples first; the longer one sits last so the row stays balanced.
+  // Examples stay distinct from the AI-suggestion cards below, so the page
+  // never shows the same prompt twice. Short ones first; long one last.
   var examples = [
-    'Sell late checkout to Sunday departures',
-    'Reactivate past summer family guests',
-    'Promote parking to arrivals asking about cars',
+    'Offer airport transfer to this week’s arrivals',
+    'Promote the spa pass to couples currently in-house',
+    'Win back business travellers from last autumn',
     'Create a campaign for guests arriving this weekend with children, offering early check-in and a family restaurant deal'
   ];
   document.getElementById('cmd-examples').innerHTML = examples.map(function(e){ return '<span class="ex">'+CRM.esc(e)+'</span>'; }).join('');
   function go(){
     var el = document.getElementById('cmd-input');
-    // Fall back to the placeholder suggestion when the field is left empty.
-    var v = (el.value.trim() || el.placeholder || '').trim();
-    if(!v) return;
+    var v = el.value.trim();
+    if(!v){ el.focus(); return; }
     location.href = 'campaign-new.html?prompt=' + encodeURIComponent(v);
   }
   document.getElementById('cmd-go').addEventListener('click', go);
@@ -193,6 +197,57 @@
       CRM.statusBadge(c.status)+'</a>';
   }).join('');
 
+  // ---- review queue: human-in-the-loop items Vela is blocked on ----
+  var revIcons = {
+    campaign: '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+    automation: '<path d="M13 2 3 14h7l-1 8 10-12h-7z"/>',
+    guest: '<path d="M16 7a4 4 0 1 0-8 0 4 4 0 0 0 8 0ZM3 21a7 7 0 0 1 14 0"/>'
+  };
+  function reviewItems(){
+    var items = [];
+    S.getCampaigns().forEach(function(c){
+      if(c.status !== 'needs_review' && c.status !== 'draft') return;
+      var who = /^Vela/.test(c.createdBy) ? 'Vela draft' : c.createdBy;
+      var meta = [who, c.channel];
+      if(c.consentCheck) meta.push(c.consentCheck.eligibleSize + ' eligible');
+      items.push({ kind:'campaign', id:c.id, title:c.name, meta:meta.join(' · '), href:'campaign-detail.html?id='+c.id, approvable:true });
+    });
+    S.getAutomations().forEach(function(a){
+      if(a.status !== 'needs_review') return;
+      items.push({ kind:'automation', title:a.name, meta:'Automation awaiting first review', href:'automation.html' });
+    });
+    S.getGuests({ segmentTag:'needs_review' }).forEach(function(g){
+      items.push({ kind:'guest', id:g.id, title:g.fullName, meta:'Guest flagged for review', href:'guests.html' });
+    });
+    return items;
+  }
+  function renderReviewQueue(){
+    var items = reviewItems();
+    var count = document.getElementById('review-count');
+    count.style.display = items.length ? '' : 'none';
+    count.textContent = items.length + ' pending';
+    document.getElementById('review-queue').innerHTML = items.length ? items.map(function(it){
+      return '<div class="rev-item">'+
+        '<div class="ic '+it.kind+'"><svg viewBox="0 0 24 24">'+revIcons[it.kind]+'</svg></div>'+
+        '<div class="tx"><a class="t" href="'+it.href+'">'+CRM.esc(it.title)+'</a><div class="mt">'+CRM.esc(it.meta)+'</div></div>'+
+        '<div class="acts">'+
+          (it.approvable
+            ? '<button class="tbtn sm brand" data-approve="'+it.id+'">'+I.check+' Approve</button>'
+            : '<a class="tbtn sm ghost" href="'+it.href+'">Review</a>')+
+        '</div>'+
+      '</div>';
+    }).join('') : '<div class="rev-empty">'+I.check+'<span>All clear — nothing is waiting on you.</span></div>';
+  }
+  renderReviewQueue();
+  document.getElementById('review-queue').addEventListener('click', function(e){
+    var b = e.target.closest('[data-approve]'); if(!b) return;
+    try{
+      S.approveCampaign(b.getAttribute('data-approve'), 'You');
+      CRM.toast('Campaign approved — ready to schedule.');
+      renderReviewQueue();
+    }catch(err){ CRM.toast(err.message || 'Could not approve campaign.'); }
+  });
+
   // ---- top deals ----
   document.getElementById('top-deals').innerHTML = S.getTopDeals().map(function(d){
     return '<div class="dealrow"><div class="ic"><svg viewBox="0 0 24 24"><path d="M20.6 8.4 12 17 3.4 8.4"/><path d="M3 8h18l-1 4H4z"/></svg></div>'+
@@ -207,6 +262,10 @@
 
   // ---- segmentation widgets ----
   var sm = S.getSegmentationMetrics();
+  document.getElementById('seg-substats').innerHTML =
+    '<span><b>'+m.totalGuests+'</b> total guests</span><i></i>'+
+    '<span><b>'+m.upcoming+'</b> upcoming stays</span><i></i>'+
+    '<span><b>'+m.inHouse+'</b> in-house now</span>';
   var segWidgets = [
     { ic:'dark', svg:'<path d="M12 2 15 8.5 22 9.4l-5 4.9 1.2 6.9L12 18l-6.2 3.2 1.2-6.9-5-4.9 7-1Z"/>', v: sm.highOpportunity, l:'High Opportunity', tag:'', score: 70 },
     { ic:'dark', svg:'<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>', v: sm.whales, l:'Whale Guests', tag:'whale' },

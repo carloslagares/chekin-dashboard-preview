@@ -58,6 +58,7 @@
           <h1>Deals <span class="count" id="deal-count">—</span></h1>
           <div class="sub">Catalog of upsell deals offered through App Sales — your own services and third-party partners. The agent draws on these when building campaigns.</div>
         </div>
+        <button class="btn-primary" id="new-deal"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> New deal</button>
       </div>
 
       <!-- KPI strip -->
@@ -122,6 +123,9 @@
 (function(){
   var S = window.CRMService, I = CRM.icons;
   CRM.boot({ active:'deals' });
+  document.getElementById('new-deal').addEventListener('click', function(){
+    CRM.toast('Deal editor coming soon — deals currently sync from App Sales.');
+  });
 
   var CAT_LABEL = { check_in:'Check-in', check_out:'Check-out', transport:'Transport', wellness:'Wellness', dining:'Dining', family:'Family', business:'Business' };
   function catLabel(c){ return CAT_LABEL[c] || (c||'').replace(/_/g,' '); }
@@ -192,9 +196,11 @@
   // ---- card render ----
   function cardHtml(d){
     var fits = fittingSegments(d);
-    var fitsHtml = fits.length
-      ? fits.map(function(n){ return '<span class="pill">'+CRM.esc(n)+'</span>'; }).join('')
-      : '<span class="tiny">—</span>';
+    // Hide the whole "Fits segments" row when there are no matches — a
+    // dangling dash reads as broken data rather than an empty state.
+    var fitsRow = fits.length
+      ? '<div class="fits"><span class="lbl">'+I.spark+'Fits segments</span> '+fits.map(function(n){ return '<span class="pill">'+CRM.esc(n)+'</span>'; }).join('')+'</div>'
+      : '';
     return '<div class="card deal-card'+(d.active?'':' inactive')+'">'+
       '<div class="dc-top"><h3>'+CRM.esc(d.title)+'</h3>'+activeBadge(d)+'</div>'+
       '<div class="prov">'+providerBadge(d)+'<span class="pn">'+CRM.esc(d.providerName)+'</span></div>'+
@@ -205,7 +211,7 @@
         '<div class="stat"><span class="sv">'+CRM.money(d.averageRevenue, d.currency)+'</span><span class="sl">Avg revenue</span></div>'+
       '</div>'+
       '<div class="meta"><span class="pill brand">'+CRM.esc(catLabel(d.category))+'</span>'+CRM.tagPills(d.tags)+'</div>'+
-      '<div class="fits"><span class="lbl">'+I.spark+'Fits segments</span> '+fitsHtml+'</div>'+
+      fitsRow+
       '<div class="dc-foot"><span class="tiny">'+CRM.esc(d.availability)+'</span><span class="spacer"></span>'+
         '<button class="tbtn" data-view-deal="'+d.id+'"><svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg> View</button>'+
       '</div>'+
