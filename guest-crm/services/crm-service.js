@@ -7,7 +7,22 @@
    ============================================================ */
 (function () {
   'use strict';
-  var D = window.CRM_DATA;
+  // ---------- first-run mode ----------
+  // When the flag is set, the service serves an empty dataset so every page
+  // shows its true pre-activation state. Static catalogs (properties,
+  // trigger types) survive — they exist before any guest does.
+  var FIRST_RUN = false;
+  try { FIRST_RUN = localStorage.getItem('crm_first_run') === '1'; } catch (e) {}
+  function emptyDataset(full) {
+    return {
+      organizationId: full.organizationId, currency: full.currency, today: full.today,
+      properties: full.properties, triggers: full.triggers,
+      guests: [], reservations: [], deals: [], consents: [], preferences: [],
+      conversations: [], checkins: [], purchases: [], segments: [], campaigns: [],
+      automations: [], approvals: [], agentRuns: [], suggestions: []
+    };
+  }
+  var D = FIRST_RUN ? emptyDataset(window.CRM_DATA) : window.CRM_DATA;
   function clone(x) { return JSON.parse(JSON.stringify(x)); }
   function find(list, id) { for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i]; return null; }
 
@@ -323,7 +338,15 @@
     }).slice(0, limit);
   }
 
+  function isFirstRun() { return FIRST_RUN; }
+  function setFirstRun(on) {
+    try { localStorage.setItem('crm_first_run', on ? '1' : '0'); } catch (e) {}
+    location.reload();
+  }
+
   window.CRMService = {
+    _dataset: D, // consumed by the agent layer so it sees the same (possibly first-run) data
+    isFirstRun: isFirstRun, setFirstRun: setFirstRun,
     getGuests: getGuests, getGuestById: getGuestById, getGuestReservations: getGuestReservations,
     getGuestConsents: getGuestConsents, getGuestPreferences: getGuestPreferences, getGuestConversations: getGuestConversations,
     getGuestPurchases: getGuestPurchases, getGuestCheckins: getGuestCheckins, getGuestCampaigns: getGuestCampaigns, getGuestTimeline: getGuestTimeline,

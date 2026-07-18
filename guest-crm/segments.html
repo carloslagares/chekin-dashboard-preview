@@ -285,7 +285,7 @@
   }
   function renderSaved(list){
     var slot = document.getElementById('seg-saved');
-    slot.innerHTML = list.length ? list.map(savedRow).join('') : '<div class="tiny">No saved segments yet.</div>';
+    slot.innerHTML = list.length ? list.map(savedRow).join('') : '<div class="tiny" style="padding:2px 0 6px">No saved segments yet — describe an audience above and save the generated rules. Saved segments stay live: guests enter and leave as their data changes.</div>';
     document.getElementById('seg-count').textContent = list.length + ' saved';
   }
   function prependSaved(plan){

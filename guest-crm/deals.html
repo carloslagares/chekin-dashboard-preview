@@ -239,6 +239,13 @@
   }
 
   function emptyHtml(){
+    if (!S.getDeals().length){
+      // First-run: the catalog itself is empty — sell what deals do.
+      return '<div class="empty" style="grid-column:1/-1"><div class="ic"><svg viewBox="0 0 24 24"><path d="M20.6 8.4 12 17 3.4 8.4"/><path d="M3 8h18l-1 4H4z"/></svg></div>'+
+        '<h3>No deals yet</h3>'+
+        '<p style="max-width:480px">Deals are the upsells Vela attaches to campaigns — your own services (late checkout, parking, breakfast) and partner offers with commission. Add your first one or sync from App Sales.</p>'+
+        '<button class="btn-primary" style="margin-top:6px" onclick="document.getElementById(\'new-deal\').click()">'+I.spark+' Add your first deal</button></div>';
+    }
     return '<div class="empty" style="grid-column:1/-1"><div class="ic"><svg viewBox="0 0 24 24"><path d="M20.6 8.4 12 17 3.4 8.4"/><path d="M3 8h18l-1 4H4z"/></svg></div>'+
       '<h3>No deals match your filters</h3><p>Try clearing the search or switching the provider, status or category filters.</p></div>';
   }

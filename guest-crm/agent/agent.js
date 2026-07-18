@@ -8,7 +8,7 @@
    ============================================================ */
 (function () {
   'use strict';
-  var D = window.CRM_DATA;
+  var D = (window.CRMService && window.CRMService._dataset) || window.CRM_DATA;
 
   // ---------- intent parsing (keyword heuristics) ----------
   function parse(prompt) {

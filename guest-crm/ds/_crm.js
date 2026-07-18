@@ -5,7 +5,7 @@
    ============================================================ */
 (function () {
   'use strict';
-  var S = window.CRMService, A = window.CRMAgent, D = window.CRM_DATA;
+  var S = window.CRMService, A = window.CRMAgent, D = (window.CRMService && window.CRMService._dataset) || window.CRM_DATA;
 
   // ---------- feature flag ----------
   var FLAGS = { guestCrmEnabled: true };

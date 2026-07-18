@@ -231,6 +231,20 @@
     if (!rows.length) {
       tbody.innerHTML = '';
       pag.style.display = 'none';
+      if (!totalGuests) {
+        // True first-run: no guests exist at all — onboarding, not "bad filter".
+        empty.innerHTML =
+          '<div class="empty"><div class="ic"><svg viewBox="0 0 24 24"><path d="M16 7a4 4 0 1 0-8 0 4 4 0 0 0 8 0ZM3 21a7 7 0 0 1 14 0"/><path d="M19 8v6M22 11h-6"/></svg></div>' +
+          '<h3>No guests yet</h3>' +
+          '<p style="max-width:460px">Guest profiles build themselves — every reservation, online check-in and inbox conversation becomes a unified profile with consent tracked from the start.</p>' +
+          '<button class="btn-primary" id="fr-sync-guests" style="margin-top:6px">' + CRM.icons.spark + ' Sync guests from Bookings</button></div>';
+        empty.querySelector('#fr-sync-guests').addEventListener('click', function(){
+          try{ localStorage.setItem('crm_fr_sync','1'); localStorage.setItem('crm_checklist','active'); }catch(e){}
+          CRM.toast('Syncing bookings — 29 guest profiles imported.');
+          setTimeout(function(){ S.setFirstRun(false); }, 900);
+        });
+        return;
+      }
       empty.innerHTML =
         '<div class="empty"><div class="ic"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></div>' +
         '<h3>No guests match your filters</h3>' +

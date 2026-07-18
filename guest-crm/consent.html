@@ -127,7 +127,7 @@
 <script src="../ds/_agent.js"></script>
 <script>
 (function(){
-  var S = window.CRMService, D = window.CRM_DATA, I = CRM.icons;
+  var S = window.CRMService, D = S._dataset || window.CRM_DATA, I = CRM.icons;
   CRM.boot({ active:'consent' });
 
   var guests = S.getGuests();
@@ -200,7 +200,7 @@
   document.getElementById('supp-count').innerHTML = '<span class="badge gray">'+suppressedGuests.length+' suppressed</span>';
   document.getElementById('suppression').innerHTML =
     '<thead><tr><th>Guest</th><th>Email</th><th>Reason</th><th>Channels still reachable</th></tr></thead>'+
-    '<tbody>'+suppressedGuests.map(function(g){
+    '<tbody>'+(suppressedGuests.length ? '' : '<tr style="cursor:default"><td colspan="4" style="text-align:center;color:var(--text-gray-medium);font:500 13px var(--font-primary)">No suppressed guests yet — anyone who unsubscribes or lacks consent will appear here automatically.</td></tr>')+suppressedGuests.map(function(g){
       var reasonBadge = g.consentSummary.globalUnsubscribe
         ? '<span class="badge red">'+I.x+' Globally unsubscribed</span>'
         : '<span class="badge amber">'+I.q+' No email marketing consent</span>';
@@ -228,7 +228,7 @@
   }
   document.getElementById('audit').innerHTML =
     '<thead><tr><th>Guest</th><th>Channel</th><th>Category</th><th>Status</th><th>Source</th><th>Captured</th><th>Proof</th></tr></thead>'+
-    '<tbody>'+auditRows.map(function(c){
+    '<tbody>'+(auditRows.length ? '' : '<tr style="cursor:default"><td colspan="7" style="text-align:center;color:var(--text-gray-medium);font:500 13px var(--font-primary)">No consent records yet — every grant and revocation is logged here with proof from the moment guests sync.</td></tr>')+auditRows.map(function(c){
       var g = nameOf[c.guestId] || { fullName:'Unknown', flag:'' };
       return '<tr style="cursor:default"><td><div class="gname"><div class="gav">'+CRM.initials(g.fullName)+'</div>'+
           '<div style="min-width:0"><div class="nm">'+CRM.esc(g.fullName)+' '+(g.flag||'')+'</div></div></div></td>'+

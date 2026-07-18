@@ -66,6 +66,9 @@
         <div class="examples" id="cmd-examples"></div>
       </section>
 
+      <!-- Activation checklist (first-run + until dismissed) -->
+      <div id="checklist-slot"></div>
+
       <!-- KPIs -->
       <section class="kpis reveal" id="kpis" style="animation-delay:.05s"></section>
 
@@ -132,6 +135,96 @@
 (function(){
   var S = window.CRMService, A = window.CRMAgent, I = CRM.icons;
   CRM.boot({ active:'overview' });
+
+  // ---- data-mode toggle (demo affordance, lives at the end of the subnav) ----
+  var subnavEl = document.querySelector('.crm-subnav');
+  if (subnavEl){
+    var tog = document.createElement('button');
+    tog.className = 'tbtn sm ghost';
+    tog.style.marginLeft = 'auto';
+    tog.innerHTML = S.isFirstRun()
+      ? '<svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9"/><path d="M16 4h5v5"/></svg> Load demo data'
+      : '<svg viewBox="0 0 24 24"><path d="M12 2 13.5 8 19 9.5 13.5 11 12 17 10.5 11 5 9.5 10.5 8 Z"/></svg> Preview first-run';
+    tog.addEventListener('click', function(){
+      if (!S.isFirstRun()){
+        // Entering the first-run preview: reset checklist state so the
+        // experience is genuinely fresh, not half-completed.
+        try{
+          ['crm_fr_sync','crm_fr_consent','crm_fr_deals','crm_fr_campaign','crm_checklist'].forEach(function(k){ localStorage.removeItem(k); });
+        }catch(e){}
+      }
+      S.setFirstRun(!S.isFirstRun());
+    });
+    subnavEl.appendChild(tog);
+  }
+
+  // ---- activation checklist ----
+  // Shown always in first-run; in data mode only while the user is mid-flow
+  // (arrived via "Sync now") and until dismissed.
+  var CK = {
+    get: function(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } },
+    set: function(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+  };
+  var steps = [
+    { k:'crm_fr_sync', t:'Sync guests from Bookings', d:'Profiles build themselves from reservations, check-ins and inbox conversations.',
+      act: S.isFirstRun() ? { label:'Sync now', id:'fr-sync' } : null, done: !S.isFirstRun() },
+    { k:'crm_fr_consent', t:'Set your consent safeguards', d:'Decide what needs approval before anything sends. Consent is enforced automatically.',
+      href:'consent.html' },
+    { k:'crm_fr_deals', t:'Review your deals catalog', d:'Your own upsells plus partner offers — Vela attaches them to campaigns.',
+      href:'deals.html' },
+    { k:'crm_fr_campaign', t:'Create your first campaign with Vela', d:'Describe the goal in a sentence. Vela drafts audience, deals and copy; you approve.',
+      href:'campaign-new.html' }
+  ];
+  function renderChecklist(){
+    var slot = document.getElementById('checklist-slot');
+    var active = S.isFirstRun() || CK.get('crm_checklist') === 'active';
+    if (!active || CK.get('crm_checklist') === 'done'){ slot.innerHTML = ''; return; }
+    var doneCount = steps.filter(function(s){ return s.done || CK.get(s.k) === '1'; }).length;
+    slot.innerHTML = '<section class="card reveal" style="animation-delay:.03s">'+
+      '<div class="hd"><h3>'+I.spark+' Get set up in 4 steps</h3>'+
+        '<div class="act"><span class="badge blue">'+doneCount+' of '+steps.length+'</span>'+
+        '<button class="tbtn sm ghost" id="fr-dismiss" title="Dismiss checklist">'+I.x+'</button></div></div>'+
+      '<div class="bd"><div class="fr-steps">'+steps.map(function(s,i){
+        var done = s.done || CK.get(s.k) === '1';
+        var action = done ? '<span class="fr-done">'+I.check+' Done</span>'
+          : s.act ? '<button class="btn-primary" id="'+s.act.id+'" style="height:34px;padding:0 14px;font-size:13px">'+s.act.label+'</button>'
+          : '<a class="tbtn sm" href="'+s.href+'" data-step="'+s.k+'">Open</a>';
+        return '<div class="fr-step'+(done?' complete':'')+'">'+
+          '<div class="num">'+(done?I.check:(i+1))+'</div>'+
+          '<div class="tx"><div class="t">'+CRM.esc(s.t)+'</div><div class="d">'+CRM.esc(s.d)+'</div></div>'+
+          '<div class="ac">'+action+'</div>'+
+        '</div>';
+      }).join('')+'</div></div></section>';
+    var sync = document.getElementById('fr-sync');
+    if (sync) sync.addEventListener('click', function(){
+      CK.set('crm_fr_sync','1'); CK.set('crm_checklist','active');
+      CRM.toast('Syncing bookings — 29 guest profiles imported.');
+      setTimeout(function(){ S.setFirstRun(false); }, 900);
+    });
+    document.getElementById('fr-dismiss').addEventListener('click', function(){
+      CK.set('crm_checklist','done'); renderChecklist();
+    });
+    slot.querySelectorAll('[data-step]').forEach(function(a){
+      a.addEventListener('click', function(){ CK.set(a.getAttribute('data-step'),'1'); });
+    });
+  }
+  renderChecklist();
+
+  // ---- first-run: welcome layout instead of empty widgets ----
+  if (S.isFirstRun()){
+    document.getElementById('kpis').style.display = 'none';
+    document.querySelector('.dash-grid').style.display = 'none';
+    // Command box stays usable; examples become the guided entry point.
+    var welcome = document.createElement('section');
+    welcome.className = 'card reveal';
+    welcome.style.animationDelay = '.06s';
+    welcome.innerHTML = '<div class="bd"><div class="empty" style="padding:26px 16px">'+
+      '<div class="ic">'+I.spark+'</div>'+
+      '<h3>Welcome to Guest CRM</h3>'+
+      '<p style="max-width:520px">Once your guests sync, this page shows revenue, AI-detected opportunities, segmentation and everything Vela is waiting on you to approve. Start with the checklist above.</p>'+
+    '</div></div>';
+    document.getElementById('checklist-slot').after(welcome);
+  }
 
   // ---- KPIs: 4 primary outcomes, each with a trend/context line ----
   var m = S.getDashboardMetrics();
