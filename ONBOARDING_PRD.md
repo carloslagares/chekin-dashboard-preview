@@ -86,7 +86,14 @@ Dos sub-preguntas en una pantalla:
 
 1. **Tipo de propiedad** (single-select, chips): 🏠 Vacation rentals · 🏨 Hotel / aparthotel · ⛺ Camping / glamping · ✳️ Other. "Other" despliega input de texto libre (placeholder: "hostel, coliving, marina…").
    - El tipo define el **vocabulario de unidad** en todo lo posterior: `vr/other → properties`, `hotel → rooms`, `camping → units`. La etiqueta de la segunda pregunta cambia en vivo ("How many rooms across your hotels?", "How many units or pitches?").
-2. **Tamaño** (single-select, tarjetas): 1–5 Independent host · 6–20 Growing portfolio · 21–100 Property manager · 100+ Enterprise. Cada una con micro-copy de qué implica.
+2. **Tamaño** (single-select, tarjetas): los **rangos, etiquetas y descripciones cambian según el tipo** elegido. Cambiar de tipo re-renderiza las tarjetas y resetea la selección. Cada opción lleva un `sizeTier` (0–3) que es lo que consumen las reglas posteriores (no el string del rango):
+
+| Tier | Vacation rentals / Other | Hotel / aparthotel | Camping / glamping |
+|---|---|---|---|
+| 0 | 1–5 · Independent host | 1–10 · Guest house | 1–25 · Small site |
+| 1 | 6–20 · Growing portfolio | 11–30 · Boutique hotel | 26–75 · Family campsite |
+| 2 | 21–100 · Property manager | 31–100 · Independent hotel | 76–200 · Large site |
+| 3 | 100+ · Enterprise | 100+ · Hotel group | 200+ · Resort / group |
 
 **Validación:** tipo + tamaño (el texto de "Other" es opcional).
 
@@ -133,7 +140,7 @@ Orden fijo — es también el orden en que la First-run propone trabajar:
               pms    → "Connect {PMS}"                     (~2 min)
               ota    → "Link your Airbnb & Booking.com calendars" (~3 min)
               manual → "Add your first property"           (~5 min)
-2. Import   → si size ∈ {21-100, 100+}: "Invite your team" (~3 min)
+2. Import   → si sizeTier ≥ 2 (dos tiers superiores): "Invite your team" (~3 min)
 3. Legal    → UN paso por CADA país regulado:
               "Police reporting — {scheme}" (~4 min)       ← ES incluye "+ regiones" en la descripción
 4. Legal    → si algún país tiene tasa: "Enable tourist tax auto-calculation" (~2 min)
@@ -155,7 +162,8 @@ Cada paso lleva: `k` (clave de tipo), `phase` (Import/Legal/Operations/Launch), 
   "ptype": "vr",              // vr | hotel | camping | other
   "ptypeOther": "",           // texto libre si ptype=other
   "unit": "properties",       // properties | rooms | units  (derivado de ptype)
-  "size": "6-20",             // 1-5 | 6-20 | 21-100 | 100+
+  "size": "6-20",             // string del rango — depende del tipo (ver tabla de tiers en §3)
+  "sizeTier": 1,              // 0-3 — usar ESTE para reglas (team step, tono enterprise)
   "manage": "pms",            // pms | ota | manual
   "pms": "Guesty",            // nombre o null
   "prios": ["compliance"],    // subset de: compliance | ops | cleaning
