@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Chekin — Guest CRM (moved)</title>
+<script>
+  // Guest CRM moved to /dashboard/guest-crm/. Redirect any old deep-link,
+  // preserving the page name, query and hash (e.g. campaign-detail.html?id=…).
+  var page = location.pathname.split('/').pop() || 'index.html';
+  location.replace('../dashboard/guest-crm/' + page + location.search + location.hash);
+</script>
+</head>
+<body>
+<noscript><a href="../dashboard/guest-crm/index.html">Open Guest CRM</a></noscript>
+</body>
+</html>
