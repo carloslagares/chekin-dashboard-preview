@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Chekin — Welcome · Weekly calendar</title>
+<link rel="stylesheet" href="../ds/colors_and_type.css">
+<link rel="stylesheet" href="../ds/_sidebar.css">
+<link rel="stylesheet" href="../ds/_agent.css">
+<style>
+  :root{
+    /* Dashboard surface tokens — mirror V1's :root so sidebar + agent panel have all tokens */
+    --bg-dark:#161643;
+    --bg-screen:#FDFDFF;
+    --bg-white:#FFFFFF;
+    --bg-neutral-light:#F4F6F8;
+    --bg-sky-light:#EFF6FF;
+    --bg-blue-light:#F0F3FF;
+    --bg-success-light:#E8FCF7;
+    --stroke-gray-lighter:#E5E6EE;
+    --stroke-gray-light:#DEDEEB;
+    --stroke-gray-medium:#CECEDE;
+    --stroke-success-light:#AAF4E3;
+    --text-dark:#161643;
+    --text-gray-dark:#6B6B95;
+    --text-gray-medium:#9696B9;
+    --text-gray-light:#CECEDE;
+    --text-white:#FFFFFF;
+    --text-brand:#385CF8;
+    --text-danger:#FF2467;
+  }
+</style>
+<link rel="stylesheet" href="_shared.css">
+<style>
+  .page{gap:24px;max-width:1320px}
+
+  /* Head row */
+  .headrow{display:flex;align-items:flex-end;justify-content:space-between;gap:24px}
+  .headrow h1{font:600 28px/34px var(--font-primary);color:var(--ink);margin:0;letter-spacing:-.01em}
+  .headrow .sub{font:400 14px/20px var(--font-primary);color:var(--ink2);margin-top:6px}
+  .headrow .weekpill{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:4px 6px 4px 14px}
+  .headrow .weekpill .label{font:600 13px var(--font-primary);color:var(--ink)}
+  .headrow .weekpill .range{font:500 12px var(--font-primary);color:var(--ink3)}
+  .headrow .weekpill .nav{display:flex;gap:2px}
+  .headrow .weekpill .nav button{appearance:none;border:none;width:28px;height:28px;border-radius:50%;background:var(--bg-neutral);display:grid;place-items:center;cursor:pointer}
+  .headrow .weekpill .nav button svg{width:12px;height:12px;stroke:var(--ink2);fill:none;stroke-width:2}
+  .headrow .weekpill .nav button:hover{background:var(--blue-light)}
+  .headrow .weekpill .nav button:hover svg{stroke:var(--blue)}
+
+  /* Occupancy strip */
+  .occ-summary{
+    display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:0;
+    background:#fff;border:1px solid var(--line);border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-card);overflow:hidden;
+  }
+  .occ-summary .s{padding:18px 22px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:6px;position:relative}
+  .occ-summary .s:last-child{border-right:none}
+  .occ-summary .s .l{font:600 11px var(--font-primary);color:var(--ink3);text-transform:uppercase;letter-spacing:.06em}
+  .occ-summary .s .v{font:700 24px/28px var(--font-primary);color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:-.01em;display:flex;align-items:baseline;gap:6px}
+  .occ-summary .s .v .u{font:500 13px var(--font-primary);color:var(--ink2)}
+  .occ-summary .s .d{font:500 12px var(--font-primary);color:var(--ink2)}
+  .occ-summary .s .d.up{color:var(--success)}
+  .occ-summary .s .d.down{color:var(--danger)}
+  .occ-summary .s .ring{position:absolute;top:14px;right:16px;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--blue) 0 calc(var(--p) * 1%),var(--bg-neutral) 0 100%)}
+  .occ-summary .s .ring::after{content:"";width:30px;height:30px;border-radius:50%;background:#fff}
+  .occ-summary .s .ring .n{position:absolute;font:700 11px var(--font-primary);color:var(--ink)}
+
+  /* Main calendar */
+  .cal{background:#fff;border:1px solid var(--line);border-radius:var(--radius-lg);box-shadow:var(--shadow-card);overflow:hidden}
+  .cal .cal-head{display:grid;grid-template-columns:200px repeat(7, 1fr);border-bottom:1px solid var(--line);background:var(--bg-neutral-alt)}
+  .cal .cal-head .h{padding:14px 16px;font:600 11px var(--font-primary);color:var(--ink2);text-transform:uppercase;letter-spacing:.06em;border-right:1px solid var(--line)}
+  .cal .cal-head .h:last-child{border-right:none}
+  .cal .cal-head .h .day{font:700 14px var(--font-primary);color:var(--ink);margin-right:6px;text-transform:none;letter-spacing:0}
+  .cal .cal-head .h .date{font:500 11px var(--font-primary);color:var(--ink3);text-transform:uppercase;letter-spacing:.04em}
+  .cal .cal-head .h.today{background:linear-gradient(180deg,var(--blue-light) 0%, transparent 100%)}
+  .cal .cal-head .h.today .day{color:var(--blue)}
+  .cal .cal-head .h.today .date{color:var(--blue);font-weight:600}
+  .cal .cal-head .h.weekend{background:#FBFBFE}
+
+  .cal .row{display:grid;grid-template-columns:200px repeat(7,1fr);border-bottom:1px solid var(--line);min-height:88px;position:relative}
+  .cal .row:last-child{border-bottom:none}
+  .cal .prop{
+    padding:14px 16px;border-right:1px solid var(--line);
+    display:flex;flex-direction:column;gap:6px;justify-content:center;
+    background:#fff;position:sticky;left:0;z-index:2;
+  }
+  .cal .prop .pname{font:600 14px var(--font-primary);color:var(--ink)}
+  .cal .prop .pcity{font:500 12px var(--font-primary);color:var(--ink3);display:flex;align-items:center;gap:5px}
+  .cal .prop .pcity .flag{font-size:11px}
+  .cal .prop .cap{display:flex;gap:2px;margin-top:4px}
+  .cal .prop .cap .d{width:6px;height:6px;border-radius:2px;background:var(--line2)}
+  .cal .prop .cap .d.on{background:var(--blue)}
+  .cal .day{position:relative;border-right:1px solid var(--line);padding:6px;min-height:88px}
+  .cal .day:last-child{border-right:none}
+  .cal .day.weekend{background:#FBFBFE}
+  .cal .day.today{background:rgba(56,92,248,.04)}
+
+  /* Booking bars */
+  .book{
+    position:absolute;top:12px;height:30px;
+    border-radius:8px;padding:0 10px;display:flex;align-items:center;gap:8px;
+    font:600 12px var(--font-primary);color:#fff;cursor:pointer;
+    z-index:3;transition:transform .15s,box-shadow .15s;
+    white-space:nowrap;overflow:hidden;
+  }
+  .book:hover{transform:translateY(-1px);box-shadow:0 6px 14px rgba(22,22,67,.14);z-index:4}
+  .book .av{width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.22);display:grid;place-items:center;font:700 10px var(--font-primary);flex-shrink:0}
+  .book .nm{flex:1;overflow:hidden;text-overflow:ellipsis}
+  .book .st{
+    width:7px;height:7px;border-radius:50%;background:#fff;flex-shrink:0;
+  }
+  .book.verified{background:linear-gradient(135deg,#385CF8 0%, #5975F5 100%)}
+  .book.pending{background:linear-gradient(135deg,#B86A00 0%, #E08C1A 100%)}
+  .book.risk{background:linear-gradient(135deg,#FF2467 0%, #FF5A88 100%)}
+  .book.block{background:repeating-linear-gradient(45deg,#CECEDE 0 6px,#DEDEEB 6px 12px);color:var(--ink)}
+  .book.block .av{background:rgba(22,22,67,.1);color:var(--ink)}
+  .book.tentative{background:linear-gradient(135deg,#9696B9 0%, #B8B8D1 100%)}
+  .book.arriving-today{box-shadow:0 0 0 2px #fff, 0 0 0 4px var(--blue), 0 8px 20px rgba(56,92,248,.3)}
+
+  /* Second tier — events (check-in, check-out dots) */
+  .event-dots{position:absolute;bottom:6px;left:8px;display:flex;gap:4px}
+  .event-dots .ev{height:18px;padding:0 7px;border-radius:4px;font:600 10px var(--font-primary);display:inline-flex;align-items:center;gap:3px;letter-spacing:.02em}
+  .event-dots .ev.in{background:var(--blue-light);color:var(--blue)}
+  .event-dots .ev.out{background:var(--neutral-pill);color:var(--ink2)}
+
+  /* Legend */
+  .legend{display:flex;align-items:center;gap:18px;padding:12px 18px;border-top:1px solid var(--line);background:var(--bg-neutral-alt);font:500 12px var(--font-primary);color:var(--ink2)}
+  .legend .l{display:inline-flex;align-items:center;gap:6px}
+  .legend .sw{width:14px;height:10px;border-radius:3px}
+  .legend .sw.verified{background:linear-gradient(135deg,#385CF8,#5975F5)}
+  .legend .sw.pending{background:linear-gradient(135deg,#B86A00,#E08C1A)}
+  .legend .sw.risk{background:linear-gradient(135deg,#FF2467,#FF5A88)}
+  .legend .sw.block{background:repeating-linear-gradient(45deg,#CECEDE 0 3px,#DEDEEB 3px 6px)}
+
+  /* Bottom section */
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+
+  /* Revenue forecast */
+  .forecast{padding:22px 26px}
+  .forecast .bigrow{display:flex;align-items:baseline;gap:16px;margin-top:4px}
+  .forecast .big{font:700 34px/38px var(--font-primary);color:var(--ink);letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+  .forecast .delta{font:600 13px var(--font-primary);color:var(--success);display:inline-flex;align-items:center;gap:4px}
+  .forecast .chart{height:140px;margin-top:18px;position:relative}
+  .forecast .chart svg{width:100%;height:100%}
+  .forecast .chart .labels{display:flex;justify-content:space-between;margin-top:8px;font:500 11px var(--font-primary);color:var(--ink3)}
+  .forecast .chart .labels span.today{color:var(--blue);font-weight:700}
+
+  /* Next arrivals panel */
+  .next-list .item{display:grid;grid-template-columns:56px 1fr auto;gap:14px;align-items:center;padding:12px 0;border-bottom:1px dashed var(--line)}
+  .next-list .item:last-child{border-bottom:none}
+  .next-list .item .date{text-align:center}
+  .next-list .item .date .d{font:700 18px var(--font-primary);color:var(--ink);line-height:1}
+  .next-list .item .date .m{font:600 10px var(--font-primary);color:var(--ink3);text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+  .next-list .item .c .name{font:600 14px var(--font-primary);color:var(--ink)}
+  .next-list .item .c .meta{font:500 12px var(--font-primary);color:var(--ink2);margin-top:2px}
+  .next-list .item .revenue{text-align:right}
+  .next-list .item .revenue .amt{font:700 14px var(--font-primary);color:var(--ink);font-variant-numeric:tabular-nums}
+  .next-list .item .revenue .nights{font:500 11px var(--font-primary);color:var(--ink3)}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div id="sidebar-slot" data-nav="home"></div>
+
+  <main>
+    <header class="top">
+      <div class="crumbs"><b>Home</b></div>
+      <div class="spacer" style="margin-left:auto"></div>
+      <span data-agent-trigger-slot></span>
+      <button class="iconbtn" aria-label="Notifications"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><div class="pip"></div></button>
+    </header>
+
+    <div class="page">
+
+      <div class="headrow">
+        <div>
+          <h1>This week at a glance</h1>
+          <div class="sub">You're at <b style="color:var(--ink)">82% occupancy</b> · 18 check-ins · 15 check-outs. One booking needs attention.</div>
+        </div>
+        <div class="weekpill">
+          <div>
+            <div class="label">Week 16</div>
+            <div class="range">14 – 20 Apr 2026</div>
+          </div>
+          <div class="nav">
+            <button><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button>
+            <button><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Occupancy summary -->
+      <div class="occ-summary">
+        <div class="s" style="--p:82">
+          <div class="l">Occupancy</div>
+          <div class="v">82<span class="u">%</span></div>
+          <div class="d up">▲ 8 pts vs last week</div>
+          <div class="ring"><span class="n">82</span></div>
+        </div>
+        <div class="s" style="--p:75">
+          <div class="l">Check-ins</div>
+          <div class="v">18</div>
+          <div class="d">3 today · 5 tomorrow</div>
+          <div class="ring"><span class="n">18</span></div>
+        </div>
+        <div class="s" style="--p:63">
+          <div class="l">Revenue (projected)</div>
+          <div class="v">€ 4,820</div>
+          <div class="d up">▲ €620 vs last week</div>
+        </div>
+        <div class="s" style="--p:92">
+          <div class="l">Verified on-time</div>
+          <div class="v">94<span class="u">%</span></div>
+          <div class="d up">▲ 6 pts month over month</div>
+        </div>
+        <div class="s" style="--p:20">
+          <div class="l">Needs attention</div>
+          <div class="v" style="color:var(--danger)">1</div>
+          <div class="d down">Matteo Leone · arrives 16:00</div>
+        </div>
+      </div>
+
+      <!-- Calendar -->
+      <div class="cal">
+        <div class="cal-head">
+          <div class="h" style="display:flex;align-items:center;gap:10px">
+            <span>Property</span>
+            <span style="font:500 11px var(--font-primary);color:var(--ink3);text-transform:none;letter-spacing:0;margin-left:auto">4 total</span>
+          </div>
+          <div class="h"><span class="day">Mon</span><span class="date">14</span></div>
+          <div class="h"><span class="day">Tue</span><span class="date">15</span></div>
+          <div class="h"><span class="day">Wed</span><span class="date">16</span></div>
+          <div class="h"><span class="day">Thu</span><span class="date">17</span></div>
+          <div class="h today"><span class="day">Fri</span><span class="date">18 · today</span></div>
+          <div class="h weekend"><span class="day">Sat</span><span class="date">19</span></div>
+          <div class="h weekend"><span class="day">Sun</span><span class="date">20</span></div>
+        </div>
+
+        <!-- Casa del Mar 302 -->
+        <div class="row">
+          <div class="prop">
+            <div class="pname">Casa del Mar · 302</div>
+            <div class="pcity"><span class="flag">🇪🇸</span>Madrid · 2 guests</div>
+            <div class="cap"><span class="d on"></span><span class="d on"></span></div>
+          </div>
+          <div class="day"></div>
+          <div class="day">
+            <!-- Previous booking ending Tue -->
+            <div class="book verified" style="left:4px;right:0;width:calc(50% + 2px)"><div class="av">LH</div><div class="nm">Laure Martin</div><div class="st"></div></div>
+          </div>
+          <div class="day"></div>
+          <div class="day"></div>
+          <div class="day today">
+            <!-- Julia Rossi 18-21 Apr, arriving today -->
+            <div class="book verified arriving-today" style="left:calc(50% - 2px);right:-1px;width:calc(50% + 2px)"><div class="av">JR</div><div class="nm">Julia Rossi → 21 Apr</div><div class="st"></div></div>
+            <div class="event-dots"><span class="ev in">↓ 15:00 in</span></div>
+          </div>
+          <div class="day weekend"></div>
+          <div class="day weekend"></div>
+        </div>
+
+        <!-- Casa del Mar 215 -->
+        <div class="row">
+          <div class="prop">
+            <div class="pname">Casa del Mar · 215</div>
+            <div class="pcity"><span class="flag">🇪🇸</span>Madrid · 4 guests</div>
+            <div class="cap"><span class="d on"></span><span class="d on"></span><span class="d on"></span><span class="d on"></span></div>
+          </div>
+          <div class="day">
+            <!-- Dana Novak 14-17 -->
+            <div class="book risk" style="left:calc(50% - 2px);right:-1px;width:calc(50% + 2px)"><div class="av">DN</div><div class="nm">Dana Novak</div><div class="st"></div></div>
+          </div>
+          <div class="day"></div>
+          <div class="day"></div>
+          <div class="day">
+            <div class="book risk" style="left:-1px;right:calc(50% - 2px);width:calc(50% + 2px);border-radius:0 8px 8px 0"><div class="av">DN</div><div class="nm">ID mismatch</div><div class="st"></div></div>
+            <div class="event-dots"><span class="ev out">↑ 11:00 out</span></div>
+          </div>
+          <div class="day today"></div>
+          <div class="day weekend">
+            <!-- Weekend block -->
+            <div class="book block" style="left:4px;right:-1px;width:calc(100% - 2px)"><div class="av">—</div><div class="nm">Cleaning · blocked</div></div>
+          </div>
+          <div class="day weekend"></div>
+        </div>
+
+        <!-- Puerta del Sol A2 -->
+        <div class="row">
+          <div class="prop">
+            <div class="pname">Puerta del Sol · A2</div>
+            <div class="pcity"><span class="flag">🇪🇸</span>Madrid · 3 guests</div>
+            <div class="cap"><span class="d on"></span><span class="d on"></span><span class="d on"></span></div>
+          </div>
+          <div class="day"></div>
+          <div class="day"></div>
+          <div class="day">
+            <!-- Thomas check-out today from past booking -->
+            <div class="book verified" style="left:4px;right:-1px;width:calc(100% - 2px)"><div class="av">TB</div><div class="nm">Thomas Becker</div><div class="st"></div></div>
+          </div>
+          <div class="day">
+            <div class="book verified" style="left:-1px;right:calc(50% - 2px);width:calc(50% + 2px);border-radius:0 8px 8px 0"><div class="av">TB</div><div class="nm">T. Becker</div></div>
+            <div class="event-dots"><span class="ev out">↑ 11:00 out</span></div>
+          </div>
+          <div class="day today">
+            <!-- Ayşe Kaya 18-25 -->
+            <div class="book verified arriving-today" style="left:calc(50% - 2px);right:-1px;width:calc(50% + 2px)"><div class="av">AK</div><div class="nm">Ayşe Kaya → 25 Apr</div><div class="st"></div></div>
+            <div class="event-dots"><span class="ev in">↓ 19:30 in</span></div>
+          </div>
+          <div class="day weekend">
+            <div class="book verified" style="left:-1px;right:-1px;width:calc(100% + 2px);border-radius:0"><div class="av">AK</div><div class="nm">Ayşe Kaya</div></div>
+          </div>
+          <div class="day weekend">
+            <div class="book verified" style="left:-1px;right:-1px;width:calc(100% + 2px);border-radius:0"><div class="av">AK</div><div class="nm">Ayşe Kaya</div></div>
+          </div>
+        </div>
+
+        <!-- Villa Serena -->
+        <div class="row">
+          <div class="prop">
+            <div class="pname">Villa Serena</div>
+            <div class="pcity"><span class="flag">🇮🇹</span>Toscana · 6 guests</div>
+            <div class="cap"><span class="d on"></span><span class="d on"></span><span class="d on"></span><span class="d on"></span><span class="d on"></span><span class="d on"></span></div>
+          </div>
+          <div class="day"></div>
+          <div class="day"></div>
+          <div class="day"></div>
+          <div class="day"></div>
+          <div class="day today">
+            <div class="book pending arriving-today" style="left:calc(50% - 2px);right:-1px;width:calc(50% + 2px)"><div class="av">ML</div><div class="nm">Matteo Leone → 23 Apr</div><div class="st"></div></div>
+            <div class="event-dots"><span class="ev in">↓ 16:00 in</span><span class="ev" style="background:var(--danger-bg);color:var(--danger)">ID pending</span></div>
+          </div>
+          <div class="day weekend">
+            <div class="book pending" style="left:-1px;right:-1px;width:calc(100% + 2px);border-radius:0"><div class="av">ML</div><div class="nm">Matteo Leone</div></div>
+          </div>
+          <div class="day weekend">
+            <div class="book pending" style="left:-1px;right:-1px;width:calc(100% + 2px);border-radius:0"><div class="av">ML</div><div class="nm">Matteo Leone</div></div>
+          </div>
+        </div>
+
+        <div class="legend">
+          <div class="l"><span class="sw verified"></span>Verified &amp; deposit held</div>
+          <div class="l"><span class="sw pending"></span>ID pending</div>
+          <div class="l"><span class="sw risk"></span>Flagged</div>
+          <div class="l"><span class="sw block"></span>Blocked / cleaning</div>
+          <div style="margin-left:auto;display:inline-flex;align-items:center;gap:8px">
+            <span style="color:var(--blue);font-weight:600">●</span>
+            Arriving today
+          </div>
+        </div>
+      </div>
+
+      <!-- Two-col: Revenue forecast + Next arrivals -->
+      <div class="two-col">
+        <div class="panel forecast">
+          <div style="display:flex;justify-content:space-between;align-items:baseline">
+            <h3 style="margin:0">Revenue forecast — next 14 days</h3>
+            <a style="font:500 13px var(--font-primary);color:var(--blue);text-decoration:none">Open report →</a>
+          </div>
+          <div class="bigrow">
+            <div class="big">€ 9,720</div>
+            <div class="delta">▲ €1,280 vs previous fortnight</div>
+          </div>
+          <div class="chart">
+            <svg viewBox="0 0 600 140" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="gFore" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#385CF8" stop-opacity=".35"/>
+                  <stop offset="1" stop-color="#385CF8" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <!-- grid -->
+              <line x1="0" y1="40" x2="600" y2="40" stroke="#E5E6EE" stroke-dasharray="2 4"/>
+              <line x1="0" y1="80" x2="600" y2="80" stroke="#E5E6EE" stroke-dasharray="2 4"/>
+              <line x1="0" y1="120" x2="600" y2="120" stroke="#E5E6EE" stroke-dasharray="2 4"/>
+              <!-- actual path to today -->
+              <path d="M0 100 L43 85 L86 95 L128 70 L171 60 L214 55 L257 50 L300 40"
+                    stroke="#385CF8" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+              <!-- forecast (dashed) -->
+              <path d="M300 40 L343 50 L386 48 L428 42 L471 35 L514 28 L557 32 L600 30"
+                    stroke="#385CF8" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="4 5" opacity=".6"/>
+              <!-- fill under actual -->
+              <path d="M0 100 L43 85 L86 95 L128 70 L171 60 L214 55 L257 50 L300 40 L300 140 L0 140 Z" fill="url(#gFore)"/>
+              <!-- today marker -->
+              <line x1="300" y1="0" x2="300" y2="140" stroke="#385CF8" stroke-width="1" stroke-dasharray="2 3" opacity=".5"/>
+              <circle cx="300" cy="40" r="5" fill="#fff" stroke="#385CF8" stroke-width="2.5"/>
+            </svg>
+          </div>
+          <div class="chart-labels labels" style="display:flex;justify-content:space-between;margin-top:4px;font:500 11px var(--font-primary);color:var(--ink3)">
+            <span>Mon 14</span><span>Wed</span><span>Fri</span><span class="today" style="color:var(--blue);font-weight:700">Today</span><span>Mon</span><span>Wed</span><span>Fri</span><span>Sun 27</span>
+          </div>
+        </div>
+
+        <div class="panel panel-pad">
+          <h3>Upcoming arrivals <a>See all →</a></h3>
+          <div class="next-list">
+            <div class="item">
+              <div class="date"><div class="d">18</div><div class="m">Apr</div></div>
+              <div class="c">
+                <div class="name">Julia Rossi → Casa del Mar · 302</div>
+                <div class="meta">1 guest · 3 nights · Booking.com</div>
+              </div>
+              <div class="revenue"><div class="amt">€ 420</div><div class="nights">3 nights</div></div>
+            </div>
+            <div class="item">
+              <div class="date"><div class="d">18</div><div class="m">Apr</div></div>
+              <div class="c">
+                <div class="name">Matteo Leone → Villa Serena</div>
+                <div class="meta" style="color:var(--danger)">2 guests · ID not yet submitted</div>
+              </div>
+              <div class="revenue"><div class="amt">€ 1,440</div><div class="nights">5 nights</div></div>
+            </div>
+            <div class="item">
+              <div class="date"><div class="d">18</div><div class="m">Apr</div></div>
+              <div class="c">
+                <div class="name">Ayşe Kaya → Puerta del Sol · A2</div>
+                <div class="meta">3 guests · 7 nights · Airbnb</div>
+              </div>
+              <div class="revenue"><div class="amt">€ 1,260</div><div class="nights">7 nights</div></div>
+            </div>
+            <div class="item">
+              <div class="date"><div class="d">19</div><div class="m">Apr</div></div>
+              <div class="c">
+                <div class="name">Sam O'Connor → Pórtico 14 · 1B</div>
+                <div class="meta">2 guests · 2 nights · Direct</div>
+              </div>
+              <div class="revenue"><div class="amt">€ 180</div><div class="nights">2 nights</div></div>
+            </div>
+            <div class="item">
+              <div class="date"><div class="d">21</div><div class="m">Apr</div></div>
+              <div class="c">
+                <div class="name">Sofia Varga → Casa del Mar · 215</div>
+                <div class="meta">4 guests · 4 nights · Vrbo</div>
+              </div>
+              <div class="revenue"><div class="amt">€ 840</div><div class="nights">4 nights</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="../ds/_sidebar.js"></script>
+<script src="../ds/_agent.js"></script>
+</body>
+</html>

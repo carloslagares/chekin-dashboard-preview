@@ -1,0 +1,568 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Chekin — Dashboard · Mobile</title>
+<link rel="stylesheet" href="../ds/colors_and_type.css">
+<style>
+  :root{
+    --bg-dark:#161643;
+    --bg-screen:#F4F6FB;
+    --bg-white:#FFFFFF;
+    --bg-neutral-light:#F4F6F8;
+    --bg-neutral-cold:#F0F0F8;
+    --bg-sky-light:#EFF6FF;
+    --bg-blue-light:#F0F3FF;
+    --bg-success-light:#E8FCF7;
+    --bg-warn-light:#FFF2E0;
+    --bg-danger-light:#FFE4EC;
+    --stroke-gray-lighter:#E5E6EE;
+    --stroke-gray-light:#DEDEEB;
+    --stroke-gray-medium:#CECEDE;
+    --text-dark:#161643;
+    --text-gray-dark:#6B6B95;
+    --text-gray-medium:#9696B9;
+    --text-gray-light:#CECEDE;
+    --text-brand:#385CF8;
+    --text-brand-dark:#2945C5;
+    --text-brand-light:#8CA5FF;
+    --text-success:#0F9F80;
+    --text-warn:#B86A00;
+    --text-danger:#FF2467;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:radial-gradient(1200px 600px at 50% -200px,#E4EAFF,transparent),var(--bg-screen);font-family:var(--font-primary);color:var(--text-dark);font-feature-settings:"ss01";min-height:100vh}
+
+  .stage{display:flex;align-items:flex-start;justify-content:center;gap:36px;padding:90px 24px 48px;flex-wrap:wrap;min-height:100vh}
+
+  /* Phone */
+  .phone-col{display:flex;flex-direction:column;align-items:center;gap:14px}
+  .phone-label{font:600 11.5px var(--font-primary);color:var(--text-gray-dark);letter-spacing:.08em;text-transform:uppercase;display:inline-flex;align-items:center;gap:8px}
+  .phone-label .pip{font:700 9px var(--font-primary);color:var(--text-brand);background:var(--bg-blue-light);padding:2px 7px;border-radius:4px;letter-spacing:.04em}
+
+  .phone{
+    width:380px;height:780px;background:#000;border-radius:48px;padding:8px;position:relative;
+    box-shadow:0 20px 50px rgba(22,22,67,.18),0 6px 16px rgba(22,22,67,.1),0 0 0 1px rgba(22,22,67,.05),inset 0 0 0 1.5px rgba(255,255,255,.08);
+  }
+  .screen{
+    width:100%;height:100%;background:var(--bg-white);
+    border-radius:42px;overflow:hidden;position:relative;
+    display:flex;flex-direction:column;
+  }
+  .island{position:absolute;top:11px;left:50%;transform:translateX(-50%);width:118px;height:34px;background:#000;border-radius:18px;z-index:50}
+
+  /* Status bar */
+  .status{display:flex;align-items:center;justify-content:space-between;padding:14px 28px 10px;font:600 14px var(--font-primary);color:var(--text-dark);font-variant-numeric:tabular-nums;flex-shrink:0;height:48px}
+  .status .right{display:inline-flex;align-items:center;gap:6px}
+  .status .right svg{width:14px;height:14px;stroke:currentColor;fill:currentColor}
+  .status .batt{display:inline-flex;align-items:center;gap:2px}
+  .status .batt .b{width:22px;height:11px;border:1.4px solid currentColor;border-radius:3px;padding:1px;display:inline-block;position:relative}
+  .status .batt .b::after{content:"";position:absolute;right:-3px;top:3px;width:2px;height:5px;background:currentColor;border-radius:0 1px 1px 0}
+  .status .batt .b::before{content:"";display:block;width:80%;height:100%;background:currentColor;border-radius:1px}
+
+  /* Top bar (host dashboard) */
+  .topbar{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid var(--stroke-gray-lighter);background:#fff;flex-shrink:0;position:relative;z-index:5}
+  .topbar .iconbtn{width:36px;height:36px;border-radius:10px;background:transparent;border:none;display:grid;place-items:center;color:var(--text-dark);cursor:pointer;position:relative}
+  .topbar .iconbtn:hover{background:var(--bg-neutral-light)}
+  .topbar .iconbtn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.7}
+  .topbar .iconbtn .dot{position:absolute;top:7px;right:7px;width:7px;height:7px;border-radius:50%;background:var(--text-danger);border:1.5px solid #fff}
+  .topbar .brand{flex:1;display:flex;align-items:center;justify-content:center;gap:8px}
+  .topbar .brand .logo{font:700 17px var(--font-primary);color:var(--text-dark);letter-spacing:-.01em}
+  .topbar .brand .logo .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--text-brand);margin-left:2px;vertical-align:2px}
+  .topbar .av{width:32px;height:32px;border-radius:50%;background:var(--bg-sky-light);color:var(--text-brand);display:grid;place-items:center;font:700 11px var(--font-primary);cursor:pointer}
+
+  /* Body */
+  .body{flex:1;overflow-y:auto;padding:14px 14px 18px;display:flex;flex-direction:column;gap:16px;scroll-behavior:smooth;min-height:0}
+  .body::-webkit-scrollbar{display:none}
+  .body > *{flex-shrink:0}
+
+  /* Welcome strip */
+  .welcome{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+  .welcome h1{font:700 22px/26px var(--font-primary);margin:0;letter-spacing:-.01em}
+  .welcome .day{font:500 11.5px var(--font-primary);color:var(--text-gray-dark);background:var(--bg-neutral-light);padding:5px 10px;border-radius:999px;border:1px solid var(--stroke-gray-lighter);white-space:nowrap;display:flex;align-items:center;gap:5px}
+  .welcome .day svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.8}
+
+  /* Setup hero card */
+  .setup{background:#fff;border:1px solid var(--stroke-gray-lighter);border-radius:14px;padding:16px;box-shadow:0 1px 2px rgba(22,22,67,.04)}
+  .setup .hd{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px}
+  .setup .hd .t{font:700 14.5px var(--font-primary)}
+  .setup .hd .tag{font:600 10px var(--font-primary);color:var(--text-brand);background:var(--bg-blue-light);padding:3px 8px;border-radius:999px;letter-spacing:.04em}
+  .setup .sub{font:400 11.5px/16px var(--font-primary);color:var(--text-gray-dark);margin-bottom:10px}
+  .setup .pct{display:flex;align-items:center;justify-content:space-between;font:500 11px var(--font-primary);color:var(--text-gray-dark);margin-bottom:6px}
+  .setup .pct b{color:var(--text-brand);font-weight:600}
+  .setup .bar{height:5px;background:var(--bg-neutral-cold);border-radius:999px;overflow:hidden;margin-bottom:14px}
+  .setup .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--text-brand),#6B8CFF);border-radius:999px}
+  .setup .steps{display:flex;flex-direction:column;gap:6px}
+  .setup .st{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px}
+  .setup .st .ic{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;flex-shrink:0}
+  .setup .st .ic svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.7}
+  .setup .st.done .ic{background:var(--bg-success-light);color:var(--text-success)}
+  .setup .st.next .ic{background:var(--bg-blue-light);color:var(--text-brand)}
+  .setup .st.todo .ic{background:var(--bg-neutral-cold);color:var(--text-gray-dark)}
+  .setup .st .lt{flex:1;min-width:0}
+  .setup .st .t{font:600 12px/16px var(--font-primary)}
+  .setup .st .d{font:400 10.5px/14px var(--font-primary);color:var(--text-gray-medium)}
+  .setup .st.done .t{color:var(--text-gray-dark);font-weight:500}
+  .setup .st.next{background:var(--bg-blue-light)}
+  .setup .st .a{font:600 11px var(--font-primary);color:var(--text-brand);white-space:nowrap}
+  .setup .st.done .a{color:var(--text-success)}
+
+  /* Stats grid */
+  .stats-h{font:700 11px var(--font-primary);color:var(--text-gray-dark);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .stat{background:#fff;border:1px solid var(--stroke-gray-lighter);border-radius:12px;padding:13px 14px}
+  .stat .l{font:500 11.5px var(--font-primary);color:var(--text-gray-dark);display:flex;align-items:center;gap:5px}
+  .stat .l svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.8;opacity:.6}
+  .stat .n{font:700 26px/32px var(--font-primary);color:var(--text-dark);letter-spacing:-.01em;margin-top:2px;font-variant-numeric:tabular-nums}
+  .stat .n .of{font:500 13px var(--font-primary);color:var(--text-gray-dark);margin-left:3px}
+  .stat .trend{display:inline-flex;align-items:center;gap:3px;font:600 10.5px var(--font-primary);color:var(--text-success);margin-top:3px}
+  .stat .trend svg{width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:2.2}
+  .stat .trend.muted{color:var(--text-gray-medium)}
+  .stat .spark{margin-top:4px;height:14px;display:block}
+
+  /* Guides */
+  .sec-h{font:700 14px var(--font-primary);display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+  .sec-h a{font:600 11.5px var(--font-primary);color:var(--text-brand);text-decoration:none}
+  .guide{display:flex;align-items:center;gap:11px;background:#fff;border:1px solid var(--stroke-gray-lighter);border-radius:10px;padding:12px;margin-bottom:8px}
+  .guide .ic{width:34px;height:34px;border-radius:8px;background:var(--bg-blue-light);color:var(--text-brand);display:grid;place-items:center;flex-shrink:0}
+  .guide .ic svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.7}
+  .guide .lt{flex:1;min-width:0}
+  .guide .t{font:700 12.5px var(--font-primary)}
+  .guide .d{font:400 10.5px/14px var(--font-primary);color:var(--text-gray-dark);margin-top:1px}
+  .guide .time{font:600 10px var(--font-primary);color:var(--text-gray-medium);background:var(--bg-neutral-light);padding:3px 7px;border-radius:999px;flex-shrink:0}
+
+  /* Activity empty */
+  .activity{background:#fff;border:1px solid var(--stroke-gray-lighter);border-radius:12px;padding:24px 14px;text-align:center}
+  .activity .ic{width:42px;height:42px;border-radius:50%;background:var(--bg-sky-light);color:var(--text-brand);display:grid;place-items:center;margin:0 auto 8px}
+  .activity .ic svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.7}
+  .activity .t{font:700 13px var(--font-primary);margin-bottom:3px}
+  .activity .d{font:400 11px/15px var(--font-primary);color:var(--text-gray-dark)}
+
+  /* Floating Vela FAB */
+  .vela-fab{
+    position:absolute;bottom:88px;right:14px;z-index:30;
+    width:48px;height:48px;border-radius:50%;border:1.5px solid transparent;
+    background:
+      linear-gradient(135deg,#385CF8,#2945C5) padding-box,
+      conic-gradient(from 0deg, #385CF8, #8CA5FF, #B5C4FF, #385CF8) border-box;
+    color:#fff;display:grid;place-items:center;cursor:pointer;
+    box-shadow:0 10px 24px rgba(56,92,248,.32),0 3px 8px rgba(56,92,248,.2);
+    isolation:isolate;
+    animation:vela-rotate-fab 5s linear infinite;
+  }
+  @property --vela-spin{syntax:"<angle>";initial-value:0deg;inherits:false}
+  @keyframes vela-rotate-fab{to{rotate:360deg}}
+  .vela-fab > *{animation:vela-counter-rotate 5s linear infinite}
+  @keyframes vela-counter-rotate{from{rotate:0deg}to{rotate:-360deg}}
+  .vela-fab svg{width:22px;height:22px;fill:currentColor;stroke:none;position:relative;z-index:2}
+  .vela-fab::before{
+    content:"";position:absolute;inset:-8px;border-radius:50%;
+    background:radial-gradient(circle,rgba(56,92,248,.5),transparent 65%);
+    filter:blur(10px);opacity:.55;z-index:-1;pointer-events:none;
+    animation:vela-aura 3.6s ease-in-out infinite;
+  }
+  @keyframes vela-aura{0%,100%{transform:scale(.85);opacity:.4}50%{transform:scale(1.18);opacity:.85}}
+
+  /* Tab bar (host) */
+  .tabbar{display:flex;align-items:center;justify-content:space-around;padding:8px 8px 16px;border-top:1px solid var(--stroke-gray-lighter);background:#fff;flex-shrink:0;position:relative}
+  .tabbar::after{content:"";position:absolute;bottom:5px;left:50%;transform:translateX(-50%);width:120px;height:4px;border-radius:3px;background:#000}
+  .tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;font:600 9.5px var(--font-primary);color:var(--text-gray-medium);cursor:pointer;background:none;border:none;padding:4px 0}
+  .tab svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.7}
+  .tab.active{color:var(--text-brand)}
+  .tab.add{color:#fff;background:var(--text-brand);width:44px;height:44px;border-radius:14px;flex:0 0 44px;margin-top:-8px;font-size:0;align-self:center}
+  .tab.add svg{width:18px;height:18px;stroke-width:2.5}
+
+  /* ─────── M2 — Drawer (sidebar nav open) ─────── */
+  .drawer-overlay{position:absolute;inset:0;background:rgba(22,22,67,.4);z-index:60}
+  .drawer{position:absolute;top:0;left:0;bottom:0;width:78%;background:var(--bg-dark);color:#fff;z-index:70;display:flex;flex-direction:column;border-radius:42px 0 0 42px;overflow:hidden}
+  .drawer .dh{display:flex;align-items:center;justify-content:space-between;padding:18px 18px 14px;border-bottom:1px solid rgba(255,255,255,.06)}
+  .drawer .dh .logo{font:700 17px var(--font-primary);color:#fff;letter-spacing:-.01em}
+  .drawer .dh .logo .d{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--text-brand);margin-left:2px;vertical-align:2px}
+  .drawer .dh .x{width:32px;height:32px;border-radius:8px;border:none;background:rgba(255,255,255,.06);color:#fff;display:grid;place-items:center;cursor:pointer}
+  .drawer .dh .x svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2}
+  .drawer .who{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.06)}
+  .drawer .who .av{width:36px;height:36px;border-radius:50%;background:var(--text-brand);color:#fff;display:grid;place-items:center;font:700 12px var(--font-primary)}
+  .drawer .who .n{font:600 13.5px var(--font-primary);color:#fff}
+  .drawer .who .e{font:500 11px var(--font-primary);color:rgba(255,255,255,.55)}
+  .drawer .nv{flex:1;padding:10px 10px;display:flex;flex-direction:column;gap:2px;overflow-y:auto}
+  .drawer .sg{font:600 9.5px var(--font-primary);color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.1em;padding:14px 12px 6px}
+  .drawer .it{display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:7px;font:500 13.5px var(--font-primary);color:rgba(255,255,255,.78);cursor:pointer}
+  .drawer .it:hover{background:rgba(255,255,255,.04);color:#fff}
+  .drawer .it.active{background:rgba(56,92,248,.22);color:#fff}
+  .drawer .it svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.6;flex-shrink:0}
+  .drawer .it .b{margin-left:auto;font:700 9.5px var(--font-primary);padding:2px 7px;border-radius:999px;background:rgba(140,165,255,.18);color:#C4D2FF;letter-spacing:.02em}
+
+  /* ─────── M3 — Vela panel ─────── */
+  .vela-screen{display:flex;flex-direction:column;height:100%}
+  .vh-top{display:flex;align-items:center;gap:10px;padding:14px 16px;background:#fff;border-bottom:1px solid var(--stroke-gray-lighter);flex-shrink:0}
+  .vh-top .av{position:relative;width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#385CF8,#8CA5FF);color:#fff;display:grid;place-items:center;flex-shrink:0;isolation:isolate}
+  .vh-top .av svg{width:18px;height:18px;fill:currentColor;stroke:none}
+  .vh-top .av::before{content:"";position:absolute;inset:-6px;border-radius:50%;background:radial-gradient(circle,rgba(56,92,248,.48),transparent 60%);filter:blur(8px);opacity:.55;z-index:-1;animation:vela-aura 3.6s ease-in-out infinite}
+  .vh-top .av::after{content:"";position:absolute;bottom:-1px;right:-1px;width:9px;height:9px;border-radius:50%;background:var(--text-success);border:1.5px solid #fff}
+  .vh-top .nm{font:700 14.5px var(--font-primary)}
+  .vh-top .st{font:500 11px var(--font-primary);color:var(--text-gray-dark);display:flex;align-items:center;gap:5px}
+  .vh-top .st::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--text-success);box-shadow:0 0 0 3px rgba(15,159,128,.15)}
+  .vh-top .x{margin-left:auto;width:32px;height:32px;border-radius:8px;border:none;background:var(--bg-neutral-light);color:var(--text-gray-dark);display:grid;place-items:center;cursor:pointer}
+  .vh-top .x svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2}
+
+  .vh-body{flex:1;padding:16px 14px 12px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;min-height:0}
+  .vh-body > *{flex-shrink:0}
+
+  .vmsg{max-width:85%;display:flex;gap:8px;align-items:flex-end}
+  .vmsg.ai{align-self:flex-start}
+  .vmsg.user{align-self:flex-end;flex-direction:row-reverse}
+  .vmsg .bub{padding:10px 13px;border-radius:14px;font:400 13.5px/19px var(--font-primary);white-space:pre-wrap}
+  .vmsg.ai .bub{background:var(--bg-neutral-light);color:var(--text-dark);border-bottom-left-radius:4px}
+  .vmsg.user .bub{background:var(--text-brand);color:#fff;border-bottom-right-radius:4px}
+  .vmsg .av{width:24px;height:24px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;font:700 9.5px var(--font-primary)}
+  .vmsg.ai .av{background:linear-gradient(135deg,#385CF8,#8CA5FF);color:#fff}
+  .vmsg.ai .av svg{width:11px;height:11px;fill:currentColor;stroke:none}
+  .vmsg.user .av{background:var(--bg-sky-light);color:var(--text-brand)}
+
+  /* Insight card inside Vela */
+  .v-insight{align-self:flex-start;max-width:90%;margin-left:32px;background:linear-gradient(135deg,#F0F3FF,#EFF6FF);border:1px solid rgba(56,92,248,.16);border-radius:14px;padding:13px 14px}
+  .v-insight .tag{font:700 9px var(--font-primary);color:var(--text-brand);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px;display:inline-flex;align-items:center;gap:4px}
+  .v-insight .tag svg{width:10px;height:10px;fill:currentColor;stroke:none}
+  .v-insight .t{font:700 13.5px/18px var(--font-primary)}
+  .v-insight .d{font:400 11.5px/16px var(--font-primary);color:var(--text-gray-dark);margin-top:3px}
+  .v-insight .actions{display:flex;gap:6px;margin-top:10px}
+  .v-insight .actions .btn{flex:1;height:30px;border-radius:7px;border:none;background:var(--text-brand);color:#fff;font:600 11.5px var(--font-primary);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px}
+  .v-insight .actions .btn svg{width:11px;height:11px;stroke:#fff;fill:none;stroke-width:2}
+  .v-insight .actions .ghost{background:#fff;color:var(--text-dark);border:1px solid var(--stroke-gray-medium)}
+
+  /* Capability cards in Vela */
+  .v-caps{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-self:stretch;margin:6px 0}
+  .v-cap{background:#fff;border:1px solid var(--stroke-gray-lighter);border-radius:11px;padding:11px 12px;cursor:pointer}
+  .v-cap .ic{width:26px;height:26px;border-radius:7px;background:var(--bg-blue-light);color:var(--text-brand);display:grid;place-items:center;margin-bottom:6px}
+  .v-cap .ic svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.7}
+  .v-cap .t{font:700 12px var(--font-primary)}
+  .v-cap .d{font:400 10px/14px var(--font-primary);color:var(--text-gray-dark);margin-top:1px}
+
+  /* Composer */
+  .vh-comp{padding:8px 12px 10px;border-top:1px solid var(--stroke-gray-lighter);background:#fff;flex-shrink:0}
+  .vh-input{display:flex;align-items:center;gap:6px;background:var(--bg-neutral-light);border:1px solid var(--stroke-gray-lighter);border-radius:12px;padding:4px 4px 4px 12px}
+  .vh-input input{flex:1;border:none;background:transparent;outline:none;font:500 13px var(--font-primary);color:var(--text-dark);padding:6px 0}
+  .vh-input input::placeholder{color:var(--text-gray-medium)}
+  .vh-input button{width:30px;height:30px;border:none;border-radius:8px;background:var(--text-brand);color:#fff;display:grid;place-items:center;cursor:pointer}
+  .vh-input button svg{width:13px;height:13px;stroke:#fff;fill:none;stroke-width:2}
+
+  @media (max-width:900px){
+    .stage{gap:24px;padding:60px 16px 32px}
+    .phone{transform:scale(.92);transform-origin:top center}
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+
+  <!-- ─────── M1 · Home ─────── -->
+  <div class="phone-col">
+    <div class="phone-label"><span class="pip">M1</span>Home</div>
+    <div class="phone">
+      <div class="screen">
+        <div class="island"></div>
+        <div class="status">
+          <span>9:41</span>
+          <span class="right">
+            <svg viewBox="0 0 24 24"><path d="M2 17h2v3H2zm4-4h2v7H6zm4-4h2v11h-2zm4-4h2v15h-2zm4-4h2v19h-2z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M5 13a10 10 0 0 1 14 0M2 9a14 14 0 0 1 20 0"/></svg>
+            <span class="batt"><span class="b"></span></span>
+          </span>
+        </div>
+        <header class="topbar">
+          <button class="iconbtn" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+          <div class="brand">
+            <div class="logo">Chekin<span class="dot"></span></div>
+          </div>
+          <button class="iconbtn" aria-label="Notifications"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><span class="dot"></span></button>
+          <div class="av">MR</div>
+        </header>
+
+        <div class="body">
+
+          <!-- Welcome -->
+          <div class="welcome">
+            <h1>Welcome,<br>Maria 👋</h1>
+            <span class="day"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Sun · 19 Apr</span>
+          </div>
+
+          <!-- Setup -->
+          <div class="setup">
+            <div class="hd">
+              <div class="t">Finish setting up Chekin</div>
+              <span class="tag">2 of 5</span>
+            </div>
+            <div class="sub">Complete these steps to unlock automated check-in & police reporting.</div>
+            <div class="pct"><span><b>40%</b> · about 8 min left</span></div>
+            <div class="bar"><i style="width:40%"></i></div>
+            <div class="steps">
+              <div class="st done">
+                <div class="ic"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div>
+                <div class="lt"><div class="t">Create workspace</div><div class="d">Sonder Madrid</div></div>
+                <span class="a">Done</span>
+              </div>
+              <div class="st done">
+                <div class="ic"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div>
+                <div class="lt"><div class="t">Add property</div><div class="d">Puerta del Sol</div></div>
+                <span class="a">Done</span>
+              </div>
+              <div class="st next">
+                <div class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></div>
+                <div class="lt"><div class="t">Connect a channel or PMS</div><div class="d">Booking.com, Guesty, Hostaway…</div></div>
+                <span class="a">Connect →</span>
+              </div>
+              <div class="st todo">
+                <div class="ic"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></div>
+                <div class="lt"><div class="t">Set up police reporting</div><div class="d">SES.HOSPEDAJES, Alloggiati…</div></div>
+                <span class="a" style="color:var(--text-gray-medium)">Set up</span>
+              </div>
+              <div class="st todo">
+                <div class="ic"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+                <div class="lt"><div class="t">Test the guest flow</div><div class="d">Send yourself a sample link</div></div>
+                <span class="a" style="color:var(--text-gray-medium)">Preview</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- At a glance -->
+          <div>
+            <div class="stats-h">At a glance · last 7 days</div>
+            <div class="stats">
+              <div class="stat">
+                <div class="l">Properties</div>
+                <div class="n">1</div>
+                <div class="trend muted">Add another to centralise ops</div>
+              </div>
+              <div class="stat">
+                <div class="l">Bookings imported</div>
+                <div class="n">12</div>
+                <div class="trend"><svg viewBox="0 0 24 24"><path d="M7 17l9-9M9 8h7v7"/></svg>First sync today</div>
+              </div>
+              <div class="stat">
+                <div class="l">Check-ins completed</div>
+                <div class="n">0<span class="of">/12</span></div>
+                <div class="trend muted">Links go out 48h before</div>
+              </div>
+              <div class="stat">
+                <div class="l">Reports submitted</div>
+                <div class="n" style="color:var(--text-gray-light)">—</div>
+                <div class="trend muted">Finish setup to enable</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Guides -->
+          <div>
+            <div class="sec-h">Get more out of Chekin <a>See all →</a></div>
+            <div class="guide">
+              <div class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="12" r="2.5"/><path d="M14 10h4M14 14h4"/></svg></div>
+              <div class="lt"><div class="t">Turn on identity verification</div><div class="d">NFC + OCR + liveness, ~90s avg</div></div>
+              <span class="time">3 min</span>
+            </div>
+            <div class="guide">
+              <div class="ic"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M2 10h20M6 14h4"/></svg></div>
+              <div class="lt"><div class="t">Enable deposit holds</div><div class="d">Pre-authorise via Stripe; release on check-out</div></div>
+              <span class="time">5 min</span>
+            </div>
+            <div class="guide">
+              <div class="ic"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg></div>
+              <div class="lt"><div class="t">Try upselling at check-in</div><div class="d">Early check-in, late check-out and extras</div></div>
+              <span class="time">4 min</span>
+            </div>
+          </div>
+
+          <!-- Activity -->
+          <div>
+            <div class="sec-h">Recent activity</div>
+            <div class="activity">
+              <div class="ic"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+              <div class="t">No activity yet</div>
+              <div class="d">When guests open their check-in link, you'll see updates here.</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Floating Vela -->
+        <button class="vela-fab" aria-label="Ask Vela">
+          <svg viewBox="0 0 24 24"><path d="M10 2.3l1.75 5.45L17 9.4l-5.25 1.65L10 16.5l-1.75-5.45L3 9.4l5.25-1.65z"/><path d="M18.5 14l.75 2.25 2.25.75-2.25.75-.75 2.25-.75-2.25-2.25-.75 2.25-.75z"/></svg>
+        </button>
+
+        <nav class="tabbar">
+          <button class="tab active">
+            <svg viewBox="0 0 24 24"><path d="M3 9 12 2l9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+            Home
+          </button>
+          <button class="tab">
+            <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            Bookings
+          </button>
+          <button class="tab add" aria-label="New booking">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+          <button class="tab">
+            <svg viewBox="0 0 24 24"><path d="M3 9 12 2l9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+            Properties
+          </button>
+          <button class="tab">
+            <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Inbox
+          </button>
+        </nav>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────── M2 · Menu open ─────── -->
+  <div class="phone-col">
+    <div class="phone-label"><span class="pip">M2</span>Menu</div>
+    <div class="phone">
+      <div class="screen">
+        <div class="island"></div>
+        <div class="status">
+          <span>9:41</span>
+          <span class="right">
+            <svg viewBox="0 0 24 24"><path d="M2 17h2v3H2zm4-4h2v7H6zm4-4h2v11h-2zm4-4h2v15h-2zm4-4h2v19h-2z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M5 13a10 10 0 0 1 14 0M2 9a14 14 0 0 1 20 0"/></svg>
+            <span class="batt"><span class="b"></span></span>
+          </span>
+        </div>
+        <header class="topbar">
+          <button class="iconbtn" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+          <div class="brand">
+            <div class="logo">Chekin<span class="dot"></span></div>
+          </div>
+          <button class="iconbtn" aria-label="Notifications"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg></button>
+          <div class="av">MR</div>
+        </header>
+
+        <div class="body" style="opacity:.4"></div>
+
+        <div class="drawer-overlay"></div>
+        <aside class="drawer">
+          <div class="dh">
+            <div class="logo">Chekin<span class="d"></span></div>
+            <button class="x" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+          </div>
+          <div class="who">
+            <div class="av">MR</div>
+            <div>
+              <div class="n">Maria Romero</div>
+              <div class="e">Sonder Madrid · maria@email.com</div>
+            </div>
+          </div>
+          <nav class="nv">
+            <div class="it active"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Home</div>
+            <div class="it"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Bookings<span class="b">12</span></div>
+            <div class="it"><svg viewBox="0 0 24 24"><path d="M3 9 12 2l9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>Properties</div>
+            <div class="it"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Inbox</div>
+            <div class="it"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>Upselling</div>
+            <div class="it"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Documents</div>
+            <div class="sg">Compliance</div>
+            <div class="it"><svg viewBox="0 0 24 24"><path d="M12 2 4 5v7c0 5 3.5 8 8 10 4.5-2 8-5 8-10V5z"/></svg>Legal &amp; Police</div>
+            <div class="it"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M2 10h20M6 14h4"/></svg>Tourist tax</div>
+            <div class="sg">Views</div>
+            <div class="it"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 14h3M8 18h5"/></svg>Today's Agenda</div>
+            <div class="it"><svg viewBox="0 0 24 24"><path d="M12 2 4 5v7c0 5 3.5 8 8 10 4.5-2 8-5 8-10V5z"/><path d="m9 12 2 2 4-4"/></svg>Compliance First</div>
+            <div class="it"><svg viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><path d="M10 2.3l1.75 5.45L17 9.4l-5.25 1.65L10 16.5l-1.75-5.45L3 9.4l5.25-1.65z"/></svg>Vela AI</div>
+            <div class="it"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Weekly calendar</div>
+          </nav>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────── M3 · Vela AI panel ─────── -->
+  <div class="phone-col">
+    <div class="phone-label"><span class="pip">M3</span>Vela AI</div>
+    <div class="phone">
+      <div class="screen vela-screen">
+        <div class="island"></div>
+        <div class="status">
+          <span>9:41</span>
+          <span class="right">
+            <svg viewBox="0 0 24 24"><path d="M2 17h2v3H2zm4-4h2v7H6zm4-4h2v11h-2zm4-4h2v15h-2zm4-4h2v19h-2z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M5 13a10 10 0 0 1 14 0M2 9a14 14 0 0 1 20 0"/></svg>
+            <span class="batt"><span class="b"></span></span>
+          </span>
+        </div>
+
+        <header class="vh-top">
+          <div class="av"><svg viewBox="0 0 24 24"><path d="M10 2.3l1.75 5.45L17 9.4l-5.25 1.65L10 16.5l-1.75-5.45L3 9.4l5.25-1.65z"/><path d="M18.5 14l.75 2.25 2.25.75-2.25.75-.75 2.25-.75-2.25-2.25-.75 2.25-.75z"/></svg></div>
+          <div>
+            <div class="nm">Vela</div>
+            <div class="st">Tuned in to your business</div>
+          </div>
+          <button class="x" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+        </header>
+
+        <div class="vh-body">
+          <div class="vmsg ai">
+            <div class="av"><svg viewBox="0 0 24 24"><path d="M10 2.3l1.75 5.45L17 9.4l-5.25 1.65L10 16.5l-1.75-5.45L3 9.4l5.25-1.65z"/></svg></div>
+            <div class="bub">Good afternoon, Maria 👋 What shall we get done today?</div>
+          </div>
+
+          <div class="v-insight">
+            <div class="tag"><svg viewBox="0 0 24 24"><path d="M10 2l1.7 5.3L17 9l-5.3 1.7L10 14l-1.7-5.3L3 9z"/></svg>Spotted for you</div>
+            <div class="t">3 guests arriving tomorrow haven't verified their ID</div>
+            <div class="d">Send a reminder now and they'll have time to complete check-in before arrival.</div>
+            <div class="actions">
+              <button class="btn"><svg viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/></svg>Send</button>
+              <button class="btn ghost">Dismiss</button>
+            </div>
+          </div>
+
+          <div class="vmsg ai">
+            <div class="av"><svg viewBox="0 0 24 24"><path d="M10 2.3l1.75 5.45L17 9.4l-5.25 1.65L10 16.5l-1.75-5.45L3 9.4l5.25-1.65z"/></svg></div>
+            <div class="bub">Try one of these to get started:</div>
+          </div>
+
+          <div class="v-caps">
+            <div class="v-cap">
+              <div class="ic"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg></div>
+              <div class="t">Summarise this week</div>
+              <div class="d">Check-ins, no-shows, revenue</div>
+            </div>
+            <div class="v-cap">
+              <div class="ic"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M2 10h20"/></svg></div>
+              <div class="t">Configure features</div>
+              <div class="d">Deposits, keys, taxes in bulk</div>
+            </div>
+            <div class="v-cap">
+              <div class="ic"><svg viewBox="0 0 24 24"><path d="M12 2 4 5v7c0 5 3.5 8 8 10 4.5-2 8-5 8-10V5z"/></svg></div>
+              <div class="t">Compliance reports</div>
+              <div class="d">SES, Alloggiati, police</div>
+            </div>
+            <div class="v-cap">
+              <div class="ic"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></div>
+              <div class="t">Find &amp; filter</div>
+              <div class="d">Guests, bookings by any rule</div>
+            </div>
+          </div>
+
+          <div class="vmsg user">
+            <div class="av">MR</div>
+            <div class="bub">Draft a reminder for the 3 unverified guests</div>
+          </div>
+
+          <div class="vmsg ai">
+            <div class="av"><svg viewBox="0 0 24 24"><path d="M10 2.3l1.75 5.45L17 9.4l-5.25 1.65L10 16.5l-1.75-5.45L3 9.4l5.25-1.65z"/></svg></div>
+            <div class="bub">Drafted in EN/ES based on each guest's locale. Want to review before I send?</div>
+          </div>
+        </div>
+
+        <div class="vh-comp">
+          <div class="vh-input">
+            <input placeholder="Ask Vela anything…">
+            <button aria-label="Send"><svg viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/></svg></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

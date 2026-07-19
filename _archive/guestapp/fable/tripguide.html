@@ -1,0 +1,831 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chekin Guest — Trip Guide (Fable V7 · Desktop)</title>
+<link rel="stylesheet" href="../../ds/colors_and_type.css">
+<link rel="stylesheet" href="../_chek.css">
+<script src="../_chek.js" defer></script>
+<style>
+  :root{
+    --bg-dark:#14143C;
+    --bg-screen:#F5F6FB;
+    --bg-white:#FFFFFF;
+    --bg-neutral-light:#F4F5F9;
+    --bg-neutral-cold:#EFF0F8;
+    --bg-sky-light:#EFF6FF;
+    --bg-blue-light:#F0F3FF;
+    --bg-success-light:#E7FBF4;
+    --bg-warn-light:#FFF3E2;
+    --bg-danger-light:#FFE7EE;
+    --bg-gold-light:#FBF1DC;
+    --stroke-gray-lighter:#E8E9F2;
+    --stroke-gray-light:#DEDFEC;
+    --stroke-gray-medium:#C9CADD;
+    --text-dark:#14143C;
+    --text-gray-dark:#68688F;
+    --text-gray-medium:#9696B9;
+    --text-gray-light:#CECEDE;
+    --text-brand:#385CF8;
+    --text-brand-dark:#2945C5;
+    --text-brand-light:#8CA5FF;
+    --text-success:#0E9E7E;
+    --text-warn:#B86A00;
+    --text-danger:#FF2467;
+    --text-gold:#9C7A2E;
+    --radius-sm:8px;
+    --radius-md:12px;
+    --radius-lg:16px;
+    --radius-xl:22px;
+    --shadow-card:0 1px 2px rgba(20,20,60,.045),0 0 0 1px rgba(20,20,60,.035);
+    --shadow-elev:0 14px 34px rgba(20,20,60,.10),0 2px 6px rgba(20,20,60,.05);
+    --shadow-hover:0 18px 38px rgba(56,92,248,.14),0 3px 8px rgba(20,20,60,.06);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg-screen);font-family:var(--font-primary);color:var(--text-dark);font-feature-settings:"ss01";-webkit-font-smoothing:antialiased}
+
+  @media (prefers-reduced-motion: no-preference){
+    .reveal{opacity:0;transform:translateY(10px);animation:rv .55s cubic-bezier(.2,.8,.2,1) forwards}
+    @keyframes rv{to{opacity:1;transform:none}}
+  }
+
+  .app{display:grid;grid-template-columns:264px 1fr 322px;min-height:100vh}
+
+  /* ───── Sidebar (same as journey-v7.html) ───── */
+  .side{background:var(--bg-dark);color:#fff;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+  .side .prop{display:flex;align-items:center;gap:12px;padding:20px 18px 17px;border-bottom:1px solid rgba(255,255,255,.07)}
+  .side .prop .av{width:42px;height:42px;border-radius:12px;overflow:hidden;flex-shrink:0;box-shadow:0 0 0 1px rgba(255,255,255,.14);position:relative}
+  .side .prop .av img{width:100%;height:100%;object-fit:cover;display:block}
+  .side .prop .name{font:600 15px/20px var(--font-primary);letter-spacing:-.005em}
+  .side .prop .ref{font:500 11px var(--font-primary);color:rgba(255,255,255,.5);margin-top:2px;font-variant-numeric:tabular-nums}
+  .side nav{padding:16px 10px;flex:1;display:flex;flex-direction:column;gap:2px}
+  .side .sgroup{font:700 10px var(--font-primary);color:rgba(255,255,255,.38);text-transform:uppercase;letter-spacing:.11em;padding:16px 12px 7px}
+  .side .n-item{display:flex;align-items:center;gap:12px;padding:9.5px 12px;border-radius:10px;cursor:pointer;font:500 14px/20px var(--font-primary);color:rgba(255,255,255,.8);user-select:none;white-space:nowrap;transition:background .14s,color .14s;text-decoration:none}
+  .side .n-item svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.6;flex-shrink:0}
+  .side .n-item:hover{background:rgba(255,255,255,.07);color:#fff}
+  .side .n-item.active{background:linear-gradient(135deg,rgba(56,92,248,.38),rgba(56,92,248,.16));color:#fff;box-shadow:inset 0 0 0 1px rgba(140,165,255,.2)}
+  .side .n-item .badge{margin-left:auto;font:700 10.5px var(--font-primary);padding:2px 8px;border-radius:999px;background:rgba(140,165,255,.2);color:#C9D5FF;white-space:nowrap}
+  .side .n-item .badge.new{background:rgba(107,224,168,.24);color:#7FE7B4}
+  .side .n-item[data-nav-toggle]{cursor:pointer}
+  .side .n-chev{margin-left:auto;width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;flex-shrink:0;transition:transform .15s}
+  .side .n-item[data-nav-toggle].open .n-chev{transform:rotate(90deg)}
+  .side .n-sub{display:none;flex-direction:column;padding:2px 12px 4px 44px}
+  .side .n-sub.open{display:flex}
+  .side .n-subitem{display:block;padding:7px 10px;border-radius:8px;font:500 13px var(--font-primary);color:rgba(255,255,255,.62);text-decoration:none;transition:background .12s,color .12s}
+  .side .n-subitem:hover{background:rgba(255,255,255,.07);color:#fff}
+  .side .n-subitem.active{color:#fff;font-weight:600}
+  .side .me{margin-top:auto;padding:15px 16px;border-top:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:10px}
+  .side .me .av{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.1);color:#fff;display:grid;place-items:center;font:700 11px var(--font-primary)}
+  .side .me .n{font:600 13px/16px var(--font-primary)}
+  .side .me .e{font:500 11px var(--font-primary);color:rgba(255,255,255,.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px}
+
+  /* ───── Main ───── */
+  .main{padding:28px 32px 56px;display:flex;flex-direction:column;gap:20px;min-width:0}
+  .head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px}
+  .head h1{font:600 27px/32px var(--font-primary);margin:0;letter-spacing:-.018em}
+  .head .sub{font:500 13px var(--font-primary);color:var(--text-gray-dark);margin-top:6px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:36px;padding:0 15px;border-radius:10px;font:600 13px var(--font-primary);cursor:pointer;border:none;text-decoration:none;transition:background .12s,transform .1s,box-shadow .12s}
+  .btn.primary{background:var(--text-brand);color:#fff;box-shadow:0 3px 10px rgba(56,92,248,.26)}
+  .btn.primary:hover{background:var(--text-brand-dark)}
+  .btn.ghost{background:#fff;color:var(--text-dark);border:1px solid var(--stroke-gray-medium)}
+  .btn.ghost:hover{background:var(--bg-neutral-light)}
+  .btn.dark{background:var(--bg-dark);color:#fff}
+  .btn.dark:hover{background:#22225C}
+  .btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2}
+
+  /* Trip-stage tracker — same component as the Home page, now interactive */
+  .stages{display:flex;align-items:center;gap:0;background:#fff;border:1px solid var(--stroke-gray-lighter);border-radius:999px;padding:5px;box-shadow:var(--shadow-card)}
+  .stages .stg{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:8px 10px;border-radius:999px;font:600 12.5px var(--font-primary);color:var(--text-gray-medium);position:relative;transition:background .15s,color .15s;cursor:pointer;border:none;background:none}
+  .stages .stg .dot{width:6px;height:6px;border-radius:50%;background:var(--stroke-gray-medium);flex-shrink:0}
+  .stages .stg.done{color:var(--text-gray-dark)}
+  .stages .stg.done .dot{background:var(--text-success)}
+  .stages .stg.active{background:var(--text-dark);color:#fff}
+  .stages .stg.active .dot{background:#7FE7B4}
+  .stages .stg:not(:last-child)::after{content:"";position:absolute;right:-1px;top:50%;width:1px;height:14px;background:var(--stroke-gray-lighter);transform:translateY(-50%)}
+  .stages .stg.active:not(:last-child)::after,.stages .stg.active + .stg::after{background:transparent}
+
+  .card{background:#fff;border:1px solid var(--stroke-gray-lighter);border-radius:var(--radius-lg);box-shadow:var(--shadow-card)}
+  .sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:12px}
+  .sec-head h2{font:600 17px/22px var(--font-primary);margin:0;letter-spacing:-.006em}
+  .sec-head .meta{font:600 13px var(--font-primary);color:var(--text-gray-dark)}
+  .sec-head .meta b{color:var(--text-brand)}
+
+  /* Day sub-tabs (only shown inside the "Stay" stage) */
+  .dtabs{display:flex;gap:6px}
+  .dtab{border:1px solid var(--stroke-gray-lighter);background:#fff;border-radius:999px;padding:7px 14px;font:600 12.5px var(--font-primary);color:var(--text-gray-dark);cursor:pointer;transition:background .12s,color .12s,border-color .12s}
+  .dtab:hover{border-color:var(--stroke-gray-medium)}
+  .dtab.on{background:var(--text-dark);color:#fff;border-color:var(--text-dark)}
+
+  .glance{display:flex;align-items:center;gap:8px;font:500 12.5px var(--font-primary);color:var(--text-gray-dark);margin:-2px 0 2px}
+  .glance svg{width:14px;height:14px;stroke:var(--text-brand);fill:none;stroke-width:1.8}
+
+  .part-label{display:flex;align-items:center;gap:12px;font:700 10.5px var(--font-primary);color:var(--text-gray-medium);text-transform:uppercase;letter-spacing:.1em;margin:18px 0 2px}
+  .part-label:first-child{margin-top:0}
+  .part-label::after{content:"";flex:1;height:1px;background:var(--stroke-gray-lighter)}
+
+  /* Flat activity row — no elevation, hairline border only, per "match Journey V7 flat cards" */
+  .act-row{display:flex;flex-direction:column;padding:18px 4px;border-bottom:1px solid var(--stroke-gray-lighter)}
+  .act-row:last-child{border-bottom:0}
+  .act-top{display:flex;align-items:flex-start;gap:18px}
+  .act-row .thumb{width:112px;height:112px;border-radius:12px;flex-shrink:0;overflow:hidden;background:var(--bg-neutral-cold)}
+  .act-row .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .act-row .main{flex:1;min-width:0;padding-top:1px}
+  .act-row .t{font:600 15.5px/20px var(--font-primary);letter-spacing:-.005em}
+  .act-row .cat{display:flex;align-items:center;gap:6px;font:600 10.5px var(--font-primary);color:var(--text-gray-medium);text-transform:uppercase;letter-spacing:.05em;margin-top:5px}
+  .cat-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;background:var(--stroke-gray-medium)}
+  .cat-dot.food{background:#C1663A}
+  .cat-dot.culture{background:#6E56C8}
+  .cat-dot.nature{background:#3F9163}
+  .cat-dot.music{background:#B23E74}
+  .cat-dot.views{background:#2C82B8}
+  .act-row .dd{font:400 13px/19px var(--font-primary);color:var(--text-gray-dark);margin-top:8px}
+  .act-row .meta-row{display:flex;align-items:center;gap:14px;font:500 12px var(--font-primary);color:var(--text-gray-medium);margin-top:10px}
+  .act-row .meta-row span{display:inline-flex;align-items:center;gap:5px}
+  .act-row .meta-row svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8}
+  .free-tag{font:700 9.5px var(--font-primary);text-transform:uppercase;letter-spacing:.04em;color:var(--text-success);background:var(--bg-success-light);padding:2px 7px;border-radius:5px}
+  .sponsor-tag{font:700 9px var(--font-primary);text-transform:uppercase;letter-spacing:.05em;color:var(--text-gold);background:var(--bg-gold-light);padding:2px 7px;border-radius:5px;margin-left:8px}
+  .act-cta{display:flex;flex-shrink:0;align-items:center;justify-content:flex-end;gap:16px;margin-top:14px;padding-top:12px;border-top:1px solid var(--stroke-gray-lighter)}
+  .dismiss-link{font:600 11.5px var(--font-primary);color:var(--text-gray-medium);background:none;border:none;cursor:pointer;padding:2px 0;transition:color .12s}
+  .dismiss-link:hover{color:var(--text-gray-dark)}
+  .buy-btn{font:700 12px var(--font-primary);color:#fff;background:var(--text-brand);border:none;border-radius:8px;padding:7px 14px;cursor:pointer;white-space:nowrap;transition:background .12s}
+  .buy-btn:hover{background:var(--text-brand-dark)}
+  .buy-btn.added{background:var(--bg-success-light);color:var(--text-success)}
+
+  .stage-note{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:10px;background:var(--bg-blue-light);color:var(--text-dark);font:600 12.5px var(--font-primary);margin-bottom:6px}
+  .stage-note svg{width:14px;height:14px;stroke:var(--text-brand);fill:none;stroke-width:1.9;flex-shrink:0}
+
+  .panel{padding:20px 20px 8px}
+  .stagewrap{display:none}
+  .stagewrap.on{display:block}
+
+  /* ───── Onboarding: cover → sign-in → quiz → generating (body-only, shell stays mounted) ───── */
+  #onboard{display:flex;flex-direction:column;align-items:center;padding-top:8px}
+  .ob-step{display:none;width:100%;max-width:480px}
+  .ob-step.on{display:block}
+  #guideReady{display:flex;flex-direction:column;align-items:center;gap:20px}
+  #guideReady>.head,#guideReady>.stages,#guideReady>section{width:100%;max-width:640px}
+  .ob-cover{overflow:hidden}
+  .ob-cover-media{position:relative;height:280px;background:#161643 center 30%/cover no-repeat}
+  .ob-cover-media img{width:100%;height:100%;object-fit:cover;display:block}
+  .ob-flag{position:absolute;top:16px;right:18px;font-size:26px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.35))}
+  .ob-cover-body{padding:24px 28px 28px}
+  .ob-h1{font:700 30px var(--font-primary);letter-spacing:-.02em;color:var(--text-dark);margin:6px 0 10px}
+  .ob-p{font:500 13px/1.6 var(--font-primary);color:var(--text-gray-dark);max-width:420px}
+  .ob-actions{display:flex;gap:10px;margin-top:18px}
+  .ob-actions .btn{height:42px;padding:0 20px}
+  .ob-foot{margin-top:16px;font:500 12px var(--font-primary);color:var(--text-gray-dark)}
+  .ob-foot a{color:var(--text-dark);font-weight:700;text-decoration:underline;cursor:pointer}
+  .ob-skip{display:block;margin-top:10px;font:600 11.5px var(--font-primary);color:var(--text-gray-medium);background:none;border:none;cursor:pointer;padding:0}
+  .ob-skip:hover{color:var(--text-gray-dark)}
+
+  .ob-quiz{padding:28px 32px}
+  .ob-quiz-top{display:flex;align-items:center;gap:14px;margin-bottom:20px}
+  .ob-quiz-count{font:600 11.5px var(--font-primary);color:var(--text-gray-medium);flex-shrink:0}
+  .ob-quiz-progress{display:flex;gap:6px;flex:1}
+  .ob-quiz-progress i{flex:1;height:3px;border-radius:2px;background:var(--stroke-gray-lighter)}
+  .ob-quiz-progress i.done{background:var(--text-brand)}
+  .ob-quiz h2{font:700 22px var(--font-primary);letter-spacing:-.015em;color:var(--text-dark);margin:0}
+  .ob-quiz .q-sub{font:500 12.5px var(--font-primary);color:var(--text-gray-dark);margin:6px 0 20px}
+  .ob-opt-list{display:flex;flex-direction:column;gap:8px}
+  .ob-opt{display:flex;align-items:center;gap:12px;text-align:left;width:100%;padding:14px 16px;border-radius:12px;border:1px solid var(--stroke-gray-lighter);background:#fff;cursor:pointer;transition:border-color .12s,background .12s}
+  .ob-opt:hover{border-color:var(--stroke-gray-medium)}
+  .ob-opt .o-name{font:600 13.5px var(--font-primary);color:var(--text-dark);display:block}
+  .ob-opt .o-desc{font:400 12px var(--font-primary);color:var(--text-gray-dark);display:block;margin-top:2px}
+  .ob-opt .o-check{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--stroke-gray-medium);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff}
+  .ob-opt .o-check svg{width:11px;height:11px;opacity:0}
+  .ob-opt.sel{border-color:var(--text-brand);background:var(--bg-blue-light)}
+  .ob-opt.sel .o-check{border-color:var(--text-brand);background:var(--text-brand)}
+  .ob-opt.sel .o-check svg{opacity:1}
+  .ob-chip-grid{display:flex;flex-wrap:wrap;gap:8px}
+  .ob-chip{font:500 12.5px var(--font-primary);color:var(--text-dark);padding:9px 15px;border-radius:20px;border:1px solid var(--stroke-gray-lighter);background:#fff;cursor:pointer;transition:all .12s}
+  .ob-chip:hover{border-color:var(--stroke-gray-medium)}
+  .ob-chip.sel{border-color:var(--text-brand);background:var(--text-brand);color:#fff;font-weight:600}
+  .ob-quiz-foot{margin-top:24px;padding-top:18px;border-top:1px solid var(--stroke-gray-lighter);display:flex;flex-direction:column;align-items:center;gap:10px}
+  .ob-quiz-foot .btn{width:100%}
+
+  .ob-gen{padding:40px 32px}
+  .ob-gen h2{font:700 22px var(--font-primary);letter-spacing:-.015em;color:var(--text-dark);margin:0}
+  .ob-gen-bar{height:3px;border-radius:2px;background:var(--stroke-gray-lighter);overflow:hidden;margin-bottom:28px}
+  .ob-gen-bar i{display:block;height:100%;width:0;background:var(--text-brand);border-radius:2px;transition:width .6s cubic-bezier(.3,.7,.3,1)}
+  .ob-gstep{display:flex;align-items:center;gap:12px;font:500 13px var(--font-primary);color:var(--text-gray-light);padding:9px 0;transition:color .25s}
+  .ob-gstep::before{content:"";width:18px;height:18px;border-radius:50%;border:1.5px solid var(--stroke-gray-lighter);flex-shrink:0}
+  .ob-gstep.on{color:var(--text-dark)}
+  .ob-gstep.on::before{border-color:var(--text-brand);background:var(--text-brand)}
+  .ob-gstep.done{color:var(--text-gray-dark)}
+  .ob-gstep.done::before{border-color:var(--text-brand);background:var(--text-brand)}
+
+  /* ───── Rail (same as journey-v7.html) ───── */
+  .rail{padding:28px 24px 56px;display:flex;flex-direction:column;gap:16px;border-left:1px solid var(--stroke-gray-lighter);background:#fff}
+  .weather{display:flex;align-items:center;gap:12px;padding:14px 18px}
+  .weather .ic{width:36px;height:36px;border-radius:10px;background:var(--bg-warn-light);color:var(--text-warn);display:grid;place-items:center;flex-shrink:0}
+  .weather .ic svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.7}
+  .weather .lt{flex:1;min-width:0}
+  .weather .t{font:600 13px var(--font-primary)}
+  .weather .d{font:400 12px var(--font-primary);color:var(--text-gray-dark);margin-top:1px}
+  .weather .temp{font:700 17px var(--font-primary);color:var(--text-dark);font-variant-numeric:tabular-nums}
+  .contact .hd{display:flex;align-items:center;gap:10px;padding:14px 18px 4px}
+  .contact .hd svg{width:16px;height:16px;stroke:var(--text-brand);fill:none;stroke-width:1.8}
+  .contact .hd .t{font:600 13.5px var(--font-primary)}
+  .contact p{margin:0;padding:4px 18px 10px;font:400 12px/17px var(--font-primary);color:var(--text-gray-dark)}
+  .contact .cta{padding:0 14px 14px}
+  .contact .cta .btn{width:100%}
+  .prefs .hd{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 4px}
+  .prefs .hd .t{font:600 14px var(--font-primary)}
+  .prefs .hd a{font:600 11.5px var(--font-primary);color:var(--text-brand);text-decoration:none}
+  .prefs .chips{display:flex;flex-wrap:wrap;gap:6px;padding:8px 18px 16px}
+  .prefs .chip{font:600 11.5px var(--font-primary);color:var(--text-brand-dark);background:var(--bg-blue-light);padding:5px 11px;border-radius:999px}
+
+  @media (max-width:1180px){
+    .app{grid-template-columns:240px 1fr}
+    .rail{grid-column:1/-1;border-left:none;border-top:1px solid var(--stroke-gray-lighter);display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:24px 32px 56px}
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- Sidebar -->
+  <aside class="side">
+    <div class="prop">
+      <div class="av"><img src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=200&auto=format&fit=crop&q=80" alt="Puerta del Sol apartment"></div>
+      <div>
+        <div class="name">Puerta del Sol</div>
+        <div class="ref">VH-2026-0847</div>
+      </div>
+    </div>
+    <nav>
+      <a class="n-item" href="../index.html?view=fable" target="_top">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Home
+      </a>
+      <div class="sgroup">Before your stay</div>
+      <div class="n-item">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+        Registration
+        <span class="badge">2 left</span>
+      </div>
+      <div class="n-item">
+        <svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M2 10h20M6 14h4"/></svg>
+        Payments
+        <span class="badge">€340</span>
+      </div>
+      <div class="sgroup">Your stay</div>
+      <div class="n-item">
+        <svg viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="3.5"/><path d="m10 13 10-10M16 7l3 3"/></svg>
+        Virtual keys
+      </div>
+      <div class="n-item active">
+        <svg viewBox="0 0 24 24"><path d="M9 4 3.5 5.8v14L9 18l6 1.8 5.5-1.8v-14L15 5.8 9 4Z"/><path d="M9 4v14M15 5.8v14"/></svg>
+        Trip guide
+        <span class="badge new">NEW</span>
+      </div>
+      <div class="n-item open" data-nav-toggle="guidebooks">
+        <svg viewBox="0 0 24 24"><path d="M4 4h10a4 4 0 0 1 4 4v12H8a4 4 0 0 1-4-4z"/><path d="M8 8h6M8 12h6"/></svg>
+        Guidebooks
+        <svg class="n-chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg>
+      </div>
+      <div class="n-sub open" id="nav-guidebooks">
+        <a class="n-subitem active" href="tripguide.html">Trip guides</a>
+      </div>
+      <div class="n-item">
+        <svg viewBox="0 0 24 24"><path d="m12 2 3.1 6.3L22 9.3l-5 4.8 1.2 6.9L12 17.8 5.8 21l1.2-6.9-5-4.8 6.9-1z"/></svg>
+        Recommendations
+      </div>
+      <div class="sgroup">Check-out</div>
+      <div class="n-item">
+        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+        Check-out instructions
+      </div>
+    </nav>
+    <div class="me">
+      <div class="av">CS</div>
+      <div>
+        <div class="n">Carmen Specimen</div>
+        <div class="e">carmen@email.com</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- ══════ Onboarding: cover → sign-in → quiz → generating ══════ -->
+    <div id="onboard">
+
+      <div class="ob-step on" data-ob="cover">
+        <div class="card ob-cover">
+          <div class="ob-cover-media"><img src="https://images.unsplash.com/photo-1543783207-ec64e4d95325?w=900&auto=format&fit=crop&q=80" alt="Madrid"></div>
+          <div class="ob-cover-body">
+            <div class="eyebrow" style="color:var(--text-brand)">Puerta del Sol · 18 – 23 May</div>
+            <h1 class="ob-h1">Madrid</h1>
+            <p class="ob-p">Five nights in the heart of the capital. Answer three quick questions and we'll shape a day-by-day plan around your stay.</p>
+            <div class="ob-actions">
+              <button class="btn primary" data-ob-go="login" type="button">Open my trip guide <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></button>
+              <button class="btn ghost" data-ob-skip type="button">Skip for now</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ob-step" data-ob="login">
+        <div class="card ob-cover">
+          <div class="ob-cover-media"><img src="https://images.unsplash.com/photo-1543783207-ec64e4d95325?w=900&auto=format&fit=crop&q=80" alt="Madrid"><span class="ob-flag">🇪🇸</span></div>
+          <div class="ob-cover-body">
+            <div class="eyebrow" style="color:var(--text-brand)">Chekin · Trip guide</div>
+            <h1 class="ob-h1" style="font-size:26px">Your Madrid guide is ready</h1>
+            <p class="ob-p">Sign in to save it and unlock check-in when you arrive.</p>
+            <div class="ob-actions">
+              <button class="btn primary" data-ob-go="quiz" type="button">
+                <svg viewBox="0 0 24 24" style="width:15px;height:15px"><path fill="#4285F4" d="M21.6 12.2c0-.6-.1-1.3-.2-1.9H12v3.6h5.4c-.2 1.2-.9 2.3-2 3v2.5h3.2c1.9-1.7 3-4.3 3-7.2z"/><path fill="#34A853" d="M12 22c2.7 0 5-.9 6.6-2.4l-3.2-2.5c-.9.6-2 1-3.4 1-2.6 0-4.9-1.8-5.7-4.2H3v2.6C4.6 19.8 8 22 12 22z"/><path fill="#FBBC05" d="M6.3 13.9c-.2-.6-.3-1.2-.3-1.9s.1-1.3.3-1.9V7.5H3C2.4 8.8 2 10.4 2 12s.4 3.2 1 4.5l3.3-2.6z"/><path fill="#EA4335" d="M12 5.9c1.5 0 2.8.5 3.8 1.5l2.9-2.9C16.9 2.9 14.7 2 12 2 8 2 4.6 4.2 3 7.5l3.3 2.6c.8-2.4 3.1-4.2 5.7-4.2z"/></svg>
+                Continue with Google
+              </button>
+              <button class="btn ghost" data-ob-go="quiz" type="button">Continue with email</button>
+            </div>
+            <p class="ob-foot">Already a Chekin guest? <a data-ob-go="quiz">Sign in</a></p>
+            <button class="ob-skip" data-ob-go="quiz" type="button">Just browsing? Continue without an account</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="ob-step" data-ob="quiz">
+        <div class="card ob-quiz">
+          <div class="ob-quiz-top">
+            <span class="ob-quiz-count" id="obQuizCount">1 of 3</span>
+            <div class="ob-quiz-progress" id="obQuizProgress"><i></i><i></i><i></i></div>
+          </div>
+          <div id="obQuizBody"></div>
+          <div class="ob-quiz-foot">
+            <button class="btn primary" id="obQuizNext" type="button">Continue</button>
+            <button class="ob-skip" id="obQuizSkipAll" type="button">Skip everything — show me the guide</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="ob-step" data-ob="generating">
+        <div class="card ob-gen">
+          <h2>Building your guide</h2>
+          <p class="ob-p" style="margin:6px 0 24px">This usually takes a few seconds.</p>
+          <div class="ob-gen-bar"><i id="obGenBar"></i></div>
+          <div id="obGenSteps">
+            <div class="ob-gstep">Reading your preferences</div>
+            <div class="ob-gstep">Mapping Madrid around Puerta del Sol</div>
+            <div class="ob-gstep">Checking opening hours for 18 – 23 May</div>
+            <div class="ob-gstep">Balancing big mornings with slow afternoons</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════ Guide (revealed once onboarding completes) ══════ -->
+    <div id="guideReady" style="display:none">
+
+    <div class="head reveal" style="animation-delay:.02s">
+      <div>
+        <h1>Your Madrid trip guide</h1>
+        <div class="sub" id="guideSummary">Built around your stay at Puerta del Sol · 18 – 23 May.</div>
+      </div>
+      <button class="btn ghost" data-chek-trigger>Ask Vela</button>
+    </div>
+
+    <!-- Trip-stage tracker — same component as Home, now switches the panel below -->
+    <div class="stages reveal" id="stageTracker" style="animation-delay:.04s">
+      <button class="stg active" data-stage="prestay" type="button"><span class="dot"></span>Pre-stay</button>
+      <button class="stg" data-stage="checkin" type="button"><span class="dot"></span>Check-in</button>
+      <button class="stg" data-stage="stay" type="button"><span class="dot"></span>Stay</button>
+      <button class="stg" data-stage="departure" type="button"><span class="dot"></span>Departure</button>
+    </div>
+
+    <section class="reveal" style="animation-delay:.08s">
+      <div class="card">
+
+        <!-- Pre-stay -->
+        <div class="stagewrap on" data-panel="prestay">
+          <div class="panel">
+            <div class="glance"><svg viewBox="0 0 24 24"><path d="M9 4 3.5 5.8v14L9 18l6 1.8 5.5-1.8v-14L15 5.8 9 4Z"/><path d="M9 4v14M15 5.8v14"/></svg>Before you arrive · worth arranging now</div>
+            <div class="act-row">
+              <div class="act-top">
+                <div class="thumb"><img src="https://images.unsplash.com/photo-1553051021-9f94520a6cad?w=300&auto=format&fit=crop&q=80" alt="Luggage lockers" loading="lazy"></div>
+                <div class="main">
+                  <div class="t">Drop your bags before check-in<span class="sponsor-tag">Sponsored</span></div>
+                  <div class="dd">5 lockers within 800 m of Puerta del Sol — leave your bags and start exploring while your room is prepared.</div>
+                </div>
+              </div>
+              <div class="act-cta">
+                <button class="dismiss-link" data-dismiss type="button">Dismiss</button>
+                <button class="buy-btn" data-buy type="button">Add · €6</button>
+              </div>
+            </div>
+            <div class="act-row">
+              <div class="act-top">
+                <div class="thumb"><img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=300&auto=format&fit=crop&q=80" alt="Bright apartment interior" loading="lazy"></div>
+                <div class="main">
+                  <div class="t">Early check-in from 10:00<span class="sponsor-tag">Sponsored</span></div>
+                  <div class="dd">Landing early? Arrive up to four hours ahead of the standard 14:00 check-in.</div>
+                </div>
+              </div>
+              <div class="act-cta">
+                <button class="dismiss-link" data-dismiss type="button">Dismiss</button>
+                <button class="buy-btn" data-buy type="button">Add · €25</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Check-in / Arrival -->
+        <div class="stagewrap" data-panel="checkin">
+          <div class="panel">
+            <div class="stage-note"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11.5V16M12 8h.01"/></svg>Finish check-in first — your digital keys unlock once it's done.</div>
+            <div class="glance"><svg viewBox="0 0 24 24"><path d="M9 4 3.5 5.8v14L9 18l6 1.8 5.5-1.8v-14L15 5.8 9 4Z"/><path d="M9 4v14M15 5.8v14"/></svg>Arrival day · an easy first afternoon</div>
+            <div class="part-label">Afternoon</div>
+            <div class="act-row">
+              <div class="act-top">
+                <div class="thumb"><img src="https://images.unsplash.com/photo-1539037116277-4db20889f2d4?w=300&auto=format&fit=crop&q=80" alt="Retiro Park" loading="lazy"></div>
+                <div class="main">
+                  <div class="t">Crystal Palace (Retiro Park)</div>
+                  <div class="cat"><span class="cat-dot nature"></span>Retiro / Paseo del Arte</div>
+                  <div class="dd">A slow first walk two minutes from your door — photos, architecture and no plans to rush.</div>
+                  <div class="meta-row"><span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>30–45 min</span><span class="free-tag">Free</span></div>
+                </div>
+              </div>
+              <div class="act-cta">
+                <button class="dismiss-link" data-dismiss type="button">Dismiss</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stay -->
+        <div class="stagewrap" data-panel="stay">
+          <div class="panel">
+            <div class="dtabs" id="dayTabs" style="margin-bottom:14px">
+              <button class="dtab on" data-day="0" type="button">Tue 19</button>
+              <button class="dtab" data-day="1" type="button">Wed 20</button>
+              <button class="dtab" data-day="2" type="button">Thu 21</button>
+            </div>
+            <div id="dayBody"></div>
+          </div>
+        </div>
+
+        <!-- Departure -->
+        <div class="stagewrap" data-panel="departure">
+          <div class="panel">
+            <div class="stage-note"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Short on time today — a light plan before your 10:00 check-out.</div>
+            <div class="act-row">
+              <div class="act-top">
+                <div class="thumb"><img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=300&auto=format&fit=crop&q=80" alt="Bright apartment interior" loading="lazy"></div>
+                <div class="main">
+                  <div class="t">Late check-out until 13:00<span class="sponsor-tag">Sponsored</span></div>
+                  <div class="dd">Keep the apartment three extra hours. Cleaning starts at 14:00.</div>
+                </div>
+              </div>
+              <div class="act-cta">
+                <button class="dismiss-link" data-dismiss type="button">Dismiss</button>
+                <button class="buy-btn" data-buy type="button">Add · €25</button>
+              </div>
+            </div>
+            <div class="act-row">
+              <div class="act-top">
+                <div class="thumb" style="background:var(--bg-warn-light);display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" width="32" height="32" stroke="var(--text-warn)" fill="none" stroke-width="1.6"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M2 10h20M6 14h4"/></svg></div>
+                <div class="main">
+                  <div class="t">Outstanding balance</div>
+                  <div class="dd">€340 due, payable on departure.</div>
+                </div>
+              </div>
+              <div class="act-cta">
+                <button class="buy-btn" type="button">Pay now</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Rail -->
+  <aside class="rail">
+    <div class="card weather reveal" style="animation-delay:.18s">
+      <div class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v3M12 20v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M1 12h3M20 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg></div>
+      <div class="lt">
+        <div class="t">Madrid on arrival day</div>
+        <div class="d">Mostly sunny · light jacket for evenings</div>
+      </div>
+      <div class="temp">23°</div>
+    </div>
+
+    <div class="card prefs reveal" style="animation-delay:.2s">
+      <div class="hd"><span class="t">Built around</span><a href="#">Adjust</a></div>
+      <div class="chips">
+        <span class="chip">Relaxed pace</span>
+        <span class="chip">Architecture</span>
+        <span class="chip">Food &amp; tapas</span>
+        <span class="chip">Couple</span>
+      </div>
+    </div>
+
+    <div class="card contact reveal" style="animation-delay:.22s">
+      <div class="hd">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        <div class="t">Need a human?</div>
+      </div>
+      <p>Vela handles most requests, but your host is one tap away.</p>
+      <div class="cta"><button class="btn dark">Chat with host</button></div>
+    </div>
+  </aside>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  var $ = function(s,c){ return (c||document).querySelector(s); };
+  var $$ = function(s,c){ return Array.prototype.slice.call((c||document).querySelectorAll(s)); };
+
+  var CAT_SLUG = {
+    'Food & tapas':'food','Architecture':'culture','Neighbourhood':'nature',
+    'Flamenco & live music':'music','Rooftops & views':'views'
+  };
+  var isPaid = function(cost){ return !!cost && cost !== 'Free'; };
+
+  /* ================= Onboarding: cover → sign-in → quiz → generating ================= */
+  var OB_QUIZ = [
+    { key:'pace', type:'single',
+      q:'What pace feels right?', sub:'This decides how much we plan into each day.',
+      options:[
+        { id:'Relaxed', name:'Relaxed', desc:'Two or three things a day, long lunches' },
+        { id:'Balanced', name:'Balanced', desc:'A full morning, an easy afternoon' },
+        { id:'See everything', name:'See everything', desc:'Early starts, late nights, no regrets' }
+      ]},
+    { key:'interests', type:'multi', min:2, max:6,
+      q:'What are you here for?', sub:'Pick two to six — we’ll build your days around them.',
+      options:[
+        { id:'Architecture', name:'Architecture' }, { id:'Food & tapas', name:'Food & tapas' },
+        { id:'Art & museums', name:'Art & museums' }, { id:'Flamenco & live music', name:'Flamenco & live music' },
+        { id:'Markets & shopping', name:'Markets & shopping' }, { id:'Rooftops & views', name:'Rooftops & views' },
+        { id:'Parks & gardens', name:'Parks & gardens' }, { id:'Local nightlife', name:'Local nightlife' }
+      ]},
+    { key:'traveler', type:'single',
+      q:'Who’s travelling?', sub:'Helps us pick the right tables, tickets and timings.',
+      options:[
+        { id:'Solo', name:'Solo', desc:'Counter seats and flexible plans' },
+        { id:'Couple', name:'Couple', desc:'Tables for two, golden-hour views' },
+        { id:'Family', name:'Family with kids', desc:'Shade, gelato and shorter walks' },
+        { id:'Friends', name:'Friends', desc:'Shared plates and late nights' }
+      ]}
+  ];
+  var OB_DEFAULTS = { pace:'Relaxed', interests:['Architecture','Food & tapas','Flamenco & live music','Rooftops & views'], traveler:'Couple' };
+  var obAnswers = { pace:null, interests:[], traveler:null };
+  var obStep = 0;
+
+  var obQuizBody = $('#obQuizBody'), obQuizNext = $('#obQuizNext'), obQuizCount = $('#obQuizCount'), obQuizProgress = $('#obQuizProgress');
+
+  function obStepComplete(i){
+    var s = OB_QUIZ[i];
+    if (s.type === 'multi') return obAnswers[s.key].length >= s.min;
+    return !!obAnswers[s.key];
+  }
+
+  function obRenderQuiz(){
+    var s = OB_QUIZ[obStep];
+    obQuizCount.textContent = (obStep+1) + ' of 3';
+    var html = '<h2>'+s.q+'</h2><p class="q-sub">'+s.sub+'</p>';
+    if (s.type === 'multi'){
+      html += '<div class="ob-chip-grid">' + s.options.map(function(o){
+        var sel = obAnswers.interests.indexOf(o.id) >= 0;
+        return '<button class="ob-chip'+(sel?' sel':'')+'" data-ob-opt="'+o.id+'" type="button">'+o.name+'</button>';
+      }).join('') + '</div>';
+    } else {
+      html += '<div class="ob-opt-list">' + s.options.map(function(o){
+        var sel = obAnswers[s.key] === o.id;
+        return '<button class="ob-opt'+(sel?' sel':'')+'" data-ob-opt="'+o.id+'" type="button">'
+          + '<span><span class="o-name">'+o.name+'</span><span class="o-desc">'+o.desc+'</span></span>'
+          + '<span class="o-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>'
+          + '</button>';
+      }).join('') + '</div>';
+    }
+    obQuizBody.innerHTML = html;
+    obQuizNext.textContent = obStep === 2 ? 'Generate my plan' : 'Continue';
+    $$('.ob-quiz-progress i', obQuizProgress.parentNode).forEach(function(seg,i){
+      seg.classList.toggle('done', i < obStep || (i === obStep && obStepComplete(obStep)));
+    });
+  }
+
+  obQuizBody.addEventListener('click', function(e){
+    var b = e.target.closest('[data-ob-opt]');
+    if (!b) return;
+    var s = OB_QUIZ[obStep], v = b.getAttribute('data-ob-opt');
+    if (s.type === 'multi'){
+      var idx = obAnswers.interests.indexOf(v);
+      if (idx >= 0){ obAnswers.interests.splice(idx,1); b.classList.remove('sel'); }
+      else if (obAnswers.interests.length < s.max){ obAnswers.interests.push(v); b.classList.add('sel'); }
+    } else {
+      obAnswers[s.key] = v;
+      $$('[data-ob-opt]', obQuizBody).forEach(function(o){ o.classList.toggle('sel', o === b); });
+    }
+    obRenderQuiz();
+  });
+
+  obQuizNext.addEventListener('click', function(){
+    if (!obStepComplete(obStep)) return;
+    if (obStep < 2){ obStep++; obRenderQuiz(); }
+    else obGoTo('generating');
+  });
+
+  function obFinalize(){
+    OB_QUIZ.forEach(function(s){
+      if (s.type === 'multi'){ if (!obAnswers[s.key].length) obAnswers[s.key] = OB_DEFAULTS[s.key].slice(); }
+      else if (!obAnswers[s.key]) obAnswers[s.key] = OB_DEFAULTS[s.key];
+    });
+  }
+
+  $('#obQuizSkipAll').addEventListener('click', function(){ obFinalize(); obGoTo('generating'); });
+  $$('[data-ob-skip]').forEach(function(b){ b.addEventListener('click', function(){ obFinalize(); obGoTo('generating'); }); });
+
+  var obGenTimers = [];
+  function obRunGenerating(){
+    obGenTimers.forEach(clearTimeout); obGenTimers = [];
+    var steps = $$('.ob-gstep', $('#obGenSteps'));
+    var bar = $('#obGenBar');
+    steps.forEach(function(s){ s.classList.remove('on','done'); });
+    bar.style.transition = 'none'; bar.style.width = '0'; void bar.offsetWidth; bar.style.transition = 'width .6s cubic-bezier(.3,.7,.3,1)';
+    steps.forEach(function(s,i){
+      obGenTimers.push(setTimeout(function(){
+        if (i > 0) steps[i-1].classList.replace('on','done');
+        s.classList.add('on');
+        bar.style.width = ((i+1)/(steps.length+1)*100) + '%';
+      }, 150 + i*550));
+    });
+    obGenTimers.push(setTimeout(function(){ steps[steps.length-1].classList.replace('on','done'); bar.style.width = '100%'; }, 150 + steps.length*550));
+    obGenTimers.push(setTimeout(revealGuide, 700 + steps.length*550));
+  }
+
+  function revealGuide(){
+    var p = obAnswers.pace ? obAnswers : OB_DEFAULTS;
+    var ints = p.interests.slice(0,2).join(', ');
+    var extra = p.interests.length - 2;
+    if (extra > 0) ints += ' +' + extra;
+    $('#guideSummary').innerHTML = 'Built for a <b>' + p.pace.toLowerCase() + '</b> pace · ' + ints + ' · ' + p.traveler;
+    $('#onboard').style.display = 'none';
+    $('#guideReady').style.display = '';
+  }
+
+  function obGoTo(step){
+    obGenTimers.forEach(clearTimeout); obGenTimers = [];
+    $$('.ob-step', $('#onboard')).forEach(function(s){ s.classList.toggle('on', s.getAttribute('data-ob') === step); });
+    if (step === 'quiz'){ obStep = 0; obAnswers = { pace:null, interests:[], traveler:null }; obRenderQuiz(); }
+    if (step === 'generating') obRunGenerating();
+  }
+  $$('[data-ob-go]').forEach(function(b){
+    b.addEventListener('click', function(){ obGoTo(b.getAttribute('data-ob-go')); });
+  });
+
+  var DAYS = [
+    { glance:'4 stops · a full but unhurried day', groups:[
+      { part:'Morning', items:[
+        { title:'Retiro Park', cat:'Neighbourhood', loc:'Retiro / Paseo del Arte', img:'https://images.unsplash.com/photo-1539037116277-4db20889f2d4?w=300&auto=format&fit=crop&q=80',
+          desc:'Spend a relaxed morning in Madrid’s landmark park, focusing on scenic sections rather than covering the entire grounds.',
+          dur:'2–3 hours', cost:'Free', why:'You picked a <b>relaxed pace</b> — the park is five minutes from Puerta del Sol, so there’s no need to rush the morning.' }
+      ]},
+      { part:'Afternoon', items:[
+        { title:'Glass Palace (Palacio de Cristal)', cat:'Architecture', loc:'Inside El Retiro Park', img:'https://images.unsplash.com/photo-1558370781-d6196949e317?w=300&auto=format&fit=crop&q=80',
+          desc:'Pair the park visit with this short stop for photos, architecture, and any temporary exhibition inside the pavilion.',
+          dur:'30–45 minutes', cost:'Free', why:'You picked <b>Architecture</b> — the Palacio de Cristal is a two-minute walk from your morning stroll, so it costs no extra travel.' },
+        { title:'Salesas', cat:'Neighbourhood', loc:'Between Chueca and Salamanca', img:'https://images.unsplash.com/photo-1509840841025-9088ba78a826?w=300&auto=format&fit=crop&q=80',
+          desc:'Move to Salesas for a polished but local-feeling afternoon of boutiques, coffee, and slow strolling.',
+          dur:'2–3 hours', cost:null, why:null }
+      ]},
+      { part:'Evening', items:[
+        { title:'Spa Ticket', cat:'Rooftops & views', loc:'Hotel Urso Wellness', img:'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=300&auto=format&fit=crop&q=80',
+          desc:'Relax and recharge with access to spa treatments and wellness services.',
+          dur:'1.5 hours', cost:'€40.00', why:'You picked <b>Comfort</b> as part of the trip — this is a quiet way to close a full first day on your feet.', sponsored:true }
+      ]}
+    ]},
+    { glance:'3 stops · museums and a long lunch', groups:[
+      { part:'Morning', items:[
+        { title:'Museo del Prado', cat:'Architecture', loc:'Paseo del Prado', img:'https://images.unsplash.com/photo-1580136579312-94651dfd596d?w=300&auto=format&fit=crop&q=80',
+          desc:'One of the world’s great collections — Velázquez and Goya are the two rooms not to rush.',
+          dur:'2–3 hours', cost:'€15.00', why:'You picked <b>Architecture &amp; culture</b> — book the 9:30 slot to get ahead of the tour groups.' }
+      ]},
+      { part:'Afternoon', items:[
+        { title:'Lunch at Mercado de San Miguel', cat:'Food & tapas', loc:'Plaza de San Miguel', img:'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=300&auto=format&fit=crop&q=80',
+          desc:'Counter-hop through jamón, croquetas and vermouth in a restored 1916 iron-and-glass market.',
+          dur:'1.5 hours', cost:'€15–20 pp', why:'You picked <b>Food &amp; tapas</b> — a five-minute walk from the Prado and busiest right at lunchtime.' }
+      ]},
+      { part:'Evening', items:[
+        { title:'Terrace at Círculo de Bellas Artes', cat:'Rooftops & views', loc:'Calle de Alcalá', img:'https://images.unsplash.com/photo-1543783207-ec64e4d95325?w=300&auto=format&fit=crop&q=80',
+          desc:'Rooftop views over the Gran Vía for sunset, drink in hand.',
+          dur:'1.5 hours', cost:'€5.00', why:'You picked <b>Rooftops &amp; views</b> — this is the closest rooftop to Puerta del Sol with a paid-but-cheap entry.' }
+      ]}
+    ]},
+    { glance:'2 stops · a slower last full day', groups:[
+      { part:'Morning', items:[
+        { title:'Gran Vía shopping walk', cat:'Neighbourhood', loc:'Gran Vía', img:'https://images.unsplash.com/photo-1543783207-ec64e4d95325?w=300&auto=format&fit=crop&q=80',
+          desc:'Madrid’s Broadway — flagship stores, cinema facades, and people-watching.',
+          dur:'1–2 hours', cost:'Free', why:null }
+      ]},
+      { part:'Evening', items:[
+        { title:'Flamenco at Casa Patas', cat:'Flamenco & live music', loc:'Cañizares 10', img:'https://images.unsplash.com/photo-1516307365426-b7f1c7ecb0a8?w=300&auto=format&fit=crop&q=80',
+          desc:'An hour of serious flamenco in an intimate tablao, two streets from your apartment.',
+          dur:'1 hour', cost:'€35.00', why:'You picked <b>Flamenco &amp; live music</b> — book the earlier show, it’s quieter and closer to your building.' }
+      ]}
+    ]}
+  ];
+
+  var activeDay = 0;
+  var dayBody = $('#dayBody');
+
+  function metaSpan(icon, txt){
+    return '<span><svg viewBox="0 0 24 24" stroke-width="1.8">'+icon+'</svg>'+txt+'</span>';
+  }
+  var CLOCK_ICON = '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>';
+  var PIN_ICON = '<path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>';
+
+  function renderItem(it){
+    var slug = CAT_SLUG[it.cat] || '';
+    var meta = '';
+    if (it.dur) meta += metaSpan(CLOCK_ICON, it.dur);
+    if (it.cost === 'Free') meta += '<span class="free-tag">Free</span>';
+    var html = '<div class="act-row">'
+      + '<div class="act-top">'
+      + '<div class="thumb"><img src="'+it.img+'" alt="" loading="lazy"></div>'
+      + '<div class="main">'
+      + '<div class="t">'+it.title+(it.sponsored ? '<span class="sponsor-tag">Sponsored</span>' : '')+'</div>'
+      + '<div class="cat"><span class="cat-dot'+(slug?' '+slug:'')+'"></span>'+it.loc
+      + '</div>'
+      + '<div class="dd">'+it.desc+'</div>'
+      + (meta ? '<div class="meta-row">'+meta+'</div>' : '')
+      + '</div></div>';
+    html += '<div class="act-cta"><button class="dismiss-link" data-dismiss type="button">Dismiss</button>'
+      + (isPaid(it.cost) ? '<button class="buy-btn" data-buy type="button">Add · '+it.cost+'</button>' : '')
+      + '</div></div>';
+    return html;
+  }
+
+  function renderDay(){
+    var d = DAYS[activeDay];
+    var html = '<div class="glance">'+ '<svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8">'+PIN_ICON+'</svg>' + d.glance + '</div>';
+    d.groups.forEach(function(g){
+      html += '<div class="part-label">'+g.part+'</div>';
+      g.items.forEach(function(it){ html += renderItem(it); });
+    });
+    dayBody.innerHTML = html;
+  }
+  renderDay();
+
+  $('#dayTabs').addEventListener('click', function(e){
+    var t = e.target.closest('[data-day]');
+    if (!t) return;
+    activeDay = +t.getAttribute('data-day');
+    $$('.dtab', $('#dayTabs')).forEach(function(b){ b.classList.toggle('on', b === t); });
+    renderDay();
+  });
+
+  // Stage tracker → panel switch
+  $('#stageTracker').addEventListener('click', function(e){
+    var t = e.target.closest('[data-stage]');
+    if (!t) return;
+    $$('.stg', $('#stageTracker')).forEach(function(b){ b.classList.toggle('active', b === t); });
+    var stage = t.getAttribute('data-stage');
+    $$('.stagewrap').forEach(function(p){ p.classList.toggle('on', p.getAttribute('data-panel') === stage); });
+  });
+
+  // Dismiss / add — delegated across both static panels and the dynamic day body
+  document.querySelector('.main').addEventListener('click', function(e){
+    var dismiss = e.target.closest('[data-dismiss]');
+    if (dismiss){
+      var row = dismiss.closest('.act-row');
+      if (row){
+        row.style.transition = 'opacity .18s ease, transform .18s ease';
+        row.style.opacity = '0';
+        row.style.transform = 'translateX(6px)';
+        setTimeout(function(){ row.remove(); }, 180);
+      }
+      return;
+    }
+    var buy = e.target.closest('[data-buy]');
+    if (buy){
+      if (!buy.classList.contains('added')){
+        buy.dataset.label = buy.textContent;
+        buy.textContent = 'Added ✓';
+      } else {
+        buy.textContent = buy.dataset.label;
+      }
+      buy.classList.toggle('added');
+    }
+  });
+
+  // Sidebar nav disclosure — e.g. Guidebooks → Trip guides
+  $$('[data-nav-toggle]').forEach(function(t){
+    t.addEventListener('click', function(){
+      t.classList.toggle('open');
+      var sub = document.getElementById('nav-' + t.getAttribute('data-nav-toggle'));
+      if (sub) sub.classList.toggle('open');
+    });
+  });
+})();
+</script>
+</body>
+</html>

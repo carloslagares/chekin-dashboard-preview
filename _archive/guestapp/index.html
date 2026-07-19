@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chekin — Guest App variants</title>
+<link rel="stylesheet" href="../ds/colors_and_type.css">
+<style>
+  :root{
+    --nav:#161643;--ink:#161643;--ink2:#6B6B95;--ink3:#9696B9;
+    --line:#E5E6EE;--bg:#F6F7FC;--blue:#385CF8;--blue-light:#EFF6FF;--blue-chip:#F0F3FF;
+    --success:#0F9F80;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);font-family:var(--font-primary);color:var(--ink)}
+
+  /* Grouped dropdown switcher — same component as the Dashboard */
+  .switcher{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:100}
+  .trigger{appearance:none;cursor:pointer;display:flex;align-items:center;gap:10px;height:44px;padding:0 8px;background:rgba(255,255,255,.9);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--line);border-radius:999px;box-shadow:0 8px 24px rgba(56,92,248,.12),0 2px 4px rgba(22,22,67,.04);font:600 13px var(--font-primary);color:var(--ink);transition:box-shadow .15s}
+  .trigger:hover{box-shadow:0 10px 28px rgba(56,92,248,.18),0 2px 4px rgba(22,22,67,.06)}
+  .trigger .cur-v{font:700 10px var(--font-primary);padding:3px 8px;border-radius:999px;background:var(--blue);color:#fff}
+  .trigger .cur-label{padding:0 2px}
+  .trigger .gen{font:800 9px var(--font-primary);padding:2px 7px;border-radius:5px;letter-spacing:.06em}
+  .trigger .gen.g47{background:rgba(22,22,67,.07);color:var(--ink2)}
+  .trigger .gen.g48{background:#D5F5EC;color:var(--success)}
+  .trigger .gen.g48v2{background:#EDE4FF;color:#7C4DFF}
+  .trigger .gen.gfab{background:#FBE7DA;color:#BD5B33}
+  .trigger .chev{width:16px;height:16px;stroke:var(--ink2);fill:none;stroke-width:2;margin-right:6px;transition:transform .2s}
+  .switcher.open .trigger .chev{transform:rotate(180deg)}
+
+  .menu{position:absolute;top:52px;left:50%;transform:translateX(-50%) translateY(-6px);width:300px;background:rgba(255,255,255,.96);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--line);border-radius:16px;box-shadow:0 16px 40px rgba(22,22,67,.16),0 2px 6px rgba(22,22,67,.06);padding:8px;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .16s,transform .16s,visibility .16s}
+  .switcher.open .menu{opacity:1;visibility:visible;pointer-events:auto;transform:translateX(-50%) translateY(0)}
+  .menu .group{display:flex;align-items:center;gap:8px;padding:10px 10px 6px;font:700 10px var(--font-primary);text-transform:uppercase;letter-spacing:.08em;color:var(--ink3)}
+  .menu .group .pill{font:800 9px var(--font-primary);padding:2px 7px;border-radius:5px;letter-spacing:.06em}
+  .menu .group .pill.g47{background:rgba(22,22,67,.07);color:var(--ink2)}
+  .menu .group .pill.g48{background:#D5F5EC;color:var(--success)}
+  .menu .group .pill.g48v2{background:#EDE4FF;color:#7C4DFF}
+  .menu .group .pill.gfab{background:#FBE7DA;color:#BD5B33}
+  .opt .new.v2{background:#EDE4FF;color:#7C4DFF}
+  .opt .new.fab{background:#FBE7DA;color:#BD5B33}
+  .menu .group .ln{flex:1;height:1px;background:var(--line)}
+  .opt{width:100%;appearance:none;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:10px;font:600 13.5px var(--font-primary);color:var(--ink);text-align:left;transition:background .12s}
+  .opt:hover{background:var(--blue-chip)}
+  .opt .v{font:700 10px var(--font-primary);padding:3px 7px;border-radius:999px;background:rgba(22,22,67,.08);color:var(--ink2);flex-shrink:0}
+  .opt .t{flex:1;min-width:0}
+  .opt .new{font:800 9px var(--font-primary);padding:2px 7px;border-radius:5px;background:#D5F5EC;color:var(--success);letter-spacing:.06em}
+  .opt .check{width:16px;height:16px;stroke:var(--blue);fill:none;stroke-width:2.6;opacity:0}
+  .opt.active{background:var(--blue-light)}
+  .opt.active .v{background:var(--blue);color:#fff}
+  .opt.active .check{opacity:1}
+
+  .stage{position:relative;min-height:100vh}
+  iframe.variant{width:100%;border:none;display:none;background:var(--bg)}
+  iframe.variant.active{display:block}
+</style>
+</head>
+<body>
+
+<div class="switcher" id="switcher">
+  <button class="trigger" id="trigger" aria-haspopup="menu" aria-expanded="false">
+    <span class="cur-v" id="curV">V1</span>
+    <span class="cur-label" id="curLabel">Journey</span>
+    <span class="gen g48" id="curGen">4.8</span>
+    <svg class="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+  </button>
+
+  <div class="menu" id="menu" role="menu">
+    <div class="group"><span class="pill gfab">Fable</span>Journey · new model<span class="ln"></span></div>
+    <button class="opt active" data-v="fj7"  data-label="Journey V7"    data-gen="fab" data-src="fable/journey-v7.html"   role="menuitem"><span class="v">V1</span><span class="t">Journey — V7</span><span class="new fab">Fable</span><svg class="check" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button>
+    <button class="opt" data-v="fj7t" data-label="Trip Guide V7" data-gen="fab" data-src="fable/tripguide.html" role="menuitem"><span class="v">V2</span><span class="t">Trip Guide — V7</span><span class="new fab">Fable</span><svg class="check" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button>
+
+    <div class="group"><span class="pill g48v2">4.8 v2</span>Guest flow · Opus<span class="ln"></span></div>
+    <button class="opt" data-v="gv2d" data-label="Desktop" data-gen="48v2" data-src="opus48v2/journey.html" role="menuitem"><span class="v">V1</span><span class="t">🖥️ Desktop</span><span class="new v2">v2</span><svg class="check" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button>
+    <button class="opt" data-v="gv2m" data-label="Mobile" data-gen="48v2" data-src="opus48v2/mobile.html" role="menuitem"><span class="v">V2</span><span class="t">📱 Mobile</span><span class="new v2">v2</span><svg class="check" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button>
+
+    <div class="group"><span class="pill g48">4.8</span>Refined · Opus<span class="ln"></span></div>
+    <button class="opt" data-v="gj48"  data-label="Journey"    data-gen="48" data-src="opus48/journey.html"   role="menuitem"><span class="v">V1</span><span class="t">Journey</span><span class="new">4.8</span><svg class="check" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button>
+    <button class="opt" data-v="gt48"  data-label="Trip Guide" data-gen="48" data-src="opus48/tripguide.html" role="menuitem"><span class="v">V2</span><span class="t">Trip Guide</span><span class="new">4.8</span><svg class="check" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button>
+    <button class="opt" data-v="gm48"  data-label="Mobile"     data-gen="48" data-src="opus48/mobile.html"    role="menuitem"><span class="v">V3</span><span class="t">📱 Mobile</span><span class="new">4.8</span><svg class="check" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button>
+
+    <div class="group"><span class="pill g47">4.7</span>Original<span class="ln"></span></div>
+    <button class="opt" data-v="gc47"   data-label="AI Concierge"  data-gen="47" data-src="variants/v1_concierge.html" role="menuitem"><span class="v">V4</span><span class="t">AI Concierge</span><svg class="check" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button>
+    <button class="opt" data-v="gj47"   data-label="Guided journey" data-gen="47" data-src="variants/v2_journey.html"  role="menuitem"><span class="v">V5</span><span class="t">Guided journey</span><svg class="check" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button>
+    <button class="opt" data-v="gl47"   data-label="Luggage"        data-gen="47" data-src="variants/v6_loogage.html"  role="menuitem"><span class="v">V6</span><span class="t">Luggage</span><svg class="check" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button>
+    <button class="opt" data-v="gmob47" data-label="Mobile"         data-gen="47" data-src="variants/v4_mobile.html"   role="menuitem"><span class="v">V7</span><span class="t">📱 Mobile</span><svg class="check" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button>
+    <button class="opt" data-v="gtr47"  data-label="Trip Guide"     data-gen="47" data-src="variants/v5_itinerary.html" role="menuitem"><span class="v">V8</span><span class="t">Trip Guide</span><svg class="check" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button>
+  </div>
+</div>
+
+<div class="stage">
+  <iframe class="variant active" data-v="fj7" src="fable/journey-v7.html" title="Journey Fable V7"></iframe>
+  <iframe class="variant" data-v="fj7t" title="Trip Guide Fable V7"></iframe>
+  <iframe class="variant" data-v="gv2d" title="Desktop 4.8 v2"></iframe>
+  <iframe class="variant" data-v="gv2m" title="Mobile 4.8 v2"></iframe>
+  <iframe class="variant" data-v="gj48" title="Journey 4.8"></iframe>
+  <iframe class="variant" data-v="gt48" title="Trip Guide 4.8"></iframe>
+  <iframe class="variant" data-v="gm48" title="Mobile 4.8"></iframe>
+  <iframe class="variant" data-v="gc47" title="AI Concierge 4.7"></iframe>
+  <iframe class="variant" data-v="gj47" title="Guided journey 4.7"></iframe>
+  <iframe class="variant" data-v="gl47" title="Luggage 4.7"></iframe>
+  <iframe class="variant" data-v="gmob47" title="Mobile 4.7"></iframe>
+  <iframe class="variant" data-v="gtr47" title="Trip Guide 4.7"></iframe>
+</div>
+
+<script>
+  function sizeFrames(){ document.querySelectorAll('iframe.variant').forEach(function(f){ f.style.height = window.innerHeight + 'px'; }); }
+  sizeFrames();
+  window.addEventListener('resize', sizeFrames);
+
+  var switcher = document.getElementById('switcher');
+  var trigger  = document.getElementById('trigger');
+  var menu     = document.getElementById('menu');
+  var curV     = document.getElementById('curV');
+  var curLabel = document.getElementById('curLabel');
+  var curGen   = document.getElementById('curGen');
+  var LS = 'chekin_guestapp_variant_v2';
+
+  // Deep-link ?view=journey|tripguide|mobile|concierge|luggage (+ originals)
+  var VIEW_MAP = {
+    fable:'fj7', fablev7:'fj7', v7:'fj7', fabletrip:'fj7t', fablev7trip:'fj7t',
+    desktop:'gv2d', desktopv2:'gv2d', v2:'gv2d', mobilev2:'gv2m',
+    journey:'gj48', trip:'gt48', tripguide:'gt48', guide:'gt48', mobile:'gm48',
+    concierge:'gc47', luggage:'gl47', loogage:'gl47', itinerary:'gtr47'
+  };
+  var urlView = new URLSearchParams(location.search).get('view');
+
+  function openMenu(){ switcher.classList.add('open'); trigger.setAttribute('aria-expanded','true'); }
+  function closeMenu(){ switcher.classList.remove('open'); trigger.setAttribute('aria-expanded','false'); }
+  trigger.addEventListener('click', function(e){ e.stopPropagation(); switcher.classList.contains('open') ? closeMenu() : openMenu(); });
+  document.addEventListener('click', function(e){ if(!switcher.contains(e.target)) closeMenu(); });
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeMenu(); });
+
+  function activate(v){
+    var opt = menu.querySelector('.opt[data-v="'+v+'"]');
+    if(!opt) return;
+    menu.querySelectorAll('.opt').forEach(function(o){ o.classList.toggle('active', o===opt); });
+    document.querySelectorAll('iframe.variant').forEach(function(f){
+      var match = f.dataset.v === v;
+      f.classList.toggle('active', match);
+      if (match && !f.hasAttribute('src')){
+        var src = menu.querySelector('.opt[data-v="'+v+'"]').getAttribute('data-src');
+        if (src) f.setAttribute('src', src);
+      }
+    });
+    curV.textContent = opt.querySelector('.v').textContent;
+    curLabel.textContent = opt.getAttribute('data-label');
+    var gen = opt.getAttribute('data-gen');
+    var genMap = { 'fab':'Fable', '48v2':'4.8 v2', '48':'4.8', '47':'4.7' };
+    var genCls = { 'fab':'gfab', '48v2':'g48v2', '48':'g48', '47':'g47' };
+    curGen.textContent = genMap[gen] || '4.7';
+    curGen.className = 'gen ' + (genCls[gen] || 'g47');
+    try{ localStorage.setItem(LS, v); }catch(err){}
+  }
+
+  var saved = null; try{ saved = localStorage.getItem(LS); }catch(err){}
+  var initial = (urlView && VIEW_MAP[urlView]) ? VIEW_MAP[urlView]
+              : (saved && menu.querySelector('.opt[data-v="'+saved+'"]') ? saved : 'fj7');
+  activate(initial);
+
+  menu.querySelectorAll('.opt').forEach(function(o){ o.addEventListener('click', function(){ activate(o.dataset.v); closeMenu(); }); });
+</script>
+</body>
+</html>

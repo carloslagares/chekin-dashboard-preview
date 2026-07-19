@@ -1,0 +1,304 @@
+/* ============================================================
+   Chekin Design System — Colors & Type
+   Single-file token + semantic-style stylesheet.
+   Import on any page:  <link rel="stylesheet" href="colors_and_type.css">
+   ============================================================ */
+
+/* ----- Font loading -----
+   NOTE: Proxima Nova is a commercial font from Mark Simonson Studio and
+   cannot be shipped here. Montserrat (Google Fonts) is the closest free
+   geometric-humanist substitute and is used as the runtime fallback.
+   If you have a Proxima Nova license, drop the .woff2 files into fonts/
+   and the @font-face block below will pick them up first.
+------------------------------------------------------------ */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Inter:wght@700&family=Poppins:wght@500&display=swap');
+
+/* Proxima Nova @font-face stubs — only load if files exist locally */
+@font-face { font-family: 'Proxima Nova'; font-weight: 400; font-style: normal;
+  src: local('Proxima Nova Regular'), url('fonts/proxima-nova/ProximaNova-Regular.woff2') format('woff2');
+  font-display: swap; }
+@font-face { font-family: 'Proxima Nova'; font-weight: 400; font-style: italic;
+  src: local('Proxima Nova Italic'), url('fonts/proxima-nova/ProximaNova-RegularItalic.woff2') format('woff2');
+  font-display: swap; }
+@font-face { font-family: 'Proxima Nova'; font-weight: 500; font-style: normal;
+  src: local('Proxima Nova Medium'), url('fonts/proxima-nova/ProximaNova-Medium.woff2') format('woff2');
+  font-display: swap; }
+@font-face { font-family: 'Proxima Nova'; font-weight: 600; font-style: normal;
+  src: local('Proxima Nova Semibold'), url('fonts/proxima-nova/ProximaNova-Semibold.woff2') format('woff2');
+  font-display: swap; }
+@font-face { font-family: 'Proxima Nova'; font-weight: 700; font-style: normal;
+  src: local('Proxima Nova Bold'), url('fonts/proxima-nova/ProximaNova-Bold.woff2') format('woff2');
+  font-display: swap; }
+@font-face { font-family: 'Proxima Nova'; font-weight: 800; font-style: normal;
+  src: local('Proxima Nova Extrabold'), url('fonts/proxima-nova/ProximaNova-Extrabold.woff2') format('woff2');
+  font-display: swap; }
+
+:root {
+  /* ============ Color: Brand ============ */
+  --color-main-blue: #385BF8;
+  --color-dark: #19194B;              /* Marketing navy (headings, hero) */
+  --color-navy-blue: #161643;          /* Product navy (component text, sidebar) */
+  --color-gradient-start: #002CFA;
+  --color-gradient-end: #274BF0;
+  --color-red: #FF2467;                /* Chekin Red — product/web */
+  --color-red-soft: #F84B7A;           /* Softer red — guest-facing */
+
+  /* ============ Color: Blue Accents ============ */
+  --color-animation-blue: #294DF1;
+  --color-divider-blue: #5F5CF0;
+  --color-hover-blue: #5975F5;
+  --color-dark-blue: #23235D;
+
+  /* ============ Color: Gray scale ============ */
+  --color-gray-1: #6B6B95;             /* Secondary / body */
+  --color-gray-2: #9696B9;             /* Tertiary / captions */
+  --color-gray-3: #DEDEEB;             /* Borders, dividers */
+  --color-separator-gray: #CECEDE;
+  --color-white: #FFFFFF;
+
+  /* ============ Color: Surface ============ */
+  --color-surface-input-empty: #F4F6F8;
+  --color-surface-autocomplete: #EFF6FF;
+  --color-surface-promo-lavender: #F4F4FD;
+  --color-surface-pressed-blue: #F0F3FF;
+  --color-surface-card: #EFEFFF;
+  --color-surface-admin: #FDFDFF;       /* Dashboard canvas */
+  --color-surface-guest: #F4F6F9;       /* Guest-App canvas */
+
+  /* ============ Semantic color tokens ============ */
+  --color-text-dark: var(--color-navy-blue);
+  --color-text-heading: var(--color-dark);
+  --color-text-white: var(--color-white);
+  --color-text-brand: var(--color-main-blue);
+  --color-text-danger: var(--color-red);
+  --color-text-gray-dark: var(--color-gray-1);
+  --color-text-gray-medium: var(--color-gray-2);
+  --color-border: var(--color-gray-3);
+  --color-bg: var(--color-white);
+
+  /* ============ Gradient ============ */
+  --gradient-blue: linear-gradient(180deg, var(--color-gradient-start), var(--color-gradient-end));
+
+  /* ============ Fonts ============ */
+  --font-primary: 'Proxima Nova', 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-display: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-code: 'Poppins', -apple-system, BlinkMacSystemFont, monospace;
+
+  /* ============ Weights ============ */
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --weight-extrabold: 800;
+
+  /* ============ Size scale ============ */
+  --size-h1: 70px;
+  --size-section-display: 64px;
+  --size-h2: 44px;
+  --size-h3: 36px;
+  --size-registration-h1: 31px;
+  --size-text-anim-mobile: 30px;
+  --size-h4: 22px;
+  --size-body-highlight: 20px;
+  --size-body-list: 18px;
+  --size-body: 16px;
+  --size-footer-link: 15px;
+  --size-small: 14px;
+  --size-caption: 12px;
+
+  /* ============ Spacing (8px base) ============ */
+  --space-0-5: 4px;
+  --space-1: 8px;
+  --space-1-25: 10px;
+  --space-1-375: 11px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --space-5: 40px;
+  --space-6: 48px;
+
+  /* ============ Radius ============ */
+  --radius-micro: 2px;
+  --radius-small: 4px;
+  --radius-input: 6px;
+  --radius-standard: 8px;
+  --radius-button: 12px;
+  --radius-card: 14px;
+  --radius-circle: 25px;
+  --radius-pill: 51px;
+  --radius-full: 200px;
+
+  /* ============ Shadows (blue-tinted) ============ */
+  --shadow-focus-ring: 0px 0px 0px 3px rgba(56, 91, 248, 0.2);
+  --shadow-subtle-outline: 0px 0px 0px 1px rgba(56, 91, 248, 0.2);
+  --shadow-solid-focus: 0px 0px 0px 1px #385BF8;
+  --shadow-card-default: 0px 0px 5px rgba(26, 148, 255, 0.173);
+  --shadow-card-hover: 0px 20px 25px rgba(26, 148, 255, 0.173);
+  --shadow-dropdown: 0px 5px 15px rgba(26, 148, 255, 0.16);
+  --shadow-large-elevation: 0px 31px 50px rgba(26, 140, 255, 0.1);
+  --shadow-xs-button: 0px 1px 4px rgba(0, 0, 0, 0.2);
+  --shadow-promo-pill: 0px 2px 7.5px rgba(0, 0, 0, 0.1);
+
+  /* ============ Hover overlays ============ */
+  --overlay-lighten: linear-gradient(0deg, rgba(255,255,255,0.1), rgba(255,255,255,0.1));
+  --overlay-darken:  linear-gradient(0deg, rgba(0,0,0,0.1),   rgba(0,0,0,0.1));
+
+  /* ============ Breakpoints ============ */
+  --bp-mobile-small: 375px;
+  --bp-mobile: 768px;
+  --bp-tablet: 1024px;
+  --bp-desktop-small: 1280px;
+  --bp-desktop: 1440px;
+}
+
+/* ============================================================
+   Semantic type styles — classes you apply directly
+   ============================================================ */
+
+html, body { font-family: var(--font-primary); color: var(--color-text-dark); background: var(--color-bg); }
+body { margin: 0; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+.h1, h1 {
+  font-family: var(--font-primary);
+  font-weight: var(--weight-bold);
+  font-size: var(--size-h1);
+  line-height: 1.15;
+  color: var(--color-text-heading);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+.section-display {
+  font-family: var(--font-display);
+  font-weight: var(--weight-bold);
+  font-size: var(--size-section-display);
+  line-height: 1.5;
+  color: var(--color-text-heading);
+}
+.h2, h2 {
+  font-family: var(--font-primary);
+  font-weight: var(--weight-regular);            /* elegance: H2 is regular, not bold */
+  font-size: var(--size-h2);
+  line-height: 1;
+  color: var(--color-text-heading);
+  margin: 0;
+}
+.h2-highlight {
+  font-family: var(--font-primary);
+  font-weight: var(--weight-bold);
+  font-size: var(--size-h2);
+  line-height: 1;
+  color: var(--color-text-heading);
+}
+.h3, h3 {
+  font-family: var(--font-primary);
+  font-weight: var(--weight-bold);
+  font-size: var(--size-h3);
+  line-height: 1.3;
+  color: var(--color-text-heading);
+  margin: 0;
+}
+.h4, h4 {
+  font-family: var(--font-primary);
+  font-weight: var(--weight-bold);
+  font-size: var(--size-h4);
+  line-height: 1.4;
+  color: var(--color-text-dark);
+  margin: 0;
+}
+.text-animation {
+  font-family: var(--font-primary);
+  font-weight: var(--weight-bold);
+  font-size: var(--size-h2);
+  line-height: 1;
+  color: var(--color-animation-blue);
+}
+.body-highlight, .body-header {
+  font-family: var(--font-primary);
+  font-weight: var(--weight-bold);
+  font-size: var(--size-body-highlight);
+  line-height: 1.5;
+  color: var(--color-text-dark);
+}
+.body-list {
+  font-family: var(--font-primary);
+  font-weight: var(--weight-medium);
+  font-size: var(--size-body-list);
+  line-height: 1.5;
+  color: var(--color-text-gray-dark);
+}
+.body, p {
+  font-family: var(--font-primary);
+  font-weight: var(--weight-medium);
+  font-size: var(--size-body);
+  line-height: 1.5;
+  color: var(--color-text-gray-dark);
+}
+.body-regular {
+  font-family: var(--font-primary);
+  font-weight: var(--weight-regular);
+  font-size: var(--size-body);
+  line-height: 1.5;
+}
+.body-semibold {
+  font-family: var(--font-primary);
+  font-weight: var(--weight-semibold);
+  font-size: var(--size-body);
+  line-height: 1.5;
+  color: var(--color-text-dark);
+}
+.body-small {
+  font-family: var(--font-primary);
+  font-weight: var(--weight-medium);
+  font-size: var(--size-small);
+  line-height: calc(24 / 14);
+  color: var(--color-text-gray-dark);
+}
+.body-small-bold {
+  font-family: var(--font-primary);
+  font-weight: var(--weight-bold);
+  font-size: var(--size-small);
+  line-height: calc(24 / 14);
+  color: var(--color-text-dark);
+}
+.caption {
+  font-family: var(--font-primary);
+  font-weight: var(--weight-medium);
+  font-size: var(--size-caption);
+  line-height: calc(16/12);
+  color: var(--color-text-gray-medium);
+}
+.supporting {
+  font-family: var(--font-primary);
+  font-weight: var(--weight-regular);
+  font-style: italic;
+  font-size: var(--size-caption);
+  line-height: calc(15/12);
+  color: var(--color-text-gray-medium);
+}
+.error-text {
+  font-family: var(--font-primary);
+  font-weight: var(--weight-medium);
+  font-size: var(--size-caption);
+  line-height: calc(16/12);
+  color: var(--color-text-danger);
+}
+.button-label {
+  font-family: var(--font-primary);
+  font-weight: var(--weight-semibold);
+  font-size: var(--size-body);
+  line-height: 1.25;
+}
+.footer-link {
+  font-family: var(--font-primary);
+  font-weight: var(--weight-regular);
+  font-size: var(--size-footer-link);
+  line-height: 1.5;
+  color: var(--color-text-gray-dark);
+}
+.code {
+  font-family: var(--font-code);
+  font-weight: var(--weight-medium);
+  font-size: var(--size-small);
+  line-height: calc(24/14);
+  color: var(--color-text-dark);
+}

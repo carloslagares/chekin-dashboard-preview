@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chekin — Campaign Studio</title>
+<link rel="stylesheet" href="../ds/colors_and_type.css">
+<link rel="stylesheet" href="../ds/_sidebar.css">
+<link rel="stylesheet" href="../ds/_agent.css">
+<link rel="stylesheet" href="ds/_crm.css">
+<style>
+  .studio{display:grid;grid-template-columns:1fr 360px;gap:18px;align-items:start}
+  @media (max-width:1080px){.studio{grid-template-columns:1fr}}
+  .studio-main{display:flex;flex-direction:column;gap:16px;min-width:0}
+  .objgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  @media (max-width:640px){.objgrid{grid-template-columns:1fr 1fr}}
+  .obj{padding:13px 14px;border:1px solid var(--stroke-gray-medium);border-radius:var(--radius-md);cursor:pointer;background:#fff;transition:.12s}
+  .obj:hover{border-color:var(--text-brand);background:var(--bg-blue-light)}
+  .obj.sel{border-color:var(--text-brand);background:var(--bg-blue-light);box-shadow:0 0 0 3px rgba(56,92,248,.12)}
+  .obj .t{font:600 14px var(--font-primary);color:var(--text-dark)}
+  .obj .d{font:400 12px/16px var(--font-primary);color:var(--text-gray-dark);margin-top:3px}
+  .dealcard{display:flex;gap:12px;align-items:flex-start;padding:13px 14px;border:1px solid var(--stroke-gray-lighter);border-radius:var(--radius-md);background:#fff}
+  .dealcard.added{border-color:var(--text-brand);background:var(--bg-blue-light)}
+  .dealcard .fit{font:700 11px var(--font-primary);color:var(--text-success)}
+  .trigopt{display:flex;align-items:center;gap:10px;padding:11px 13px;border:1px solid var(--stroke-gray-medium);border-radius:var(--radius-md);cursor:pointer;background:#fff}
+  .trigopt.sel{border-color:var(--text-brand);background:var(--bg-blue-light)}
+  .trigopt .nm{font:600 13.5px var(--font-primary)}
+  .trigopt .ds{font:400 12px var(--font-primary);color:var(--text-gray-dark)}
+  .field label{display:block;font:600 12.5px var(--font-primary);color:var(--text-gray-dark);margin:0 0 6px}
+  .field input,.field textarea,.field select{width:100%;padding:10px 12px;border:1px solid var(--stroke-gray-medium);border-radius:var(--radius-sm);font:500 14px var(--font-primary);color:var(--text-dark);outline:none;background:#fff}
+  .field textarea{resize:vertical;min-height:90px;line-height:1.5}
+  .field input:focus,.field textarea:focus,.field select:focus{border-color:var(--text-dark);box-shadow:0 0 0 3px rgba(56,92,248,.15)}
+  .field{margin-bottom:14px}
+  .rowflds{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .risk{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:var(--radius-sm);font:600 12.5px var(--font-primary)}
+  .risk.passed{background:var(--bg-success-light);color:var(--text-success)}
+  .risk.warning{background:var(--bg-amber-light);color:var(--text-amber)}
+  .risk.failed{background:var(--bg-danger-light);color:var(--text-danger)}
+  .risk svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.2}
+  .sidesticky{position:sticky;top:84px;display:flex;flex-direction:column;gap:14px}
+  .bignum{font:700 30px var(--font-primary);color:var(--text-dark);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+  .navbtns{display:flex;gap:10px;justify-content:space-between;align-items:center;padding-top:4px}
+  /* Sticky stepper + nav bar — keeps progress and the primary CTA (Next) always visible */
+  .studio-bar{position:sticky;top:72px;z-index:6;box-shadow:var(--shadow-card),0 6px 16px rgba(22,22,67,.06)}
+  .stepbar{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .stepbar .stepper{flex:1;min-width:240px}
+  .navbtns-inline{display:flex;align-items:center;gap:10px;margin-left:auto}
+  .navbtns-inline #nav-right{display:flex;align-items:center;gap:10px}
+  @media (max-width:720px){.studio-bar{position:static}.navbtns-inline{width:100%;justify-content:space-between}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div id="sidebar-slot" data-nav="guest-crm"></div>
+  <main>
+    <header class="top">
+      <div class="crumbs"><b>Guest CRM</b> <span class="sep">/</span> <a href="campaigns.html">Campaigns</a> <span class="sep">/</span> Studio</div>
+      <span data-agent-trigger-slot style="margin-left:auto"></span>
+      <button class="iconbtn" aria-label="Help"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 1 1 5.8 1c0 2-3 2-3 4M12 17h.01"/></svg></button>
+      <button class="iconbtn" aria-label="Notifications"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><div class="pip"></div></button>
+      <div class="user-av">MR</div>
+    </header>
+
+    <div class="page">
+      <div id="crm-demo"></div>
+      <div id="crm-subnav"></div>
+
+      <div class="pagehead">
+        <div>
+          <h1>Campaign Studio</h1>
+          <div class="sub">Describe your goal — Vela drafts the audience, deals, copy and automation as a structured campaign you can edit and approve. Nothing sends until you approve.</div>
+        </div>
+      </div>
+
+      <div class="card studio-bar">
+        <div class="bd stepbar">
+          <div class="stepper" id="stepper"></div>
+          <div class="navbtns-inline">
+            <button class="tbtn" id="btn-back">← Back</button>
+            <div id="nav-right"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="studio">
+        <div class="studio-main" id="step-body"></div>
+        <div>
+          <div class="sidesticky" id="side"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="crm-drawer-root"></div>
+
+<script src="data/types.js"></script>
+<script src="data/fixtures.js"></script>
+<script src="services/crm-service.js"></script>
+<script src="agent/agent.js"></script>
+<script src="ds/_crm.js"></script>
+<script src="../ds/_sidebar.js"></script>
+<script src="../ds/_agent.js"></script>
+<script>
+(function(){
+  var S = window.CRMService, A = window.CRMAgent, I = CRM.icons;
+  CRM.boot({ active:'campaigns' });
+
+  var qp = new URLSearchParams(location.search);
+  var initialPrompt = qp.get('prompt') || '';
+  var guestId = qp.get('guest');
+  if (guestId) { var g = S.getGuestById(guestId); if (g) initialPrompt = initialPrompt || ('Create a personalised offer for ' + g.fullName + ' for their upcoming stay'); }
+
+  var STEPS = ['Brief','Audience','Deals','Content','Automation','Review'];
+  var state = {
+    step: 0,
+    prompt: initialPrompt,
+    plan: null,        // structured CampaignPlan from the agent
+    addedDeals: {},    // dealId -> true
+    savedCampaignId: null
+  };
+
+  var OBJECTIVES = [
+    { k:'upsell', t:'Upsell', d:'Sell an upgrade or add-on' },
+    { k:'cross-sell', t:'Cross-sell', d:'Offer a complementary deal' },
+    { k:'rebooking', t:'Rebooking', d:'Win back past guests' },
+    { k:'retention', t:'Retention', d:'Keep loyal guests engaged' },
+    { k:'operational', t:'Operational', d:'Nudge an action' },
+    { k:'check-in recovery', t:'Check-in recovery', d:'Recover abandoned check-ins' }
+  ];
+
+  // ---------- stepper ----------
+  function renderStepper(){
+    document.getElementById('stepper').innerHTML = STEPS.map(function(s,i){
+      var cls = i===state.step ? 'active' : (i<state.step ? 'done' : '');
+      var inner = i<state.step ? I.check : (i+1);
+      return '<div class="step '+cls+'" data-step="'+i+'"><span class="n">'+inner+'</span>'+s+'</div>' + (i<STEPS.length-1 ? '<span class="step-sep"></span>' : '');
+    }).join('');
+    document.querySelectorAll('#stepper .step').forEach(function(el){
+      el.addEventListener('click', function(){
+        var i = +el.getAttribute('data-step');
+        if (i <= state.step || state.plan) { state.step = i; render(); }
+      });
+    });
+  }
+
+  // ---------- generate plan ----------
+  function generate(){
+    state.plan = A.generateCampaignPlan(state.prompt);
+    // seed added deals with the planned ones
+    state.addedDeals = {};
+    state.plan.deals.forEach(function(d){ state.addedDeals[d.dealId] = true; });
+    state.recommended = A.recommendDeals(state.plan.audience.rules).deals;
+    state.step = 1;
+    render();
+  }
+
+  function recomputeConsent(){
+    state.plan.consentCheck = A.runConsentCheck({ audienceRules: state.plan.audience.rules, channel: state.plan.channel });
+    state.plan.audience.eligibleSize = state.plan.consentCheck.eligibleSize;
+    state.plan.audience.excludedSize = state.plan.consentCheck.excludedSize;
+  }
+
+  // ---------- step bodies ----------
+  function card(title, body, actHtml){ return '<div class="card"><div class="hd"><h3>'+title+'</h3>'+(actHtml?'<div class="act">'+actHtml+'</div>':'')+'</div><div class="bd">'+body+'</div></div>'; }
+
+  function stepBrief(){
+    var examples = [
+      'Create a campaign for guests arriving this weekend with children, offering early check-in and a family restaurant deal. Exclude guests without marketing consent.',
+      'Sell late checkout to guests departing on Sunday',
+      'Reactivate families who stayed last summer with no future booking',
+      'Promote parking to guests asking about cars arriving in the next 72 hours'
+    ];
+    var body =
+      '<div class="field"><label>What do you want to achieve?</label>'+
+      '<textarea id="brief-input" placeholder="Describe your campaign in plain language…">'+CRM.esc(state.prompt)+'</textarea></div>'+
+      '<div class="tiny" style="margin-bottom:8px">Examples</div>'+
+      '<div class="chips" id="brief-examples">'+examples.map(function(e){
+        // Cut on a word boundary and keep the full prompt in the tooltip —
+        // mid-word truncation ("…this weekend w…") reads as a rendering bug.
+        var label = e;
+        if(e.length>64){ var cut = e.lastIndexOf(' ', 64); label = e.slice(0, cut>40?cut:64)+'…'; }
+        return '<span class="chip" title="'+CRM.esc(e)+'">'+CRM.esc(label)+'</span>';
+      }).join('')+'</div>'+
+      '<div class="tiny" style="margin:16px 0 8px">Objective (optional — Vela infers one if you skip)</div>'+
+      '<div class="objgrid" id="objgrid">'+OBJECTIVES.map(function(o){ return '<div class="obj" data-obj="'+o.k+'"><div class="t">'+o.t+'</div><div class="d">'+o.d+'</div></div>'; }).join('')+'</div>';
+    document.getElementById('step-body').innerHTML =
+      card('<span style="display:inline-flex;gap:8px;align-items:center">'+I.spark+' Campaign brief</span>', body);
+
+    var examplesEl = document.getElementById('brief-examples');
+    examplesEl.addEventListener('click', function(e){ var c=e.target.closest('.chip'); if(!c) return; var idx=[].indexOf.call(examplesEl.children,c); document.getElementById('brief-input').value = examples[idx]; state.prompt = examples[idx]; });
+    document.getElementById('objgrid').addEventListener('click', function(e){ var o=e.target.closest('.obj'); if(!o) return; document.querySelectorAll('.obj').forEach(function(x){x.classList.remove('sel');}); o.classList.add('sel'); state.forcedObjective = o.getAttribute('data-obj'); });
+    document.getElementById('brief-input').addEventListener('input', function(){ state.prompt = this.value; });
+  }
+
+  function stepAudience(){
+    var a = state.plan.audience, cc = state.plan.consentCheck;
+    var rules = '<div style="display:flex;gap:8px;flex-wrap:wrap" id="rules">'+ a.rules.map(function(r,i){
+      return '<span class="rule"><span class="f">'+CRM.esc(r.label||r.field)+'</span><span class="op">'+CRM.esc(r.operator)+'</span><span class="x" data-rule="'+i+'">'+I.x+'</span></span>';
+    }).join('') + '<button class="tbtn" id="add-rule" style="height:34px">+ Add rule</button></div>';
+
+    var sample = (a.sample||state.plan.sample||[]) ;
+    var sampleHtml = (S.previewSegmentAudience(a.rules).sample||[]).slice(0,6).map(function(s){
+      return '<div class="opp" style="padding:9px 12px"><div class="gav" style="width:30px;height:30px;font-size:11px">'+CRM.initials(s.name)+'</div><div class="tx"><div class="t">'+CRM.esc(s.name)+' '+(s.flag||'')+'</div><div class="r">'+CRM.titleStage(s.stage)+(s.nextStayAt?' · arrives '+CRM.relDate(s.nextStayAt):'')+'</div></div></div>';
+    }).join('') || '<div class="tiny">No matching guests for these rules.</div>';
+
+    var consentTone = cc.status==='failed'?'red':cc.status==='warning'?'amber':'green';
+    var exclHtml = cc.exclusions.length ? cc.exclusions.map(function(e){ return '<div class="risk warning">'+I.info+' '+CRM.esc(e.reason)+' — '+e.count+' excluded</div>'; }).join('') : '<div class="risk passed">'+I.check+' All matched guests have valid '+CRM.esc(cc.channel)+' consent</div>';
+
+    document.getElementById('step-body').innerHTML =
+      card('Audience rules', CRM.aiBlock(CRM.esc(state.plan.reasoningSummary), {why: state.plan.reasoningSummary}) + '<div style="margin-top:12px">'+rules+'</div>') +
+      card('Consent issues', exclHtml) +
+      card('Audience preview', sampleHtml);
+
+    document.querySelectorAll('#rules .x').forEach(function(x){
+      x.addEventListener('click', function(){ var i=+x.getAttribute('data-rule'); state.plan.audience.rules.splice(i,1); var p=S.previewSegmentAudience(state.plan.audience.rules); state.plan.audience.estimatedSize=p.estimatedSize; recomputeConsent(); render(); });
+    });
+    document.getElementById('add-rule').addEventListener('click', function(){ CRM.toast('Rule builder — pick a field (demo)'); });
+  }
+
+  function stepDeals(){
+    var recs = state.recommended || A.recommendDeals(state.plan.audience.rules).deals;
+    var body = recs.map(function(d){
+      var added = !!state.addedDeals[d.dealId];
+      var meta = d.providerType==='own' ? ('Own · margin '+CRM.pct(d.margin)) : (d.providerName+' · commission '+CRM.pct(d.commission));
+      return '<div class="dealcard '+(added?'added':'')+'">'+
+        '<div class="opp" style="border:none;padding:0;flex:1"><div class="ic">'+I.spark+'</div>'+
+        '<div class="tx"><div class="t">'+CRM.esc(d.title)+' <span class="badge '+(d.providerType==='own'?'blue':'violet')+'">'+(d.providerType==='own'?'Own':'Third-party')+'</span></div>'+
+        '<div class="r">'+CRM.esc(d.reason)+'</div>'+
+        '<div style="margin-top:6px;display:flex;gap:8px;flex-wrap:wrap"><span class="badge gray">'+CRM.money(d.price)+'</span><span class="badge gray">conv '+CRM.pct(d.conversionRate)+'</span><span class="badge gray">'+CRM.esc(meta)+'</span><span class="fit">fit '+CRM.pct(d.fit)+'</span></div></div></div>'+
+        '<button class="tbtn '+(added?'':'brand')+'" data-deal="'+d.dealId+'" style="align-self:center">'+(added?'Remove':'+ Add')+'</button>'+
+        '</div>';
+    }).join('');
+    document.getElementById('step-body').innerHTML =
+      card('Recommended deals', CRM.aiBlock('Ranked by fit with your audience and historical conversion. Own deals carry margin; third-party deals carry commission.', {why:'Tag overlap with the audience + conversion rate.'}) + '<div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">'+body+'</div>');
+    document.querySelectorAll('[data-deal]').forEach(function(b){
+      b.addEventListener('click', function(){ var id=b.getAttribute('data-deal'); if(state.addedDeals[id]) delete state.addedDeals[id]; else state.addedDeals[id]=true; syncDeals(); render(); });
+    });
+  }
+  function syncDeals(){
+    var recs = state.recommended || [];
+    state.plan.deals = Object.keys(state.addedDeals).map(function(id){
+      var r = recs.filter(function(x){return x.dealId===id;})[0] || S.getDealById(id);
+      return { dealId:id, title:(r&&r.title)||id, reason:(r&&r.reason)||'Selected by you.' };
+    });
+  }
+
+  function stepContent(){
+    var c = state.plan.content;
+    var variantHtml = (state.plan.variants||[]).map(function(v){
+      return '<div class="badge '+(v.id==='var_a'?'blue':'violet')+'">'+CRM.esc(v.name)+' · '+v.allocationPercentage+'%</div>';
+    }).join(' ');
+    var tokens = c.personalizationTokens.map(function(t){ return '<span class="pill brand">{{'+CRM.esc(t)+'}}</span>'; }).join(' ');
+    var body =
+      '<div class="rowflds"><div class="field"><label>Language</label><select id="f-lang"><option value="en">English</option><option value="es">Spanish</option><option value="fr">French</option><option value="de">German</option></select></div>'+
+      '<div class="field"><label>Tone</label><select id="f-tone"><option value="warm">Warm</option><option value="direct">Direct</option><option value="playful">Playful</option><option value="formal">Formal</option></select></div></div>'+
+      '<div class="field"><label>Subject</label><input id="f-subject" value="'+CRM.esc(c.subject)+'"></div>'+
+      '<div class="field"><label>Preview text</label><input id="f-preview" value="'+CRM.esc(c.previewText)+'"></div>'+
+      '<div class="field"><label>Body</label><textarea id="f-body">'+CRM.esc(c.body)+'</textarea></div>'+
+      '<div class="rowflds"><div class="field"><label>CTA label</label><input id="f-cta" value="'+CRM.esc(c.ctaLabel)+'"></div>'+
+      '<div class="field"><label>A/B variants</label><div style="padding-top:8px">'+variantHtml+'</div></div></div>'+
+      '<div class="tiny" style="margin-bottom:6px">Personalization tokens</div><div>'+tokens+'</div>';
+
+    document.getElementById('step-body').innerHTML =
+      card('Message content', body, '<button class="tbtn brand" id="regen">'+I.spark+' Regenerate copy</button>') +
+      card('Preview as guest', renderMailPreview());
+
+    ['lang','tone','subject','preview','body','cta'].forEach(function(k){
+      var el = document.getElementById('f-'+k); if(!el) return;
+      el.addEventListener('input', function(){
+        if(k==='lang') c.language=el.value; else if(k==='tone') c.tone=el.value;
+        else if(k==='subject') c.subject=el.value; else if(k==='preview') c.previewText=el.value;
+        else if(k==='body') c.body=el.value; else if(k==='cta') c.ctaLabel=el.value;
+        var prev=document.getElementById('mail-preview'); if(prev) prev.outerHTML=renderMailPreview();
+      });
+    });
+    var lang=document.getElementById('f-lang'); if(lang) lang.value=c.language;
+    var tone=document.getElementById('f-tone'); if(tone) tone.value=c.tone;
+    document.getElementById('regen').addEventListener('click', function(){ var p=A.generateCampaignPlan(state.prompt); state.plan.content=p.content; state.plan.variants=p.variants; CRM.toast('Copy regenerated'); render(); });
+  }
+  function renderMailPreview(){
+    var c = state.plan.content;
+    var bodyText = c.body.replace(/{{firstName}}/g,'Marco').replace(/{{propertyName}}/g,'Puerta del Sol').replace(/{{checkInDate}}/g,'Sat 15 Jun');
+    return '<div class="mailprev" id="mail-preview"><div class="mh"><div class="subj">'+CRM.esc(c.subject)+'</div><div class="from">Puerta del Sol · '+CRM.esc((c.previewText||'').replace(/{{firstName}}/g,'Marco').replace(/{{propertyName}}/g,'Puerta del Sol'))+'</div></div>'+
+      '<div class="mb">'+CRM.esc(bodyText)+'<br><a class="cta">'+CRM.esc(c.ctaLabel)+'</a></div></div>';
+  }
+
+  function stepAutomation(){
+    var triggers = S.getAutomationTriggers();
+    var sel = state.plan.automation.type;
+    var body =
+      '<div class="field"><label>Delivery</label><div class="chips"><span class="chip active">Automation Engine trigger</span><span class="chip">One-shot schedule</span></div></div>'+
+      '<div class="tiny" style="margin:6px 0 8px">Trigger</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px" id="trigs">'+triggers.map(function(t){
+        return '<div class="trigopt '+(t.eventType===sel?'sel':'')+'" data-trig="'+t.eventType+'"><div><div class="nm">'+CRM.esc(t.name)+'</div><div class="ds">'+CRM.esc(t.description)+'</div></div></div>';
+      }).join('')+'</div>'+
+      (/days_before_arrival/.test(sel) ? '<div class="field" style="max-width:200px;margin-top:14px"><label>Days before arrival</label><input id="trig-val" type="number" min="0" value="'+(state.plan.automation.value||3)+'"></div>' : '');
+    document.getElementById('step-body').innerHTML =
+      card('Automation', body, '<button class="tbtn brand" id="testrun">'+I.spark+' Test run</button>');
+    document.querySelectorAll('#trigs .trigopt').forEach(function(o){
+      o.addEventListener('click', function(){ state.plan.automation = { type:o.getAttribute('data-trig') }; render(); });
+    });
+    var tv=document.getElementById('trig-val'); if(tv) tv.addEventListener('input', function(){ state.plan.automation.value=+this.value; });
+    document.getElementById('testrun').addEventListener('click', function(){
+      var sim = S.simulateAutomationRun(state.plan.automation.type, { channel:state.plan.channel, consentCheck:state.plan.consentCheck });
+      CRM.openDrawer(
+        '<div class="dhead"><div><div style="font:600 17px var(--font-primary)">Test run (simulation)</div><div class="tiny" style="margin-top:3px">No messages are sent.</div></div><button class="dclose" data-drawer-close>'+I.x+'</button></div>'+
+        '<div class="dbody">'+CRM.aiBlock('Dry run only. Vela evaluated the trigger and consent — nothing was delivered.',{why:sim.note})+
+        '<div class="card"><div class="bd"><div class="kv">'+
+        '<div class="row"><div class="k">Trigger</div><div class="v">'+CRM.esc(sim.triggerType)+'</div></div>'+
+        '<div class="row"><div class="k">Channel</div><div class="v">'+CRM.esc(sim.channel)+'</div></div>'+
+        '<div class="row"><div class="k">Would send</div><div class="v">'+sim.wouldSend+' guests</div></div>'+
+        '<div class="row"><div class="k">Blocked by consent</div><div class="v">'+sim.blockedByConsent+'</div></div>'+
+        '<div class="row"><div class="k">Sample recipients</div><div class="v">'+CRM.esc((sim.sampleRecipients||[]).join(', ')||'—')+'</div></div>'+
+        '</div></div></div></div>'
+      );
+    });
+  }
+
+  function stepReview(){
+    var p = state.plan, cc = p.consentCheck;
+    syncDeals();
+    var risks = (p.riskChecks||[]).concat([{type:'consent',status:cc.status==='failed'?'failed':cc.status==='warning'?'warning':'passed'}]).reduce(function(acc,r){ if(!acc.some(function(x){return x.type===r.type;})) acc.push(r); return acc; },[]);
+    var riskHtml = risks.map(function(r){ var st=r.status==='passed'?'passed':r.status==='warning'?'warning':'failed'; var ic=st==='passed'?I.check:st==='warning'?I.info:I.x; return '<div class="risk '+st+'">'+ic+' '+CRM.esc(r.type.replace(/_/g,' '))+' — '+st+'</div>'; }).join('');
+    var dealsHtml = p.deals.length ? p.deals.map(function(d){ return '<span class="pill brand">'+CRM.esc(d.title)+'</span>'; }).join(' ') : '<span class="tiny">No deals attached</span>';
+
+    var summary = '<div class="kv">'+
+      '<div class="row"><div class="k">Name</div><div class="v">'+CRM.esc(p.name)+'</div></div>'+
+      '<div class="row"><div class="k">Objective</div><div class="v">'+CRM.esc(p.objective)+'</div></div>'+
+      '<div class="row"><div class="k">Channel</div><div class="v">'+CRM.esc(p.channel)+'</div></div>'+
+      '<div class="row"><div class="k">Audience</div><div class="v">'+p.audience.estimatedSize+' matched · '+cc.eligibleSize+' eligible · '+cc.excludedSize+' excluded</div></div>'+
+      '<div class="row"><div class="k">Deals</div><div class="v">'+dealsHtml+'</div></div>'+
+      '<div class="row"><div class="k">Automation</div><div class="v">'+CRM.esc(p.automation.type)+(p.automation.value!=null?' · '+p.automation.value:'')+'</div></div>'+
+      '<div class="row"><div class="k">Subject</div><div class="v">'+CRM.esc(p.content.subject)+'</div></div>'+
+      '</div>';
+
+    var consentTone = cc.status==='failed'?'failed':cc.status==='warning'?'warning':'passed';
+    var consentBody = '<div class="risk '+consentTone+'">'+(consentTone==='passed'?I.check:consentTone==='warning'?I.info:I.x)+' Consent check: '+cc.status.toUpperCase()+' · '+cc.eligibleSize+' eligible on '+CRM.esc(cc.channel)+'</div>'+
+      (cc.exclusions.length?'<div style="margin-top:8px;display:flex;flex-direction:column;gap:6px">'+cc.exclusions.map(function(e){return '<div class="tiny">• '+CRM.esc(e.reason)+' — '+e.count+' excluded</div>';}).join('')+'</div>':'')+
+      '<div class="tiny" style="margin-top:8px">'+CRM.esc((cc.notes||[]).join(' '))+'</div>';
+
+    var channelReady = p.channel==='email' ? '<div class="risk passed">'+I.check+' Email channel ready</div>' : '<div class="risk warning">'+I.info+' '+CRM.esc(p.channel)+' connector not configured — sends will be simulated / exported</div>';
+
+    var revBody = '<div class="bignum">'+CRM.money(p.revenueEstimate.expectedRevenue)+'</div><div class="tiny">~'+p.revenueEstimate.expectedConversions+' conversions · '+p.revenueEstimate.currency+'</div>';
+
+    document.getElementById('step-body').innerHTML =
+      (cc.status==='failed' ? '<div class="appbar" style="border-color:#FFC9D9;background:linear-gradient(90deg,#FFF0F4,#FFF6F8)"><div class="ic" style="color:var(--text-danger)">'+I.info+'</div><div class="tx"><div class="t">Activation blocked</div><div class="d">No eligible recipients with consent. Adjust the audience or channel before activating.</div></div></div>' :
+        '<div class="appbar"><div class="ic">'+I.spark+'</div><div class="tx"><div class="t">Human approval required</div><div class="d">Vela prepared this campaign as a draft. Review and approve — AI does not send autonomously.</div></div></div>') +
+      card('Summary', summary) +
+      '<div class="grid2">'+card('Consent check', consentBody)+card('Channel readiness', channelReady)+'</div>' +
+      '<div class="grid2">'+card('Revenue estimate', revBody)+card('Risk checks', riskHtml)+'</div>';
+  }
+
+  // ---------- side panel (live plan) ----------
+  function renderSide(){
+    var el = document.getElementById('side');
+    if (!state.plan){ el.innerHTML = card('Live plan', '<div class="tiny">Describe your campaign and generate a plan to see the live summary here.</div>'); return; }
+    var p = state.plan, cc = p.consentCheck;
+    el.innerHTML =
+      '<div class="card"><div class="hd"><h3>'+I.spark+' Live plan</h3>'+CRM.statusBadge(state.savedCampaignId?'draft':'draft')+'</div><div class="bd">'+
+      '<div style="font:600 15px var(--font-primary);margin-bottom:10px">'+CRM.esc(p.name)+'</div>'+
+      '<div class="kv">'+
+      '<div class="row"><div class="k">Objective</div><div class="v">'+CRM.esc(p.objective)+'</div></div>'+
+      '<div class="row"><div class="k">Channel</div><div class="v">'+CRM.esc(p.channel)+'</div></div>'+
+      '<div class="row"><div class="k">Eligible</div><div class="v">'+cc.eligibleSize+' / '+p.audience.estimatedSize+'</div></div>'+
+      '<div class="row"><div class="k">Deals</div><div class="v">'+Object.keys(state.addedDeals).length+'</div></div>'+
+      '<div class="row"><div class="k">Est. revenue</div><div class="v">'+CRM.money(p.revenueEstimate.expectedRevenue)+'</div></div>'+
+      '</div>'+
+      '<div class="meter" style="margin-top:12px"><i style="width:'+(p.audience.estimatedSize?Math.round(cc.eligibleSize/p.audience.estimatedSize*100):0)+'%"></i></div>'+
+      '<div class="tiny" style="margin-top:6px">'+cc.eligibleSize+' of '+p.audience.estimatedSize+' guests eligible after consent</div>'+
+      '</div></div>';
+  }
+
+  // ---------- nav ----------
+  function renderNav(){
+    var right = document.getElementById('nav-right');
+    document.getElementById('btn-back').style.visibility = state.step===0 ? 'hidden' : 'visible';
+    if (state.step===0){ right.innerHTML = '<button class="btn-primary" id="btn-gen">'+I.spark+' Generate campaign plan</button>'; document.getElementById('btn-gen').addEventListener('click', function(){ if(!state.prompt.trim()){CRM.toast('Describe your campaign first');return;} generate(); }); return; }
+    if (state.step < STEPS.length-1){ right.innerHTML = '<button class="btn-primary" id="btn-next">Next →</button>'; document.getElementById('btn-next').addEventListener('click', function(){ state.step++; render(); }); return; }
+    // review step
+    var cc = state.plan.consentCheck;
+    var canActivate = cc.status!=='failed';
+    right.innerHTML =
+      '<button class="tbtn" id="btn-draft">Save as draft</button> '+
+      '<button class="btn-primary" id="btn-approve" '+(canActivate?'':'disabled')+'>'+I.check+' Approve & '+(state.plan.channel==='email'?'activate':'schedule')+'</button>';
+    document.getElementById('btn-draft').addEventListener('click', saveDraft);
+    document.getElementById('btn-approve').addEventListener('click', approveActivate);
+  }
+
+  function buildDraft(){
+    if (state.savedCampaignId) return S.getCampaignById(state.savedCampaignId);
+    syncDeals();
+    var camp = S.createCampaignDraft(state.plan);
+    state.savedCampaignId = camp.id;
+    return camp;
+  }
+  function saveDraft(){ var c=buildDraft(); CRM.toast('Saved as draft'); setTimeout(function(){ location.href='campaign-detail.html?id='+c.id; }, 700); }
+  function approveActivate(){
+    var c = buildDraft();
+    try {
+      S.approveCampaign(c.id, 'You');
+      S.scheduleCampaign(c.id);
+      CRM.toast('Approved — '+(c.status==='active'?'campaign is now active':'campaign scheduled'));
+      setTimeout(function(){ location.href='campaign-detail.html?id='+c.id; }, 800);
+    } catch(e){ CRM.toast(e.message); }
+  }
+
+  // ---------- master render ----------
+  function render(){
+    renderStepper();
+    switch(state.step){
+      case 0: stepBrief(); break;
+      case 1: stepAudience(); break;
+      case 2: stepDeals(); break;
+      case 3: stepContent(); break;
+      case 4: stepAutomation(); break;
+      case 5: stepReview(); break;
+    }
+    renderSide();
+    renderNav();
+    window.scrollTo(0,0);
+  }
+  document.getElementById('btn-back').addEventListener('click', function(){ if(state.step>0){ state.step--; render(); } });
+
+  // auto-generate if arriving with a prompt
+  if (initialPrompt) { generate(); } else { render(); }
+})();
+</script>
+</body>
+</html>

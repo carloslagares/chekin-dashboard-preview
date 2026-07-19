@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Chekin Guest CRM — Product Roadmap</title>
+<style>
+  @page {
+    size: A4;
+    margin: 26mm 20mm 20mm;
+    @top-right { content: "Chekin Guest CRM - Product Roadmap"; font: italic 8.5pt Georgia, serif; color: #8a8aa0; }
+    @bottom-center { content: "Internal product document - Chekin"; font: italic 8.5pt Georgia, serif; color: #9a9ab0; }
+  }
+  * { box-sizing: border-box; }
+  html { font-family: Georgia, "Times New Roman", serif; color: #1f2430; font-size: 11pt; line-height: 1.5; }
+  body { margin: 0; }
+
+  /* ---- palette ---- */
+  /* navy #19194B · blue #2F4BD0 · brand #385BF8 · table head #2E3A8C
+     mint #E8FCF7 · lavender #F1F1FB */
+
+  h1.title { font-size: 40pt; font-weight: bold; color: #19194B; text-align: center; margin: 6pt 0 4pt; letter-spacing: -.5pt; }
+  .wordmark { text-align: center; font: bold 15pt Georgia, serif; color: #385BF8; letter-spacing: 1pt; margin-top: 2pt; }
+  .subtitle { text-align: center; font-style: italic; font-size: 14pt; color: #4a4a6a; margin: 8pt 0 18pt; }
+
+  h2 { font-size: 21pt; font-weight: bold; color: #19194B; margin: 26pt 0 6pt; letter-spacing: -.2pt; }
+  h3 { font-size: 13.5pt; font-weight: bold; color: #2F4BD0; margin: 18pt 0 6pt; }
+  p { margin: 0 0 9pt; text-align: left; }
+  a { color: inherit; text-decoration: none; }
+
+  ul { margin: 4pt 0 10pt; padding-left: 0; list-style: none; }
+  ul li { position: relative; padding-left: 20pt; margin: 0 0 5pt; }
+  ul li::before { content: "•"; position: absolute; left: 6pt; color: #2F4BD0; font-weight: bold; }
+  ol { margin: 4pt 0 10pt; padding-left: 22pt; }
+  ol li { margin: 0 0 4pt; }
+
+  /* callout boxes */
+  .box { padding: 12pt 14pt; border-radius: 4pt; margin: 12pt 0 14pt; }
+  .box .bh { font-weight: bold; color: #2F4BD0; margin-bottom: 6pt; font-size: 12pt; }
+  .box p:last-child { margin-bottom: 0; }
+  .mint { background: #E8FCF7; }
+  .mint .bh { color: #0F8F73; }
+  .lav { background: #F1F1FB; }
+  .lav .bh { color: #4338A8; }
+
+  /* tables */
+  table { width: 100%; border-collapse: collapse; margin: 8pt 0 14pt; font-size: 10.5pt; }
+  thead th { background: #2E3A8C; color: #fff; text-align: left; padding: 8pt 12pt; font-weight: bold; }
+  tbody td { padding: 9pt 12pt; vertical-align: top; border-bottom: 1px solid #E2E2EE; }
+  tbody td:first-child { font-weight: bold; color: #19194B; width: 34%; }
+  tbody tr { page-break-inside: avoid; }
+
+  /* TOC */
+  .toc h2 { margin-top: 0; }
+  .toc ul li { margin-bottom: 6pt; font-size: 11.5pt; }
+
+  /* cover hero image */
+  .hero { display: block; width: 78%; margin: 14pt auto 16pt; border: 1px solid #E2E2EE; border-radius: 6pt; }
+  .figure { page-break-before: always; }
+  .figure img { display: block; width: 100%; border: 1px solid #E2E2EE; border-radius: 6pt; }
+  .figure .cap { text-align: center; font-style: italic; font-size: 10pt; color: #6a6a85; margin-top: 10pt; }
+
+  .page-break { page-break-before: always; }
+  .cover { page-break-after: always; padding-top: 8pt; }
+  section { page-break-inside: auto; }
+</style>
+</head>
+<body>
+
+<!-- ============ COVER ============ -->
+<div class="cover">
+  <div class="wordmark">CHEKIN</div>
+  <h1 class="title">Guest CRM</h1>
+  <div class="subtitle">Project Structure, Use Cases, Roadmap and Product Logic</div>
+  <img class="hero" src="assets/roadmap/hero-dashboard.png" alt="Guest CRM dashboard">
+  <div class="box lav">
+    <div class="bh">Strategic thesis</div>
+    <p>Chekin can evolve from a communication and check-in layer into the <b>guest intelligence and revenue-activation layer</b> of the stay: a CRM that understands each guest, builds audiences from natural language, drafts campaigns, recommends deals and triggers automations — before, during and after the stay, with consent and human approval at the centre.</p>
+  </div>
+</div>
+
+<!-- ============ TOC ============ -->
+<div class="toc">
+  <h2>Table of contents</h2>
+  <ul>
+    <li>1. Executive summary</li>
+    <li>2. Product vision and positioning</li>
+    <li>3. Why Chekin has an unfair data advantage</li>
+    <li>4. Product architecture</li>
+    <li>5. UX flow and navigation</li>
+    <li>6. Agentic campaign studio concept</li>
+    <li>7. Segment model and natural-language audiences</li>
+    <li>8. Use case roadmap</li>
+    <li>9. Deals and monetization taxonomy</li>
+    <li>10. Recommendation and monetization logic</li>
+    <li>11. Engineering implementation model</li>
+    <li>12. Analytics and success metrics</li>
+    <li>13. Consent, trust and guardrails</li>
+    <li>14. Delivery roadmap</li>
+    <li>15. Open questions and decisions</li>
+    <li>16. Appendix: data model and implementation prompt</li>
+  </ul>
+</div>
+
+<!-- ============ 1 ============ -->
+<section class="page-break">
+  <h2>1. Executive summary</h2>
+  <p>This document defines the product logic and roadmap for the Chekin <b>Guest CRM</b>: a guest intelligence and revenue-activation module that lets Chekin's B2B clients understand their guests, build audiences in plain language, create campaigns with an AI agent, attach App Sales deals, trigger the existing Automation Engine and measure the revenue generated.</p>
+  <p>The opportunity is not to build a generic CRM. It is to build an <b>agentic CRM</b> that already knows the reservation context, the guest profile, the property, the timing of the trip and the available commercial inventory, and turns that intelligence into personalized communication and revenue per reservation — without breaking guest trust.</p>
+  <div class="box mint">
+    <div class="bh">North Star</div>
+    <p>Turn every guest into an understood profile, every profile into a relevant audience, and every audience into a revenue opportunity that still feels helpful, trusted and guest-first.</p>
+  </div>
+  <h3>What this product should achieve</h3>
+  <ul>
+    <li>Give the client a single, intelligent view of each guest (Guest 360).</li>
+    <li>Let non-technical staff build audiences by typing, not by configuring rules.</li>
+    <li>Let an agent draft campaigns end-to-end as structured, editable objects.</li>
+    <li>Monetize through relevant App Sales deals attached at the right moment.</li>
+    <li>Reuse the existing Automation Engine and Unified Inbox, not replace them.</li>
+    <li>Keep consent, suppression and human approval as first-class guardrails.</li>
+  </ul>
+</section>
+
+<!-- ============ 2 ============ -->
+<section>
+  <h2>2. Product vision and positioning</h2>
+  <p>The product should be positioned as a <b>guest revenue activation layer</b>, not as a database. It should feel like a smart operator who already knows the stay context and can anticipate what to offer, to whom, on which channel and when — while the client stays in control of every send.</p>
+  <h3>Proposed product names</h3>
+  <table>
+    <thead><tr><th>Name</th><th>Why it works</th></tr></thead>
+    <tbody>
+      <tr><td>Guest CRM</td><td>Clear, broad, instantly understood by clients.</td></tr>
+      <tr><td>Guest Intelligence</td><td>Emphasises the 360 profile and insight angle.</td></tr>
+      <tr><td>Revenue CRM</td><td>Strong for the monetization narrative.</td></tr>
+      <tr><td>Guest Journey CRM</td><td>Ties pre-, in- and post-stay together.</td></tr>
+      <tr><td>Stay Marketing</td><td>Simple and action-oriented.</td></tr>
+    </tbody>
+  </table>
+  <div class="box lav">
+    <div class="bh">Recommended positioning</div>
+    <p>"Know your guests, sell more, stay trusted." The message is simple for the client and commercially powerful for Chekin: Chekin is no longer only managing the stay; Chekin is helping monetize the relationship around it.</p>
+  </div>
+</section>
+
+<!-- ============ 3 ============ -->
+<section>
+  <h2>3. Why Chekin has an unfair data advantage</h2>
+  <p>Most CRMs start with a cold contact list. Chekin starts with structured, high-intent stay context: the guest has booked, has a property, has dates, has a party composition, is checking in, and is already communicating through the Unified Inbox. This is a far stronger targeting and recommendation surface than a generic marketing CRM.</p>
+  <table>
+    <thead><tr><th>Data layer</th><th>Examples</th></tr></thead>
+    <tbody>
+      <tr><td>Reservation context</td><td>Property and location; check-in / check-out dates; arrival and departure timing; nights, channel, booking value and spend tier.</td></tr>
+      <tr><td>Guest and party context</td><td>Language and country; family / couple / business inference; children or companions; lifecycle stage; repeat and VIP signals.</td></tr>
+      <tr><td>Commercial inventory</td><td>Own and third-party App Sales deals; price, margin and commission; per-property availability and eligibility.</td></tr>
+      <tr><td>Behavioural and conversational</td><td>Inbox intents (e.g. asked about parking); clicked and dismissed offers; check-in completion; past purchases and stays; consent state.</td></tr>
+    </tbody>
+  </table>
+  <h3>Differentiation vs generic CRMs</h3>
+  <ul>
+    <li>Generic CRMs ask you to import and segment cold data; Chekin already holds live stay context.</li>
+    <li>Email tools blast lists; Chekin can trigger on real stay events via the Automation Engine.</li>
+    <li>Marketplaces show offers; Chekin can place the right deal at the right moment in the journey.</li>
+    <li>Other CRMs guess consent; Chekin captures it at check-in and enforces it at send time.</li>
+  </ul>
+</section>
+
+<!-- ============ 4 ============ -->
+<section>
+  <h2>4. Product architecture</h2>
+  <p>The Guest CRM is designed as a modular system. Guest intelligence, segmentation, campaign creation, deal recommendation and automation are separable enough to evolve independently, but connected through a single guest model and a shared agent orchestration layer.</p>
+  <table>
+    <thead><tr><th>Module</th><th>Responsibility</th></tr></thead>
+    <tbody>
+      <tr><td>Guest context builder</td><td>Unifies reservation, identity, preference, consent and conversation data into the Guest 360 profile.</td></tr>
+      <tr><td>Segment builder</td><td>Turns a natural-language request into structured, editable audience rules with a live size preview.</td></tr>
+      <tr><td>Campaign studio (agent)</td><td>Drafts objective, audience, deals, copy, variants, automation and revenue estimate as one editable object.</td></tr>
+      <tr><td>Deal recommendation engine</td><td>Ranks own and third-party deals by fit with the audience and historical conversion.</td></tr>
+      <tr><td>Consent &amp; guardrail layer</td><td>Runs a consent check on every campaign, excludes unconsented guests and blocks unsafe activation.</td></tr>
+      <tr><td>Automation bridge</td><td>Binds approved campaigns to existing Automation Engine triggers; supports test runs.</td></tr>
+      <tr><td>Analytics layer</td><td>Tracks sends, opens, clicks, conversions and revenue; summarises performance with the agent.</td></tr>
+    </tbody>
+  </table>
+  <p>Each AI output is a <b>structured, editable object</b>, never free text alone. The agent drafts; the user reviews and approves; the engine executes. This keeps the experience agentic but controlled and explainable.</p>
+</section>
+
+<!-- ============ 5 ============ -->
+<section>
+  <h2>5. UX flow and navigation</h2>
+  <p>The Guest CRM lives inside the existing Chekin dashboard as a product area (sidebar item between Upselling and Documents), reusing the design system, sidebar, Vela agent panel and layout conventions. No separate visual identity is introduced.</p>
+  <ol>
+    <li>Guest CRM dashboard with an agentic command box and AI suggestions.</li>
+    <li>Guests list with filters and a Guest 360 profile drawer.</li>
+    <li>Natural-language segment builder with a live audience preview.</li>
+    <li>Agentic campaign studio (six guided steps).</li>
+    <li>Campaigns list and campaign detail with approval and analytics.</li>
+    <li>Deals catalog (own and third-party).</li>
+    <li>Automation bindings and simulated test runs.</li>
+    <li>Consent and preference settings with a suppression list and audit trail.</li>
+  </ol>
+  <h3>Current HTML prototype alignment</h3>
+  <p>The current prototype already covers all of the above: dashboard, guests + profile drawer, segment builder, six-step campaign studio, campaign detail, deals, automation and consent — all running on a typed mock data / service / agent layer that is ready to be swapped for real APIs.</p>
+</section>
+
+<!-- ============ 6 ============ -->
+<section>
+  <h2>6. Agentic campaign studio concept</h2>
+  <p>The campaign studio is the emotional and commercial hook. A user types a goal in plain language and the agent returns a complete, structured campaign that can be inspected and edited at every step. It should feel like delegating to a competent marketer who shows their work.</p>
+  <p>From a single prompt the agent generates the objective, the audience rules and estimated size, the recommended deals with a fit explanation, the channel, the timing trigger, the message copy and an A/B variant, the consent check, and the revenue estimate — each as an editable field with a visible "Why?".</p>
+</section>
+
+<div class="figure">
+  <img src="assets/roadmap/studio.png" alt="Agentic campaign studio">
+  <div class="cap">Reference experience: the agentic campaign studio turns one prompt into a structured, editable campaign with a live consent check and revenue estimate.</div>
+</div>
+
+<!-- ============ 7 ============ -->
+<section>
+  <h2>7. Segment model and natural-language audiences</h2>
+  <p>Audiences are the input to every campaign. Instead of a rule-builder maze, the user describes the audience in a sentence and the agent parses it into structured rules with a live eligible-size preview after consent.</p>
+  <table>
+    <thead><tr><th>Example prompt</th><th>Generated rules (structured)</th></tr></thead>
+    <tbody>
+      <tr><td>Families arriving this weekend with children</td><td>checkInDate between today..+3d; children &gt; 0</td></tr>
+      <tr><td>Guests who have not completed check-in</td><td>checkinStatus = abandoned; checkInDate in next 7d</td></tr>
+      <tr><td>Past summer families with no future booking</td><td>stayed last summer; tags contains family; nextStay is empty</td></tr>
+      <tr><td>Guests who asked about parking, arriving in 72h</td><td>intent = parking_inquiry; checkInDate in 72h</td></tr>
+    </tbody>
+  </table>
+  <p>Every rule is editable as a chip, the audience size recomputes live, and consent exclusions are shown explicitly. Segments can be saved and reused, or sent straight into the campaign studio.</p>
+</section>
+
+<div class="figure">
+  <img src="assets/roadmap/guests.png" alt="Guests and Guest 360">
+  <div class="cap">Reference experience: the Guests list and Guest 360 profile feed the segment model with reservation, consent, revenue and intent signals.</div>
+</div>
+
+<!-- ============ 8 ============ -->
+<section>
+  <h2>8. Use case roadmap</h2>
+  <p>The same engine powers a growing set of revenue and retention use cases across the journey.</p>
+  <table>
+    <thead><tr><th>Use case</th><th>Trigger and offer</th></tr></thead>
+    <tbody>
+      <tr><td>Pre-arrival upsell</td><td>Days before arrival → early check-in, parking, transfer, crib.</td></tr>
+      <tr><td>Check-in recovery</td><td>Check-in abandoned → operational nudge to finish before arrival.</td></tr>
+      <tr><td>In-stay cross-sell</td><td>During stay → breakfast, spa, late checkout, experiences.</td></tr>
+      <tr><td>Departure upsell</td><td>Before checkout → late checkout for relaxed departures.</td></tr>
+      <tr><td>Win-back / rebooking</td><td>Past guests, no future booking → seasonal reactivation.</td></tr>
+      <tr><td>Intent-based offers</td><td>Inbox intent (parking, cars) → targeted, fast WhatsApp offer.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 9 ============ -->
+<section>
+  <h2>9. Deals and monetization taxonomy</h2>
+  <p>Monetization runs through the existing App Sales layer. Deals are own (margin) or third-party (commission), scoped per property, with conversion and average-revenue history that feeds recommendation.</p>
+  <table>
+    <thead><tr><th>Deal category</th><th>Examples and economics</th></tr></thead>
+    <tbody>
+      <tr><td>Convenience (own)</td><td>Early check-in, late checkout, baby kit — high margin, high conversion.</td></tr>
+      <tr><td>Transport</td><td>Parking (own), airport transfer and bike rental (third-party commission).</td></tr>
+      <tr><td>Dining</td><td>Breakfast delivery (own); family or partner restaurant sets (commission).</td></tr>
+      <tr><td>Wellness &amp; experiences</td><td>Spa passes and experiences (third-party commission, high average value).</td></tr>
+      <tr><td>Business</td><td>Co-working day passes for business travellers.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 10 ============ -->
+<section>
+  <h2>10. Recommendation and monetization logic</h2>
+  <p>For a given audience, the agent scores each active deal by tag overlap with the audience signals and by historical conversion rate, then explains the fit. Own deals are weighted for margin, third-party for commission and average revenue.</p>
+  <ul>
+    <li>Score = base conversion + audience-fit boosts (family, couple, business, intent, timing).</li>
+    <li>Each recommendation carries a one-line "Why?" so the choice is explainable.</li>
+    <li>Revenue estimate = eligible audience × expected conversion × deal price.</li>
+    <li>Offers are subtle and contextual — the right deal at the right journey moment, not advertising.</li>
+  </ul>
+</section>
+
+<!-- ============ 11 ============ -->
+<section>
+  <h2>11. Engineering implementation model</h2>
+  <p>The prototype is structured so the UI never talks to data directly. Components consume a service layer; the service layer is the only consumer of data and the agent orchestration; both are swappable for real APIs.</p>
+  <table>
+    <thead><tr><th>Layer</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr><td>Data / fixtures</td><td>Typed entities (Guest, Reservation, Deal, Segment, Campaign, Consent, Trigger…) with realistic seed data.</td></tr>
+      <tr><td>Service layer</td><td>getGuests, previewSegmentAudience, createCampaignDraft, runConsentCheck, approveCampaign, scheduleCampaign, simulateAutomationRun…</td></tr>
+      <tr><td>Agent orchestration</td><td>generateSegmentFromPrompt, generateCampaignPlan, recommendDeals, runConsentCheck, summarizeCampaignPerformance — each returns structured JSON with a reasoning summary.</td></tr>
+      <tr><td>UI components</td><td>Reuse the dashboard design system: cards, tables, drawers, badges, stepper, email preview.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 12 ============ -->
+<section>
+  <h2>12. Analytics and success metrics</h2>
+  <p>Every campaign exposes the operational funnel and the money it generated, plus an agent-written performance summary with recommendations.</p>
+  <ul>
+    <li>Funnel: sent → delivered → opened → clicked → converted.</li>
+    <li>Money: campaign revenue, App Sales revenue, commission.</li>
+    <li>Health: open rate, click rate, conversion rate, unsubscribes, failures.</li>
+    <li>Portfolio: active vs draft campaigns, top deals, top recommended actions.</li>
+  </ul>
+</section>
+
+<!-- ============ 13 ============ -->
+<section>
+  <h2>13. Consent, trust and guardrails</h2>
+  <p>Trust is the precondition for monetization. The CRM treats consent and approval as enforced safeguards, not optional settings.</p>
+  <ul>
+    <li>Every campaign runs a consent check against channel marketing consent and the global suppression list.</li>
+    <li>Guests without permission for the channel are excluded automatically, with a visible count and reason.</li>
+    <li>A campaign with zero eligible recipients fails the check and <b>cannot be activated</b>.</li>
+    <li>AI never sends autonomously: it drafts; a human approves before activation.</li>
+    <li>Where a channel is not connected, sends are simulated or exported — never sent silently.</li>
+    <li>Every approval and consent state is kept as an audit trail.</li>
+  </ul>
+  <div class="box mint">
+    <div class="bh">Guardrail principle</div>
+    <p>The safeguard is the draft-and-approve flow, not a banner. Campaigns stay as drafts until a person reviews the consent check, the channel readiness and the revenue estimate, and explicitly approves.</p>
+  </div>
+</section>
+
+<!-- ============ 14 ============ -->
+<section>
+  <h2>14. Delivery roadmap</h2>
+  <table>
+    <thead><tr><th>Phase</th><th>Scope</th></tr></thead>
+    <tbody>
+      <tr><td>Phase 1 — MVP (now)</td><td>Guest 360, NL segments, agentic campaign studio, deal recommendations, consent guardrails, automation simulation, basic analytics — on a mock service layer.</td></tr>
+      <tr><td>Phase 2 — Live data</td><td>Replace fixtures with real reservation, consent, inbox and App Sales APIs; persist segments and campaigns.</td></tr>
+      <tr><td>Phase 3 — Real activation</td><td>Connect email / WhatsApp channels and the Automation Engine for real sends behind approval.</td></tr>
+      <tr><td>Phase 4 — Optimisation</td><td>A/B testing, frequency capping, learning loop on dismissed/converted offers, revenue attribution.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 15 ============ -->
+<section>
+  <h2>15. Open questions and decisions</h2>
+  <ul>
+    <li>Default channel priority per market (email vs WhatsApp) and frequency caps.</li>
+    <li>Attribution window for campaign-driven App Sales revenue.</li>
+    <li>Whether segments are client-scoped or shareable across properties.</li>
+    <li>Approval roles: who can approve and activate campaigns.</li>
+    <li>How partner-marketing consent is captured and surfaced separately from own marketing.</li>
+  </ul>
+</section>
+
+<!-- ============ 16 ============ -->
+<section>
+  <h2>16. Appendix: data model and implementation prompt</h2>
+  <p>Core entities: Guest, GuestIdentity, Reservation, GuestPreference, Consent, ConversationEvent, CheckInEvent, Deal, Segment, Campaign (with CampaignContent, CampaignVariant, CampaignAnalytics), AutomationTrigger, AgentRun and Approval. Each AI service returns a structured object plus a reasoning summary for explainability.</p>
+  <div class="box lav">
+    <div class="bh">Implementation prompt</div>
+    <p>"Build an agentic Guest CRM inside the existing Chekin dashboard. Reuse the design system, sidebar and Vela agent. Deliver Guest 360, a natural-language segment builder, a six-step agentic campaign studio, App Sales deal recommendations, an Automation Engine bridge, consent guardrails and basic analytics. Every AI output must become a structured, editable object; AI drafts and recommends but never sends — the user approves before activation; consent checks block unsafe sends."</p>
+  </div>
+</section>
+
+</body>
+</html>

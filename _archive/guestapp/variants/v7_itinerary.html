@@ -1,0 +1,1383 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chekin — Personalized Trip Guide V7</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   Chekin Trip Guide — V7
+   One continuous phone prototype. 4/8px rhythm, one accent.
+   Type scale: 10 / 11 / 12 / 13 / 15 / 20 / 30
+   ============================================================ */
+:root{
+  --blue:#385BF8;
+  --blue-press:#2C4CDE;
+  --blue-soft:#EEF1FE;
+  --navy:#161643;
+  --text:#40405E;
+  --muted:#73738C;
+  --faint:#9EA0B4;
+  --line:#E7E8F0;
+  --line-soft:#F1F2F7;
+  --bg:#F5F6FA;
+  --surface:#FFFFFF;
+  --green:#0E9F6E;
+  --ease:cubic-bezier(.3,.7,.3,1);
+  --shadow-1:0 1px 2px rgba(22,22,67,.06);
+  --shadow-2:0 1px 2px rgba(22,22,67,.05),0 12px 32px rgba(22,22,67,.10);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:'Montserrat',system-ui,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  font-size:14px;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit;border:0;background:none;cursor:pointer;color:inherit}
+img{max-width:100%;display:block}
+.sprite{display:none}
+.ic{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- Desktop page chrome ---------- */
+.page-head{
+  max-width:1120px;margin:0 auto;
+  padding:36px 40px 8px;
+  display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;
+}
+.page-head .eyebrow{
+  font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--blue);margin-bottom:8px;
+}
+.page-head h1{
+  font-size:28px;font-weight:700;letter-spacing:-.02em;color:var(--navy);line-height:1.2;
+}
+.page-head .sub{max-width:520px;margin-top:8px;font-size:13px;color:var(--muted)}
+.head-actions{display:flex;gap:8px;padding-bottom:4px}
+.hbtn{
+  font-size:12px;font-weight:600;color:var(--navy);
+  padding:8px 14px;border-radius:8px;border:1px solid var(--line);
+  background:var(--surface);transition:border-color .15s var(--ease),background .15s var(--ease);
+}
+.hbtn:hover{border-color:#CFD2E2}
+.hbtn.primary{background:var(--navy);color:#fff;border-color:var(--navy)}
+.hbtn.primary:hover{background:#22225C}
+
+.layout{
+  max-width:1120px;margin:0 auto;
+  display:grid;grid-template-columns:224px 1fr;gap:40px;
+  padding:24px 40px 56px;align-items:start;
+}
+.rail{position:sticky;top:32px}
+.rail-label{
+  font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--faint);padding:0 0 10px 12px;
+}
+.rail-step{
+  display:flex;align-items:baseline;gap:10px;width:100%;text-align:left;
+  padding:9px 12px;border-radius:8px;border-left:2px solid transparent;
+  font-size:13px;font-weight:500;color:var(--muted);
+  transition:color .15s var(--ease),background .15s var(--ease);
+}
+.rail-step:hover{color:var(--navy)}
+.rail-step .n{font-size:10px;font-weight:600;color:var(--faint);font-variant-numeric:tabular-nums;width:16px;flex:none}
+.rail-step.active{color:var(--navy);font-weight:600;background:#fff;border-left-color:var(--blue);border-radius:0 8px 8px 0;box-shadow:var(--shadow-1)}
+.rail-step.active .n{color:var(--blue)}
+.rail-hint{margin:20px 12px 0;font-size:11px;line-height:1.6;color:var(--faint)}
+.rail-hint kbd{
+  font-family:inherit;font-size:10px;font-weight:600;color:var(--muted);
+  border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 4px;background:#fff;
+}
+
+.stage{display:flex;justify-content:center}
+.page-foot{
+  max-width:1120px;margin:0 auto;padding:0 40px 40px;
+  font-size:11px;color:var(--faint);
+}
+
+/* ---------- Phone ---------- */
+.phone{
+  width:344px;height:712px;flex:none;
+  background:#0C0C16;border-radius:52px;padding:10px;
+  box-shadow:0 2px 4px rgba(12,12,22,.2),0 24px 64px rgba(22,22,67,.28);
+  position:relative;
+}
+.phone-screen{
+  width:324px;height:692px;border-radius:43px;overflow:hidden;
+  background:var(--surface);position:relative;
+}
+.notch{
+  position:absolute;top:21px;left:50%;transform:translateX(-50%);
+  width:96px;height:26px;border-radius:13px;background:#0C0C16;z-index:60;
+}
+.statusbar{
+  position:absolute;top:0;left:0;right:0;height:48px;z-index:55;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 26px 0;pointer-events:none;
+  color:var(--navy);transition:color .2s var(--ease);
+}
+.statusbar.on-image{color:#fff}
+.statusbar .time{font-size:12px;font-weight:600;letter-spacing:.01em}
+.statusbar .sicons{display:flex;align-items:center;gap:5px}
+.statusbar svg{display:block}
+
+/* Screens */
+.screen{
+  position:absolute;inset:0;background:var(--surface);
+  display:flex;flex-direction:column;
+  opacity:0;transform:translateX(14px);pointer-events:none;
+  transition:opacity .22s var(--ease),transform .22s var(--ease);
+}
+.screen.active{opacity:1;transform:none;pointer-events:auto;z-index:10}
+.scroll{flex:1;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none}
+.scroll::-webkit-scrollbar{display:none}
+
+/* Shared in-app atoms */
+.btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;height:48px;border-radius:12px;
+  font-size:14px;font-weight:600;letter-spacing:.005em;
+  background:var(--blue);color:#fff;
+  transition:background .15s var(--ease),color .15s var(--ease),transform .1s var(--ease);
+}
+.btn:active{transform:scale(.985)}
+.btn.hold{background:var(--line-soft);color:var(--faint)}
+.btn.ghost{background:none;color:var(--muted);font-weight:500;height:40px}
+.btn.ghost:hover{color:var(--navy)}
+.btn.outline{background:#fff;border:1px solid var(--line);color:var(--navy)}
+.eyebrow{
+  font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);
+}
+.hairline{height:1px;background:var(--line-soft);border:0}
+
+/* ---------- Screen 1 · Cover ---------- */
+.cover-hero{
+  height:404px;flex:none;position:relative;
+  background:url('images/poster_sevilla.png') center 72%/145% no-repeat,#161643;
+}
+.cover-hero::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(22,22,67,.52) 0%,rgba(22,22,67,0) 38%,rgba(255,255,255,0) 72%,#fff 100%);
+}
+.cover-brand{
+  position:absolute;top:60px;left:24px;z-index:2;
+  font-size:13px;font-weight:700;letter-spacing:-.01em;color:#fff;
+}
+.cover-brand i{font-style:normal;color:#8FA3FB}
+.cover-body{flex:1;display:flex;flex-direction:column;padding:16px 24px 24px}
+.cover-body h1{
+  font-size:30px;font-weight:700;letter-spacing:-.025em;color:var(--navy);line-height:1.1;
+  margin:6px 0 10px;
+}
+.cover-body p{font-size:13px;color:var(--muted);line-height:1.6;max-width:262px}
+.cover-cta{margin-top:auto;display:flex;flex-direction:column;gap:2px}
+
+/* ---------- Screen 2 · Quiz ---------- */
+.quiz-top{flex:none;padding:60px 24px 0}
+.quiz-nav{display:flex;align-items:center;justify-content:space-between;height:32px}
+.iconbtn{
+  width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+  color:var(--navy);margin-left:-7px;transition:background .15s var(--ease);
+}
+.iconbtn:hover{background:var(--line-soft)}
+.quiz-count{font-size:11px;font-weight:600;color:var(--faint);font-variant-numeric:tabular-nums}
+.quiz-progress{display:flex;gap:6px;margin:14px 0 24px}
+.quiz-progress i{flex:1;height:3px;border-radius:2px;background:var(--line);transition:background .25s var(--ease)}
+.quiz-progress i.done{background:var(--blue)}
+.quiz-body{flex:1;overflow-y:auto;scrollbar-width:none;padding:0 24px}
+.quiz-body::-webkit-scrollbar{display:none}
+.quiz-body h2{font-size:20px;font-weight:700;letter-spacing:-.015em;color:var(--navy);line-height:1.25}
+.quiz-body .q-sub{font-size:12px;color:var(--muted);margin:6px 0 20px;line-height:1.55}
+.opt-list{display:flex;flex-direction:column;gap:8px}
+.opt{
+  display:flex;align-items:center;gap:12px;text-align:left;width:100%;
+  padding:14px 16px;border-radius:12px;border:1px solid var(--line);background:#fff;
+  transition:border-color .15s var(--ease),background .15s var(--ease),box-shadow .15s var(--ease);
+}
+.opt:hover{border-color:#CBD1E8}
+.opt .o-txt{flex:1;min-width:0}
+.opt .o-name{font-size:13px;font-weight:600;color:var(--navy);display:block}
+.opt .o-desc{font-size:11.5px;color:var(--muted);display:block;margin-top:2px;line-height:1.45}
+.opt .o-check{
+  width:20px;height:20px;border-radius:50%;border:1.5px solid var(--line);flex:none;
+  display:flex;align-items:center;justify-content:center;color:#fff;
+  transition:all .15s var(--ease);
+}
+.opt .o-check svg{width:11px;height:11px;opacity:0}
+.opt.sel{border-color:var(--blue);background:var(--blue-soft);box-shadow:inset 0 0 0 .5px var(--blue)}
+.opt.sel .o-check{border-color:var(--blue);background:var(--blue)}
+.opt.sel .o-check svg{opacity:1}
+.chip-grid{display:flex;flex-wrap:wrap;gap:8px}
+.chip{
+  font-size:12.5px;font-weight:500;color:var(--navy);
+  padding:9px 14px;border-radius:20px;border:1px solid var(--line);background:#fff;
+  transition:all .15s var(--ease);
+}
+.chip:hover{border-color:#CBD1E8}
+.chip.sel{border-color:var(--blue);background:var(--blue);color:#fff;font-weight:600}
+.quiz-foot{flex:none;padding:12px 24px 28px;border-top:1px solid var(--line-soft)}
+.quiz-hint{
+  min-height:18px;font-size:11.5px;color:var(--muted);text-align:center;margin-bottom:10px;
+  transition:color .2s var(--ease);
+}
+.quiz-hint.attn{color:var(--navy);font-weight:600;animation:nudge .3s var(--ease)}
+@keyframes nudge{0%{transform:translateY(2px);opacity:.4}100%{transform:none;opacity:1}}
+
+/* ---------- Screen 3 · Generating ---------- */
+.gen-wrap{flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 32px 48px}
+.gen-wrap h2{font-size:20px;font-weight:700;letter-spacing:-.015em;color:var(--navy)}
+.gen-wrap .g-sub{font-size:12px;color:var(--muted);margin:6px 0 32px}
+.gen-bar{height:3px;border-radius:2px;background:var(--line);overflow:hidden;margin-bottom:32px}
+.gen-bar i{display:block;height:100%;width:0;background:var(--blue);border-radius:2px;transition:width .6s var(--ease)}
+.gen-steps{display:flex;flex-direction:column;gap:18px}
+.gstep{display:flex;align-items:center;gap:12px;font-size:13px;color:var(--faint);transition:color .25s var(--ease)}
+.gstep .g-dot{
+  width:20px;height:20px;border-radius:50%;flex:none;position:relative;
+  border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;color:#fff;
+  transition:all .25s var(--ease);
+}
+.gstep .g-dot svg{width:11px;height:11px;opacity:0}
+.gstep.on{color:var(--navy);font-weight:500}
+.gstep.on .g-dot{border-color:var(--blue)}
+.gstep.on .g-dot::after{
+  content:"";position:absolute;inset:4px;border-radius:50%;background:var(--blue);
+  animation:pulse 1s var(--ease) infinite alternate;
+}
+@keyframes pulse{from{opacity:.35;transform:scale(.7)}to{opacity:1;transform:scale(1)}}
+.gstep.done{color:var(--muted)}
+.gstep.done .g-dot{border-color:var(--blue);background:var(--blue)}
+.gstep.done .g-dot svg{opacity:1}
+.gstep.done .g-dot::after{display:none}
+
+/* ---------- In-app header + tab bar ---------- */
+.app-head{flex:none;padding:60px 24px 0}
+.app-head .t-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.app-head h2{font-size:20px;font-weight:700;letter-spacing:-.015em;color:var(--navy);line-height:1.2}
+.textlink{font-size:12px;font-weight:600;color:var(--blue);padding:4px 0;white-space:nowrap}
+.textlink:hover{color:var(--blue-press)}
+.tabbar{
+  flex:none;height:74px;border-top:1px solid var(--line-soft);background:rgba(255,255,255,.96);
+  display:none;align-items:flex-start;padding:8px 12px 0;
+}
+.screen.has-tabs .tabbar{display:flex}
+.tab{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:6px 0;font-size:10px;font-weight:600;letter-spacing:.02em;color:var(--faint);
+  transition:color .15s var(--ease);
+}
+.tab .ic{width:21px;height:21px;stroke-width:1.6}
+.tab.on{color:var(--blue)}
+
+/* ---------- Screen 4 · Itinerary ---------- */
+.plan-sub{font-size:11.5px;color:var(--muted);margin-top:5px;line-height:1.5}
+.plan-sub b{color:var(--navy);font-weight:600}
+.day-tabs{display:flex;margin:16px -4px 0;border-bottom:1px solid var(--line-soft)}
+.dtab{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:1px;
+  padding:8px 0 10px;position:relative;color:var(--faint);
+  transition:color .15s var(--ease);
+}
+.dtab .dw{font-size:9.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase}
+.dtab .dn{font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--muted);transition:color .15s var(--ease)}
+.dtab.on{color:var(--blue)}
+.dtab.on .dn{color:var(--navy);font-weight:700}
+.dtab.on::after{
+  content:"";position:absolute;left:22%;right:22%;bottom:-1px;height:2px;border-radius:1px;background:var(--blue);
+}
+.day-body{padding:20px 24px 24px}
+.glance{
+  display:flex;align-items:center;gap:10px;
+  font-size:12px;color:var(--muted);padding-bottom:18px;
+}
+.glance .ic{width:15px;height:15px;color:var(--blue)}
+.part-label{
+  display:flex;align-items:center;gap:12px;
+  font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);
+  margin:20px 0 4px;
+}
+.part-label::after{content:"";flex:1;height:1px;background:var(--line-soft)}
+.part-label:first-of-type{margin-top:0}
+.act{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--line-soft)}
+.act:last-child{border-bottom:0}
+.act .a-time{
+  flex:none;width:40px;font-size:11.5px;font-weight:600;color:var(--navy);
+  font-variant-numeric:tabular-nums;padding-top:1px;
+}
+.act .a-main{flex:1;min-width:0}
+.act .a-name{font-size:13.5px;font-weight:600;color:var(--navy);line-height:1.3}
+.act .a-cat{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin-top:3px}
+.act .a-desc{font-size:12px;color:var(--muted);line-height:1.55;margin-top:5px}
+.act .a-meta{display:flex;gap:14px;margin-top:7px;font-size:11px;color:var(--faint)}
+.act .a-meta span{display:flex;align-items:center;gap:5px}
+.act .a-meta .ic{width:13px;height:13px}
+.why-btn{
+  display:inline-flex;align-items:center;gap:5px;margin-top:9px;
+  font-size:11.5px;font-weight:600;color:var(--blue);
+}
+.why-btn .ic{width:13px;height:13px;transition:transform .2s var(--ease)}
+.why-btn[aria-expanded="true"] .ic{transform:rotate(180deg)}
+.why-panel{display:grid;grid-template-rows:0fr;transition:grid-template-rows .22s var(--ease)}
+.why-panel.open{grid-template-rows:1fr}
+.why-panel>div{overflow:hidden}
+.why-inner{
+  margin-top:10px;padding:10px 14px;border-left:2px solid var(--blue);
+  background:#F8F9FE;border-radius:0 10px 10px 0;
+  font-size:11.5px;color:var(--text);line-height:1.6;
+}
+.why-inner b{color:var(--navy)}
+
+/* ---------- Screen 5 · Today ---------- */
+.today-head{padding:60px 24px 0}
+.today-head h2{font-size:22px;font-weight:700;letter-spacing:-.02em;color:var(--navy);margin-top:6px}
+.today-head .t-sub{font-size:12.5px;color:var(--muted);margin-top:5px;line-height:1.55}
+.wx{
+  display:flex;align-items:center;gap:14px;
+  margin:20px 24px 0;padding:14px 0;
+  border-top:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft);
+}
+.wx .ic{width:26px;height:26px;color:var(--blue);stroke-width:1.5}
+.wx .w-temp{font-size:20px;font-weight:700;letter-spacing:-.02em;color:var(--navy)}
+.wx .w-txt{font-size:11.5px;color:var(--muted);line-height:1.45}
+.checkin-card{
+  margin:20px 24px 0;padding:20px;border-radius:16px;background:var(--navy);color:#fff;
+  box-shadow:var(--shadow-2);
+}
+.checkin-card .cc-eyebrow{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#8FA3FB}
+.checkin-card h3{font-size:15px;font-weight:700;letter-spacing:-.01em;margin:8px 0 4px}
+.checkin-card p{font-size:11.5px;color:#B9BDDD;line-height:1.55}
+.checkin-card .btn{margin-top:16px;height:44px;background:#fff;color:var(--navy);font-size:13px}
+.checkin-card .btn:hover{background:#EEF1FE}
+.task{
+  display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--line-soft);
+}
+.task:last-child{border-bottom:0}
+.task .t-ic{
+  width:34px;height:34px;border-radius:10px;background:var(--line-soft);flex:none;
+  display:flex;align-items:center;justify-content:center;color:var(--muted);
+}
+.task .t-ic .ic{width:16px;height:16px}
+.task .t-ic.ok{background:#E7F6EF;color:var(--green)}
+.task .t-txt{flex:1;min-width:0}
+.task .t-name{display:block;font-size:12.5px;font-weight:600;color:var(--navy)}
+.task .t-desc{display:block;font-size:11px;color:var(--muted);margin-top:1px}
+.task>.ic{width:15px;height:15px;color:var(--faint)}
+.sec-label{
+  font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);
+  padding:24px 24px 6px;
+}
+.sec-pad{padding:0 24px}
+.tonight-card{
+  margin:8px 24px 4px;border-radius:16px;overflow:hidden;position:relative;
+  height:120px;display:flex;align-items:flex-end;text-align:left;width:calc(100% - 48px);
+  background:url('images/poster_barcelona.png') center/cover no-repeat,#19194B;
+  box-shadow:var(--shadow-1);
+}
+.tonight-card::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(22,22,67,0) 20%,rgba(22,22,67,.78))}
+.tonight-card .tc-txt{position:relative;z-index:2;padding:14px 16px;color:#fff;width:100%}
+.tonight-card .tc-name{font-size:13px;font-weight:700;letter-spacing:-.01em}
+.tonight-card .tc-sub{font-size:11px;color:#C9CDE8;margin-top:2px;display:flex;align-items:center;gap:6px}
+.tonight-card .tc-sub .ic{width:12px;height:12px}
+
+/* ---------- Screen 6 · Concierge ---------- */
+.chat-head{
+  flex:none;padding:60px 24px 14px;border-bottom:1px solid var(--line-soft);
+  display:flex;align-items:center;gap:12px;
+}
+.chat-avatar{
+  width:38px;height:38px;border-radius:50%;background:var(--navy);flex:none;
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:12px;font-weight:700;
+}
+.chat-avatar i{font-style:normal;color:#8FA3FB}
+.chat-head .ch-name{font-size:14px;font-weight:700;letter-spacing:-.01em;color:var(--navy)}
+.chat-head .ch-sub{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px;margin-top:1px}
+.chat-head .dot{width:6px;height:6px;border-radius:50%;background:var(--green)}
+.chat-body{flex:1;overflow-y:auto;scrollbar-width:none;padding:16px 20px;display:flex;flex-direction:column;gap:10px}
+.chat-body::-webkit-scrollbar{display:none}
+.chat-day{align-self:center;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);padding:4px 0 2px}
+.msg{max-width:82%;padding:10px 14px;font-size:12.5px;line-height:1.55;animation:msgin .25s var(--ease)}
+@keyframes msgin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.msg.ai{align-self:flex-start;background:var(--line-soft);color:var(--navy);border-radius:16px 16px 16px 5px}
+.msg.me{align-self:flex-end;background:var(--blue);color:#fff;border-radius:16px 16px 5px 16px}
+.msg.typing{display:flex;gap:4px;align-items:center;padding:14px 16px}
+.msg.typing i{width:5px;height:5px;border-radius:50%;background:var(--faint);animation:tdot 1s infinite}
+.msg.typing i:nth-child(2){animation-delay:.15s}
+.msg.typing i:nth-child(3){animation-delay:.3s}
+@keyframes tdot{0%,60%,100%{opacity:.3;transform:none}30%{opacity:1;transform:translateY(-3px)}}
+.chat-foot{flex:none;border-top:1px solid var(--line-soft);padding:10px 16px 0}
+.chips-row{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:10px}
+.chips-row::-webkit-scrollbar{display:none}
+.qchip{
+  flex:none;font-size:11.5px;font-weight:600;color:var(--blue);
+  border:1px solid #C9D3FD;border-radius:16px;padding:7px 13px;background:#fff;
+  transition:all .15s var(--ease);
+}
+.qchip:hover{background:var(--blue-soft)}
+.composer{display:flex;align-items:center;gap:8px;padding-bottom:14px}
+.composer input{
+  flex:1;height:42px;border:1px solid var(--line);border-radius:21px;padding:0 16px;
+  font:500 12.5px 'Montserrat',sans-serif;color:var(--navy);outline:none;background:#fff;
+  transition:border-color .15s var(--ease);
+}
+.composer input::placeholder{color:var(--faint)}
+.composer input:focus{border-color:var(--blue)}
+.sendbtn{
+  width:42px;height:42px;border-radius:50%;background:var(--blue);color:#fff;flex:none;
+  display:flex;align-items:center;justify-content:center;transition:background .15s var(--ease);
+}
+.sendbtn:hover{background:var(--blue-press)}
+.sendbtn .ic{width:17px;height:17px;margin:1px 1px 0 0}
+
+/* ---------- Screen 7 · Departure ---------- */
+.stay-prop{padding:16px 24px 0;display:flex;align-items:center;gap:14px}
+.stay-prop .sp-img{
+  width:52px;height:52px;border-radius:12px;flex:none;
+  background:url('images/poster_sevilla.png') center 24%/cover no-repeat,#19194B;
+}
+.stay-prop .sp-name{font-size:13.5px;font-weight:700;letter-spacing:-.01em;color:var(--navy)}
+.stay-prop .sp-addr{font-size:11px;color:var(--muted);margin-top:2px}
+.countdown{
+  margin:20px 24px 0;padding:18px 20px;border:1px solid var(--line);border-radius:16px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+}
+.countdown .cd-when{font-size:14px;font-weight:700;letter-spacing:-.01em;color:var(--navy);margin-top:3px;white-space:nowrap}
+.countdown .cd-left{
+  font-size:11px;font-weight:600;color:var(--blue);background:var(--blue-soft);
+  padding:6px 12px;border-radius:14px;white-space:nowrap;font-variant-numeric:tabular-nums;
+}
+.dep-task{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--line-soft);align-items:flex-start}
+.dep-task:last-child{border-bottom:0}
+.dep-task .t-ic{
+  width:34px;height:34px;border-radius:10px;background:var(--line-soft);flex:none;
+  display:flex;align-items:center;justify-content:center;color:var(--muted);
+}
+.dep-task .t-ic .ic{width:16px;height:16px}
+.dep-task .t-txt{flex:1;min-width:0}
+.dep-task .t-name{display:block;font-size:12.5px;font-weight:600;color:var(--navy)}
+.dep-task .t-desc{display:block;font-size:11px;color:var(--muted);margin-top:2px;line-height:1.5}
+.mini-btn{
+  flex:none;font-size:11px;font-weight:600;color:var(--blue);
+  border:1px solid #C9D3FD;border-radius:8px;padding:6px 12px;margin-top:2px;
+  transition:all .15s var(--ease);
+}
+.mini-btn:hover{background:var(--blue-soft)}
+.mini-btn.added{color:var(--green);border-color:#BCE5D3;background:#E7F6EF}
+.stay-cta{padding:20px 24px 24px}
+.btn.success{background:#E7F6EF;color:var(--green)}
+
+/* ---------- Preview mode ---------- */
+.exit-preview{
+  display:none;position:fixed;top:20px;right:20px;z-index:200;
+  font-size:12px;font-weight:600;color:#fff;
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);
+  padding:9px 16px;border-radius:20px;backdrop-filter:blur(8px);
+}
+.exit-preview:hover{background:rgba(255,255,255,.2)}
+body.preview{background:#0E0E26;overflow:hidden}
+body.preview .page-head,body.preview .rail,body.preview .page-foot{display:none}
+body.preview .layout{display:block;padding:0;max-width:none}
+body.preview .exit-preview{display:block}
+body.preview .phone{
+  position:fixed;top:50%;left:50%;margin:0;
+  transform-origin:center center;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr;gap:24px;padding:16px 24px 48px}
+  .rail{position:static;display:flex;flex-wrap:wrap;gap:4px}
+  .rail-label{width:100%;padding-left:0}
+  .rail-step{width:auto;border-left:0;border:1px solid var(--line);border-radius:16px;padding:6px 12px;font-size:12px;background:#fff}
+  .rail-step.active{border-color:var(--blue);border-radius:16px;box-shadow:none}
+  .rail-hint{display:none}
+  .page-head{padding:24px 24px 0}
+  .page-foot{padding:0 24px 32px}
+  .stage{align-items:flex-start}
+  .phone{transform-origin:top center}
+}
+</style>
+</head>
+<body>
+
+<!-- ─── Version switcher (V5/V6/V7) ─── -->
+<style>
+.chk-verswitch{position:fixed;z-index:9999;font-family:'Montserrat',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+.chk-verswitch.tr{top:14px;right:14px}
+.chk-verswitch.tr .chk-vs-menu{right:0}
+.chk-vs-trigger{display:flex;align-items:center;gap:6px;height:32px;padding:0 10px 0 12px;border:1px solid rgba(255,255,255,.14);border-radius:999px;background:#161643;color:#fff;font:700 11px inherit;letter-spacing:.02em;cursor:pointer;box-shadow:0 4px 14px rgba(22,22,67,.28);transition:background .15s}
+.chk-vs-trigger:hover{background:#22225C}
+.chk-vs-trigger svg{width:12px;height:12px;stroke:#fff;fill:none;stroke-width:2.4;transition:transform .18s}
+.chk-verswitch.open .chk-vs-trigger svg{transform:rotate(180deg)}
+.chk-vs-menu{position:absolute;top:38px;min-width:190px;background:#fff;border:1px solid #E5E6EE;border-radius:12px;box-shadow:0 12px 32px rgba(22,22,67,.18);padding:6px;opacity:0;visibility:hidden;transform:translateY(-4px);pointer-events:none;transition:opacity .15s,transform .15s,visibility .15s}
+.chk-verswitch.open .chk-vs-menu{opacity:1;visibility:visible;transform:none;pointer-events:auto}
+.chk-vs-opt{display:flex;align-items:baseline;gap:8px;padding:8px 10px;border-radius:8px;text-decoration:none;color:#161643;font:700 12.5px inherit}
+.chk-vs-opt:hover{background:#F0F3FF}
+.chk-vs-opt small{font:500 10.5px inherit;color:#6B6B95}
+.chk-vs-opt.active{background:#EFF6FF;color:#385BF8}
+</style>
+<div class="chk-verswitch tr" id="chkVerSwitch">
+  <button class="chk-vs-trigger" id="chkVsTrigger" type="button" aria-haspopup="menu" aria-expanded="false">
+    V7 <svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+  </button>
+  <div class="chk-vs-menu" id="chkVsMenu" role="menu">
+    <a class="chk-vs-opt" href="v5_itinerary.html">V5<small>Original design</small></a>
+    <a class="chk-vs-opt" href="v6_itinerary.html">V6<small>UX refinements</small></a>
+    <a class="chk-vs-opt active" href="v7_itinerary.html">V7<small>Fable redesign</small></a>
+    <a class="chk-vs-opt" href="v7.2_itinerary.html">V7.2<small>Pre-stay · check-in · stay · departure</small></a>
+    <a class="chk-vs-opt" href="v7.3_itinerary.html">V7.3<small>Sign-in · dismiss/buy · sponsor tags</small></a>
+  </div>
+</div>
+<script>
+(function(){
+  var w=document.getElementById('chkVerSwitch'), t=document.getElementById('chkVsTrigger');
+  t.addEventListener('click',function(e){e.stopPropagation();w.classList.toggle('open');});
+  document.addEventListener('click',function(e){ if(!w.contains(e.target)) w.classList.remove('open'); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') w.classList.remove('open'); });
+})();
+</script>
+
+<!-- Icon sprite -->
+<svg class="sprite" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-chevron-left" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></symbol>
+  <symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></symbol>
+  <symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></symbol>
+  <symbol id="i-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8.5 12.3l2.4 2.4 4.6-4.9"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V21h13V9.5"/></symbol>
+  <symbol id="i-map" viewBox="0 0 24 24"><path d="M9 4 3.5 5.8v14L9 18l6 1.8 5.5-1.8v-14L15 5.8 9 4Z"/><path d="M9 4v14M15 5.8v14"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 12a8.5 8.5 0 0 1-12.6 7.4L4 21l1.6-4.4A8.5 8.5 0 1 1 21 12Z"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="15.5" r="4.5"/><path d="M11.2 12.3 20 3.5M15.7 7.8l3 3"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="M21 3 10.5 13.5M21 3l-6.8 18-3.7-8.3L2 9 21 3Z"/></symbol>
+  <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="16" rx="2.5"/><path d="M8 3v4M16 3v4M3.5 10.5h17"/></symbol>
+  <symbol id="i-bag" viewBox="0 0 24 24"><rect x="4.5" y="7.5" width="15" height="13" rx="2.5"/><path d="M9 7.5V6a3 3 0 0 1 6 0v1.5"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9L12 3.5Z"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5.5" y="10.5" width="13" height="10" rx="2.5"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11.5V16M12 8h.01"/></symbol>
+  <symbol id="i-id" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.5"/><circle cx="8.5" cy="11" r="2"/><path d="M6 15.5c.6-1.2 1.5-1.8 2.5-1.8s1.9.6 2.5 1.8M14.5 9.5H18M14.5 13H18"/></symbol>
+  <symbol id="i-taxi" viewBox="0 0 24 24"><path d="M5 11.5 6.3 7A2 2 0 0 1 8.2 5.5h7.6A2 2 0 0 1 17.7 7L19 11.5"/><rect x="3.5" y="11.5" width="17" height="6.5" rx="2"/><path d="M6 18v2M18 18v2M7 15h.01M17 15h.01"/></symbol>
+</svg>
+
+<header class="page-head">
+  <div>
+    <div class="eyebrow">Chekin Guest App</div>
+    <h1>Personalized Trip Guide · V7</h1>
+    <p class="sub">A continuous, click-through prototype — one phone, seven moments, from arrival to departure. Move through the flow on the left or use the app’s own navigation.</p>
+  </div>
+  <div class="head-actions">
+    <button class="hbtn" id="restartBtn" type="button">Restart flow</button>
+    <button class="hbtn primary" id="previewBtn" type="button">Mobile preview</button>
+  </div>
+</header>
+
+<div class="layout">
+  <nav class="rail" aria-label="Prototype flow">
+    <div class="rail-label">Flow</div>
+    <button class="rail-step" data-go="cover" type="button"><span class="n">01</span>Arrival cover</button>
+    <button class="rail-step" data-go="quiz" type="button"><span class="n">02</span>Personalization</button>
+    <button class="rail-step" data-go="generating" type="button"><span class="n">03</span>Generating</button>
+    <button class="rail-step" data-go="itinerary" type="button"><span class="n">04</span>Itinerary</button>
+    <button class="rail-step" data-go="today" type="button"><span class="n">05</span>Today</button>
+    <button class="rail-step" data-go="chat" type="button"><span class="n">06</span>Concierge</button>
+    <button class="rail-step" data-go="stay" type="button"><span class="n">07</span>Departure</button>
+    <p class="rail-hint">Use <kbd>←</kbd> <kbd>→</kbd> to step through the flow, or click through the prototype itself.</p>
+  </nav>
+
+  <main class="stage" id="stage">
+    <div class="phone" id="phone">
+      <div class="phone-screen">
+        <div class="notch"></div>
+
+        <div class="statusbar" id="statusbar">
+          <span class="time">9:41</span>
+          <span class="sicons">
+            <svg width="16" height="10" viewBox="0 0 16 10" fill="currentColor"><rect x="0" y="6" width="3" height="4" rx="1"/><rect x="4.5" y="4" width="3" height="6" rx="1"/><rect x="9" y="2" width="3" height="8" rx="1"/><rect x="13" y="0" width="3" height="10" rx="1" opacity=".35"/></svg>
+            <svg width="14" height="10" viewBox="0 0 14 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1 3.5a9 9 0 0 1 12 0M3.4 6a5.5 5.5 0 0 1 7.2 0"/><circle cx="7" cy="8.6" r="1.1" fill="currentColor" stroke="none"/></svg>
+            <svg width="22" height="11" viewBox="0 0 22 11" fill="none"><rect x=".5" y=".5" width="18" height="10" rx="3" stroke="currentColor" opacity=".45"/><rect x="2" y="2" width="13" height="7" rx="1.8" fill="currentColor"/><path d="M20.5 3.5v4a2 2 0 0 0 0-4Z" fill="currentColor" opacity=".45"/></svg>
+          </span>
+        </div>
+
+        <!-- ============ 01 · COVER ============ -->
+        <section class="screen" id="s-cover" data-status="on-image">
+          <div class="cover-hero"></div>
+          <div class="cover-brand">chekin<i>.</i></div>
+          <div class="cover-body">
+            <div class="eyebrow">Casa Alameda · 2 – 6 July</div>
+            <h1>Seville</h1>
+            <p>Four days in Andalusia’s capital. Answer three quick questions and we’ll shape a day-by-day plan around your stay.</p>
+            <div class="cover-cta">
+              <button class="btn" data-go="quiz" type="button">Build my trip guide <svg class="ic" style="width:16px;height:16px"><use href="#i-arrow-right"/></svg></button>
+              <button class="btn ghost" data-go="today" type="button">Skip for now — see today’s info</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ 02 · QUIZ ============ -->
+        <section class="screen" id="s-quiz">
+          <div class="quiz-top">
+            <div class="quiz-nav">
+              <button class="iconbtn" id="quizBack" type="button" aria-label="Back"><svg class="ic"><use href="#i-chevron-left"/></svg></button>
+              <span class="quiz-count" id="quizCount">1 of 3</span>
+            </div>
+            <div class="quiz-progress" id="quizProgress"><i></i><i></i><i></i></div>
+          </div>
+          <div class="quiz-body" id="quizBody"></div>
+          <div class="quiz-foot">
+            <p class="quiz-hint" id="quizHint" aria-live="polite"></p>
+            <button class="btn" id="quizNext" type="button">Continue</button>
+          </div>
+        </section>
+
+        <!-- ============ 03 · GENERATING ============ -->
+        <section class="screen" id="s-generating">
+          <div class="gen-wrap">
+            <h2>Building your guide</h2>
+            <p class="g-sub">This usually takes a few seconds.</p>
+            <div class="gen-bar"><i id="genBar"></i></div>
+            <div class="gen-steps" id="genSteps">
+              <div class="gstep"><span class="g-dot"><svg><use href="#i-check"/></svg></span>Reading your preferences</div>
+              <div class="gstep"><span class="g-dot"><svg><use href="#i-check"/></svg></span>Mapping Seville around Casa Alameda</div>
+              <div class="gstep"><span class="g-dot"><svg><use href="#i-check"/></svg></span>Checking opening hours for 2 – 6 July</div>
+              <div class="gstep"><span class="g-dot"><svg><use href="#i-check"/></svg></span>Balancing big mornings with slow afternoons</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ 04 · ITINERARY ============ -->
+        <section class="screen has-tabs" id="s-itinerary">
+          <div class="app-head">
+            <div class="t-row">
+              <h2>Your Seville plan</h2>
+              <button class="textlink" data-go="quiz" type="button">Adjust</button>
+            </div>
+            <p class="plan-sub" id="planSummary"></p>
+            <div class="day-tabs" id="dayTabs"></div>
+          </div>
+          <div class="scroll">
+            <div class="day-body" id="dayBody"></div>
+          </div>
+          <nav class="tabbar" data-tabbar></nav>
+        </section>
+
+        <!-- ============ 05 · TODAY ============ -->
+        <section class="screen has-tabs" id="s-today">
+          <div class="scroll">
+            <div class="today-head">
+              <div class="eyebrow">Wednesday, 2 July</div>
+              <h2>Good afternoon, Laura</h2>
+              <p class="t-sub">Welcome to Seville. Your check-in at Casa Alameda opens at 15:00.</p>
+            </div>
+            <div class="wx">
+              <svg class="ic"><use href="#i-sun"/></svg>
+              <span class="w-temp">36°</span>
+              <span class="w-txt">Sunny, peaking at 38° around 18:00.<br>Do the big sights before noon — the city naps from 3 to 5.</span>
+            </div>
+            <div class="checkin-card">
+              <div class="cc-eyebrow">Required before arrival</div>
+              <h3>Complete your online check-in</h3>
+              <p>Verify your ID and get your door code before you arrive — no keys, no front desk, no waiting.</p>
+              <button class="btn" id="checkinBtn" type="button">Start check-in · about 2 min</button>
+            </div>
+            <div class="sec-label">Your arrival</div>
+            <div class="sec-pad">
+              <div class="task">
+                <span class="t-ic ok"><svg class="ic"><use href="#i-check"/></svg></span>
+                <span class="t-txt"><span class="t-name">Booking confirmed</span><span class="t-desc">Casa Alameda · 2 guests · 4 nights</span></span>
+              </div>
+              <div class="task" id="taskId">
+                <span class="t-ic"><svg class="ic"><use href="#i-id"/></svg></span>
+                <span class="t-txt"><span class="t-name">ID verification</span><span class="t-desc">2 of 2 guests remaining</span></span>
+                <svg class="ic"><use href="#i-chevron-right"/></svg>
+              </div>
+              <div class="task">
+                <span class="t-ic"><svg class="ic"><use href="#i-lock"/></svg></span>
+                <span class="t-txt"><span class="t-name">Door code</span><span class="t-desc">Unlocks here once check-in is complete</span></span>
+                <svg class="ic"><use href="#i-lock"/></svg>
+              </div>
+            </div>
+            <div class="sec-label">Tonight</div>
+            <button class="tonight-card" data-go="itinerary" type="button">
+              <span class="tc-txt">
+                <span class="tc-name">Tapas at Eslava, 20:30</span>
+                <span class="tc-sub"><svg class="ic"><use href="#i-pin"/></svg>6-min walk · first stop on your plan</span>
+              </span>
+            </button>
+            <div class="sec-pad" style="padding-bottom:20px">
+              <button class="btn ghost" data-go="itinerary" type="button">See the full plan</button>
+            </div>
+          </div>
+          <nav class="tabbar" data-tabbar></nav>
+        </section>
+
+        <!-- ============ 06 · CONCIERGE ============ -->
+        <section class="screen has-tabs" id="s-chat">
+          <div class="chat-head">
+            <div class="chat-avatar">c<i>.</i></div>
+            <div>
+              <div class="ch-name">Concierge</div>
+              <div class="ch-sub"><span class="dot"></span>Online · replies in under a minute</div>
+            </div>
+          </div>
+          <div class="chat-body" id="chatBody">
+            <div class="chat-day">Wednesday, 2 July</div>
+            <div class="msg ai">Hi Laura — I’m your Chekin concierge for Casa Alameda. I know your plan and your stay, so ask me anything about Seville or the apartment.</div>
+          </div>
+          <div class="chat-foot">
+            <div class="chips-row" id="chipsRow">
+              <button class="qchip" data-q="tonight" type="button">Tonight’s plan</button>
+              <button class="qchip" data-q="late" type="button">Late check-out</button>
+              <button class="qchip" data-q="taxi" type="button">Taxi to the airport</button>
+              <button class="qchip" data-q="wifi" type="button">Wi-Fi password</button>
+            </div>
+            <form class="composer" id="composer">
+              <input type="text" id="chatInput" placeholder="Message the concierge…" autocomplete="off">
+              <button class="sendbtn" type="submit" aria-label="Send"><svg class="ic"><use href="#i-send"/></svg></button>
+            </form>
+          </div>
+          <nav class="tabbar" data-tabbar></nav>
+        </section>
+
+        <!-- ============ 07 · DEPARTURE ============ -->
+        <section class="screen has-tabs" id="s-stay">
+          <div class="app-head">
+            <div class="t-row"><h2>Your stay</h2></div>
+          </div>
+          <div class="scroll">
+            <div class="stay-prop">
+              <span class="sp-img"></span>
+              <span>
+                <span class="sp-name">Casa Alameda</span><br>
+                <span class="sp-addr">Calle Amor de Dios 14, 41002 Sevilla</span>
+              </span>
+            </div>
+            <div class="countdown">
+              <div>
+                <div class="eyebrow">Check-out</div>
+                <div class="cd-when">Sunday 6 July, 11:00</div>
+              </div>
+              <span class="cd-left" id="cdLeft">3 days left</span>
+            </div>
+            <div class="sec-label">Before you leave</div>
+            <div class="sec-pad">
+              <div class="dep-task">
+                <span class="t-ic"><svg class="ic"><use href="#i-clock"/></svg></span>
+                <span class="t-txt">
+                  <span class="t-name">Late check-out until 14:00</span>
+                  <span class="t-desc">Keep the apartment three extra hours for €25. Cleaning starts at 15:00.</span>
+                </span>
+                <button class="mini-btn" id="lateBtn" type="button">Add · €25</button>
+              </div>
+              <div class="dep-task">
+                <span class="t-ic"><svg class="ic"><use href="#i-bag"/></svg></span>
+                <span class="t-txt">
+                  <span class="t-name">Luggage storage nearby</span>
+                  <span class="t-desc">Locker Sevilla, 400 m away — €5 per bag until midnight on departure day.</span>
+                </span>
+              </div>
+              <div class="dep-task">
+                <span class="t-ic"><svg class="ic"><use href="#i-taxi"/></svg></span>
+                <span class="t-txt">
+                  <span class="t-name">Airport taxi</span>
+                  <span class="t-desc">Flat €25.65 to SVQ, about 20 minutes. Ask the concierge to book a pickup.</span>
+                </span>
+                <button class="mini-btn" data-go="chat" type="button">Ask</button>
+              </div>
+              <div class="dep-task">
+                <span class="t-ic"><svg class="ic"><use href="#i-key"/></svg></span>
+                <span class="t-txt">
+                  <span class="t-name">Leaving the apartment</span>
+                  <span class="t-desc">Close the terrace windows and pull the door shut — your code deactivates at check-out.</span>
+                </span>
+              </div>
+              <div class="dep-task">
+                <span class="t-ic"><svg class="ic"><use href="#i-star"/></svg></span>
+                <span class="t-txt">
+                  <span class="t-name">How was your stay?</span>
+                  <span class="t-desc">A one-minute review helps the next guests — and your hosts.</span>
+                </span>
+                <button class="mini-btn" type="button">Review</button>
+              </div>
+            </div>
+            <div class="stay-cta">
+              <button class="btn outline" id="checkoutBtn" type="button">Complete check-out</button>
+            </div>
+          </div>
+          <nav class="tabbar" data-tabbar></nav>
+        </section>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<button class="exit-preview" id="exitPreview" type="button">Exit preview</button>
+
+<footer class="page-foot">V7 · Chekin design exploration · Montserrat · #385BF8 / #161643 · Static prototype, no data leaves this page.</footer>
+
+<script>
+(function(){
+  'use strict';
+
+  /* ================= State & helpers ================= */
+  var FLOW = ['cover','quiz','generating','itinerary','today','chat','stay'];
+  var current = 'cover';
+  var $ = function(s,c){ return (c||document).querySelector(s); };
+  var $$ = function(s,c){ return Array.prototype.slice.call((c||document).querySelectorAll(s)); };
+
+  /* ================= Itinerary data ================= */
+  var DAYS = [
+    {
+      dow:'Wed', num:'2', glance:'Arrival day · 2 stops · an easy first evening',
+      groups:[
+        { part:'Afternoon', items:[
+          { time:'15:00', title:'Check in at Casa Alameda', cat:'Your stay',
+            desc:'Your door code unlocks once online check-in is complete. The rooftop terrace catches the evening breeze.',
+            dur:null, cost:null, why:null }
+        ]},
+        { part:'Evening', items:[
+          { time:'19:30', title:'Alameda de Hércules stroll', cat:'Neighbourhood',
+            desc:'The plaza outside your door — Roman columns, orange trees and half the city out for the evening paseo.',
+            dur:'45 min', cost:'Free',
+            why:'You chose a <b>relaxed pace</b>, so there are no tickets on arrival day — just a walk to get your bearings, two minutes from your stay.' },
+          { time:'20:30', title:'Tapas at Eslava', cat:'Food & tapas',
+            desc:'A thirty-year neighbourhood institution. Order the slow-cooked egg on mushroom cake and the cinnamon-glazed pork rib.',
+            dur:'1.5 h', cost:'€18–25 pp',
+            why:'You picked <b>Food & tapas</b> — Eslava is the most-awarded tapas bar in Seville and a 6-minute walk from Casa Alameda. Arrive by 20:30 to beat the queue.' }
+        ]}
+      ]
+    },
+    {
+      dow:'Thu', num:'3', glance:'5 stops · 3.4 km on foot · big morning, slow afternoon',
+      groups:[
+        { part:'Morning', items:[
+          { time:'09:30', title:'Real Alcázar', cat:'Architecture',
+            desc:'A thousand years of Mudéjar palaces, tiled courtyards and gardens still used by the Spanish royal family.',
+            dur:'2 h', cost:'€14.50',
+            why:'You picked <b>Architecture</b> — this is the city’s masterpiece. The 9:30 slot gets you in ahead of the tour groups and the worst of the heat. Book the timed entry tonight.' },
+          { time:'11:45', title:'Barrio Santa Cruz', cat:'Neighbourhood',
+            desc:'The old Jewish quarter — whitewashed lanes barely two metres wide, opening onto quiet orange-tree squares.',
+            dur:'45 min', cost:'Free',
+            why:'Its narrow streets were built for July: you stay in shade the whole walk, and it starts right at the Alcázar exit.' }
+        ]},
+        { part:'Afternoon', items:[
+          { time:'13:30', title:'Bodega Santa Cruz "Las Columnas"', cat:'Food & tapas',
+            desc:'Chalkboard tapas shouted over a marble counter — montaditos, pringá and very cold beer.',
+            dur:'1 h', cost:'€10–15 pp',
+            why:'You picked <b>Food & tapas</b> — this is a locals’ counter, not a tourist menu, and it sits on your walking route out of Santa Cruz.' },
+          { time:'15:00', title:'Siesta at Casa Alameda', cat:'Your stay',
+            desc:'Seville pauses from three to five. So should you — the terrace is shaded by mid-afternoon.',
+            dur:'2 h', cost:null,
+            why:'A <b>relaxed pace</b> means we keep the hottest hours free. Today peaks at 38° around 18:00.' }
+        ]},
+        { part:'Evening', items:[
+          { time:'21:00', title:'La Casa del Flamenco', cat:'Flamenco & live music',
+            desc:'An hour of serious flamenco in a 15th-century courtyard. No dinner show, no microphones — just four performers and the room.',
+            dur:'1 h', cost:'€25',
+            why:'You picked <b>Flamenco & live music</b> — this is the venue Sevillanos actually recommend, and the intimate patio suits a table for two.' }
+        ]}
+      ]
+    },
+    {
+      dow:'Fri', num:'4', glance:'5 stops · 4.1 km · market lunch, river evening',
+      groups:[
+        { part:'Morning', items:[
+          { time:'09:00', title:'Catedral & La Giralda', cat:'Architecture',
+            desc:'The largest Gothic cathedral on earth, with Columbus’s tomb inside and a 12th-century minaret you climb by ramp.',
+            dur:'1 h 45', cost:'€13',
+            why:'You picked <b>Rooftops & views</b> — the Giralda climb ends 96 m above the old town, and at 9:00 you’ll have the ramps nearly to yourselves.' },
+          { time:'11:15', title:'Churros at Bar Comercio', cat:'Food & tapas',
+            desc:'Frying churros on the same corner since 1904. Order a media with thick chocolate, stand at the bar.',
+            dur:'30 min', cost:'€4 pp',
+            why:'You picked <b>Food & tapas</b> — this is the post-cathedral ritual, three streets from the exit.' }
+        ]},
+        { part:'Afternoon', items:[
+          { time:'13:30', title:'Lunch at Mercado de Triana', cat:'Food & tapas',
+            desc:'Cross the bridge and eat where Triana shops — grilled tuna, salmorejo and sherry among the market stalls.',
+            dur:'1.5 h', cost:'€12–18 pp',
+            why:'You picked <b>Food & tapas</b> — market counters here serve what came in that morning, at half the old-town price.' },
+          { time:'16:30', title:'Triana ceramics & river walk', cat:'Neighbourhood',
+            desc:'Calle Alfarería’s azulejo workshops, then the shaded river path along Calle Betis.',
+            dur:'1 h', cost:'Free',
+            why:'A <b>relaxed pace</b> afternoon: no tickets, riverside shade, and you end exactly where the evening starts.' }
+        ]},
+        { part:'Evening', items:[
+          { time:'21:15', title:'Sunset at Las Setas', cat:'Rooftops & views',
+            desc:'The world’s largest wooden structure — a rooftop skywalk over the old town, five minutes from your door.',
+            dur:'45 min', cost:'€15',
+            why:'You picked <b>Rooftops & views</b> — sunset is at 21:36 in early July. Go up twenty minutes early and walk the full loop.' }
+        ]}
+      ]
+    },
+    {
+      dow:'Sat', num:'5', glance:'4 stops · slow Saturday · plazas and a last rooftop',
+      groups:[
+        { part:'Morning', items:[
+          { time:'09:30', title:'Plaza de España', cat:'Architecture',
+            desc:'A half-moon of bridges, canals and tiled alcoves — one for every province in Spain. Built for the 1929 Expo.',
+            dur:'1 h', cost:'Free',
+            why:'You picked <b>Architecture</b> — and arriving before the 11:00 coach tours means you’ll have the colonnade almost to yourselves.' },
+          { time:'10:45', title:'Parque de María Luisa', cat:'Neighbourhood',
+            desc:'A slow green hour under the pergolas — tiled fountains, hidden pavilions and resident peacocks.',
+            dur:'1 h', cost:'Free',
+            why:'A <b>relaxed pace</b> Saturday: the park holds its shade until noon, and it’s on your way back from the plaza.' }
+        ]},
+        { part:'Afternoon', items:[
+          { time:'13:45', title:'Lunch at Casa Morales', cat:'Food & tapas',
+            desc:'Wine from the barrel and chicharrones on butcher paper — barely changed since 1850.',
+            dur:'1.5 h', cost:'€15–20 pp',
+            why:'You picked <b>Food & tapas</b> — one of the last true abacerías, and quiet on Saturday afternoons once the tour groups clear.' }
+        ]},
+        { part:'Evening', items:[
+          { time:'20:30', title:'Rooftop at La Terraza del EME', cat:'Rooftops & views',
+            desc:'Cathedral-facing terrace for a final drink — the Giralda lit up close enough to count the bells.',
+            dur:'1.5 h', cost:'€12–16 pp',
+            why:'You picked <b>Rooftops & views</b> — this is the closest view of the Giralda you can get with a drink in hand. Book the 20:30 slot for golden hour.' }
+        ]}
+      ]
+    },
+    {
+      dow:'Sun', num:'6', glance:'Departure · check-out at 11:00 · one last breakfast',
+      groups:[
+        { part:'Morning', items:[
+          { time:'09:00', title:'Breakfast at La Cacharrería', cat:'Food & tapas',
+            desc:'Toast stacked with tomato and jamón, good coffee, mismatched armchairs. Two streets from your door.',
+            dur:'45 min', cost:'€8 pp',
+            why:'No rush before an 11:00 check-out — you picked <b>Food & tapas</b>, so the last morning ends the way the trip started.' },
+          { time:'11:00', title:'Check out of Casa Alameda', cat:'Your stay',
+            desc:'Leave the keys on the kitchen table and pull the door shut. Luggage storage is 400 m away if your flight is later.',
+            dur:null, cost:null, why:null }
+        ]}
+      ]
+    }
+  ];
+
+  /* ================= Quiz ================= */
+  var QUIZ = [
+    {
+      key:'pace', type:'single',
+      q:'What pace feels right?', sub:'This decides how much we plan into each day.',
+      options:[
+        { id:'Relaxed', name:'Relaxed', desc:'Two or three things a day, long lunches' },
+        { id:'Balanced', name:'Balanced', desc:'A full morning, an easy afternoon' },
+        { id:'See everything', name:'See everything', desc:'Early starts, late nights, no regrets' }
+      ]
+    },
+    {
+      key:'interests', type:'multi', min:2, max:6,
+      q:'What are you here for?', sub:'Pick two to six — we’ll build your days around them.',
+      options:[
+        { id:'Architecture', name:'Architecture' },
+        { id:'Food & tapas', name:'Food & tapas' },
+        { id:'Art & museums', name:'Art & museums' },
+        { id:'Flamenco & live music', name:'Flamenco & live music' },
+        { id:'Markets & shopping', name:'Markets & shopping' },
+        { id:'Rooftops & views', name:'Rooftops & views' },
+        { id:'Parks & gardens', name:'Parks & gardens' },
+        { id:'Local nightlife', name:'Local nightlife' }
+      ]
+    },
+    {
+      key:'traveler', type:'single',
+      q:'Who’s travelling?', sub:'Helps us pick the right tables, tickets and timings.',
+      options:[
+        { id:'Solo', name:'Solo', desc:'Counter seats and flexible plans' },
+        { id:'Couple', name:'Couple', desc:'Tables for two, golden-hour views' },
+        { id:'Family', name:'Family with kids', desc:'Shade, gelato and shorter walks' },
+        { id:'Friends', name:'Friends', desc:'Shared plates and late nights' }
+      ]
+    }
+  ];
+
+  var DEFAULTS = { pace:'Relaxed', interests:['Architecture','Food & tapas','Flamenco & live music','Rooftops & views'], traveler:'Couple' };
+  var answers = { pace:null, interests:[], traveler:null };
+  var quizStep = 0;
+  var quizDone = false;
+
+  var quizBody = $('#quizBody'), quizHint = $('#quizHint'), quizNext = $('#quizNext'),
+      quizCount = $('#quizCount'), quizProgress = $('#quizProgress');
+
+  function stepComplete(i){
+    var s = QUIZ[i];
+    if (s.type === 'multi') return answers[s.key].length >= s.min;
+    return !!answers[s.key];
+  }
+
+  function hintFor(i){
+    var s = QUIZ[i];
+    if (s.type === 'multi'){
+      var n = answers.interests.length;
+      if (n === 0) return 'Pick at least two interests — this shapes your whole plan.';
+      if (n === 1) return 'One more interest and you’re set.';
+      return '';
+    }
+    if (s.key === 'pace') return answers.pace ? '' : 'Choose a pace to continue.';
+    return answers.traveler ? '' : 'Select who’s travelling to generate your guide.';
+  }
+
+  function renderQuiz(){
+    var s = QUIZ[quizStep];
+    quizCount.textContent = (quizStep+1) + ' of 3';
+    var html = '<h2>'+s.q+'</h2><p class="q-sub">'+s.sub+'</p>';
+    if (s.type === 'multi'){
+      html += '<div class="chip-grid">' + s.options.map(function(o){
+        var sel = answers.interests.indexOf(o.id) >= 0;
+        return '<button class="chip'+(sel?' sel':'')+'" data-opt="'+o.id+'" type="button" aria-pressed="'+sel+'">'+o.name+'</button>';
+      }).join('') + '</div>';
+    } else {
+      html += '<div class="opt-list">' + s.options.map(function(o){
+        var sel = answers[s.key] === o.id;
+        return '<button class="opt'+(sel?' sel':'')+'" data-opt="'+o.id+'" type="button" aria-pressed="'+sel+'">'
+          + '<span class="o-txt"><span class="o-name">'+o.name+'</span><span class="o-desc">'+o.desc+'</span></span>'
+          + '<span class="o-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>'
+          + '</button>';
+      }).join('') + '</div>';
+    }
+    quizBody.innerHTML = html;
+    quizNext.textContent = quizStep === 2 ? 'Generate my plan' : 'Continue';
+    updateQuizFoot(false);
+  }
+
+  function updateQuizFoot(attn){
+    var ok = stepComplete(quizStep);
+    quizNext.classList.toggle('hold', !ok);
+    quizHint.textContent = hintFor(quizStep);
+    quizHint.classList.remove('attn');
+    if (attn && !ok){
+      void quizHint.offsetWidth;
+      quizHint.classList.add('attn');
+    }
+    $$('.quiz-progress i', $('#s-quiz')).forEach(function(seg,i){
+      seg.classList.toggle('done', i < quizStep || (i === quizStep && ok));
+    });
+  }
+
+  quizBody.addEventListener('click', function(e){
+    var b = e.target.closest('[data-opt]');
+    if (!b) return;
+    var s = QUIZ[quizStep], v = b.getAttribute('data-opt');
+    if (s.type === 'multi'){
+      var idx = answers.interests.indexOf(v);
+      if (idx >= 0){ answers.interests.splice(idx,1); b.classList.remove('sel'); b.setAttribute('aria-pressed','false'); }
+      else if (answers.interests.length >= s.max){
+        quizHint.textContent = 'Six is plenty — remove one to add another.';
+        quizHint.classList.remove('attn'); void quizHint.offsetWidth; quizHint.classList.add('attn');
+        return;
+      } else { answers.interests.push(v); b.classList.add('sel'); b.setAttribute('aria-pressed','true'); }
+    } else {
+      answers[s.key] = v;
+      $$('[data-opt]', quizBody).forEach(function(o){
+        var on = o === b;
+        o.classList.toggle('sel', on); o.setAttribute('aria-pressed', String(on));
+      });
+    }
+    updateQuizFoot(false);
+  });
+
+  quizNext.addEventListener('click', function(){
+    if (!stepComplete(quizStep)){ updateQuizFoot(true); return; }
+    if (quizStep < 2){ quizStep++; renderQuiz(); }
+    else { quizDone = true; renderItinerary(); goTo('generating'); }
+  });
+
+  $('#quizBack').addEventListener('click', function(){
+    if (quizStep > 0){ quizStep--; renderQuiz(); }
+    else goTo('cover');
+  });
+
+  /* ================= Generating ================= */
+  var genTimers = [];
+  function clearGen(){ genTimers.forEach(clearTimeout); genTimers = []; }
+  function runGenerating(){
+    clearGen();
+    var steps = $$('.gstep', $('#genSteps'));
+    var bar = $('#genBar');
+    steps.forEach(function(s){ s.classList.remove('on','done'); });
+    bar.style.transition = 'none'; bar.style.width = '0';
+    void bar.offsetWidth;
+    bar.style.transition = 'width .6s var(--ease)';
+    steps.forEach(function(s,i){
+      genTimers.push(setTimeout(function(){
+        if (i > 0) steps[i-1].classList.replace('on','done');
+        s.classList.add('on');
+        bar.style.width = ((i+1)/(steps.length+1)*100) + '%';
+      }, 150 + i*620));
+    });
+    genTimers.push(setTimeout(function(){
+      steps[steps.length-1].classList.replace('on','done');
+      bar.style.width = '100%';
+    }, 150 + steps.length*620));
+    genTimers.push(setTimeout(function(){ goTo('itinerary'); }, 700 + steps.length*620));
+  }
+
+  /* ================= Itinerary ================= */
+  var activeDay = 1; // land on the first full day
+  var dayTabs = $('#dayTabs'), dayBody = $('#dayBody'), planSummary = $('#planSummary');
+
+  function prefs(){
+    var a = quizDone ? answers : DEFAULTS;
+    return {
+      pace: a.pace || DEFAULTS.pace,
+      interests: (a.interests && a.interests.length ? a.interests : DEFAULTS.interests),
+      traveler: a.traveler || DEFAULTS.traveler
+    };
+  }
+
+  function summaryLine(){
+    var p = prefs();
+    var ints = p.interests.slice(0,2).join(', ');
+    var extra = p.interests.length - 2;
+    if (extra > 0) ints += ' +' + extra;
+    return 'Built for a <b>' + p.pace.toLowerCase() + '</b> pace · ' + ints + ' · ' + p.traveler;
+  }
+
+  function renderTabs(){
+    dayTabs.innerHTML = DAYS.map(function(d,i){
+      return '<button class="dtab'+(i===activeDay?' on':'')+'" data-day="'+i+'" type="button">'
+        + '<span class="dw">'+d.dow+'</span><span class="dn">'+d.num+'</span></button>';
+    }).join('');
+  }
+
+  function metaSpan(icon, txt){
+    return '<span><svg class="ic"><use href="#'+icon+'"/></svg>'+txt+'</span>';
+  }
+
+  function renderDay(){
+    var d = DAYS[activeDay];
+    var html = '<div class="glance"><svg class="ic"><use href="#i-map"/></svg>'+d.glance+'</div>';
+    d.groups.forEach(function(g){
+      html += '<div class="part-label">'+g.part+'</div>';
+      g.items.forEach(function(it){
+        html += '<div class="act"><span class="a-time">'+it.time+'</span><div class="a-main">'
+          + '<div class="a-name">'+it.title+'</div>'
+          + '<div class="a-cat">'+it.cat+'</div>'
+          + '<p class="a-desc">'+it.desc+'</p>';
+        var meta = '';
+        if (it.dur) meta += metaSpan('i-clock', it.dur);
+        if (it.cost) meta += '<span>'+it.cost+'</span>';
+        if (meta) html += '<div class="a-meta">'+meta+'</div>';
+        if (it.why){
+          html += '<button class="why-btn" type="button" aria-expanded="false">Why this pick'
+            + '<svg class="ic"><use href="#i-chevron-down"/></svg></button>'
+            + '<div class="why-panel"><div><div class="why-inner">'+it.why+'</div></div></div>';
+        }
+        html += '</div></div>';
+      });
+    });
+    dayBody.innerHTML = html;
+    dayBody.closest('.scroll').scrollTop = 0;
+  }
+
+  function renderItinerary(){
+    planSummary.innerHTML = summaryLine();
+    renderTabs();
+    renderDay();
+  }
+
+  dayTabs.addEventListener('click', function(e){
+    var t = e.target.closest('[data-day]');
+    if (!t) return;
+    activeDay = +t.getAttribute('data-day');
+    renderTabs();
+    renderDay();
+  });
+
+  dayBody.addEventListener('click', function(e){
+    var b = e.target.closest('.why-btn');
+    if (!b) return;
+    var open = b.getAttribute('aria-expanded') === 'true';
+    b.setAttribute('aria-expanded', String(!open));
+    b.nextElementSibling.classList.toggle('open', !open);
+  });
+
+  /* ================= Concierge chat ================= */
+  var chatBody = $('#chatBody'), chatInput = $('#chatInput');
+  var REPLIES = {
+    tonight: { q:'What’s the plan tonight?',
+      a:'Tonight you’re at Eslava for tapas at 20:30 — a 6-minute walk from your door, left out of the building and along the Alameda. It fills up fast; if the bar is full, its sister restaurant next door takes walk-ins. Want me to shift it later?' },
+    late: { q:'Can we get a late check-out?',
+      a:'Late check-out until 14:00 is available for €25 — cleaning for the next guests starts at 15:00. I can add it to your stay now and you’ll see it under Stay. Shall I?' },
+    taxi: { q:'How do we get a taxi to the airport?',
+      a:'A taxi to Seville airport takes about 20 minutes and costs a flat €25.65 from the centre. For a Sunday flight I’d book pickup two and a half hours before departure — tell me your flight time and I’ll arrange it.' },
+    wifi: { q:'What’s the Wi-Fi password?',
+      a:'The network is CasaAlameda-5G and the password is printed on the card by the fridge. If the signal drops on the terrace, the router is behind the TV — give it thirty seconds after a restart.' }
+  };
+  var GENERIC = 'Noted — I’ve passed that to the team at Casa Alameda and you’ll hear back here shortly. Anything else about tonight’s plan?';
+  var chatBusy = false;
+
+  function addMsg(cls, text){
+    var m = document.createElement('div');
+    m.className = 'msg ' + cls;
+    m.textContent = text;
+    chatBody.appendChild(m);
+    chatBody.scrollTop = chatBody.scrollHeight;
+    return m;
+  }
+
+  function converse(q, a){
+    if (chatBusy) return;
+    chatBusy = true;
+    addMsg('me', q);
+    setTimeout(function(){
+      var t = document.createElement('div');
+      t.className = 'msg ai typing';
+      t.innerHTML = '<i></i><i></i><i></i>';
+      chatBody.appendChild(t);
+      chatBody.scrollTop = chatBody.scrollHeight;
+      setTimeout(function(){
+        t.remove();
+        addMsg('ai', a);
+        chatBusy = false;
+      }, 950);
+    }, 350);
+  }
+
+  $('#chipsRow').addEventListener('click', function(e){
+    var c = e.target.closest('[data-q]');
+    if (!c) return;
+    var r = REPLIES[c.getAttribute('data-q')];
+    converse(r.q, r.a);
+  });
+
+  $('#composer').addEventListener('submit', function(e){
+    e.preventDefault();
+    var v = chatInput.value.trim();
+    if (!v || chatBusy) return;
+    chatInput.value = '';
+    converse(v, GENERIC);
+  });
+
+  /* ================= Today ================= */
+  $('#checkinBtn').addEventListener('click', function(){
+    this.textContent = 'Check-in started — resume any time';
+    var t = $('#taskId .t-desc');
+    if (t) t.textContent = 'In progress · 2 of 2 guests remaining';
+  });
+
+  /* ================= Departure ================= */
+  $('#lateBtn').addEventListener('click', function(){
+    var added = this.classList.toggle('added');
+    this.textContent = added ? 'Added' : 'Add · €25';
+  });
+  var checkoutBtn = $('#checkoutBtn');
+  checkoutBtn.addEventListener('click', function(){
+    if (checkoutBtn.classList.contains('success')) return;
+    checkoutBtn.classList.remove('outline');
+    checkoutBtn.classList.add('success');
+    checkoutBtn.innerHTML = '<svg class="ic" style="width:16px;height:16px"><use href="#i-check"/></svg>Checked out — safe travels, Laura';
+  });
+
+  function tickCountdown(){
+    var el = $('#cdLeft');
+    var end = new Date('2026-07-06T11:00:00');
+    var ms = end - new Date();
+    if (ms <= 0){ el.textContent = 'Check-out closed'; return; }
+    var d = Math.floor(ms/86400000), h = Math.floor(ms%86400000/3600000), m = Math.floor(ms%3600000/60000);
+    el.textContent = d > 0 ? (d + 'd ' + h + 'h left') : (h > 0 ? (h + 'h ' + m + 'm left') : (m + 'm left'));
+  }
+  tickCountdown();
+  setInterval(tickCountdown, 30000);
+
+  /* ================= Tab bars ================= */
+  var TABS = [
+    { id:'today', label:'Today', icon:'i-home' },
+    { id:'itinerary', label:'Plan', icon:'i-map' },
+    { id:'chat', label:'Concierge', icon:'i-chat' },
+    { id:'stay', label:'Stay', icon:'i-key' }
+  ];
+  $$('[data-tabbar]').forEach(function(bar){
+    bar.innerHTML = TABS.map(function(t){
+      return '<button class="tab" data-go="'+t.id+'" type="button">'
+        + '<svg class="ic"><use href="#'+t.icon+'"/></svg>'+t.label+'</button>';
+    }).join('');
+  });
+  function syncTabs(){
+    $$('.tab').forEach(function(t){
+      t.classList.toggle('on', t.getAttribute('data-go') === current);
+    });
+  }
+
+  /* ================= Navigation ================= */
+  var statusbar = $('#statusbar');
+  function goTo(id){
+    if (!document.getElementById('s-'+id)) return;
+    clearGen();
+    current = id;
+    $$('.screen').forEach(function(s){
+      s.classList.toggle('active', s.id === 's-'+id);
+    });
+    var scr = document.getElementById('s-'+id);
+    statusbar.classList.toggle('on-image', scr.getAttribute('data-status') === 'on-image');
+    $$('.rail-step').forEach(function(r){
+      r.classList.toggle('active', r.getAttribute('data-go') === id);
+    });
+    syncTabs();
+    if (id === 'quiz') renderQuiz();
+    if (id === 'generating') runGenerating();
+    if (id === 'itinerary') renderItinerary();
+  }
+
+  document.addEventListener('click', function(e){
+    var g = e.target.closest('[data-go]');
+    if (!g || g.hasAttribute('data-day') || g.hasAttribute('data-opt')) return;
+    goTo(g.getAttribute('data-go'));
+  });
+
+  $('#restartBtn').addEventListener('click', function(){
+    answers = { pace:null, interests:[], traveler:null };
+    quizStep = 0; quizDone = false; activeDay = 1;
+    goTo('cover');
+  });
+
+  document.addEventListener('keydown', function(e){
+    var tag = (e.target.tagName || '').toLowerCase();
+    if (tag === 'input' || tag === 'textarea') return;
+    if (e.key === 'Escape' && document.body.classList.contains('preview')){ setPreview(false); return; }
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft'){
+      var i = FLOW.indexOf(current);
+      var n = e.key === 'ArrowRight' ? Math.min(i+1, FLOW.length-1) : Math.max(i-1, 0);
+      if (n !== i) goTo(FLOW[n]);
+    }
+  });
+
+  /* ================= Preview / fitting ================= */
+  var phone = $('#phone');
+  function setPreview(on){
+    document.body.classList.toggle('preview', on);
+    fitPhone();
+    if (!on) phone.style.transform = '';
+  }
+  $('#previewBtn').addEventListener('click', function(){ setPreview(true); });
+  $('#exitPreview').addEventListener('click', function(){ setPreview(false); });
+
+  function fitPhone(){
+    if (document.body.classList.contains('preview')){
+      var s = Math.min((window.innerHeight - 48) / 712, (window.innerWidth - 40) / 344, 1.25);
+      phone.style.transform = 'translate(-50%, -50%) scale(' + s.toFixed(4) + ')';
+    } else if (window.innerWidth < 900){
+      var s2 = Math.min((window.innerWidth - 48) / 344, 1);
+      phone.style.transform = 'scale(' + s2.toFixed(4) + ')';
+      phone.style.marginBottom = (s2 < 1 ? -(712 * (1 - s2)) : 0) + 'px';
+    } else {
+      phone.style.transform = '';
+      phone.style.marginBottom = '';
+    }
+  }
+  window.addEventListener('resize', fitPhone);
+
+  /* ================= Init ================= */
+  var start = (location.hash || '').slice(1);
+  goTo(FLOW.indexOf(start) >= 0 ? start : 'cover');
+  fitPhone();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chekin — Guest CRM · Segments</title>
+<link rel="stylesheet" href="../ds/colors_and_type.css">
+<link rel="stylesheet" href="../ds/_sidebar.css">
+<link rel="stylesheet" href="../ds/_agent.css">
+<link rel="stylesheet" href="ds/_crm.css">
+<style>
+  .seg-grid{display:grid;grid-template-columns:1fr 380px;gap:18px;align-items:start}
+  @media (max-width:1080px){.seg-grid{grid-template-columns:1fr}}
+  .rules-wrap{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .big{font:700 32px/34px var(--font-primary);color:var(--text-dark);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+  .prev-row{display:flex;gap:18px;flex-wrap:wrap}
+  .prev-cell{flex:1;min-width:120px}
+  .prev-cell .l{font:500 12px var(--font-primary);color:var(--text-gray-medium);margin-top:3px}
+  .segrow{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--stroke-gray-lighter)}
+  .segrow:last-child{border-bottom:none}
+  .segsample{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid var(--stroke-gray-lighter)}
+  .segsample:last-child{border-bottom:none}
+  .excl-row{display:flex;align-items:center;gap:8px;font:500 13px var(--font-primary);color:var(--text-gray-dark);padding:6px 0}
+  .excl-row svg{width:14px;height:14px;stroke:var(--text-amber);fill:none;stroke-width:2;flex-shrink:0}
+</style>
+</head>
+<body>
+<div class="app">
+  <div id="sidebar-slot" data-nav="guest-crm"></div>
+  <main>
+    <header class="top">
+      <div class="crumbs"><b>Guest CRM</b> <span class="sep">/</span> Segments</div>
+      <span data-agent-trigger-slot style="margin-left:auto"></span>
+      <button class="iconbtn" aria-label="Help"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 1 1 5.8 1c0 2-3 2-3 4M12 17h.01"/></svg></button>
+      <button class="iconbtn" aria-label="Notifications"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><div class="pip"></div></button>
+      <div class="user-av">MR</div>
+    </header>
+
+    <div class="page">
+      <div id="crm-demo"></div>
+      <div id="crm-subnav"></div>
+
+      <div class="pagehead reveal">
+        <div>
+          <h1>Segments</h1>
+          <div class="sub">Describe an audience in plain language. Vela parses it into structured, editable rules, previews the eligible audience after consent, and you can save it or launch a campaign.</div>
+        </div>
+      </div>
+
+      <!-- Agentic prompt box -->
+      <section class="cmd reveal" style="animation-delay:.05s">
+        <span class="eyebrow"><svg viewBox="0 0 24 24"><path d="M12 2 13.5 8 19 9.5 13.5 11 12 17 10.5 11 5 9.5 10.5 8 Z"/></svg> Vela · Segment builder</span>
+        <h2>Describe the guests you want to reach. Vela turns it into rules — you review and edit before saving.</h2>
+        <div class="inputbar">
+          <svg class="lead" viewBox="0 0 24 24"><path d="M12 2 13.5 8 19 9.5 13.5 11 12 17 10.5 11 5 9.5 10.5 8 Z"/></svg>
+          <input id="seg-input" placeholder="Describe an audience… e.g. Guests arriving in the next 7 days who have not completed check-in">
+          <button class="go" id="seg-go"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg> Generate rules</button>
+        </div>
+        <div class="examples" id="seg-examples"></div>
+      </section>
+
+      <div class="seg-grid">
+        <!-- LEFT: builder / results -->
+        <div id="seg-result"></div>
+
+        <!-- RIGHT: saved segments -->
+        <div class="card reveal" style="animation-delay:.12s">
+          <div class="hd"><h3>Saved segments</h3><div class="act tiny" id="seg-count"></div></div>
+          <div class="bd" id="seg-saved"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="crm-drawer-root"></div>
+
+<script src="data/types.js"></script>
+<script src="data/fixtures.js"></script>
+<script src="services/crm-service.js"></script>
+<script src="agent/agent.js"></script>
+<script src="ds/_crm.js"></script>
+<script src="../ds/_sidebar.js"></script>
+<script src="../ds/_agent.js"></script>
+<script>
+(function(){
+  var S = window.CRMService, A = window.CRMAgent, I = CRM.icons;
+  CRM.boot({ active:'segments' });
+
+  var typeBadge = { dynamic:'blue', static:'gray', ai_suggested:'violet' };
+  var typeLabel = { dynamic:'Dynamic', static:'Static', ai_suggested:'AI suggested' };
+
+  // ---- current builder state ----
+  var current = null; // last generated { type, name, naturalLanguageQuery, rules, ... }
+
+  // ---- example chips ----
+  var examples = (A.SEGMENT_EXAMPLES && A.SEGMENT_EXAMPLES.length) ? A.SEGMENT_EXAMPLES : [
+    'Guests arriving in the next 7 days who have not completed check-in',
+    'Families who stayed last summer and have no future booking',
+    'Couples arriving this weekend who have not bought spa deals',
+    'Guests who asked about parking and arrive in the next 72 hours'
+  ];
+  document.getElementById('seg-examples').innerHTML = examples.map(function(e){ return '<span class="ex">'+CRM.esc(e)+'</span>'; }).join('');
+
+  // ---- empty state (before any generation) ----
+  function emptyState(){
+    return '<div class="card"><div class="bd"><div class="empty">'+
+      '<div class="ic">'+I.spark+'</div>'+
+      '<h3>Build an audience from a sentence</h3>'+
+      '<p>Type a description above or pick an example. Vela parses it into structured rules and previews how many guests are eligible after consent — nothing is sent.</p>'+
+      '</div></div></div>';
+  }
+
+  // ---- render an editable rule chip ----
+  function ruleChip(r, idx){
+    var field = r.label || r.field;
+    var val = formatValue(r.value);
+    return '<span class="rule" data-idx="'+idx+'">'+
+      '<span class="f">'+CRM.esc(field)+'</span>'+
+      '<span class="op">'+CRM.esc(prettyOp(r.operator))+'</span>'+
+      (val ? '<span>'+CRM.esc(val)+'</span>' : '')+
+      '<span class="x" data-remove="'+idx+'" title="Remove rule">'+I.x+'</span>'+
+      '</span>';
+  }
+  function prettyOp(op){
+    return ({ between:'between', greater_than:'>', less_than:'<', equals:'is', contains:'has', is_false:'is none', is_true:'is set' }[op] || op);
+  }
+  function formatValue(v){
+    if (v == null) return '';
+    if (Array.isArray(v)) return v.join(' → ');
+    return String(v);
+  }
+
+  // ---- render the results card from a generated/edited plan ----
+  function renderResult(plan){
+    current = plan;
+    var rulesHtml = plan.rules.length
+      ? plan.rules.map(function(r,i){ return ruleChip(r,i); }).join('')
+      : '<span class="tiny">No rules — add one or refine your prompt.</span>';
+
+    var sample = plan.sample || [];
+    var sampleHtml = sample.length
+      ? sample.slice(0,6).map(function(s){
+          return '<div class="segsample"><div class="gav" style="width:30px;height:30px;font-size:11px">'+CRM.initials(s.name)+'</div>'+
+            '<div style="flex:1;min-width:0"><div style="font:600 13px var(--font-primary)">'+CRM.esc(s.name)+' <span style="font-size:12px">'+(s.flag||'')+'</span></div>'+
+            '<div class="tiny">'+CRM.esc(CRM.titleStage(s.stage))+(s.nextStayAt ? ' · next stay '+CRM.relDate(s.nextStayAt) : '')+'</div></div></div>';
+        }).join('')
+      : '<div class="tiny">No matching guests in this audience.</div>';
+
+    var exclusions = (plan.exclusions || []).map(function(e){
+      var label = typeof e === 'string' ? e : (e.reason + (e.count ? ' ('+e.count+')' : ''));
+      return '<div class="excl-row"><svg viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg><span>'+CRM.esc(label)+'</span></div>';
+    }).join('');
+
+    var est = plan.estimatedSize || 0, elig = plan.eligibleSize || 0, excl = plan.excludedSize || 0;
+    var ratio = est ? Math.round((elig/est)*100) : 0;
+
+    var html =
+      '<div class="card reveal" style="margin-bottom:18px">'+
+        '<div class="hd"><h3>'+I.spark+' '+CRM.esc(plan.name || 'New segment')+'</h3>'+
+          '<div class="act"><span class="badge violet">AI generated</span></div></div>'+
+        '<div class="bd" style="display:flex;flex-direction:column;gap:16px">'+
+          CRM.aiBlock(CRM.esc(plan.reasoningSummary || 'Parsed your request into structured rules.'), { why: plan.reasoningSummary })+
+          '<div>'+
+            '<div class="tiny" style="margin-bottom:8px">Rules</div>'+
+            '<div class="rules-wrap" id="seg-rules">'+rulesHtml+
+              '<button class="tbtn ghost" id="seg-add-rule" style="height:34px;padding:0 12px">+ Add rule</button>'+
+            '</div>'+
+          '</div>'+
+        '</div>'+
+      '</div>'+
+
+      '<div class="card reveal" style="margin-bottom:18px;animation-delay:.05s">'+
+        '<div class="hd"><h3>Audience preview</h3><div class="act tiny">After consent</div></div>'+
+        '<div class="bd" style="display:flex;flex-direction:column;gap:16px">'+
+          '<div class="prev-row">'+
+            '<div class="prev-cell"><div class="big" id="prev-est">'+est+'</div><div class="l">Estimated audience</div></div>'+
+            '<div class="prev-cell"><div class="big" id="prev-elig" style="color:var(--text-success)">'+elig+'</div><div class="l">Eligible after consent</div></div>'+
+            '<div class="prev-cell"><div class="big" id="prev-excl" style="color:var(--text-amber)">'+excl+'</div><div class="l">Excluded</div></div>'+
+          '</div>'+
+          '<div><div class="tiny" style="margin-bottom:6px"><span id="prev-ratio">'+ratio+'</span>% eligible</div>'+
+            '<div class="meter"><i id="prev-meter" style="width:'+ratio+'%"></i></div></div>'+
+          (exclusions ? '<div><div class="tiny" style="margin-bottom:2px">Consent exclusions</div><div id="prev-exclusions">'+exclusions+'</div></div>'
+                      : '<div id="prev-exclusions" class="tiny">No consent exclusions — everyone in this audience can be contacted.</div>')+
+          '<div><div class="tiny" style="margin-bottom:6px">Sample guests</div><div id="prev-sample">'+sampleHtml+'</div></div>'+
+          '<div class="toolbar">'+
+            '<button class="btn-primary" id="seg-save">'+I.check+' Save segment</button>'+
+            '<button class="tbtn" id="seg-use">'+I.spark+' Use in campaign</button>'+
+          '</div>'+
+        '</div>'+
+      '</div>';
+
+    document.getElementById('seg-result').innerHTML = html;
+    wireResult();
+  }
+
+  // ---- recompute the preview block from the current rules ----
+  function refreshPreview(){
+    var p = S.previewSegmentAudience(current.rules);
+    current.estimatedSize = p.estimatedSize;
+    current.eligibleSize = p.eligibleSize;
+    current.excludedSize = p.excludedSize;
+    current.sample = p.sample;
+    // keep agent-provided consent exclusions if present; else use preview's
+    if (!current.exclusions || !current.exclusions.length) current.exclusions = p.exclusions;
+
+    var est = p.estimatedSize, elig = p.eligibleSize, excl = p.excludedSize;
+    var ratio = est ? Math.round((elig/est)*100) : 0;
+    document.getElementById('prev-est').textContent = est;
+    document.getElementById('prev-elig').textContent = elig;
+    document.getElementById('prev-excl').textContent = excl;
+    document.getElementById('prev-ratio').textContent = ratio;
+    document.getElementById('prev-meter').style.width = ratio + '%';
+
+    var sample = p.sample || [];
+    document.getElementById('prev-sample').innerHTML = sample.length
+      ? sample.slice(0,6).map(function(s){
+          return '<div class="segsample"><div class="gav" style="width:30px;height:30px;font-size:11px">'+CRM.initials(s.name)+'</div>'+
+            '<div style="flex:1;min-width:0"><div style="font:600 13px var(--font-primary)">'+CRM.esc(s.name)+' <span style="font-size:12px">'+(s.flag||'')+'</span></div>'+
+            '<div class="tiny">'+CRM.esc(CRM.titleStage(s.stage))+(s.nextStayAt ? ' · next stay '+CRM.relDate(s.nextStayAt) : '')+'</div></div></div>';
+        }).join('')
+      : '<div class="tiny">No matching guests in this audience.</div>';
+  }
+
+  // ---- re-render only the rule chips row ----
+  function refreshRules(){
+    var wrap = document.getElementById('seg-rules');
+    if (!wrap) return;
+    var rulesHtml = current.rules.length
+      ? current.rules.map(function(r,i){ return ruleChip(r,i); }).join('')
+      : '<span class="tiny">No rules — add one or refine your prompt.</span>';
+    wrap.innerHTML = rulesHtml + '<button class="tbtn ghost" id="seg-add-rule" style="height:34px;padding:0 12px">+ Add rule</button>';
+    wireRules();
+  }
+
+  function wireRules(){
+    var wrap = document.getElementById('seg-rules');
+    if (!wrap) return;
+    wrap.addEventListener('click', function(e){
+      var rm = e.target.closest('[data-remove]');
+      if (rm){
+        var idx = +rm.getAttribute('data-remove');
+        current.rules.splice(idx, 1);
+        refreshRules();
+        refreshPreview();
+        return;
+      }
+      var add = e.target.closest('#seg-add-rule');
+      if (add){
+        current.rules.push({ field:'lifecycleStage', operator:'equals', value:'guest', label:'Active guests' });
+        CRM.toast('Rule added — refine it from your prompt for finer control');
+        refreshRules();
+        refreshPreview();
+      }
+    });
+  }
+
+  function wireResult(){
+    wireRules();
+    var save = document.getElementById('seg-save');
+    if (save) save.addEventListener('click', function(){
+      CRM.toast('Segment saved');
+      prependSaved(current);
+    });
+    var use = document.getElementById('seg-use');
+    if (use) use.addEventListener('click', function(){
+      location.href = 'campaign-new.html?prompt=' + encodeURIComponent(current.naturalLanguageQuery || '');
+    });
+  }
+
+  // ---- saved segments list ----
+  function savedRow(seg){
+    var t = seg.type || 'dynamic';
+    return '<div class="segrow" data-nl="'+CRM.esc(seg.naturalLanguageQuery||'')+'">'+
+      '<div style="flex:1;min-width:0">'+
+        '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'+
+          '<span style="font:600 14px var(--font-primary)">'+CRM.esc(seg.name)+'</span>'+
+          '<span class="badge '+(typeBadge[t]||'gray')+'">'+CRM.esc(typeLabel[t]||t)+'</span>'+
+        '</div>'+
+        '<div class="tiny" style="margin-top:3px">'+CRM.esc(seg.naturalLanguageQuery || seg.description || '')+'</div>'+
+        '<div class="tiny" style="margin-top:4px">'+(seg.estimatedSize||0)+' guests · '+(seg.eligibleSize||0)+' eligible'+
+          ((seg.exclusions && seg.exclusions.length) ? ' · '+seg.exclusions.length+' exclusion'+(seg.exclusions.length>1?'s':'') : '')+'</div>'+
+        '<a class="tbtn ghost" style="height:30px;padding:0 8px;margin-top:6px;font-size:13px" href="campaign-new.html?prompt='+encodeURIComponent(seg.naturalLanguageQuery||'')+'">'+I.spark+' Use in campaign</a>'+
+      '</div></div>';
+  }
+  function renderSaved(list){
+    var slot = document.getElementById('seg-saved');
+    slot.innerHTML = list.length ? list.map(savedRow).join('') : '<div class="tiny" style="padding:2px 0 6px">No saved segments yet — describe an audience above and save the generated rules. Saved segments stay live: guests enter and leave as their data changes.</div>';
+    document.getElementById('seg-count').textContent = list.length + ' saved';
+  }
+  function prependSaved(plan){
+    var seg = {
+      name: plan.name || 'New segment',
+      type: plan.type === 'segment_builder' ? 'dynamic' : (plan.type || 'dynamic'),
+      naturalLanguageQuery: plan.naturalLanguageQuery,
+      description: plan.naturalLanguageQuery,
+      estimatedSize: plan.estimatedSize, eligibleSize: plan.eligibleSize,
+      exclusions: plan.exclusions || []
+    };
+    savedList.unshift(seg);
+    renderSaved(savedList);
+  }
+
+  var savedList = S.getSegments();
+  renderSaved(savedList);
+
+  // ---- generation ----
+  function generate(prompt){
+    var v = (prompt != null ? prompt : document.getElementById('seg-input').value).trim();
+    if (!v) return;
+    document.getElementById('seg-input').value = v;
+    var plan = A.generateSegmentFromPrompt(v);
+    renderResult(plan);
+  }
+
+  document.getElementById('seg-go').addEventListener('click', function(){ generate(); });
+  document.getElementById('seg-input').addEventListener('keydown', function(e){ if(e.key==='Enter') generate(); });
+  document.getElementById('seg-examples').addEventListener('click', function(e){
+    var ex = e.target.closest('.ex'); if(!ex) return;
+    generate(ex.textContent);
+  });
+
+  // ---- initial empty state ----
+  document.getElementById('seg-result').innerHTML = emptyState();
+})();
+</script>
+</body>
+</html>

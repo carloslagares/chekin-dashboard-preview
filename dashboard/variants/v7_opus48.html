@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Chekin — Dashboard Home (Opus 4.8)</title>
+<link rel="stylesheet" href="../ds/colors_and_type.css">
+<link rel="stylesheet" href="../ds/_sidebar.css">
+<link rel="stylesheet" href="../ds/_agent.css">
+<style>
+  :root{
+    --bg-dark:#161643;
+    --bg-screen:#FAFBFF;
+    --bg-white:#FFFFFF;
+    --bg-neutral-light:#F4F6F8;
+    --bg-sky-light:#EFF6FF;
+    --bg-blue-light:#F0F3FF;
+    --bg-success-light:#E8FCF7;
+    --stroke-gray-lighter:#E8E9F1;
+    --stroke-gray-light:#DEDEEB;
+    --stroke-gray-medium:#CECEDE;
+    --stroke-success-light:#AAF4E3;
+    --text-dark:#161643;
+    --text-gray-dark:#6B6B95;
+    --text-gray-medium:#9696B9;
+    --text-gray-light:#CECEDE;
+    --text-white:#FFFFFF;
+    --text-brand:#385CF8;
+    --text-danger:#FF2467;
+    --text-warn:#B86A00;
+    --icon-success-light:#35E5BC;
+    --success:#0F9F80;
+    /* Softer, layered shadows — the 4.8 elevation system */
+    --shadow-xs:0 1px 2px rgba(22,22,67,.04);
+    --shadow-card:0 1px 3px rgba(22,22,67,.04), 0 1px 2px rgba(22,22,67,.03);
+    --shadow-raised:0 4px 12px rgba(22,22,67,.06), 0 1px 3px rgba(22,22,67,.04);
+    --shadow-hover:0 12px 28px rgba(56,92,248,.12), 0 2px 6px rgba(22,22,67,.05);
+    --radius-sm:6px;
+    --radius-md:8px;
+    --radius-lg:14px;
+    --radius-xl:18px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg-screen);font-family:var(--font-primary);color:var(--text-dark);font-feature-settings:"ss01";-webkit-font-smoothing:antialiased}
+
+  @media (prefers-reduced-motion: no-preference){
+    .reveal{opacity:0;transform:translateY(10px);animation:reveal .55s cubic-bezier(.2,.8,.2,1) forwards}
+    @keyframes reveal{to{opacity:1;transform:none}}
+  }
+
+  /* ───────── Main ───────── */
+  main{display:flex;flex-direction:column;min-width:0}
+  header.top{display:flex;align-items:center;gap:16px;padding:0 32px;height:64px;border-bottom:1px solid var(--stroke-gray-lighter);background:rgba(255,255,255,.82);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);position:sticky;top:0;z-index:5}
+  .crumbs{font:500 14px var(--font-primary);color:var(--text-gray-dark)}
+  .crumbs b{color:var(--text-dark);font-weight:600}
+  .iconbtn{width:40px;height:40px;border-radius:var(--radius-md);background:#fff;border:1px solid var(--stroke-gray-lighter);display:grid;place-items:center;cursor:pointer;position:relative;transition:background .15s,border-color .15s}
+  .iconbtn svg{width:18px;height:18px;stroke:var(--text-gray-dark);fill:none;stroke-width:1.6}
+  .iconbtn:hover{background:var(--bg-neutral-light);border-color:var(--stroke-gray-medium)}
+  .iconbtn .pip{position:absolute;top:8px;right:8px;width:8px;height:8px;border-radius:50%;background:var(--text-danger);border:2px solid #fff}
+
+  /* Page */
+  .page{padding:32px 48px 64px;max-width:1280px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+
+  /* ───────── Hero band ───────── */
+  .hero{position:relative;border-radius:var(--radius-xl);overflow:hidden;background:linear-gradient(135deg,#1B1B5A 0%,#23235D 42%,#2E3FB0 100%);color:#fff;padding:30px 34px;box-shadow:var(--shadow-raised)}
+  .hero::before{content:"";position:absolute;top:-60px;right:-40px;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(56,92,248,.55),transparent 62%)}
+  .hero::after{content:"";position:absolute;bottom:-90px;right:120px;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(53,229,188,.20),transparent 65%)}
+  .hero-row{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center;gap:32px;flex-wrap:wrap}
+  .hero .greet{font:500 13px var(--font-primary);color:#B9C2FF;letter-spacing:.02em;display:flex;align-items:center;gap:8px}
+  .hero .greet .dot{width:6px;height:6px;border-radius:50%;background:var(--icon-success-light);box-shadow:0 0 0 4px rgba(53,229,188,.18)}
+  .hero h1{font:700 28px/34px var(--font-primary);margin:8px 0 0;letter-spacing:-.015em;color:#fff}
+  .hero h1 .wave{display:inline-block;transform-origin:70% 70%;animation:wave 2.6s ease-in-out infinite;margin-left:4px}
+  @keyframes wave{0%,60%,100%{transform:rotate(0)}10%{transform:rotate(14deg)}20%{transform:rotate(-8deg)}30%{transform:rotate(14deg)}40%{transform:rotate(-4deg)}50%{transform:rotate(10deg)}}
+  .hero .sub{font:400 14px/21px var(--font-primary);color:#C9D0FF;margin-top:8px;max-width:440px}
+  .hero .chips{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap}
+  .hero .chip{display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:999px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.14);font:600 12px var(--font-primary);color:#fff;backdrop-filter:blur(4px)}
+  .hero .chip svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2}
+  .hero .chip b{color:#fff}
+  .hero .chip .mut{color:#AEB7F5;font-weight:500}
+
+  /* Progress ring */
+  .ring-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;flex-shrink:0}
+  .ring{position:relative;width:128px;height:128px}
+  .ring svg{transform:rotate(-90deg);width:128px;height:128px}
+  .ring .track{stroke:rgba(255,255,255,.14);fill:none;stroke-width:11}
+  .ring .fill{stroke:url(#ringGrad);fill:none;stroke-width:11;stroke-linecap:round;stroke-dasharray:339.292;stroke-dashoffset:339.292;animation:ringFill 1.3s cubic-bezier(.3,.9,.3,1) .25s forwards}
+  @keyframes ringFill{to{stroke-dashoffset:203.575}} /* 40% of 339.292 */
+  .ring .ctr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .ring .ctr .pct{font:700 30px var(--font-primary);color:#fff;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .ring .ctr .lbl{font:600 10px var(--font-primary);color:#AEB7F5;text-transform:uppercase;letter-spacing:.08em;margin-top:2px}
+  .ring-wrap .eta{font:500 12px var(--font-primary);color:#C9D0FF}
+  .ring-wrap .eta b{color:#fff;font-weight:600}
+
+  /* ───────── Section heads ───────── */
+  .sechead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px}
+  .sechead h2{font:700 13px var(--font-primary);color:var(--text-gray-dark);margin:0;text-transform:uppercase;letter-spacing:.07em}
+  .sechead .range{font:600 13px var(--font-primary);color:var(--text-brand);display:inline-flex;align-items:center;gap:6px;cursor:pointer;padding:5px 10px;border-radius:var(--radius-sm);background:var(--bg-blue-light)}
+  .sechead .range svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.2}
+  .sechead .link{font:600 13px var(--font-primary);color:var(--text-brand);cursor:pointer;display:inline-flex;align-items:center;gap:4px}
+  .sechead .link svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2}
+
+  /* ───────── Setup stepper ───────── */
+  .setup{background:var(--bg-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-card);overflow:hidden;border:1px solid var(--stroke-gray-lighter)}
+  .setup .hd{display:flex;justify-content:space-between;align-items:center;padding:20px 26px;border-bottom:1px solid var(--stroke-gray-lighter)}
+  .setup .hd h3{font:600 16px var(--font-primary);color:var(--text-dark);margin:0;display:flex;align-items:center;gap:10px}
+  .setup .hd .tag{font:600 12px var(--font-primary);color:var(--text-brand);background:var(--bg-blue-light);padding:3px 10px;border-radius:var(--radius-sm)}
+  .setup .hd .sub{font:400 13px var(--font-primary);color:var(--text-gray-dark);margin-top:4px}
+  .setup .hd .skip{font:600 13px var(--font-primary);color:var(--text-gray-medium);cursor:pointer}
+  .setup .hd .skip:hover{color:var(--text-dark)}
+  .steps{display:grid;grid-template-columns:repeat(5,1fr);gap:0;position:relative}
+  /* connector line behind step icons */
+  .steps::before{content:"";position:absolute;top:43px;left:10%;right:10%;height:2px;background:var(--stroke-gray-light);z-index:0}
+  .step{padding:22px 20px;display:flex;flex-direction:column;gap:11px;cursor:pointer;transition:background .15s;position:relative;z-index:1}
+  .step + .step{border-left:1px solid var(--stroke-gray-lighter)}
+  .step:hover{background:#FBFBFE}
+  .step .ic{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:var(--bg-neutral-light);color:var(--text-gray-dark);position:relative;transition:transform .12s}
+  .step:hover .ic{transform:translateY(-2px)}
+  .step .ic svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+  .step .ic .check{position:absolute;right:-5px;bottom:-5px;width:19px;height:19px;border-radius:50%;background:var(--success);border:2.5px solid #fff;display:grid;place-items:center}
+  .step .ic .check svg{width:10px;height:10px;stroke:#fff;fill:none;stroke-width:3.4}
+  .step.done .ic{background:var(--bg-success-light);color:var(--success)}
+  .step.active .ic{background:var(--text-brand);color:#fff;box-shadow:0 0 0 4px rgba(56,92,248,.16),0 6px 14px rgba(56,92,248,.30)}
+  .step .t{font:600 14px/19px var(--font-primary);color:var(--text-dark)}
+  .step.done .t{color:var(--text-gray-dark)}
+  .step .d{font:400 12px/17px var(--font-primary);color:var(--text-gray-medium)}
+  .step .cta{margin-top:auto;font:600 13px var(--font-primary);color:var(--text-brand);display:inline-flex;align-items:center;gap:4px}
+  .step .cta svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.4}
+  .step.done .cta{color:var(--success)}
+  .step.active .t{color:var(--text-brand)}
+
+  /* ───────── KPI cards ───────── */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+  .kpi{background:var(--bg-white);border:1px solid var(--stroke-gray-lighter);border-radius:var(--radius-lg);padding:18px 20px 14px;display:flex;flex-direction:column;gap:9px;box-shadow:var(--shadow-card);transition:transform .16s,box-shadow .16s,border-color .16s;cursor:default}
+  .kpi:hover{transform:translateY(-3px);box-shadow:var(--shadow-hover);border-color:rgba(56,92,248,.28)}
+  .kpi .l{font:600 12.5px var(--font-primary);color:var(--text-gray-dark);display:flex;align-items:center;gap:7px}
+  .kpi .l .badge{width:24px;height:24px;border-radius:7px;display:grid;place-items:center;background:var(--bg-blue-light);color:var(--text-brand)}
+  .kpi .l .badge svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.9}
+  .kpi .row{display:flex;align-items:flex-end;justify-content:space-between;gap:8px}
+  .kpi .v{font:700 32px/34px var(--font-primary);color:var(--text-dark);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .kpi .v .u{font:600 14px var(--font-primary);color:var(--text-gray-medium);margin-left:3px}
+  .kpi .delta{display:inline-flex;align-items:center;gap:4px;font:600 12px var(--font-primary);padding:3px 7px;border-radius:999px;white-space:nowrap}
+  .kpi .delta svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2.6}
+  .kpi .delta.up{color:var(--success);background:var(--bg-success-light)}
+  .kpi .delta.flat{color:var(--text-gray-dark);background:var(--bg-neutral-light)}
+  .kpi .delta.new{color:var(--text-brand);background:var(--bg-blue-light)}
+  .kpi .spark{height:34px;margin-top:1px}
+  .kpi .spark svg{width:100%;height:100%;display:block}
+  .kpi.fresh .v{color:var(--text-gray-medium)}
+
+  /* ───────── Two-col ───────── */
+  .grid2{display:grid;grid-template-columns:1.35fr 1fr;gap:24px;align-items:start}
+  .panel{background:var(--bg-white);border:1px solid var(--stroke-gray-lighter);border-radius:var(--radius-lg);box-shadow:var(--shadow-card);padding:20px 22px}
+  .panel > h3{font:600 15px var(--font-primary);color:var(--text-dark);margin:0 0 4px;display:flex;justify-content:space-between;align-items:center}
+  .panel > h3 a{font:600 13px var(--font-primary);color:var(--text-brand);cursor:pointer;display:inline-flex;align-items:center;gap:4px}
+  .panel > h3 a svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2}
+  .panel .psub{font:400 13px var(--font-primary);color:var(--text-gray-medium);margin:0 0 16px}
+
+  /* Today timeline — replaces the dead empty-state */
+  .tl{display:flex;flex-direction:column}
+  .tl-item{display:flex;gap:14px;padding:13px 0;position:relative}
+  .tl-item + .tl-item{border-top:1px solid var(--stroke-gray-lighter)}
+  .tl-time{flex-shrink:0;width:52px;font:600 13px var(--font-primary);color:var(--text-dark);font-variant-numeric:tabular-nums;padding-top:1px}
+  .tl-time .ap{font:600 10px var(--font-primary);color:var(--text-gray-medium);display:block;margin-top:1px}
+  .tl-dotcol{flex-shrink:0;width:34px;display:flex;justify-content:center}
+  .tl-dot{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;flex-shrink:0}
+  .tl-dot svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .tl-dot.in{background:var(--bg-success-light);color:var(--success)}
+  .tl-dot.out{background:#FFF1F5;color:var(--text-danger)}
+  .tl-dot.task{background:var(--bg-blue-light);color:var(--text-brand)}
+  .tl-dot.warn{background:var(--warn-bg,#FFF4E5);color:var(--text-warn)}
+  .tl-body{flex:1;min-width:0}
+  .tl-body .t{font:600 14px/19px var(--font-primary);color:var(--text-dark)}
+  .tl-body .d{font:400 12.5px/17px var(--font-primary);color:var(--text-gray-dark);margin-top:2px}
+  .tl-body .pill{display:inline-flex;align-items:center;gap:5px;margin-top:7px;font:600 11px var(--font-primary);padding:3px 9px;border-radius:999px}
+  .tl-body .pill svg{width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:2.4}
+  .tl-body .pill.ok{color:var(--success);background:var(--bg-success-light)}
+  .tl-body .pill.pending{color:var(--text-warn);background:var(--warn-bg,#FFF4E5)}
+  .tl-body .pill.action{color:var(--text-brand);background:var(--bg-blue-light);cursor:pointer}
+  .tl-status{flex-shrink:0;align-self:center}
+  .tl-status .av{width:30px;height:30px;border-radius:50%;background:var(--bg-sky-light);color:var(--text-brand);display:grid;place-items:center;font:700 11px var(--font-primary)}
+
+  /* Compliance donut widget */
+  .comp{display:flex;align-items:center;gap:20px;padding:4px 0 16px;border-bottom:1px solid var(--stroke-gray-lighter);margin-bottom:14px}
+  .donut{position:relative;width:96px;height:96px;flex-shrink:0}
+  .donut svg{transform:rotate(-90deg)}
+  .donut .ctr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .donut .ctr .n{font:700 22px var(--font-primary);color:var(--text-dark);font-variant-numeric:tabular-nums}
+  .donut .ctr .l{font:600 9px var(--font-primary);color:var(--text-gray-medium);text-transform:uppercase;letter-spacing:.06em}
+  .comp-legend{flex:1;display:flex;flex-direction:column;gap:9px}
+  .lg{display:flex;align-items:center;gap:9px;font:500 13px var(--font-primary);color:var(--text-gray-dark)}
+  .lg .sw{width:9px;height:9px;border-radius:3px;flex-shrink:0}
+  .lg b{margin-left:auto;color:var(--text-dark);font-weight:700;font-variant-numeric:tabular-nums}
+  .comp-rows{display:flex;flex-direction:column;gap:2px}
+  .crow{display:flex;align-items:center;gap:11px;padding:10px 8px;border-radius:var(--radius-md);cursor:pointer;transition:background .14s}
+  .crow:hover{background:var(--bg-neutral-light)}
+  .crow .flag{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;font-size:15px;background:var(--bg-neutral-light);flex-shrink:0}
+  .crow .ct{flex:1;min-width:0}
+  .crow .ct .t{font:600 13px var(--font-primary);color:var(--text-dark)}
+  .crow .ct .d{font:400 11.5px var(--font-primary);color:var(--text-gray-medium)}
+  .crow .st{font:600 11px var(--font-primary);padding:3px 9px;border-radius:999px;display:inline-flex;align-items:center;gap:5px}
+  .crow .st svg{width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:2.6}
+  .crow .st.ok{color:var(--success);background:var(--bg-success-light)}
+  .crow .st.due{color:var(--text-warn);background:var(--warn-bg,#FFF4E5)}
+
+  /* Primary CTA */
+  .btn-primary{height:40px;padding:0 18px;background:var(--text-brand);border:none;color:#fff;font:600 14px var(--font-primary);border-radius:var(--radius-md);cursor:pointer;display:inline-flex;align-items:center;gap:8px;box-shadow:0 4px 12px rgba(56,92,248,.28);transition:transform .12s,box-shadow .12s}
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(56,92,248,.36)}
+  .btn-primary svg{width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2.5}
+
+  /* Resource strip */
+  .resources{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  .res{background:var(--bg-white);border:1px solid var(--stroke-gray-lighter);border-radius:var(--radius-lg);padding:18px 20px;display:flex;gap:14px;align-items:flex-start;cursor:pointer;transition:border-color .16s,box-shadow .16s,transform .16s}
+  .res:hover{border-color:rgba(56,92,248,.32);box-shadow:var(--shadow-hover);transform:translateY(-2px)}
+  .res .ic{width:38px;height:38px;border-radius:10px;background:var(--bg-blue-light);color:var(--text-brand);display:grid;place-items:center;flex-shrink:0}
+  .res .ic svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.6}
+  .res .t{font:600 14px var(--font-primary);color:var(--text-dark);margin-bottom:3px}
+  .res .d{font:400 12.5px/17px var(--font-primary);color:var(--text-gray-dark)}
+  .res .arr{margin-left:auto;align-self:center;color:var(--text-gray-light);transition:color .15s,transform .15s}
+  .res:hover .arr{color:var(--text-brand);transform:translateX(2px)}
+  .res .arr svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2}
+</style>
+</head>
+<body>
+
+<div class="app" data-screen-label="01 Dashboard Home — Opus 4.8">
+  <div id="sidebar-slot" data-nav="home"></div>
+
+  <main>
+    <header class="top">
+      <div class="crumbs"><b>Home</b></div>
+      <div style="margin-left:auto"></div>
+      <span data-agent-trigger-slot></span>
+      <button class="iconbtn" aria-label="Notifications"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><div class="pip"></div></button>
+    </header>
+
+    <div class="page">
+
+      <!-- ───── Hero band ───── -->
+      <section class="hero reveal" style="animation-delay:.02s">
+        <div class="hero-row">
+          <div>
+            <div class="greet"><span class="dot"></span>Friday, 18 April 2026 · everything running smoothly</div>
+            <h1>Welcome back, Maria <span class="wave">👋</span></h1>
+            <div class="sub">You're two steps from going live. Connect a channel and set up police reporting to unlock fully automated check-in.</div>
+            <div class="chips">
+              <span class="chip"><svg viewBox="0 0 24 24"><path d="M3 9 12 2l9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><b>1</b><span class="mut">property</span></span>
+              <span class="chip"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><b>12</b><span class="mut">bookings imported</span></span>
+              <span class="chip"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg><b>2</b><span class="mut">arrivals today</span></span>
+            </div>
+          </div>
+
+          <div class="ring-wrap">
+            <div class="ring">
+              <svg viewBox="0 0 128 128">
+                <defs>
+                  <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="#5B79FF"/>
+                    <stop offset="1" stop-color="#35E5BC"/>
+                  </linearGradient>
+                </defs>
+                <circle class="track" cx="64" cy="64" r="54"/>
+                <circle class="fill" cx="64" cy="64" r="54"/>
+              </svg>
+              <div class="ctr"><span class="pct" data-count="40" data-suffix="%">0%</span><span class="lbl">Setup</span></div>
+            </div>
+            <div class="eta"><b>2 of 5</b> done · ~8 min left</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ───── Setup stepper ───── -->
+      <section class="setup reveal" style="animation-delay:.08s">
+        <div class="hd">
+          <div>
+            <h3>Finish setting up Chekin <span class="tag">2 of 5 done</span></h3>
+            <div class="sub">Complete these to unlock automated online check-in and police reporting.</div>
+          </div>
+          <span class="skip">Dismiss</span>
+        </div>
+        <div class="steps">
+          <div class="step done">
+            <div class="ic">
+              <svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4"/></svg>
+              <div class="check"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div>
+            </div>
+            <div class="t">Create workspace</div>
+            <div class="d">Sonder Madrid</div>
+            <div class="cta">Completed</div>
+          </div>
+          <div class="step done">
+            <div class="ic">
+              <svg viewBox="0 0 24 24"><path d="M3 9 12 2l9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+              <div class="check"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div>
+            </div>
+            <div class="t">Add first property</div>
+            <div class="d">Puerta del Sol · Madrid</div>
+            <div class="cta">Completed</div>
+          </div>
+          <div class="step active">
+            <div class="ic">
+              <svg viewBox="0 0 24 24"><path d="M12 2 2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            </div>
+            <div class="t">Connect a channel</div>
+            <div class="d">Booking.com, Guesty, Hostaway & 120+ more.</div>
+            <div class="cta">Connect <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
+          </div>
+          <div class="step">
+            <div class="ic">
+              <svg viewBox="0 0 24 24"><path d="M12 2 4 5v7c0 5 3.5 8 8 10 4.5-2 8-5 8-10V5z"/></svg>
+            </div>
+            <div class="t">Police reporting</div>
+            <div class="d">SES.HOSPEDAJES, Alloggiati & more.</div>
+            <div class="cta">Set up <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
+          </div>
+          <div class="step">
+            <div class="ic">
+              <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+            </div>
+            <div class="t">Test guest flow</div>
+            <div class="d">Send yourself a sample check-in link.</div>
+            <div class="cta">Preview <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ───── KPIs ───── -->
+      <section class="reveal" style="animation-delay:.14s">
+        <div class="sechead">
+          <h2>At a glance</h2>
+          <div class="range">Last 7 days <svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></div>
+        </div>
+        <div class="kpis">
+          <div class="kpi">
+            <div class="l"><span class="badge"><svg viewBox="0 0 24 24"><path d="M3 9 12 2l9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span>Properties</div>
+            <div class="row"><div class="v" data-count="1">0</div><span class="delta flat"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg>Steady</span></div>
+            <div class="spark"><svg viewBox="0 0 120 34" preserveAspectRatio="none"><line x1="0" y1="26" x2="120" y2="26" stroke="#E8E9F1" stroke-width="2" stroke-dasharray="3 4"/><circle cx="116" cy="26" r="3.4" fill="#385CF8"/></svg></div>
+          </div>
+          <div class="kpi">
+            <div class="l"><span class="badge"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span>Bookings imported</div>
+            <div class="row"><div class="v" data-count="12">0</div><span class="delta new"><svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>First sync</span></div>
+            <div class="spark"><svg viewBox="0 0 120 34" preserveAspectRatio="none"><defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#385CF8" stop-opacity=".22"/><stop offset="1" stop-color="#385CF8" stop-opacity="0"/></linearGradient></defs><path d="M0 30 L24 30 L48 27 L72 24 L96 16 L120 8 L120 34 L0 34 Z" fill="url(#g1)"/><path d="M0 30 L24 30 L48 27 L72 24 L96 16 L120 8" stroke="#385CF8" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="120" cy="8" r="3.4" fill="#385CF8"/></svg></div>
+          </div>
+          <div class="kpi">
+            <div class="l"><span class="badge"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>Check-ins ready</div>
+            <div class="row"><div class="v" data-count="0">0<span class="u">of 12</span></div><span class="delta up"><svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>Links scheduled</span></div>
+            <div class="spark"><svg viewBox="0 0 120 34" preserveAspectRatio="none"><defs><linearGradient id="g2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0F9F80" stop-opacity=".20"/><stop offset="1" stop-color="#0F9F80" stop-opacity="0"/></linearGradient></defs><path d="M0 30 L30 30 L60 28 L90 22 L120 18 L120 34 L0 34 Z" fill="url(#g2)"/><path d="M0 30 L30 30 L60 28 L90 22 L120 18" stroke="#0F9F80" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="120" cy="18" r="3.4" fill="#0F9F80"/></svg></div>
+          </div>
+          <div class="kpi fresh">
+            <div class="l"><span class="badge"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span>Reports submitted</div>
+            <div class="row"><div class="v">—</div><span class="delta flat">Setup needed</span></div>
+            <div class="spark"><svg viewBox="0 0 120 34" preserveAspectRatio="none"><line x1="0" y1="26" x2="120" y2="26" stroke="#E8E9F1" stroke-width="2" stroke-dasharray="3 4"/></svg></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ───── Two-col: Today timeline + Compliance ───── -->
+      <div class="grid2 reveal" style="animation-delay:.2s">
+        <div class="panel">
+          <h3>Today's agenda <a>Open calendar <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a></h3>
+          <p class="psub">Friday, 18 April · 2 arrivals, 1 departure, 1 task</p>
+          <div class="tl">
+            <div class="tl-item">
+              <div class="tl-time">11:00<span class="ap">AM</span></div>
+              <div class="tl-dotcol"><div class="tl-dot out"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></div></div>
+              <div class="tl-body">
+                <div class="t">Check-out · Puerta del Sol</div>
+                <div class="d">James Okafor · 3 nights · deposit released</div>
+                <span class="pill ok"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Completed</span>
+              </div>
+              <div class="tl-status"><div class="av">JO</div></div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-time">3:00<span class="ap">PM</span></div>
+              <div class="tl-dotcol"><div class="tl-dot in"><svg viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg></div></div>
+              <div class="tl-body">
+                <div class="t">Arrival · Puerta del Sol</div>
+                <div class="d">Lena Fischer · 4 nights · 2 guests</div>
+                <span class="pill ok"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Online check-in done · ID verified</span>
+              </div>
+              <div class="tl-status"><div class="av">LF</div></div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-time">5:30<span class="ap">PM</span></div>
+              <div class="tl-dotcol"><div class="tl-dot in"><svg viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg></div></div>
+              <div class="tl-body">
+                <div class="t">Arrival · Puerta del Sol</div>
+                <div class="d">Marco Bianchi · 2 nights · 1 guest</div>
+                <span class="pill pending"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 7v5l3 2"/></svg>Check-in link opened · awaiting ID</span>
+              </div>
+              <div class="tl-status"><div class="av">MB</div></div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-time">EOD</div>
+              <div class="tl-dotcol"><div class="tl-dot warn"><svg viewBox="0 0 24 24"><path d="M12 2 4 5v7c0 5 3.5 8 8 10 4.5-2 8-5 8-10V5z"/></svg></div></div>
+              <div class="tl-body">
+                <div class="t">Police report due · Lena Fischer</div>
+                <div class="d">SES.HOSPEDAJES — submit within 24h of check-in</div>
+                <span class="pill action"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>Connect reporting to automate</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Compliance health</h3>
+          <p class="psub">Across your active regulations</p>
+          <div class="comp">
+            <div class="donut">
+              <svg width="96" height="96" viewBox="0 0 96 96">
+                <circle cx="48" cy="48" r="40" fill="none" stroke="#F0F1F7" stroke-width="10"/>
+                <!-- 75% ok (green), 25% due (amber): circumference ~251.3 -->
+                <circle cx="48" cy="48" r="40" fill="none" stroke="#0F9F80" stroke-width="10" stroke-linecap="round" stroke-dasharray="188.5 251.3" stroke-dashoffset="0"/>
+                <circle cx="48" cy="48" r="40" fill="none" stroke="#F0A82C" stroke-width="10" stroke-linecap="round" stroke-dasharray="62.8 251.3" stroke-dashoffset="-188.5"/>
+              </svg>
+              <div class="ctr"><span class="n">75%</span><span class="l">Healthy</span></div>
+            </div>
+            <div class="comp-legend">
+              <div class="lg"><span class="sw" style="background:#0F9F80"></span>Up to date <b>3</b></div>
+              <div class="lg"><span class="sw" style="background:#F0A82C"></span>Action needed <b>1</b></div>
+              <div class="lg"><span class="sw" style="background:#F0F1F7"></span>Not configured <b>1</b></div>
+            </div>
+          </div>
+          <div class="comp-rows">
+            <div class="crow">
+              <div class="flag">🇪🇸</div>
+              <div class="ct"><div class="t">SES.HOSPEDAJES</div><div class="d">Spain · national police</div></div>
+              <span class="st due"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>1 due</span>
+            </div>
+            <div class="crow">
+              <div class="flag">🏛️</div>
+              <div class="ct"><div class="t">Mossos d'Esquadra</div><div class="d">Catalonia · regional</div></div>
+              <span class="st ok"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>OK</span>
+            </div>
+            <div class="crow">
+              <div class="flag">🧾</div>
+              <div class="ct"><div class="t">Tourist tax · Madrid</div><div class="d">Auto-calculated per stay</div></div>
+              <span class="st ok"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>OK</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ───── Resources ───── -->
+      <section class="reveal" style="animation-delay:.26s">
+        <div class="sechead"><h2>Resources</h2><span class="link">Help center <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span></div>
+        <div class="resources">
+          <div class="res">
+            <div class="ic"><svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>
+            <div><div class="t">Compliance guide</div><div class="d">What each EU country requires & how Chekin handles it.</div></div>
+            <span class="arr"><svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></span>
+          </div>
+          <div class="res">
+            <div class="ic"><svg viewBox="0 0 24 24"><polygon points="10 8 16 12 10 16 10 8"/><circle cx="12" cy="12" r="10"/></svg></div>
+            <div><div class="t">2-minute product tour</div><div class="d">A quick walkthrough of the operator dashboard.</div></div>
+            <span class="arr"><svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></span>
+          </div>
+          <div class="res">
+            <div class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 1 1 5.8 1c0 2-3 2-3 4M12 17h.01"/></svg></div>
+            <div><div class="t">Help center</div><div class="d">Search articles or chat — we reply in under 5 minutes.</div></div>
+            <span class="arr"><svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></span>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<script src="../ds/_sidebar.js"></script>
+<script src="../ds/_agent.js"></script>
+<script>
+  // Count-up for KPI values + ring percentage (respects reduced motion)
+  (function(){
+    const rm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document.querySelectorAll('[data-count]').forEach(el => {
+      const target = parseFloat(el.getAttribute('data-count'));
+      const suffix = el.getAttribute('data-suffix') || '';
+      const unit = el.querySelector('.u');
+      if (rm || target === 0){ el.firstChild && (el.firstChild.nodeType===3 ? el.firstChild.textContent = target+suffix : el.textContent = target+suffix); if(unit) el.appendChild(unit); return; }
+      let start = null; const dur = 900;
+      function tick(ts){
+        if (start===null) start = ts;
+        const p = Math.min((ts-start)/dur, 1);
+        const eased = 1 - Math.pow(1-p, 3);
+        const val = Math.round(target*eased);
+        // preserve trailing unit span if present
+        el.childNodes[0].textContent = val + suffix;
+        if (p < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    });
+  })();
+</script>
+</body>
+</html>

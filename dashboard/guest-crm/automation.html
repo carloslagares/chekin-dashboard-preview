@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chekin — Guest CRM · Automation</title>
+<link rel="stylesheet" href="../ds/colors_and_type.css">
+<link rel="stylesheet" href="../ds/_sidebar.css">
+<link rel="stylesheet" href="../ds/_agent.css">
+<link rel="stylesheet" href="ds/_crm.css">
+<style>
+  .trig-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  @media (max-width:980px){.trig-grid{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:640px){.trig-grid{grid-template-columns:1fr}}
+  .trig{display:flex;gap:11px;padding:13px 14px;border:1px solid var(--stroke-gray-lighter);border-radius:var(--radius-md);background:#fff;box-shadow:var(--shadow-card)}
+  .trig .ic{width:34px;height:34px;border-radius:9px;flex-shrink:0;display:grid;place-items:center;background:var(--bg-violet-light);color:var(--text-violet)}
+  .trig .ic svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.8}
+  .trig .nm{font:600 13.5px var(--font-primary);color:var(--text-dark)}
+  .trig .ev{font:600 10px var(--font-primary);text-transform:uppercase;letter-spacing:.04em;color:var(--text-brand);margin-top:3px}
+  .trig .ds{font:400 12px/16px var(--font-primary);color:var(--text-gray-dark);margin-top:4px}
+  .actcell{display:flex;gap:6px;justify-content:flex-end}
+  .stchips{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+  .sim-kv .row{display:flex;gap:12px;padding:10px 0;border-bottom:1px dashed var(--stroke-gray-light)}
+  .sim-kv .row:last-child{border-bottom:none}
+  .sim-kv .k{flex:0 0 150px;font:500 13px var(--font-primary);color:var(--text-gray-medium)}
+  .sim-kv .v{flex:1;font:600 13.5px var(--font-primary);color:var(--text-dark)}
+</style>
+</head>
+<body>
+<div class="app">
+  <div id="sidebar-slot" data-nav="guest-crm"></div>
+  <main>
+    <header class="top">
+      <div class="crumbs"><b>Guest CRM</b> <span class="sep">/</span> Automation</div>
+      <span data-agent-trigger-slot style="margin-left:auto"></span>
+      <button class="iconbtn" aria-label="Help"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 1 1 5.8 1c0 2-3 2-3 4M12 17h.01"/></svg></button>
+      <button class="iconbtn" aria-label="Notifications"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><div class="pip"></div></button>
+      <div class="user-av">MR</div>
+    </header>
+
+    <div class="page">
+      <div id="crm-demo"></div>
+      <div id="crm-subnav"></div>
+
+      <!-- Page head -->
+      <section class="pagehead reveal">
+        <div>
+          <h1>Automation</h1>
+          <div class="sub">Guest CRM automations run on Chekin's existing Automation Engine. The agent only drafts and binds them — nothing sends without marketing consent and an explicit approval.</div>
+        </div>
+        <a class="btn-primary" href="campaign-new.html" style="text-decoration:none"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> New automation</a>
+      </section>
+
+      <!-- KPIs -->
+      <section class="kpis reveal" id="kpis" style="animation-delay:.05s"></section>
+
+      <!-- Automations table -->
+      <div class="reveal" id="auto-table" style="animation-delay:.1s"></div>
+
+      <!-- Trigger catalog -->
+      <div class="card reveal" style="animation-delay:.15s">
+        <div class="hd"><h3><svg viewBox="0 0 24 24"><path d="M13 2 3 14h7v8l10-12h-7z"/></svg> Automation Engine triggers</h3><div class="act tiny">Catalog of events that can start an automation</div></div>
+        <div class="bd"><div class="trig-grid" id="trig-grid"></div></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="crm-drawer-root"></div>
+
+<script src="data/types.js"></script>
+<script src="data/fixtures.js"></script>
+<script src="services/crm-service.js"></script>
+<script src="agent/agent.js"></script>
+<script src="ds/_crm.js"></script>
+<script src="../ds/_sidebar.js"></script>
+<script src="../ds/_agent.js"></script>
+<script>
+(function(){
+  var S = window.CRMService, I = CRM.icons;
+  CRM.boot({ active:'automation' });
+
+  function fmtTrigger(t){ return String(t || '').replace(/_/g, ' '); }
+  function num(n){ return Number(n || 0).toLocaleString('en-GB'); }
+
+  // ---- KPIs ----
+  var autos = S.getAutomations();
+  var totalRuns = autos.reduce(function(s,a){ return s + (a.runs || 0); }, 0);
+  var totalConv = autos.reduce(function(s,a){ return s + (a.conversions || 0); }, 0);
+  var kpis = [
+    { ic:'green', svg:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>', v:autos.filter(function(a){ return a.status==='active'; }).length, l:'Active automations' },
+    { ic:'amber', svg:'<rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>', v:autos.filter(function(a){ return a.status==='paused'; }).length, l:'Paused' },
+    { ic:'blue', svg:'<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>', v:num(totalRuns), l:'Total runs' },
+    { ic:'violet', svg:'<path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/>', v:num(totalConv), l:'Total conversions' }
+  ];
+  document.getElementById('kpis').innerHTML = kpis.map(function(k){
+    return '<div class="kpi"><div class="ic '+k.ic+'"><svg viewBox="0 0 24 24">'+k.svg+'</svg></div><div><div class="v">'+k.v+'</div><div class="l">'+k.l+'</div></div></div>';
+  }).join('');
+
+  // ---- status cell (badge + failure/consent-block flags) ----
+  function statusCell(a){
+    var html = '<div class="stchips">' + CRM.statusBadge(a.status);
+    if (a.failures > 0) html += '<span class="badge red">'+a.failures+' failure'+(a.failures===1?'':'s')+'</span>';
+    if (a.consentBlocks > 0) html += '<span class="badge amber">'+a.consentBlocks+' consent block'+(a.consentBlocks===1?'':'s')+'</span>';
+    html += '</div>';
+    return html;
+  }
+
+  // ---- main table ----
+  var tableWrap = document.getElementById('auto-table');
+  function renderTable(){
+    if (!autos.length){
+      tableWrap.innerHTML =
+        '<div class="card"><div class="bd"><div class="empty">'+
+          '<div class="ic"><svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>'+
+          '<h3>No automations yet</h3>'+
+          '<p>When you approve a campaign with a trigger, it appears here bound to the Automation Engine. Nothing runs until you approve it.</p>'+
+        '</div></div></div>';
+      return;
+    }
+    var rows = autos.map(function(a){
+      var camp = S.getCampaignById(a.campaignId);
+      var campCell = camp ? '<a href="campaign-detail.html?id='+CRM.esc(camp.id)+'" style="color:var(--text-brand);font-weight:600">'+CRM.esc(camp.name)+'</a>' : '<span class="tiny">—</span>';
+      var trig = '<div class="nm" style="font:600 13.5px var(--font-primary)">'+CRM.esc(fmtTrigger(a.triggerType))+'</div>'+
+                 '<div class="tiny" style="margin-top:2px">'+(a.triggerValue != null ? '· '+CRM.esc(String(a.triggerValue)) : 'event-based')+'</div>';
+      var toggleLabel = a.status==='active' ? 'Pause' : 'Resume';
+      var toggleNext = a.status==='active' ? 'paused' : 'active';
+      var canToggle = (a.status==='active' || a.status==='paused');
+      return '<tr data-id="'+CRM.esc(a.id)+'">'+
+        '<td><div class="nm" style="font:600 14px var(--font-primary)">'+CRM.esc(a.name)+'</div></td>'+
+        '<td>'+trig+'</td>'+
+        '<td>'+campCell+'</td>'+
+        '<td class="status-cell">'+statusCell(a)+'</td>'+
+        '<td>'+CRM.relDate(a.lastRun)+'</td>'+
+        '<td>'+CRM.relDate(a.nextRun)+'</td>'+
+        '<td class="num">'+num(a.runs)+' / '+num(a.conversions)+'</td>'+
+        '<td><div class="actcell">'+
+          (canToggle ? '<button class="tbtn" data-act="toggle" data-next="'+toggleNext+'">'+toggleLabel+'</button>' : '')+
+          '<button class="tbtn brand" data-act="test">'+I.spark+' Test run</button>'+
+        '</div></td>'+
+      '</tr>';
+    }).join('');
+    tableWrap.innerHTML =
+      '<div class="table-wrap"><div class="table-scroll"><table class="crm">'+
+        '<thead><tr>'+
+          '<th>Automation</th><th>Trigger</th><th>Campaign</th><th>Status</th>'+
+          '<th>Last run</th><th>Next run</th><th class="num">Runs / Conv.</th><th></th>'+
+        '</tr></thead><tbody>'+rows+'</tbody>'+
+      '</table></div></div>';
+  }
+  renderTable();
+
+  // ---- test-run drawer (SIMULATION ONLY) ----
+  function openTestRun(a){
+    var camp = S.getCampaignById(a.campaignId);
+    var r = S.simulateAutomationRun(a.triggerType, camp);
+    var recips = (r.sampleRecipients && r.sampleRecipients.length)
+      ? r.sampleRecipients.map(function(n){ return '<span class="pill">'+CRM.esc(n)+'</span>'; }).join('')
+      : '<span class="tiny">No eligible recipients in sample.</span>';
+
+    var head =
+      '<div class="dhead">'+
+        '<div class="gav" style="width:48px;height:48px;font-size:16px;background:var(--bg-violet-light);color:var(--text-violet)">'+I.spark+'</div>'+
+        '<div style="flex:1;min-width:0">'+
+          '<div style="font:600 18px var(--font-primary)">Test run · simulation</div>'+
+          '<div class="tiny" style="margin-top:3px">'+CRM.esc(a.name)+'</div>'+
+          '<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">'+
+            '<span class="badge violet">'+CRM.esc(fmtTrigger(a.triggerType))+(a.triggerValue!=null?' · '+CRM.esc(String(a.triggerValue)):'')+'</span>'+
+            '<span class="badge blue">'+CRM.esc(r.channel)+'</span>'+
+          '</div>'+
+        '</div>'+
+        '<button class="dclose" data-drawer-close>'+I.x+'</button>'+
+      '</div>';
+
+    var aiHtml = CRM.aiBlock('This is a <b>dry run</b>. I evaluated the trigger against the current audience and consent state — <b>no messages were sent</b>. Connect a live channel to go live.', { why: r.note });
+
+    var kvHtml =
+      '<div class="sim-kv">'+
+        '<div class="row"><div class="k">Would send</div><div class="v">'+num(r.wouldSend)+' message'+(r.wouldSend===1?'':'s')+'</div></div>'+
+        '<div class="row"><div class="k">Blocked by consent</div><div class="v">'+(r.blockedByConsent>0?'<span class="badge amber">'+num(r.blockedByConsent)+' blocked</span>':'<span class="badge green">None</span>')+'</div></div>'+
+        '<div class="row"><div class="k">Channel</div><div class="v">'+CRM.esc(r.channel)+'</div></div>'+
+        '<div class="row"><div class="k">Evaluated</div><div class="v">'+CRM.relDate(r.evaluatedAt)+'</div></div>'+
+      '</div>';
+
+    function section(title, body){ return '<div class="card"><div class="hd"><h3>'+title+'</h3></div><div class="bd">'+body+'</div></div>'; }
+
+    var body =
+      '<div class="dbody">'+
+        '<div class="appbar"><div class="ic">'+I.info+'</div><div class="tx"><div class="t">Simulation only — nothing was sent</div><div class="d">'+CRM.esc(r.note)+'</div></div></div>'+
+        section('AI explanation', aiHtml)+
+        section('Simulated outcome', kvHtml)+
+        section('Sample recipients', '<div class="consent-row" style="gap:8px">'+recips+'</div><div class="tiny" style="margin-top:8px">Preview only. Real recipients are resolved at send time after the consent check passes.</div>')+
+      '</div>';
+
+    var foot =
+      '<button class="btn-primary" onclick="CRM.toast(\'Simulation complete — no messages sent.\');CRM.closeDrawer()">'+I.check+' Looks good</button>'+
+      '<button class="tbtn" data-drawer-close>Close</button>';
+
+    CRM.openDrawer(head + body, foot);
+  }
+
+  // ---- row actions ----
+  tableWrap.addEventListener('click', function(e){
+    var btn = e.target.closest('[data-act]'); if(!btn) return;
+    var tr = btn.closest('tr'); var id = tr.getAttribute('data-id');
+    var a = null;
+    for (var i=0;i<autos.length;i++){ if (autos[i].id===id){ a = autos[i]; break; } }
+    if (!a) return;
+
+    if (btn.getAttribute('data-act')==='toggle'){
+      var next = btn.getAttribute('data-next');
+      S.setAutomationStatus(id, next);
+      a.status = next;
+      tr.querySelector('.status-cell').innerHTML = statusCell(a);
+      btn.textContent = next==='active' ? 'Pause' : 'Resume';
+      btn.setAttribute('data-next', next==='active' ? 'paused' : 'active');
+      CRM.toast('Automation '+(next==='active'?'resumed':'paused')+'.');
+    } else if (btn.getAttribute('data-act')==='test'){
+      openTestRun(a);
+    }
+  });
+
+  // ---- trigger catalog ----
+  document.getElementById('trig-grid').innerHTML = S.getAutomationTriggers().map(function(t){
+    return '<div class="trig">'+
+      '<div class="ic">'+I.spark+'</div>'+
+      '<div style="min-width:0">'+
+        '<div class="nm">'+CRM.esc(t.name)+'</div>'+
+        '<div class="ev">'+CRM.esc(t.eventType)+'</div>'+
+        '<div class="ds">'+CRM.esc(t.description)+'</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+})();
+</script>
+</body>
+</html>

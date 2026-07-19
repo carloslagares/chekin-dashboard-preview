@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chekin — Guest CRM</title>
+<link rel="stylesheet" href="../ds/colors_and_type.css">
+<link rel="stylesheet" href="../ds/_sidebar.css">
+<link rel="stylesheet" href="../ds/_agent.css">
+<link rel="stylesheet" href="ds/_crm.css">
+<style>
+  .dash-grid{display:grid;grid-template-columns:1fr 380px;gap:18px;align-items:start}
+  @media (max-width:1080px){.dash-grid{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}}
+  .sug-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media (max-width:720px){.sug-grid{grid-template-columns:1fr}}
+  .dealrow{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--stroke-gray-lighter)}
+  .dealrow:last-child{border-bottom:none}
+  .dealrow .ic{width:34px;height:34px;border-radius:9px;background:var(--bg-blue-light);color:var(--text-brand);display:grid;place-items:center;flex-shrink:0}
+  .dealrow .ic svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.8}
+  .dealrow .nm{font:600 13.5px var(--font-primary)}
+  .dealrow .mt{font:400 12px var(--font-primary);color:var(--text-gray-medium);margin-top:1px}
+  .camprow{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--stroke-gray-lighter)}
+  .camprow:last-child{border-bottom:none}
+  /* command box: eyebrow left, subtle explainer-video chip right */
+  .cmd-top{display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .cmd .inputbar{margin-top:18px}
+  .cmd-video{flex-shrink:0;display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 12px 0 5px;border-radius:999px;cursor:pointer;
+    background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;font-family:var(--font-primary);transition:.15s}
+  .cmd-video:hover{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.36)}
+  .cmd-video .play{width:23px;height:23px;border-radius:50%;background:#fff;display:grid;place-items:center;flex-shrink:0}
+  .cmd-video .play svg{width:10px;height:10px;fill:var(--text-brand);margin-left:1px}
+  .cmd-video .vlabel{font:600 12px var(--font-primary);color:#fff;white-space:nowrap}
+  @media (max-width:560px){.cmd-video .vlabel{display:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div id="sidebar-slot" data-nav="guest-crm"></div>
+  <main>
+    <header class="top">
+      <div class="crumbs"><b>Guest CRM</b></div>
+      <span data-agent-trigger-slot style="margin-left:auto"></span>
+      <button class="iconbtn" aria-label="Help"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 1 1 5.8 1c0 2-3 2-3 4M12 17h.01"/></svg></button>
+      <button class="iconbtn" aria-label="Notifications"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><div class="pip"></div></button>
+      <div class="user-av">MR</div>
+    </header>
+
+    <div class="page">
+      <div id="crm-demo"></div>
+      <div id="crm-subnav"></div>
+
+      <!-- Agentic command -->
+      <section class="cmd reveal">
+        <div class="cmd-top">
+          <span class="eyebrow"><svg viewBox="0 0 24 24"><path d="M12 2 13.5 8 19 9.5 13.5 11 12 17 10.5 11 5 9.5 10.5 8 Z"/></svg> Vela · Guest CRM Agent</span>
+          <button class="cmd-video" id="cmd-video" aria-label="Watch how it works">
+            <span class="play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+            <span class="vlabel">How it works · 1 min</span>
+          </button>
+        </div>
+        <div class="inputbar">
+          <svg class="lead" viewBox="0 0 24 24"><path d="M12 2 13.5 8 19 9.5 13.5 11 12 17 10.5 11 5 9.5 10.5 8 Z"/></svg>
+          <input id="cmd-input" placeholder="Describe a campaign — audience, offer, channel…">
+          <button class="go" id="cmd-go"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg> Generate</button>
+        </div>
+        <div class="examples" id="cmd-examples"></div>
+      </section>
+
+      <!-- Activation checklist (first-run + until dismissed) -->
+      <div id="checklist-slot"></div>
+
+      <!-- KPIs -->
+      <section class="kpis reveal" id="kpis" style="animation-delay:.05s"></section>
+
+      <div class="dash-grid">
+        <div style="display:flex;flex-direction:column;gap:18px">
+          <!-- AI suggestions -->
+          <div class="card reveal" style="animation-delay:.1s">
+            <div class="hd"><h3><svg viewBox="0 0 24 24"><path d="M12 2 13.5 8 19 9.5 13.5 11 12 17 10.5 11 5 9.5 10.5 8 Z"/></svg> AI suggestions</h3><div class="act tiny">Ranked by revenue opportunity</div></div>
+            <div class="bd"><div class="sug-grid" id="suggestions"></div></div>
+          </div>
+
+          <!-- Segmentation widgets -->
+          <div class="card reveal" style="animation-delay:.13s">
+            <div class="hd">
+              <h3><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg> Guest Segmentation</h3>
+              <div class="act"><a class="tbtn ghost" href="guests.html">View all guests</a></div>
+            </div>
+            <div class="bd">
+              <div class="seg-substats" id="seg-substats"></div>
+              <div class="seg-widgets" id="seg-widgets"></div>
+              <div class="seg-insights-list" id="seg-insights" style="margin-top:16px"></div>
+            </div>
+          </div>
+
+          <!-- Top recommended campaigns -->
+          <div class="card reveal" style="animation-delay:.15s">
+            <div class="hd"><h3>Top campaigns</h3><div class="act"><a class="tbtn ghost" href="campaigns.html">View all</a></div></div>
+            <div class="bd" id="top-campaigns"></div>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:18px">
+          <!-- Review queue: everything Vela is waiting on a human for -->
+          <div class="card reveal" style="animation-delay:.09s">
+            <div class="hd"><h3><svg viewBox="0 0 24 24"><path d="M12 22s8-3.5 8-10V5l-8-3-8 3v7c0 6.5 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg> Needs your review</h3><div class="act"><span class="badge amber" id="review-count" style="display:none"></span></div></div>
+            <div class="bd" id="review-queue"></div>
+          </div>
+          <!-- Top deals -->
+          <div class="card reveal" style="animation-delay:.12s">
+            <div class="hd"><h3>Top performing deals</h3></div>
+            <div class="bd" id="top-deals"></div>
+          </div>
+          <!-- Agent activity -->
+          <div class="card reveal" style="animation-delay:.18s">
+            <div class="hd"><h3>Agent activity</h3></div>
+            <div class="bd"><div class="timeline" id="agent-activity"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="crm-drawer-root"></div>
+
+<script src="data/types.js"></script>
+<script src="data/fixtures.js"></script>
+<script src="services/crm-service.js"></script>
+<script src="agent/agent.js"></script>
+<script src="ds/_crm.js"></script>
+<script src="../ds/_sidebar.js"></script>
+<script src="../ds/_agent.js"></script>
+<script>
+(function(){
+  var S = window.CRMService, A = window.CRMAgent, I = CRM.icons;
+  CRM.boot({ active:'overview' });
+
+  // ---- data-mode toggle (demo affordance, lives at the end of the subnav) ----
+  var subnavEl = document.querySelector('.crm-subnav');
+  if (subnavEl){
+    var tog = document.createElement('button');
+    tog.className = 'tbtn sm ghost';
+    tog.style.marginLeft = 'auto';
+    tog.innerHTML = S.isFirstRun()
+      ? '<svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9"/><path d="M16 4h5v5"/></svg> Load demo data'
+      : '<svg viewBox="0 0 24 24"><path d="M12 2 13.5 8 19 9.5 13.5 11 12 17 10.5 11 5 9.5 10.5 8 Z"/></svg> Preview first-run';
+    tog.addEventListener('click', function(){
+      if (!S.isFirstRun()){
+        // Entering the first-run preview: reset checklist state so the
+        // experience is genuinely fresh, not half-completed.
+        try{
+          ['crm_fr_sync','crm_fr_consent','crm_fr_deals','crm_fr_campaign','crm_checklist'].forEach(function(k){ localStorage.removeItem(k); });
+        }catch(e){}
+      }
+      S.setFirstRun(!S.isFirstRun());
+    });
+    subnavEl.appendChild(tog);
+  }
+
+  // ---- activation checklist ----
+  // Shown always in first-run; in data mode only while the user is mid-flow
+  // (arrived via "Sync now") and until dismissed.
+  var CK = {
+    get: function(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } },
+    set: function(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+  };
+  var steps = [
+    { k:'crm_fr_sync', t:'Sync guests from Bookings', d:'Profiles build themselves from reservations, check-ins and inbox conversations.',
+      act: S.isFirstRun() ? { label:'Sync now', id:'fr-sync' } : null, done: !S.isFirstRun() },
+    { k:'crm_fr_consent', t:'Set your consent safeguards', d:'Decide what needs approval before anything sends. Consent is enforced automatically.',
+      href:'consent.html' },
+    { k:'crm_fr_deals', t:'Review your deals catalog', d:'Your own upsells plus partner offers — Vela attaches them to campaigns.',
+      href:'deals.html' },
+    { k:'crm_fr_campaign', t:'Create your first campaign with Vela', d:'Describe the goal in a sentence. Vela drafts audience, deals and copy; you approve.',
+      href:'campaign-new.html' }
+  ];
+  function renderChecklist(){
+    var slot = document.getElementById('checklist-slot');
+    var active = S.isFirstRun() || CK.get('crm_checklist') === 'active';
+    if (!active || CK.get('crm_checklist') === 'done'){ slot.innerHTML = ''; return; }
+    var doneCount = steps.filter(function(s){ return s.done || CK.get(s.k) === '1'; }).length;
+    slot.innerHTML = '<section class="card reveal" style="animation-delay:.03s">'+
+      '<div class="hd"><h3>'+I.spark+' Get set up in 4 steps</h3>'+
+        '<div class="act"><span class="badge blue">'+doneCount+' of '+steps.length+'</span>'+
+        '<button class="tbtn sm ghost" id="fr-dismiss" title="Dismiss checklist">'+I.x+'</button></div></div>'+
+      '<div class="bd"><div class="fr-steps">'+steps.map(function(s,i){
+        var done = s.done || CK.get(s.k) === '1';
+        var action = done ? '<span class="fr-done">'+I.check+' Done</span>'
+          : s.act ? '<button class="btn-primary" id="'+s.act.id+'" style="height:34px;padding:0 14px;font-size:13px">'+s.act.label+'</button>'
+          : '<a class="tbtn sm" href="'+s.href+'" data-step="'+s.k+'">Open</a>';
+        return '<div class="fr-step'+(done?' complete':'')+'">'+
+          '<div class="num">'+(done?I.check:(i+1))+'</div>'+
+          '<div class="tx"><div class="t">'+CRM.esc(s.t)+'</div><div class="d">'+CRM.esc(s.d)+'</div></div>'+
+          '<div class="ac">'+action+'</div>'+
+        '</div>';
+      }).join('')+'</div></div></section>';
+    var sync = document.getElementById('fr-sync');
+    if (sync) sync.addEventListener('click', function(){
+      CK.set('crm_fr_sync','1'); CK.set('crm_checklist','active');
+      CRM.toast('Syncing bookings — 29 guest profiles imported.');
+      setTimeout(function(){ S.setFirstRun(false); }, 900);
+    });
+    document.getElementById('fr-dismiss').addEventListener('click', function(){
+      CK.set('crm_checklist','done'); renderChecklist();
+    });
+    slot.querySelectorAll('[data-step]').forEach(function(a){
+      a.addEventListener('click', function(){ CK.set(a.getAttribute('data-step'),'1'); });
+    });
+  }
+  renderChecklist();
+
+  // ---- first-run: welcome layout instead of empty widgets ----
+  if (S.isFirstRun()){
+    document.getElementById('kpis').style.display = 'none';
+    document.querySelector('.dash-grid').style.display = 'none';
+    // Command box stays usable; examples become the guided entry point.
+    var welcome = document.createElement('section');
+    welcome.className = 'card reveal';
+    welcome.style.animationDelay = '.06s';
+    welcome.innerHTML = '<div class="bd"><div class="empty" style="padding:26px 16px">'+
+      '<div class="ic">'+I.spark+'</div>'+
+      '<h3>Welcome to Guest CRM</h3>'+
+      '<p style="max-width:520px">Once your guests sync, this page shows revenue, AI-detected opportunities, segmentation and everything Vela is waiting on you to approve. Start with the checklist above.</p>'+
+    '</div></div>';
+    document.getElementById('checklist-slot').after(welcome);
+  }
+
+  // ---- KPIs: 4 primary outcomes, each with a trend/context line ----
+  var m = S.getDashboardMetrics();
+  var upArrow = '<svg viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></svg>';
+  var kpis = [
+    { ic:'green', svg:'<path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/>', v:CRM.money(m.campaignRevenue), l:'Campaign revenue', delta:{cls:'up', ic:upArrow, t:'+18% vs May'} },
+    { ic:'violet', svg:'<rect x="2" y="6" width="20" height="12" rx="2"/><path d="M2 10h20M6 14h4"/>', v:CRM.money(m.appSalesRevenue), l:'App Sales revenue', delta:{cls:'up', ic:upArrow, t:'+12% vs May'} },
+    { ic:'blue', svg:'<path d="M20 6 9 17l-5-5"/>', v:m.marketingConsent+'<small>/ '+m.totalGuests+'</small>', l:'Marketing consent', delta:{cls:'flat', t:Math.round(m.marketingConsent/m.totalGuests*100)+'% of guests'} },
+    { ic:'blue', svg:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>', v:m.activeCampaigns, l:'Active campaigns', delta:{cls:'warn', t:m.draftCampaigns+' awaiting review'} }
+  ];
+  document.getElementById('kpis').innerHTML = kpis.map(function(k){
+    var d = k.delta ? '<div class="d '+k.delta.cls+'">'+(k.delta.ic||'')+k.delta.t+'</div>' : '';
+    return '<div class="kpi"><div class="ic '+k.ic+'"><svg viewBox="0 0 24 24">'+k.svg+'</svg></div><div><div class="v">'+k.v+'</div><div class="l">'+k.l+'</div>'+d+'</div></div>';
+  }).join('');
+
+  // ---- command box ----
+  // Examples stay distinct from the AI-suggestion cards below, so the page
+  // never shows the same prompt twice. Short ones first; long one last.
+  var examples = [
+    'Offer airport transfer to this week’s arrivals',
+    'Promote the spa pass to couples currently in-house',
+    'Win back business travellers from last autumn',
+    'Create a campaign for guests arriving this weekend with children, offering early check-in and a family restaurant deal'
+  ];
+  document.getElementById('cmd-examples').innerHTML = examples.map(function(e){ return '<span class="ex">'+CRM.esc(e)+'</span>'; }).join('');
+  function go(){
+    var el = document.getElementById('cmd-input');
+    var v = el.value.trim();
+    if(!v){ el.focus(); return; }
+    location.href = 'campaign-new.html?prompt=' + encodeURIComponent(v);
+  }
+  document.getElementById('cmd-go').addEventListener('click', go);
+  document.getElementById('cmd-input').addEventListener('keydown', function(e){ if(e.key==='Enter') go(); });
+  document.getElementById('cmd-video').addEventListener('click', function(){ CRM.toast('Walkthrough video coming soon'); });
+  document.getElementById('cmd-examples').addEventListener('click', function(e){
+    var ex = e.target.closest('.ex'); if(!ex) return;
+    document.getElementById('cmd-input').value = ex.textContent;
+    go();
+  });
+
+  // ---- AI suggestions ----
+  var iconKind = { upsell:{cls:'up', svg:'<path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/>'}, recover:{cls:'rec', svg:'<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>'}, reactivate:{cls:'react', svg:'<path d="M21 12a9 9 0 1 1-9-9"/><path d="M16 4h5v5"/>'} };
+  document.getElementById('suggestions').innerHTML = S.getSuggestions().map(function(s){
+    var k = iconKind[s.kind] || iconKind.upsell;
+    return '<div class="sug"><div class="top"><div class="ic '+k.cls+'"><svg viewBox="0 0 24 24">'+k.svg+'</svg></div>'+
+      '<div><h4>'+CRM.esc(s.title)+'</h4></div></div>'+
+      '<p>'+CRM.esc(s.detail)+'</p>'+
+      '<div class="ft"><span class="badge gray">'+CRM.esc(s.metric)+'</span>'+(s.estRevenue?'<span class="badge green">+'+CRM.money(s.estRevenue)+' est.</span>':'')+'</div>'+
+      '<button class="btn-primary" style="width:100%;justify-content:center;margin-top:4px" data-prompt="'+CRM.esc(s.title)+'">'+I.spark+' Create campaign</button>'+
+      '</div>';
+  }).join('');
+  document.getElementById('suggestions').addEventListener('click', function(e){
+    var b = e.target.closest('[data-prompt]'); if(!b) return;
+    location.href = 'campaign-new.html?prompt=' + encodeURIComponent(b.getAttribute('data-prompt'));
+  });
+
+  // ---- top campaigns ----
+  var camps = S.getCampaigns().slice().sort(function(a,b){ return (b.revenueEstimate.expectedRevenue)-(a.revenueEstimate.expectedRevenue); }).slice(0,4);
+  document.getElementById('top-campaigns').innerHTML = camps.map(function(c){
+    return '<a class="camprow" href="campaign-detail.html?id='+c.id+'">'+
+      '<div style="flex:1;min-width:0"><div class="nm" style="font:600 14px var(--font-primary)">'+CRM.esc(c.name)+'</div>'+
+      '<div class="mt tiny" style="margin-top:2px">'+CRM.esc(c.objective)+' · '+CRM.esc(c.channel)+' · est. '+CRM.money(c.revenueEstimate.expectedRevenue)+'</div></div>'+
+      CRM.statusBadge(c.status)+'</a>';
+  }).join('');
+
+  // ---- review queue: human-in-the-loop items Vela is blocked on ----
+  var revIcons = {
+    campaign: '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+    automation: '<path d="M13 2 3 14h7l-1 8 10-12h-7z"/>',
+    guest: '<path d="M16 7a4 4 0 1 0-8 0 4 4 0 0 0 8 0ZM3 21a7 7 0 0 1 14 0"/>'
+  };
+  function reviewItems(){
+    var items = [];
+    S.getCampaigns().forEach(function(c){
+      if(c.status !== 'needs_review' && c.status !== 'draft') return;
+      var who = /^Vela/.test(c.createdBy) ? 'Vela draft' : c.createdBy;
+      var meta = [who, c.channel];
+      if(c.consentCheck) meta.push(c.consentCheck.eligibleSize + ' eligible');
+      items.push({ kind:'campaign', id:c.id, title:c.name, meta:meta.join(' · '), href:'campaign-detail.html?id='+c.id, approvable:true });
+    });
+    S.getAutomations().forEach(function(a){
+      if(a.status !== 'needs_review') return;
+      items.push({ kind:'automation', title:a.name, meta:'Automation awaiting first review', href:'automation.html' });
+    });
+    S.getGuests({ segmentTag:'needs_review' }).forEach(function(g){
+      items.push({ kind:'guest', id:g.id, title:g.fullName, meta:'Guest flagged for review', href:'guests.html' });
+    });
+    return items;
+  }
+  function renderReviewQueue(){
+    var items = reviewItems();
+    var count = document.getElementById('review-count');
+    count.style.display = items.length ? '' : 'none';
+    count.textContent = items.length + ' pending';
+    document.getElementById('review-queue').innerHTML = items.length ? items.map(function(it){
+      return '<div class="rev-item">'+
+        '<div class="ic '+it.kind+'"><svg viewBox="0 0 24 24">'+revIcons[it.kind]+'</svg></div>'+
+        '<div class="tx"><a class="t" href="'+it.href+'">'+CRM.esc(it.title)+'</a><div class="mt">'+CRM.esc(it.meta)+'</div></div>'+
+        '<div class="acts">'+
+          (it.approvable
+            ? '<button class="tbtn sm brand" data-approve="'+it.id+'">'+I.check+' Approve</button>'
+            : '<a class="tbtn sm ghost" href="'+it.href+'">Review</a>')+
+        '</div>'+
+      '</div>';
+    }).join('') : '<div class="rev-empty">'+I.check+'<span>All clear — nothing is waiting on you.</span></div>';
+  }
+  renderReviewQueue();
+  document.getElementById('review-queue').addEventListener('click', function(e){
+    var b = e.target.closest('[data-approve]'); if(!b) return;
+    try{
+      S.approveCampaign(b.getAttribute('data-approve'), 'You');
+      CRM.toast('Campaign approved — ready to schedule.');
+      renderReviewQueue();
+    }catch(err){ CRM.toast(err.message || 'Could not approve campaign.'); }
+  });
+
+  // ---- top deals ----
+  document.getElementById('top-deals').innerHTML = S.getTopDeals().map(function(d){
+    return '<div class="dealrow"><div class="ic"><svg viewBox="0 0 24 24"><path d="M20.6 8.4 12 17 3.4 8.4"/><path d="M3 8h18l-1 4H4z"/></svg></div>'+
+      '<div style="flex:1;min-width:0"><div class="nm">'+CRM.esc(d.title)+'</div><div class="mt">'+(d.providerType==='own'?'Own':d.providerName)+' · conv '+CRM.pct(d.conversionRate)+'</div></div>'+
+      '<div style="text-align:right"><div class="nm">'+CRM.money(d.averageRevenue)+'</div><div class="mt">avg</div></div></div>';
+  }).join('');
+
+  // ---- agent activity ----
+  document.getElementById('agent-activity').innerHTML = S.getAgentRuns().slice(0,5).map(function(r){
+    return '<div class="tl-item conversation"><div class="dot">'+I.spark+'</div><div class="ct"><div class="t">'+CRM.esc(r.type.replace(/_/g,' '))+'</div><div class="d">'+CRM.esc(r.reasoningSummary)+'</div><div class="when">'+CRM.relDate(r.createdAt.slice(0,10))+' · '+CRM.esc(r.createdBy)+'</div></div></div>';
+  }).join('');
+
+  // ---- segmentation widgets ----
+  var sm = S.getSegmentationMetrics();
+  document.getElementById('seg-substats').innerHTML =
+    '<span><b>'+m.totalGuests+'</b> total guests</span><i></i>'+
+    '<span><b>'+m.upcoming+'</b> upcoming stays</span><i></i>'+
+    '<span><b>'+m.inHouse+'</b> in-house now</span>';
+  var segWidgets = [
+    { ic:'dark', svg:'<path d="M12 2 15 8.5 22 9.4l-5 4.9 1.2 6.9L12 18l-6.2 3.2 1.2-6.9-5-4.9 7-1Z"/>', v: sm.highOpportunity, l:'High Opportunity', tag:'', score: 70 },
+    { ic:'dark', svg:'<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>', v: sm.whales, l:'Whale Guests', tag:'whale' },
+    { ic:'violet', svg:'<path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>', v: sm.vips, l:'VIP Guests', tag:'vip' },
+    { ic:'green', svg:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>', v: sm.repeatGuests, l:'Repeat Guests', tag:'repeat_guest' },
+    { ic:'amber', svg:'<path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/>', v: sm.highAppSalesPotential, l:'High App Sales', tag:'high_app_sales_potential' },
+    { ic:'red', svg:'<circle cx="12" cy="12" r="10"/><path d="M4.93 4.93l14.14 14.14"/>', v: sm.excluded, l:'Excluded Guests', tag:'do_not_contact' }
+  ];
+  document.getElementById('seg-widgets').innerHTML = segWidgets.map(function(w){
+    var href = w.tag ? 'guests.html' : 'guests.html';
+    var dataAttr = w.tag ? ' data-seg-tag="'+CRM.esc(w.tag)+'"' : (w.score ? ' data-min-score="'+w.score+'"' : '');
+    return '<div class="seg-stat"'+dataAttr+' style="cursor:pointer">'+
+      '<div class="ic '+w.ic+'"><svg viewBox="0 0 24 24" style="stroke:currentColor;fill:none;stroke-width:1.8">'+w.svg+'</svg></div>'+
+      '<div><div class="v">'+w.v+'</div><div class="l">'+CRM.esc(w.l)+'</div></div>'+
+    '</div>';
+  }).join('');
+  // navigate to filtered guests on click
+  document.getElementById('seg-widgets').addEventListener('click', function(e){
+    var stat = e.target.closest('[data-seg-tag]');
+    if (stat) { location.href = 'guests.html'; CRM.toast('Filtering by tag: '+stat.getAttribute('data-seg-tag')); return; }
+    var stat2 = e.target.closest('[data-min-score]');
+    if (stat2) { location.href = 'guests.html'; }
+  });
+
+  // ---- segmentation insights ----
+  var insightDots = { whale:'dot-dark', opportunity:'dot-blue', repeat:'dot-green', excluded:'dot-red' };
+  document.getElementById('seg-insights').innerHTML = sm.insights.map(function(ins){
+    var dotCls = insightDots[ins.kind] || 'dot-blue';
+    return '<div class="seg-insight">'+
+      '<span class="dot '+dotCls+'"></span>'+
+      '<span class="t">'+CRM.esc(ins.text)+'</span>'+
+      (ins.action && ins.prompt ? '<span class="act seg-insight-act" data-prompt="'+CRM.esc(ins.prompt)+'">'+CRM.esc(ins.action)+' →</span>' : '')+
+    '</div>';
+  }).join('')||'<div class="tiny" style="color:var(--text-gray-medium)">No segmentation alerts right now.</div>';
+  document.getElementById('seg-insights').addEventListener('click', function(e){
+    var act = e.target.closest('.seg-insight-act');
+    if (act) location.href = 'campaign-new.html?prompt='+encodeURIComponent(act.getAttribute('data-prompt'));
+  });
+})();
+</script>
+</body>
+</html>

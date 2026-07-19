@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chekin Guest — Guided Journey (Opus 4.8)</title>
+<link rel="stylesheet" href="../../ds/colors_and_type.css">
+<link rel="stylesheet" href="../_chek.css">
+<script src="../_chek.js" defer></script>
+<style>
+  :root{
+    --bg-dark:#161643;
+    --bg-screen:#F6F7FC;
+    --bg-white:#FFFFFF;
+    --bg-neutral-light:#F4F6F8;
+    --bg-neutral-cold:#F0F0F8;
+    --bg-sky-light:#EFF6FF;
+    --bg-blue-light:#F0F3FF;
+    --bg-success-light:#E8FCF7;
+    --bg-warn-light:#FFF2E0;
+    --bg-danger-light:#FFE4EC;
+    --stroke-gray-lighter:#E8E9F1;
+    --stroke-gray-light:#DEDEEB;
+    --stroke-gray-medium:#CECEDE;
+    --text-dark:#161643;
+    --text-gray-dark:#6B6B95;
+    --text-gray-medium:#9696B9;
+    --text-gray-light:#CECEDE;
+    --text-brand:#385CF8;
+    --text-brand-dark:#2945C5;
+    --text-brand-light:#8CA5FF;
+    --text-success:#0F9F80;
+    --text-warn:#B86A00;
+    --text-danger:#FF2467;
+    --radius-sm:6px;
+    --radius-md:10px;
+    --radius-lg:14px;
+    --radius-xl:20px;
+    --shadow-card:0 1px 3px rgba(22,22,67,.05),0 0 0 1px rgba(22,22,67,.035);
+    --shadow-elev:0 10px 30px rgba(22,22,67,.08),0 2px 6px rgba(22,22,67,.05);
+    --shadow-hover:0 16px 36px rgba(56,92,248,.14),0 3px 8px rgba(22,22,67,.06);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg-screen);font-family:var(--font-primary);color:var(--text-dark);font-feature-settings:"ss01";-webkit-font-smoothing:antialiased}
+
+  @media (prefers-reduced-motion: no-preference){
+    .reveal{opacity:0;transform:translateY(10px);animation:rv .55s cubic-bezier(.2,.8,.2,1) forwards}
+    @keyframes rv{to{opacity:1;transform:none}}
+  }
+
+  .app{display:grid;grid-template-columns:266px 1fr 324px;min-height:100vh}
+
+  /* ───── Sidebar ───── */
+  .side{background:var(--bg-dark);color:#fff;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+  .side .prop{display:flex;align-items:center;gap:12px;padding:18px 18px 16px;border-bottom:1px solid rgba(255,255,255,.06)}
+  .side .prop .av{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,rgba(56,92,248,.5),rgba(140,165,255,.32));display:grid;place-items:center;flex-shrink:0;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+  .side .prop .av svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:1.7}
+  .side .prop .name{font:600 15px/20px var(--font-primary)}
+  .side .prop .ref{font:500 11px var(--font-primary);color:rgba(255,255,255,.5);margin-top:2px;font-variant-numeric:tabular-nums}
+  .side nav{padding:14px 10px;flex:1;display:flex;flex-direction:column;gap:3px}
+  .side .sgroup{font:600 10.5px var(--font-primary);color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.1em;padding:14px 12px 6px}
+  .side .n-item{display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:9px;cursor:pointer;font:500 14px/20px var(--font-primary);color:rgba(255,255,255,.78);user-select:none;white-space:nowrap;transition:background .14s,color .14s}
+  .side .n-item svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.6;flex-shrink:0}
+  .side .n-item:hover{background:rgba(255,255,255,.06);color:#fff}
+  .side .n-item.active{background:linear-gradient(135deg,rgba(56,92,248,.34),rgba(56,92,248,.16));color:#fff;box-shadow:inset 0 0 0 1px rgba(140,165,255,.18)}
+  .side .n-item .badge{margin-left:auto;font:700 10.5px var(--font-primary);padding:2px 8px;border-radius:999px;background:rgba(140,165,255,.18);color:#C4D2FF;white-space:nowrap}
+  .side .n-item .badge.new{background:rgba(107,224,168,.22);color:#7BE3B0}
+  .side .n-item .check{margin-left:auto;width:16px;height:16px;border-radius:50%;background:var(--text-success);display:grid;place-items:center;flex-shrink:0}
+  .side .n-item .check svg{width:9px;height:9px;stroke:#fff;stroke-width:3}
+  .side .me{margin-top:auto;padding:14px 16px;border-top:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:10px}
+  .side .me .av{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.1);color:#fff;display:grid;place-items:center;font:700 11px var(--font-primary)}
+  .side .me .n{font:600 13px/16px var(--font-primary)}
+  .side .me .e{font:500 11px var(--font-primary);color:rgba(255,255,255,.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px}
+
+  /* ───── Main ───── */
+  .main{padding:26px 32px 56px;display:flex;flex-direction:column;gap:22px;min-width:0}
+  .head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px}
+  .head h1{font:600 27px/32px var(--font-primary);margin:0;letter-spacing:-.015em}
+  .head .sub{font:500 13px var(--font-primary);color:var(--text-gray-dark);margin-top:6px}
+
+  /* Check-in strip — layered, with live status + progress */
+  .strip{position:relative;overflow:hidden;background:linear-gradient(135deg,#15153F 0%,#23235D 44%,#2E46C8 100%);color:#fff;border-radius:var(--radius-xl);padding:24px 28px;box-shadow:var(--shadow-elev)}
+  .strip::before{content:"";position:absolute;top:-80px;right:-40px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(107,224,168,.22),transparent 62%);pointer-events:none}
+  .strip::after{content:"";position:absolute;bottom:-100px;right:160px;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(140,165,255,.30),transparent 65%);pointer-events:none}
+  .strip-top{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}
+  .strip-top .pin{display:inline-flex;align-items:center;gap:8px;font:600 12px var(--font-primary);color:#C9D0FF}
+  .strip-top .pin svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2}
+  .strip-top .live{display:inline-flex;align-items:center;gap:7px;font:600 11px var(--font-primary);color:#fff;background:rgba(255,255,255,.12);padding:5px 11px;border-radius:999px;border:1px solid rgba(255,255,255,.14)}
+  .strip-top .live .dot{width:6px;height:6px;border-radius:50%;background:#5EE6BE;box-shadow:0 0 0 4px rgba(94,230,190,.22)}
+  .strip-grid{position:relative;z-index:1;display:grid;grid-template-columns:1fr auto 1fr;gap:24px;align-items:center}
+  .strip .slot .l{font:700 11px var(--font-primary);color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px}
+  .strip .slot .h{font:600 32px/34px var(--font-primary);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .strip .slot .d{font:500 12px var(--font-primary);color:rgba(255,255,255,.72);margin-top:5px;text-transform:uppercase;letter-spacing:.06em}
+  .strip .slot.right{text-align:right}
+  .strip .mid{display:flex;flex-direction:column;align-items:center;gap:7px}
+  .strip .mid .nights{font:700 11px var(--font-primary);color:#C9D0FF}
+  .strip .arrow{width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.12);display:grid;place-items:center;border:1px solid rgba(255,255,255,.16)}
+  .strip .arrow svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2}
+
+  .card{background:#fff;border:1px solid var(--stroke-gray-lighter);border-radius:var(--radius-lg);box-shadow:var(--shadow-card)}
+  .sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:12px}
+  .sec-head h2{font:600 17px/22px var(--font-primary);margin:0;letter-spacing:-.005em}
+  .sec-head .meta{font:600 13px var(--font-primary);color:var(--text-gray-dark)}
+  .sec-head .meta b{color:var(--text-brand)}
+  .sec-head a.meta{color:var(--text-brand);text-decoration:none;display:inline-flex;align-items:center;gap:4px}
+  .sec-head a.meta svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2}
+
+  /* Checklist — with progress ring header + vertical connector */
+  .checklist .ptop{display:flex;align-items:center;gap:16px;padding:18px 20px 16px;border-bottom:1px solid var(--stroke-gray-lighter)}
+  .ring{position:relative;width:60px;height:60px;flex-shrink:0}
+  .ring svg{transform:rotate(-90deg);width:60px;height:60px}
+  .ring .tr{stroke:var(--bg-neutral-cold);fill:none;stroke-width:7}
+  .ring .fl{stroke:url(#jg);fill:none;stroke-width:7;stroke-linecap:round;stroke-dasharray:163.36;stroke-dashoffset:163.36;animation:rgf 1.2s cubic-bezier(.3,.9,.3,1) .2s forwards}
+  @keyframes rgf{to{stroke-dashoffset:122.52}} /* 25% */
+  .ring .ctr{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:700 15px var(--font-primary);color:var(--text-brand);font-variant-numeric:tabular-nums}
+  .checklist .ptop .pt{flex:1}
+  .checklist .ptop .pt .t{font:600 15px var(--font-primary)}
+  .checklist .ptop .pt .d{font:500 12.5px var(--font-primary);color:var(--text-gray-dark);margin-top:2px}
+  .checklist .ptop .eta{font:600 12px var(--font-primary);color:var(--text-warn);background:var(--bg-warn-light);padding:5px 11px;border-radius:999px;white-space:nowrap}
+  .cl-list{position:relative}
+  .cl-list::before{content:"";position:absolute;left:40px;top:30px;bottom:30px;width:2px;background:var(--stroke-gray-light);z-index:0}
+  .cl-row{position:relative;z-index:1;display:flex;align-items:center;gap:16px;padding:15px 20px;border-top:1px solid var(--stroke-gray-lighter);cursor:pointer;transition:background .12s}
+  .cl-row:hover{background:#FBFBFE}
+  .cl-row .ic{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;flex-shrink:0;border:3px solid #fff}
+  .cl-row .ic svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8}
+  .cl-row.done .ic{background:var(--bg-success-light);color:var(--text-success)}
+  .cl-row.pending .ic{background:var(--text-brand);color:#fff;box-shadow:0 0 0 4px rgba(56,92,248,.14)}
+  .cl-row.todo .ic{background:var(--bg-neutral-cold);color:var(--text-gray-dark)}
+  .cl-row .lt{flex:1;min-width:0}
+  .cl-row .t{font:600 15px/20px var(--font-primary)}
+  .cl-row .d{font:400 13px/18px var(--font-primary);color:var(--text-gray-dark);margin-top:2px}
+  .cl-row .st{font:600 11px var(--font-primary);padding:4px 10px;border-radius:999px;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+  .cl-row.done .st{background:var(--bg-success-light);color:var(--text-success)}
+  .cl-row.pending .st{background:var(--bg-blue-light);color:var(--text-brand)}
+  .cl-row.todo .st{background:var(--bg-neutral-light);color:var(--text-gray-dark)}
+  .cl-row .chev{width:20px;height:20px;stroke:var(--text-gray-light);fill:none;stroke-width:2;flex-shrink:0;transition:stroke .12s,transform .12s}
+  .cl-row:hover .chev{stroke:var(--text-brand);transform:translateX(2px)}
+
+  /* Vela nudge */
+  .nudge{display:flex;gap:14px;padding:18px 20px;background:linear-gradient(135deg,#F0F3FF,#EFF6FF);border:1px solid #DCE3FF;border-radius:var(--radius-lg);position:relative;overflow:hidden}
+  .nudge::before{content:"";position:absolute;top:-30px;right:-20px;width:130px;height:130px;border-radius:50%;background:radial-gradient(circle,rgba(56,92,248,.14),transparent 65%);pointer-events:none}
+  .nudge .av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#385CF8,#8CA5FF);color:#fff;display:grid;place-items:center;flex-shrink:0;position:relative;z-index:2;box-shadow:0 4px 12px rgba(56,92,248,.30)}
+  .nudge .av svg{width:18px;height:18px;fill:#fff;stroke:none}
+  .nudge .b{position:relative;z-index:2;flex:1}
+  .nudge .l{font:700 10.5px var(--font-primary);color:var(--text-brand);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+  .nudge .t{font:600 14.5px/20px var(--font-primary)}
+  .nudge .d{font:400 13px/19px var(--font-primary);color:var(--text-gray-dark);margin-top:4px}
+  .nudge .actions{display:flex;gap:8px;margin-top:12px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:36px;padding:0 15px;border-radius:9px;font:600 13px var(--font-primary);cursor:pointer;border:none;text-decoration:none;transition:background .12s,transform .1s,box-shadow .12s}
+  .btn.primary{background:var(--text-brand);color:#fff;box-shadow:0 3px 10px rgba(56,92,248,.26)}
+  .btn.primary:hover{background:var(--text-brand-dark);transform:translateY(-1px);box-shadow:0 6px 14px rgba(56,92,248,.32)}
+  .btn.ghost{background:#fff;color:var(--text-dark);border:1px solid var(--stroke-gray-medium)}
+  .btn.ghost:hover{background:var(--bg-neutral-light)}
+  .btn.dark{background:var(--bg-dark);color:#fff}
+  .btn.dark:hover{background:#222268}
+  .btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2}
+
+  /* Stay grid */
+  .stay{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .stay .card{padding:22px 20px;text-align:center;transition:transform .15s,box-shadow .15s}
+  .stay .card:hover{transform:translateY(-2px);box-shadow:var(--shadow-hover)}
+  .stay .ic{width:50px;height:50px;border-radius:50%;background:var(--bg-blue-light);color:var(--text-brand);display:grid;place-items:center;margin:0 auto 10px}
+  .stay .ic svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8}
+  .stay .t{font:600 16px var(--font-primary)}
+  .stay .d{font:400 13px/18px var(--font-primary);color:var(--text-gray-dark);margin:4px 0 14px}
+
+  /* Reco grid */
+  .reco{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .reco .card{overflow:hidden;cursor:pointer;transition:transform .16s,box-shadow .16s}
+  .reco .card:hover{transform:translateY(-3px);box-shadow:var(--shadow-hover)}
+  .reco .media{height:142px;position:relative;overflow:hidden;background:var(--bg-neutral-cold)}
+  .reco .media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s ease}
+  .reco .card:hover .media img{transform:scale(1.05)}
+  .reco .media::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 52%,rgba(22,22,67,.20));pointer-events:none}
+  .reco .media .chip{position:absolute;top:10px;left:10px;font:700 9.5px var(--font-primary);text-transform:uppercase;letter-spacing:.05em;background:rgba(255,255,255,.92);color:var(--text-brand);padding:4px 9px;border-radius:999px;backdrop-filter:blur(4px)}
+  .reco .body{padding:14px 16px}
+  .reco .t{font:600 14.5px/19px var(--font-primary)}
+  .reco .dd{font:400 12px/16px var(--font-primary);color:var(--text-gray-dark);margin-top:3px}
+  .reco .row{display:flex;align-items:center;justify-content:space-between;margin-top:12px}
+  .reco .p{font:700 14px var(--font-primary);color:var(--text-dark)}
+  .reco .p .from{color:var(--text-gray-medium);font-weight:500;margin-right:3px;font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+
+  /* Checkout banner */
+  .coban{display:flex;align-items:center;gap:14px;padding:16px 20px;background:var(--bg-neutral-light);border:1px dashed var(--stroke-gray-medium);border-radius:var(--radius-lg)}
+  .coban .ic{width:36px;height:36px;border-radius:50%;background:#fff;color:var(--text-gray-dark);display:grid;place-items:center;flex-shrink:0}
+  .coban .ic svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.7}
+  .coban .lt{flex:1}
+  .coban .t{font:600 13.5px var(--font-primary)}
+  .coban .d{font:400 12.5px var(--font-primary);color:var(--text-gray-medium)}
+
+  /* ───── Rail ───── */
+  .rail{padding:26px 24px 56px;display:flex;flex-direction:column;gap:16px;border-left:1px solid var(--stroke-gray-lighter);background:#fff}
+  .res .hd{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 12px;border-bottom:1px solid var(--stroke-gray-lighter)}
+  .res .hd .t{font:600 14px var(--font-primary)}
+  .res .hd .st{display:inline-flex;align-items:center;gap:6px;font:600 11px var(--font-primary);color:var(--text-success);background:var(--bg-success-light);padding:3px 10px;border-radius:999px}
+  .res .hd .st::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--text-success)}
+  .res dl{margin:0;padding:12px 18px 16px;display:grid;gap:9px}
+  .res .row{display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .res dt{font:500 12.5px var(--font-primary);color:var(--text-gray-dark);margin:0}
+  .res dd{margin:0;font:600 12.5px var(--font-primary);font-variant-numeric:tabular-nums}
+
+  .ups{overflow:hidden;position:relative}
+  .ups .slide{display:none}
+  .ups .slide.on{display:block;animation:rv .35s ease-out}
+  .ups .media{height:152px;background:var(--bg-neutral-cold);position:relative;overflow:hidden}
+  .ups .media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+  .ups .media::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(22,22,67,.2));pointer-events:none}
+  .ups .tag{position:absolute;top:10px;left:10px;z-index:2;font:700 10.5px var(--font-primary);color:var(--text-brand);background:#fff;padding:4px 10px;border-radius:999px;letter-spacing:.04em;text-transform:uppercase;box-shadow:0 2px 6px rgba(22,22,67,.12)}
+  .ups .body{padding:14px 18px}
+  .ups .t{font:600 14.5px/19px var(--font-primary)}
+  .ups .d{font:400 12.5px/17px var(--font-primary);color:var(--text-gray-dark);margin:4px 0 12px}
+  .ups .foot{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .ups .foot .p{font:700 17px var(--font-primary)}
+  .ups .foot .p .from{font:500 11px var(--font-primary);color:var(--text-gray-medium);margin-right:3px;text-transform:uppercase;letter-spacing:.05em}
+  .ups .dots{display:flex;justify-content:center;gap:5px;padding:0 0 12px}
+  .ups .dots i{width:5px;height:5px;border-radius:50%;background:var(--stroke-gray-medium);cursor:pointer;transition:all .2s}
+  .ups .dots i.on{background:var(--text-brand);width:14px;border-radius:3px}
+
+  .contact .hd{display:flex;align-items:center;gap:10px;padding:14px 18px 4px}
+  .contact .hd svg{width:16px;height:16px;stroke:var(--text-brand);fill:none;stroke-width:1.8}
+  .contact .hd .t{font:600 13.5px var(--font-primary)}
+  .contact p{margin:0;padding:4px 18px 10px;font:400 12px/17px var(--font-primary);color:var(--text-gray-dark)}
+  .contact .cta{padding:0 14px 14px}
+  .contact .cta .btn{width:100%}
+
+  @media (max-width:1180px){
+    .app{grid-template-columns:240px 1fr}
+    .rail{grid-column:1/-1;border-left:none;border-top:1px solid var(--stroke-gray-lighter);display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:24px 32px 56px}
+    .reco{grid-template-columns:1fr 1fr}
+  }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute"><defs>
+  <linearGradient id="jg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#385CF8"/><stop offset="1" stop-color="#6B8CFF"/></linearGradient>
+</defs></svg>
+
+<div class="app">
+
+  <!-- Sidebar -->
+  <aside class="side">
+    <div class="prop">
+      <div class="av"><svg viewBox="0 0 24 24"><path d="M3 9 12 2l9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg></div>
+      <div>
+        <div class="name">Puerta del Sol</div>
+        <div class="ref">VH-2026-0847</div>
+      </div>
+    </div>
+    <nav>
+      <div class="n-item active">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Home
+      </div>
+      <div class="sgroup">Before your stay</div>
+      <div class="n-item">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+        Registration
+        <span class="badge">2 left</span>
+      </div>
+      <div class="n-item">
+        <svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M2 10h20M6 14h4"/></svg>
+        Payments
+        <span class="badge">€340</span>
+      </div>
+      <div class="sgroup">Your stay</div>
+      <div class="n-item">
+        <svg viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="3.5"/><path d="m10 13 10-10M16 7l3 3"/></svg>
+        Virtual keys
+      </div>
+      <a class="n-item" href="../index.html?view=luggage" target="_top" style="text-decoration:none;color:inherit">
+        <svg viewBox="0 0 24 24"><path d="M6 8V6a3 3 0 0 1 3-3h6a3 3 0 0 1 3 3v2"/><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M9 12v5M15 12v5"/></svg>
+        Luggage drop-off
+        <span class="badge new">NEW</span>
+      </a>
+      <div class="n-item">
+        <svg viewBox="0 0 24 24"><path d="M4 4h10a4 4 0 0 1 4 4v12H8a4 4 0 0 1-4-4z"/><path d="M8 8h6M8 12h6"/></svg>
+        Guidebooks
+      </div>
+      <div class="n-item">
+        <svg viewBox="0 0 24 24"><path d="m12 2 3.1 6.3L22 9.3l-5 4.8 1.2 6.9L12 17.8 5.8 21l1.2-6.9-5-4.8 6.9-1z"/></svg>
+        Recommendations
+      </div>
+      <div class="sgroup">Check-out</div>
+      <div class="n-item">
+        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+        Check-out instructions
+      </div>
+    </nav>
+    <div class="me">
+      <div class="av">CS</div>
+      <div>
+        <div class="n">Carmen Specimen</div>
+        <div class="e">carmen@email.com</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+
+    <div class="head reveal" style="animation-delay:.02s">
+      <div>
+        <h1>Welcome, Carmen 👋</h1>
+        <div class="sub">Finish your check-in and make the most of your stay in Madrid.</div>
+      </div>
+      <button class="chek-trigger" data-chek-trigger>Ask Vela</button>
+    </div>
+
+    <!-- Check-in strip -->
+    <div class="strip reveal" style="animation-delay:.06s">
+      <div class="strip-top">
+        <span class="pin"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Calle Mayor 12, Madrid · 4 min from airport bus</span>
+        <span class="live"><span class="dot"></span>Arrival in 5 days</span>
+      </div>
+      <div class="strip-grid">
+        <div class="slot">
+          <div class="l">Check-in</div>
+          <div class="h">14:00</div>
+          <div class="d">Mon · 18 May 2026</div>
+        </div>
+        <div class="mid">
+          <div class="nights">5 NIGHTS</div>
+          <div class="arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
+        </div>
+        <div class="slot right">
+          <div class="l">Check-out</div>
+          <div class="h">10:00</div>
+          <div class="d">Sat · 23 May 2026</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vela nudge -->
+    <div class="nudge reveal" style="animation-delay:.1s">
+      <div class="av"><svg viewBox="0 0 24 24"><path d="M10 2.3l1.75 5.45L17 9.4l-5.25 1.65L10 16.5l-1.75-5.45L3 9.4l5.25-1.65z"/><path d="M18.5 14l.75 2.25 2.25.75-2.25.75-.75 2.25-.75-2.25-2.25-.75 2.25-.75z"/></svg></div>
+      <div class="b">
+        <div class="l">Suggested by Vela</div>
+        <div class="t">Finish ID verification now and unlock your digital keys.</div>
+        <div class="d">Your flight lands at 13:20 — verifying ahead of time means you walk straight in, no waiting at the lockbox.</div>
+        <div class="actions">
+          <button class="btn primary">Start verification <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></button>
+          <button class="btn ghost" data-chek-trigger>Ask Vela</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Checklist -->
+    <section class="reveal" style="animation-delay:.14s">
+      <div class="sec-head">
+        <h2>Complete your check-in</h2>
+        <div class="meta"><b>1</b> of 4 done</div>
+      </div>
+      <div class="card checklist">
+        <div class="ptop">
+          <div class="ring">
+            <svg viewBox="0 0 60 60"><circle class="tr" cx="30" cy="30" r="26"/><circle class="fl" cx="30" cy="30" r="26"/></svg>
+            <div class="ctr" data-count="25" data-suffix="%">0%</div>
+          </div>
+          <div class="pt">
+            <div class="t">You're 25% checked in</div>
+            <div class="d">3 steps left · about 6 minutes</div>
+          </div>
+          <span class="eta">Due before arrival</span>
+        </div>
+        <div class="cl-list">
+          <div class="cl-row done">
+            <div class="ic"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div>
+            <div class="lt">
+              <div class="t">Guest details</div>
+              <div class="d">All guests added and verified.</div>
+            </div>
+            <span class="st">Completed</span>
+            <svg class="chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg>
+          </div>
+          <div class="cl-row pending">
+            <div class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="12" r="2.5"/><path d="M14 10h4M14 14h4"/></svg></div>
+            <div class="lt">
+              <div class="t">ID verification</div>
+              <div class="d">Scan your document with NFC — ~90 seconds.</div>
+            </div>
+            <span class="st">Next up</span>
+            <svg class="chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg>
+          </div>
+          <div class="cl-row todo">
+            <div class="ic"><svg viewBox="0 0 24 24"><path d="M12 2 4 5v7c0 5 3.5 8 8 10 4.5-2 8-5 8-10V5z"/></svg></div>
+            <div class="lt">
+              <div class="t">Security deposit</div>
+              <div class="d">€200 pre-authorisation — released on check-out.</div>
+            </div>
+            <span class="st">Not started</span>
+            <svg class="chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg>
+          </div>
+          <div class="cl-row todo">
+            <div class="ic"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M2 10h20M6 14h4"/></svg></div>
+            <div class="lt">
+              <div class="t">Balance payment</div>
+              <div class="d">€340 due — unlocks your digital keys.</div>
+            </div>
+            <span class="st">Not started</span>
+            <svg class="chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Your stay -->
+    <section class="reveal" style="animation-delay:.18s">
+      <div class="sec-head"><h2>Your stay</h2></div>
+      <div class="stay">
+        <div class="card">
+          <div class="ic"><svg viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="3.5"/><path d="m10 13 10-10M16 7l3 3"/></svg></div>
+          <div class="t">Virtual keys</div>
+          <div class="d">Available once your balance is paid.</div>
+          <button class="btn dark">View keys</button>
+        </div>
+        <div class="card">
+          <div class="ic"><svg viewBox="0 0 24 24"><path d="M4 4h10a4 4 0 0 1 4 4v12H8a4 4 0 0 1-4-4z"/><path d="M8 8h6M8 12h6"/></svg></div>
+          <div class="t">Guidebooks</div>
+          <div class="d">Meet your host + local tips for Madrid.</div>
+          <button class="btn ghost">Browse</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Recommendations -->
+    <section class="reveal" style="animation-delay:.22s">
+      <div class="sec-head">
+        <h2>Handpicked by Vela for your trip</h2>
+        <a class="meta" href="#">See all <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
+      </div>
+      <div class="reco">
+        <div class="card">
+          <div class="media"><span class="chip">Comfort</span><img src="https://images.unsplash.com/photo-1445019980597-93fa8acb246c?w=800&auto=format&fit=crop&q=80" alt="Slow morning coffee in bed" loading="lazy"></div>
+          <div class="body">
+            <div class="t">Late check-out</div>
+            <div class="dd">Extend your stay until 14:00 on departure day.</div>
+            <div class="row"><div class="p"><span class="from">from</span>€25</div><button class="btn ghost" style="height:30px;padding:0 12px;font-size:12.5px">Add</button></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="media"><span class="chip">Arrival</span><img src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&auto=format&fit=crop&q=80" alt="Fresh produce and groceries" loading="lazy"></div>
+          <div class="body">
+            <div class="t">Grocery pack</div>
+            <div class="dd">Bread, milk and fruit waiting on arrival.</div>
+            <div class="row"><div class="p"><span class="from">from</span>€35</div><button class="btn ghost" style="height:30px;padding:0 12px;font-size:12.5px">Add</button></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="media"><span class="chip">Experience</span><img src="https://images.unsplash.com/photo-1543832923-44667a44c804?w=800&auto=format&fit=crop&q=80" alt="Madrid street at golden hour" loading="lazy"></div>
+          <div class="body">
+            <div class="t">Walking tour</div>
+            <div class="dd">Private 2h tour of the Austrias quarter.</div>
+            <div class="row"><div class="p"><span class="from">from</span>€45</div><button class="btn ghost" style="height:30px;padding:0 12px;font-size:12.5px">Add</button></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Checkout -->
+    <div class="coban reveal" style="animation-delay:.26s">
+      <div class="ic"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></div>
+      <div class="lt">
+        <div class="t">Check-out instructions</div>
+        <div class="d">Available 24 hours before departure.</div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Rail -->
+  <aside class="rail">
+    <div class="card ups reveal" id="upsCarousel" style="animation-delay:.16s">
+      <div class="slide on" data-i="0">
+        <div class="media"><img src="https://images.unsplash.com/photo-1553051021-9f94520a6cad?w=800&auto=format&fit=crop&q=80" alt="Luggage lockers" loading="lazy"><span class="tag" style="color:#0F9F80">New</span></div>
+        <div class="body">
+          <div class="t">Drop your bags before check-in</div>
+          <div class="d">5 lockers within 800 m. €6 medium · €12 large per day.</div>
+          <div class="foot">
+            <div class="p" style="color:#0F9F80;font-size:15px"><span class="from">from</span>€6</div>
+            <a class="btn primary" href="../index.html?view=luggage" target="_top" style="height:34px;text-decoration:none">View lockers</a>
+          </div>
+        </div>
+        <div class="dots"><i class="on" data-d="0"></i><i data-d="1"></i></div>
+      </div>
+      <div class="slide" data-i="1">
+        <div class="media"><img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&auto=format&fit=crop&q=80" alt="Bright cozy apartment interior" loading="lazy"><span class="tag">Limited offer</span></div>
+        <div class="body">
+          <div class="t">Early check-in from 10:00</div>
+          <div class="d">Arrive up to 4 hours early — perfect for early flights.</div>
+          <div class="foot">
+            <div class="p"><span class="from">from</span>€25</div>
+            <button class="btn primary" style="height:34px">Add to stay</button>
+          </div>
+        </div>
+        <div class="dots"><i data-d="0"></i><i class="on" data-d="1"></i></div>
+      </div>
+    </div>
+
+    <div class="card contact reveal" style="animation-delay:.2s">
+      <div class="hd">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        <div class="t">Need a human?</div>
+      </div>
+      <p>Vela handles most requests, but your host is one tap away.</p>
+      <div class="cta"><button class="btn dark">Chat with host</button></div>
+    </div>
+  </aside>
+</div>
+
+<script>
+  // Upsell carousel
+  (function(){
+    var root = document.getElementById('upsCarousel');
+    if(!root) return;
+    var slides = root.querySelectorAll('.slide');
+    function show(i){ slides.forEach(function(s){ s.classList.toggle('on', s.dataset.i == String(i)); }); }
+    root.addEventListener('click', function(e){
+      var t = e.target.closest('[data-d]');
+      if(!t) return; show(t.dataset.d);
+    });
+    var idx = 0;
+    setInterval(function(){ idx = (idx + 1) % slides.length; show(idx); }, 6500);
+  })();
+  // Count-up for ring %
+  (function(){
+    var rm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document.querySelectorAll('[data-count]').forEach(function(el){
+      var target = parseFloat(el.getAttribute('data-count'));
+      var suffix = el.getAttribute('data-suffix') || '';
+      if (rm){ el.textContent = target + suffix; return; }
+      var start = null, dur = 1000;
+      function tick(ts){
+        if(start===null) start = ts;
+        var p = Math.min((ts-start)/dur, 1);
+        var val = Math.round(target * (1 - Math.pow(1-p,3)));
+        el.textContent = val + suffix;
+        if(p<1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    });
+  })();
+</script>
+</body>
+</html>

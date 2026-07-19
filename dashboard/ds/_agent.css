@@ -1,0 +1,228 @@
+/* ─────────────────────────────────────────────
+   Chekin AI Agent — "Chek"
+   A trigger in the topbar and a slide-in right panel.
+   Uses the same CSS tokens declared in each page's :root.
+   ───────────────────────────────────────────── */
+
+/* ── Trigger button ── */
+.chek-trigger{
+  position:relative;
+  height:40px;padding:0 14px 0 10px;
+  display:inline-flex;align-items:center;gap:8px;
+  border-radius:999px;border:1px solid transparent;
+  background:linear-gradient(135deg, #385CF8 0%, #6B85FF 100%);
+  color:#fff;cursor:pointer;user-select:none;
+  font:600 13px var(--font-primary);
+  box-shadow:0 4px 12px rgba(56,92,248,.35), inset 0 0 0 1px rgba(255,255,255,.14);
+  transition:transform .15s, box-shadow .15s;
+}
+.chek-trigger:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(56,92,248,.45), inset 0 0 0 1px rgba(255,255,255,.2)}
+.chek-trigger:active{transform:translateY(0)}
+.chek-trigger .mark{
+  width:24px;height:24px;border-radius:50%;
+  background:rgba(255,255,255,.15);
+  display:grid;place-items:center;flex-shrink:0;
+  position:relative;
+}
+.chek-trigger .mark svg{width:14px;height:14px;fill:#fff;stroke:none}
+.chek-trigger .label{letter-spacing:.01em}
+.chek-trigger .kbd{
+  font:600 11px var(--font-primary);color:#fff;opacity:.75;
+  padding:2px 6px;border-radius:4px;background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.12);
+  line-height:1;
+}
+.chek-trigger::before{
+  /* pulse halo */
+  content:"";position:absolute;inset:-4px;border-radius:999px;
+  background:radial-gradient(circle, rgba(56,92,248,.35) 0%, transparent 70%);
+  opacity:0;z-index:-1;animation:chek-pulse 3.2s ease-out infinite;
+}
+@keyframes chek-pulse{
+  0%{opacity:0;transform:scale(.95)}
+  40%{opacity:.8}
+  100%{opacity:0;transform:scale(1.12)}
+}
+
+/* When panel is open, collapse the trigger */
+.chek-open .chek-trigger{display:none}
+
+/* ── Backdrop (subtle, doesn't block) ── */
+.chek-backdrop{
+  position:fixed;inset:0;background:rgba(22,22,67,.08);
+  opacity:0;pointer-events:none;transition:opacity .2s;z-index:40;
+}
+.chek-open .chek-backdrop{opacity:1;pointer-events:auto}
+
+/* ── Panel ── */
+.chek-panel{
+  position:fixed;top:12px;right:12px;bottom:12px;
+  width:420px;max-width:calc(100vw - 24px);
+  background:#fff;border-radius:16px;
+  box-shadow:0 24px 60px rgba(22,22,67,.22), 0 0 0 1px rgba(22,22,67,.06);
+  display:flex;flex-direction:column;
+  transform:translateX(calc(100% + 24px));
+  transition:transform .28s cubic-bezier(.2,.8,.2,1);
+  z-index:50;overflow:hidden;
+}
+html.chek-open .chek-panel{transform:translateX(0) !important}
+
+/* Expanded (full-width) variant */
+.chek-panel.wide{width:min(900px, calc(100vw - 24px))}
+
+/* Header */
+.chek-head{
+  padding:14px 16px;display:flex;align-items:center;gap:10px;
+  border-bottom:1px solid var(--stroke-gray-lighter);
+  background:linear-gradient(180deg, #FDFDFF 0%, #fff 100%);
+  flex-shrink:0;
+}
+.chek-head .av{
+  width:32px;height:32px;border-radius:50%;
+  background:linear-gradient(135deg, #385CF8 0%, #6B85FF 100%);
+  display:grid;place-items:center;color:#fff;flex-shrink:0;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.2);
+}
+.chek-head .av svg{width:16px;height:16px;fill:#fff;stroke:none}
+.chek-head .ti{display:flex;align-items:center;min-width:0}
+.chek-head .ti .t{font:700 16px var(--font-primary);color:var(--text-dark);letter-spacing:-0.01em}
+.chek-head .acts{margin-left:auto;display:flex;align-items:center;gap:2px}
+.chek-head .acts .ib{
+  width:32px;height:32px;border-radius:8px;background:transparent;border:none;cursor:pointer;
+  display:grid;place-items:center;color:var(--text-gray-dark);
+}
+.chek-head .acts .ib:hover{background:var(--bg-neutral-light);color:var(--text-dark)}
+.chek-head .acts .ib svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.chek-head .new{
+  height:32px;padding:0 12px;border-radius:8px;background:var(--bg-blue-light);color:var(--text-brand);
+  border:none;cursor:pointer;font:600 13px var(--font-primary);display:inline-flex;align-items:center;gap:6px;
+}
+.chek-head .new:hover{background:#E3E9FF}
+.chek-head .new svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.5}
+
+/* Body (scrolls) */
+.chek-body{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:16px}
+
+/* Greeting */
+.chek-greet{display:flex;flex-direction:column;gap:6px;padding:4px 2px 4px}
+.chek-greet .hello{font:500 13px var(--font-primary);color:var(--text-gray-dark)}
+.chek-greet .q{font:600 22px/28px var(--font-primary);color:var(--text-dark);letter-spacing:-.005em}
+
+/* Proactive insight card */
+.chek-insight{
+  border-radius:12px;padding:14px;display:flex;gap:12px;align-items:flex-start;
+  background:linear-gradient(135deg, #F0F3FF 0%, #EFF6FF 100%);
+  border:1px solid #D6DEFF;
+  position:relative;overflow:hidden;
+}
+.chek-insight::before{
+  content:"";position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;
+  background:radial-gradient(circle, rgba(56,92,248,.12), transparent 70%);
+}
+.chek-insight .ic{
+  width:32px;height:32px;border-radius:8px;background:#fff;display:grid;place-items:center;color:var(--text-brand);
+  flex-shrink:0;box-shadow:0 1px 2px rgba(22,22,67,.08);
+}
+.chek-insight .ic svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.chek-insight .cp{flex:1;min-width:0}
+.chek-insight .tag{font:600 10px var(--font-primary);color:var(--text-brand);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
+.chek-insight .t{font:600 14px/20px var(--font-primary);color:var(--text-dark)}
+.chek-insight .d{font:400 13px/18px var(--font-primary);color:var(--text-gray-dark);margin-top:2px}
+.chek-insight .actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;align-items:center}
+.chek-insight .actions button{
+  height:32px;padding:0 12px;border-radius:8px;border:1px solid rgba(22,22,67,.10);
+  background:#fff;color:var(--text-dark);font:600 12px var(--font-primary);cursor:pointer;
+  display:inline-flex;align-items:center;gap:6px;white-space:nowrap;line-height:1;
+}
+.chek-insight .actions button:hover{background:var(--bg-neutral-light)}
+.chek-insight .actions button.primary{background:var(--text-brand);color:#fff;border-color:var(--text-brand)}
+.chek-insight .actions button.primary:hover{background:#2E4FE0}
+.chek-insight .actions button.ghost{border-color:transparent;background:transparent;color:var(--text-gray-dark);padding:0 8px;margin-left:auto}
+.chek-insight .actions button.ghost:hover{background:rgba(22,22,67,.04);color:var(--text-dark)}
+.chek-insight .actions button svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;flex-shrink:0}
+
+/* Capability chips */
+.chek-caps{display:flex;flex-direction:column;gap:10px}
+.chek-caps .h{font:600 11px var(--font-primary);color:var(--text-gray-medium);text-transform:uppercase;letter-spacing:.08em}
+.chek-caps .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.chek-cap{
+  padding:12px;background:#fff;border:1px solid var(--stroke-gray-lighter);border-radius:10px;
+  display:flex;flex-direction:column;gap:6px;cursor:pointer;transition:border-color .12s, transform .08s;
+}
+.chek-cap:hover{border-color:var(--text-brand);transform:translateY(-1px)}
+.chek-cap .ic{
+  width:28px;height:28px;border-radius:7px;background:var(--bg-blue-light);color:var(--text-brand);display:grid;place-items:center;
+}
+.chek-cap .ic svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.chek-cap .t{font:600 13px/18px var(--font-primary);color:var(--text-dark)}
+.chek-cap .d{font:400 12px/16px var(--font-primary);color:var(--text-gray-medium)}
+
+/* Conversation messages */
+.chek-msg{display:flex;gap:10px;animation:chek-fade .2s ease-out}
+@keyframes chek-fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.chek-msg.user{flex-direction:row-reverse}
+.chek-msg .bubble{
+  max-width:82%;padding:10px 14px;border-radius:12px;
+  font:400 14px/20px var(--font-primary);color:var(--text-dark);
+}
+.chek-msg.bot .bubble{background:var(--bg-neutral-light);border-top-left-radius:4px}
+.chek-msg.user .bubble{background:var(--text-brand);color:#fff;border-top-right-radius:4px}
+.chek-msg .av{width:26px;height:26px;border-radius:50%;flex-shrink:0;display:grid;place-items:center}
+.chek-msg.bot .av{background:linear-gradient(135deg, #385CF8 0%, #6B85FF 100%)}
+.chek-msg.bot .av svg{width:12px;height:12px;fill:#fff;stroke:none}
+.chek-msg.user .av{background:var(--bg-sky-light);color:var(--text-brand);font:700 11px var(--font-primary)}
+
+/* Actionable result cards inside bot messages */
+.chek-result{
+  margin-top:8px;border:1px solid var(--stroke-gray-lighter);border-radius:10px;overflow:hidden;background:#fff;
+}
+.chek-result .rhead{padding:10px 12px;border-bottom:1px solid var(--stroke-gray-lighter);display:flex;align-items:center;gap:8px;font:600 12px var(--font-primary);color:var(--text-gray-dark);text-transform:uppercase;letter-spacing:.04em}
+.chek-result .rhead svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2}
+.chek-result .rrow{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--stroke-gray-lighter);font:500 13px var(--font-primary);color:var(--text-dark)}
+.chek-result .rrow:last-child{border-bottom:none}
+.chek-result .rrow .sm{font:400 12px var(--font-primary);color:var(--text-gray-medium);margin-left:auto}
+.chek-result .rfoot{padding:10px 12px;display:flex;gap:6px}
+.chek-result .rfoot button{height:30px;padding:0 12px;border-radius:6px;border:1px solid var(--stroke-gray-medium);background:#fff;color:var(--text-dark);font:600 12px var(--font-primary);cursor:pointer}
+.chek-result .rfoot button.primary{background:var(--text-brand);color:#fff;border-color:var(--text-brand)}
+.chek-result .rfoot button:hover{background:var(--bg-neutral-light)}
+.chek-result .rfoot button.primary:hover{background:#2E4FE0}
+
+/* Typing indicator */
+.chek-typing{display:flex;gap:4px;padding:10px 14px;background:var(--bg-neutral-light);border-radius:12px;border-top-left-radius:4px;width:fit-content}
+.chek-typing span{width:6px;height:6px;border-radius:50%;background:var(--text-gray-medium);animation:chek-dot 1.2s infinite}
+.chek-typing span:nth-child(2){animation-delay:.15s}
+.chek-typing span:nth-child(3){animation-delay:.3s}
+@keyframes chek-dot{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
+
+/* Input */
+.chek-input{
+  padding:12px;border-top:1px solid var(--stroke-gray-lighter);background:#fff;flex-shrink:0;
+}
+.chek-input .bar{
+  display:flex;align-items:flex-end;gap:8px;padding:10px 12px;
+  background:var(--bg-neutral-light);border-radius:12px;border:1px solid transparent;transition:border-color .15s, background .15s;
+}
+.chek-input .bar:focus-within{background:#fff;border-color:var(--text-brand);box-shadow:0 0 0 3px rgba(56,92,248,.15)}
+.chek-input textarea{
+  flex:1;border:none;background:transparent;resize:none;outline:none;
+  font:400 14px/20px var(--font-primary);color:var(--text-dark);min-height:20px;max-height:120px;
+}
+.chek-input textarea::placeholder{color:var(--text-gray-medium)}
+.chek-input .tools{display:flex;gap:4px}
+.chek-input .tools button{
+  width:28px;height:28px;border-radius:6px;border:none;background:transparent;cursor:pointer;
+  display:grid;place-items:center;color:var(--text-gray-dark);
+}
+.chek-input .tools button:hover{background:rgba(22,22,67,.06);color:var(--text-dark)}
+.chek-input .tools button svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8}
+.chek-input .send{
+  width:32px;height:32px;border-radius:8px;border:none;cursor:pointer;flex-shrink:0;
+  background:linear-gradient(135deg, #385CF8 0%, #6B85FF 100%);color:#fff;
+  display:grid;place-items:center;box-shadow:0 2px 6px rgba(56,92,248,.35);
+  transition:transform .1s, opacity .15s;
+}
+.chek-input .send:disabled{opacity:.4;cursor:not-allowed;background:var(--stroke-gray-medium);box-shadow:none}
+.chek-input .send:hover:not(:disabled){transform:scale(1.05)}
+.chek-input .send svg{width:14px;height:14px;fill:#fff;stroke:none}
+.chek-input .hint{font:500 11px var(--font-primary);color:var(--text-gray-medium);margin-top:8px;padding:0 4px;display:flex;align-items:center;gap:6px}
+.chek-input .hint kbd{font:600 10px var(--font-primary);background:#fff;border:1px solid var(--stroke-gray-lighter);border-radius:4px;padding:2px 5px;color:var(--text-gray-dark)}
