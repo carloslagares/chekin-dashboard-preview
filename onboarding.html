@@ -763,7 +763,9 @@
       show(5);
     }
   } else {
-    show(1);
+    // Debug: ?step=N jumps straight to a step (no validation)
+    const stepParam = parseInt(new URLSearchParams(location.search).get('step') || '1', 10);
+    show(isNaN(stepParam) ? 1 : stepParam);
   }
 })();
 </script>
