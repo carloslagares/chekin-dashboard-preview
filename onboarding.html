@@ -266,7 +266,7 @@
         </div>
         <input class="ptype-other" id="ptypeOther" placeholder="Tell us what you manage — e.g. hostel, coliving, marina…" style="display:none">
 
-        <div class="subq" style="margin-top:28px">How many properties?</div>
+        <div class="subq" style="margin-top:28px" id="sizeQ">How many properties?</div>
         <div class="cards c2" id="sizeCards">
           <div class="card size" data-size="1-5" tabindex="0"><span class="tick"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span><span class="n">1–5</span><span class="t">Independent host</span><span class="d">You run everything yourself — we automate the boring parts.</span></div>
           <div class="card size" data-size="6-20" tabindex="0"><span class="tick"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span><span class="n">6–20</span><span class="t">Growing portfolio</span><span class="d">Repetitive tasks start to hurt. Bulk actions and templates help.</span></div>
@@ -423,6 +423,9 @@
   /* ───── State ───── */
   const state = { countries:[], regions:[], ptype:null, ptypeOther:'', size:null, manage:null, pms:null, prios:[] };
   const PTYPE_LABELS = { vr:'Vacation rentals', hotel:'Hotel / aparthotel', camping:'Camping / glamping', other:'Other' };
+  const UNITS = { vr:'properties', hotel:'rooms', camping:'units', other:'properties' };
+  const SIZE_Q = { vr:'How many properties?', hotel:'How many rooms across your hotels?', camping:'How many units or pitches?', other:'How many properties?' };
+  const unit = () => UNITS[state.ptype] || 'properties';
   let step = 1;
   const TOTAL = 5;
 
@@ -471,6 +474,7 @@
     state.ptype = b.dataset.ptype;
     $('#ptypeOther').style.display = state.ptype === 'other' ? '' : 'none';
     if (state.ptype !== 'other') state.ptypeOther = '';
+    $('#sizeQ').textContent = SIZE_Q[state.ptype] || SIZE_Q.other;
     refresh();
   }));
   $('#ptypeOther').addEventListener('input', e => { state.ptypeOther = e.target.value.trim(); refresh(); });
@@ -548,26 +552,31 @@
   /* ───── Step 5: plan generation ───── */
   function buildPlan(){
     const steps = [];
+    const u = unit();
     if (state.manage === 'pms'){
       const n = state.pms && state.pms.id !== 'other' ? state.pms.name : 'your PMS';
-      steps.push({ k:'pms', t:`Connect ${n}`, d:'Properties and bookings sync automatically from day one.', eta:2 });
+      steps.push({ k:'pms', phase:'Import', t:`Connect ${n}`, d:`Your ${u} and bookings sync automatically from day one.`, eta:2 });
     } else if (state.manage === 'ota'){
-      steps.push({ k:'ota', t:'Link your Airbnb & Booking.com calendars', d:'New reservations import on their own — no PMS needed.', eta:3 });
+      steps.push({ k:'ota', phase:'Import', t:'Link your Airbnb & Booking.com calendars', d:'New reservations import on their own — no PMS needed.', eta:3 });
     } else {
-      steps.push({ k:'manual', t:'Add your first property', d:'A guided form — import the rest later via spreadsheet.', eta:5 });
+      steps.push({ k:'manual', phase:'Import', t:'Add your first property', d:'A guided form — import the rest later via spreadsheet.', eta:5 });
     }
-    if (regulated()){
-      const s = [...new Set(schemes())].join(' · ');
-      steps.push({ k:'police', t:'Activate police reporting', d:`${s}${state.regions.length ? ' + ' + state.regions.join(', ') : ''} — submitted automatically per stay.`, eta:4 });
+    if (state.size === '21-100' || state.size === '100+'){
+      steps.push({ k:'team', phase:'Import', t:'Invite your team', d:'Owners, managers and front desk — each with the right permissions.', eta:3 });
     }
-    if (anyTax()) steps.push({ k:'tax', t:'Enable tourist tax auto-calculation', d:'Calculated and collected per stay, per your local rates.', eta:2 });
+    // One police step per regulated country — schemes differ, credentials differ
+    state.countries.filter(c => c.reg).forEach(c => {
+      const extra = c.code === 'ES' && state.regions.length ? ' + ' + state.regions.join(', ') : '';
+      steps.push({ k:'police', phase:'Legal', t:`Police reporting — ${c.scheme}`, d:`${c.name}${extra} — every guest submitted automatically, within the legal deadline.`, eta:4, scheme:c.scheme, country:c.name });
+    });
+    if (anyTax()) steps.push({ k:'tax', phase:'Legal', t:'Enable tourist tax auto-calculation', d:'Calculated and collected per stay, per your local rates.', eta:2 });
     if (state.prios.includes('ops')){
-      steps.push({ k:'ops', t:'Set up your guest inbox & smart locks', d:'One inbox for every channel, keyless entry for every guest.', eta:5 });
+      steps.push({ k:'ops', phase:'Operations', t:'Set up your guest inbox & smart locks', d:'One inbox for every channel, keyless entry for every guest.', eta:5 });
     }
     if (state.prios.includes('cleaning')){
-      steps.push({ k:'cleaning', t:'Invite your cleaning & maintenance team', d:'Turnovers auto-schedule from check-outs.', eta:4 });
+      steps.push({ k:'cleaning', phase:'Operations', t:'Invite your cleaning & maintenance team', d:'Turnovers auto-schedule from check-outs.', eta:4 });
     }
-    steps.push({ k:'test', t:'Send yourself a test check-in link', d:'Experience exactly what your guests will see.', eta:1 });
+    steps.push({ k:'test', phase:'Launch', t:'Send yourself a test check-in link', d:'Experience exactly what your guests will see.', eta:1 });
     return steps;
   }
 
@@ -612,7 +621,7 @@
       rail.appendChild(r);
     });
     const tp = state.ptype ? (state.ptype === 'other' && state.ptypeOther ? state.ptypeOther : PTYPE_LABELS[state.ptype]) : '';
-    $('#pvGreet').textContent = state.countries.map(c => c.flag).join(' ') + ' · ' + (state.size || '') + ' ' + (tp || 'properties');
+    $('#pvGreet').textContent = state.countries.map(c => c.flag).join(' ') + ' · ' + (state.size || '') + ' ' + (state.size ? unit() : '') + (tp ? ' · ' + tp : '');
 
     // Modules
     const mods = buildMods();
@@ -651,7 +660,7 @@
     state.countries.forEach(c => chips.push(`${c.flag} ${c.name}${c.reg ? ' · compliance' : ''}`));
     state.regions.forEach(r => chips.push(`+ ${r}`));
     if (state.ptype) chips.push(state.ptype === 'other' && state.ptypeOther ? state.ptypeOther : PTYPE_LABELS[state.ptype]);
-    if (state.size) chips.push(`${state.size} properties`);
+    if (state.size) chips.push(`${state.size} ${unit()}`);
     if (state.manage === 'pms') chips.push(state.pms && state.pms.id !== 'other' ? `${state.pms.name} sync` : 'PMS sync');
     if (state.manage === 'ota') chips.push('OTA calendars');
     if (state.manage === 'manual') chips.push('Manual setup');
@@ -708,6 +717,7 @@
         countries: state.countries.map(c => ({ code:c.code, name:c.name, flag:c.flag, reg:c.reg, scheme:c.scheme, tax:c.tax })),
         regions: state.regions,
         ptype: state.ptype, ptypeOther: state.ptypeOther,
+        unit: unit(),
         size: state.size, manage: state.manage,
         pms: state.pms ? state.pms.name : null,
         prios: state.prios,
@@ -739,8 +749,19 @@
     } else if (demo === 'all'){
       state.countries = [byCode('ES')];
       state.ptype = 'vr'; state.size = '100+'; state.manage = 'pms'; state.pms = PMS[0]; state.prios = ['compliance','ops','cleaning'];
+    } else if (demo === 'manual'){
+      state.countries = [byCode('FR')];
+      state.ptype = 'vr'; state.size = '1-5'; state.manage = 'manual'; state.prios = ['ops'];
+    } else if (demo === 'multi'){
+      state.countries = [byCode('ES'), byCode('IT'), byCode('PT')]; state.regions = ['Catalonia'];
+      state.ptype = 'vr'; state.size = '21-100'; state.manage = 'pms'; state.pms = PMS[0]; state.prios = ['compliance'];
     }
-    show(5);
+    if (new URLSearchParams(location.search).get('go')){
+      savePlan();
+      goTop('firstrun');
+    } else {
+      show(5);
+    }
   } else {
     show(1);
   }
