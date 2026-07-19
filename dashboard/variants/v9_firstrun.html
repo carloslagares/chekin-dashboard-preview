@@ -222,7 +222,7 @@
         <div class="hero-row">
           <div>
             <div class="greet"><span class="dot"></span><span id="greetLine">Your workspace is ready</span></div>
-            <h1 id="heroH1">Let's get you live, Maria 🚀</h1>
+            <h1 id="heroH1">Let's get you live 🚀</h1>
             <div class="sub" id="heroSub">Follow your plan step by step — most hosts finish in one sitting.</div>
           </div>
           <div class="ring-wrap">
@@ -322,12 +322,12 @@
   const flags = (plan.countries||[]).map(c => c.flag).join(' ');
   $('#greetLine').textContent = `${flags} ${plan.size || ''} ${unit} · ${tp}`;
 
-  if (!regulated && prios.includes('ops')){
-    $('#heroH1').textContent = "Let's get you earning more, Maria 💸";
-    $('#heroSub').textContent = 'No legal paperwork in your markets — your plan goes straight to revenue and saved hours.';
-  } else if (!regulated && prios.includes('cleaning')){
-    $('#heroH1').textContent = "Let's get your operations humming, Maria ✨";
-    $('#heroSub').textContent = 'No legal paperwork in your markets — your plan focuses on flawless turnovers and guest experience.';
+  if (!regulated && prios.includes('revenue')){
+    $('#heroH1').textContent = "Let's get you earning more 💸";
+    $('#heroSub').textContent = 'No legal paperwork in your markets — your plan goes straight to revenue from every stay.';
+  } else if (!regulated && prios.includes('ops')){
+    $('#heroH1').textContent = "Let's get your operations humming ✨";
+    $('#heroSub').textContent = 'No legal paperwork in your markets — your plan puts every stay on autopilot.';
   } else if (regulated && prios.length > 1){
     $('#heroSub').textContent = 'Compliance handled automatically, plus the operations tools you picked — one step at a time.';
   }
@@ -412,26 +412,41 @@
         cta:'Enable tourist tax', okd:'Tourist tax active — collected per stay, summaries under Compliance → Tourist tax.'
       };
       case 'ops': return {
-        tag:'Operations · Inbox & access', title:'Set up inbox & smart locks',
+        tag:'Operations · Autopilot', title:'Set up your operations hub',
         d:'Pick what to switch on now — you can add the rest from the Apps store anytime.',
         body:`<div class="frm"><div class="opts">
-          ${tgl('Unified guest inbox (Airbnb, Booking, email)')}
-          ${tgl('WhatsApp channel for guest messages')}
-          ${tgl('Smart locks — unique code per stay (Nuki, Yale, TTLock)')}
+          ${tgl('Unified guest inbox (Airbnb, Booking, WhatsApp, email)')}
           ${tgl('Automated messages: booking → check-in → check-out')}
-        </div></div>`,
-        cta:'Set up selected', okd:'Operations tools active — find them under Inbox and the Apps store.'
+          ${tgl('Smart locks — unique code per stay (Nuki, Yale, TTLock)')}
+          ${tgl('Auto-schedule cleaning turnovers from check-outs')}
+          ${tgl('Identity verification on every online check-in')}
+        </div>
+          <label>Cleaning & maintenance team emails (optional, one per line)<textarea placeholder="cleaning@partner.com"></textarea></label>
+        </div>`,
+        cta:'Set up selected', okd:'Operations hub active — inbox, access, turnovers and ID checks now run themselves.'
       };
-      case 'cleaning': return {
+      case 'cleaning': return { /* legacy plans saved before the revenue/ops split */
         tag:'Operations · Cleaning', title:'Invite your cleaning & maintenance team',
         d:'Turnovers schedule themselves the moment a guest checks out.',
         body:`<div class="frm">
           <label>Cleaner emails (one per line)<textarea placeholder="cleaning@partner.com"></textarea></label>
           ${tgl('Auto-schedule a turnover after every check-out')}
           ${tgl('Require completion photos')}
-          ${tgl('Let cleaners report maintenance issues')}
         </div>`,
         cta:'Invite team', okd:'Team invited — turnovers will appear on their schedule automatically.'
+      };
+      case 'revenue': return {
+        tag:'Revenue · Upselling store', title:'Open your upselling store',
+        d:'Approve the catalog once — every stay sells for you through the guest app.',
+        body:`<div class="frm"><div class="opts">
+          ${tgl('Late check-out (auto-priced by occupancy)')}
+          ${tgl('Room / unit upgrades')}
+          ${tgl('Mid-stay cleaning')}
+          ${tgl('Airport transfers')}
+          ${tgl('Local experiences & partner services')}
+        </div>
+        <div class="note">${noteIc}You set the prices, we handle payment and delivery. Revenue shows up in the Upselling panel.</div></div>`,
+        cta:'Open my store', okd:'Store open — offers go live in the guest app for every upcoming stay.'
       };
       case 'test': default: return {
         tag:'Launch · Test run', title:'Send yourself a test check-in link',
@@ -453,31 +468,34 @@
     team:   { bullets:['Invite owners, managers and front desk','Role-based permissions out of the box','People join with their own login — no shared passwords'], cta:'Invite team' },
     police: { bullets:['We register your property with the authorities','Every guest is submitted automatically, within the legal deadline','Full audit trail of every submission'], cta:'Set up reporting' },
     tax:    { bullets:['Rates applied automatically by municipality and season','Collected from guests during online check-in','Ready-to-file summaries every period'], cta:'Enable tourist tax' },
-    ops:    { bullets:['One inbox for every channel — Airbnb, Booking, WhatsApp','Smart locks issue a unique code per stay','Automated messages from booking to check-out'], cta:'Set up inbox & locks' },
+    ops:    { bullets:['One inbox for every channel — Airbnb, Booking, WhatsApp','Cleaning turnovers auto-schedule from check-outs','Smart locks and ID verification on every stay'], cta:'Set up operations' },
     cleaning:{ bullets:['Turnovers auto-schedule the moment a guest checks out','Assign cleaners and track completion with photos','Maintenance issues logged per property'], cta:'Invite your team' },
+    revenue:{ bullets:['Your guest app becomes a storefront — zero extra work','Late check-out and upgrades priced and sold automatically','You approve the catalog once; every stay sells for you'], cta:'Open my store' },
     test:   { bullets:['We send a real check-in link to your email','Complete it like a guest — ID scan included','Takes about a minute'], cta:'Send me a test link' },
   };
 
   /* ───── Recommended apps (ops / cleaning buckets) ───── */
   const APPS = {
+    revenue: [
+      {n:'Upselling Store', bg:'#385CF8', d:'Late check-out, upgrades, extras — sold automatically.'},
+      {n:'StayFi', bg:'#7C3AED', d:'Guest WiFi that captures emails for remarketing.'},
+      {n:'Late Check-out Deals', bg:'#F59E0B', d:'Auto-priced by next-day occupancy.'},
+      {n:'Local Experiences', bg:'#0F9F80', d:'Partner tours and services with commission for you.'},
+    ],
     ops: [
       {n:'WhatsApp Inbox', bg:'#25D366', d:'Guest chats from every channel in one thread.'},
       {n:'Nuki Smart Locks', bg:'#111827', d:'A unique entry code per stay, auto-expiring.'},
-      {n:'Upselling Store', bg:'#385CF8', d:'Late check-out, mid-stay cleans, extras — sold automatically.'},
-      {n:'StayFi', bg:'#7C3AED', d:'Guest WiFi that captures emails for remarketing.'},
-    ],
-    cleaning: [
       {n:'Cleaning Scheduler', bg:'#0F9F80', d:'Turnovers created from check-outs, assigned by zone.'},
       {n:'Team Tasks', bg:'#F59E0B', d:'Checklists with photo proof per property.'},
-      {n:'Issue Tracker', bg:'#EF4444', d:'Maintenance reports straight from your cleaners.'},
-      {n:'Upselling Store', bg:'#385CF8', d:'Late check-out, mid-stay cleans, extras — sold automatically.'},
     ],
   };
   (function renderApps(){
-    const picked = ['ops','cleaning'].filter(k => prios.includes(k));
+    const picked = ['revenue','ops'].filter(k => prios.includes(k) || (k === 'ops' && prios.includes('cleaning')));
     if (!picked.length) return;
     $('#appsSec').classList.add('on');
-    $('#appsHead').textContent = 'Recommended apps — earn more from every stay';
+    $('#appsHead').textContent = picked.includes('revenue')
+      ? 'Recommended apps — earn more from every stay'
+      : 'Recommended apps — run stays on autopilot';
     const seen = new Set();
     const grid = $('#appsGrid');
     picked.flatMap(k => APPS[k]).forEach(a => {
@@ -506,8 +524,8 @@
       { t:'Check-ins ready', ic:IC.check, lock:'Unlocks after your first booking' },
     ];
     if (regulated) cards.push({ t:'Reports submitted', ic:IC.doc, lock:'Unlocks with police reporting' });
-    else if (prios.includes('ops')) cards.push({ t:'Upsell revenue', ic:IC.coin, lock:'Unlocks with the Upselling store' });
-    else if (prios.includes('cleaning')) cards.push({ t:'Turnovers scheduled', ic:IC.spark, lock:'Unlocks when your team joins' });
+    else if (prios.includes('revenue')) cards.push({ t:'Upsell revenue', ic:IC.coin, lock:'Unlocks with the Upselling store' });
+    else if (prios.includes('ops') || prios.includes('cleaning')) cards.push({ t:'Turnovers scheduled', ic:IC.spark, lock:'Unlocks with your operations hub' });
     else cards.push({ t:'Tourist tax collected', ic:IC.coin, lock:'Unlocks with tourist tax' });
     const row = $('#kpiRow');
     cards.forEach(c => {

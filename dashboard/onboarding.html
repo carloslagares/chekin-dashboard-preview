@@ -324,22 +324,22 @@
               <div class="d">Police reporting, guest ID verification and tourist taxes — submitted automatically for every stay.</div>
             </div>
           </div>
+          <div class="card prio" data-prio="revenue" tabindex="0">
+            <span class="tick"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span>
+            <div class="ic violet"><svg viewBox="0 0 24 24"><path d="M12 2v20M17 5.5c0-1.9-2.2-3.5-5-3.5S7 3.6 7 5.5 9.2 9 12 9s5 1.6 5 3.5-2.2 3.5-5 3.5-5-1.6-5-3.5"/><path d="M3 21h18"/></svg></div>
+            <div>
+              <div class="t">Earn more from every stay</div>
+              <div class="d">Turn check-in into a sales channel — late check-out, upgrades, experiences and services sold automatically through the guest app.</div>
+              <div class="apps"><span>Upselling store</span><span>Guest app</span><span>Late check-out</span><span>Experiences</span></div>
+            </div>
+          </div>
           <div class="card prio" data-prio="ops" tabindex="0">
             <span class="tick"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span>
             <div class="ic blue"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .4 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.9.4l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 4.6 15 1.7 1.7 0 0 0 3.1 14H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.6 9 1.7 1.7 0 0 0 4.2 7.1l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.4l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.7 1.7 0 0 0 19.4 9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></div>
             <div>
-              <div class="t">Save hours on daily operations</div>
-              <div class="d">One inbox for all guests, remote key access, tourist tax handling and automated messages.</div>
-              <div class="apps"><span>Guest inbox</span><span>Smart locks</span><span>Upselling store</span><span>Auto-messages</span></div>
-            </div>
-          </div>
-          <div class="card prio" data-prio="cleaning" tabindex="0">
-            <span class="tick"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span>
-            <div class="ic violet"><svg viewBox="0 0 24 24"><path d="m8 6 4-4 4 4M12 2v10"/><path d="M5 12h14l-1.5 9a1 1 0 0 1-1 .8h-9a1 1 0 0 1-1-.8z"/></svg></div>
-            <div>
-              <div class="t">Orchestrate cleaning &amp; maintenance</div>
-              <div class="d">Auto-schedule turnovers from check-outs, assign your team, track issues property by property.</div>
-              <div class="apps"><span>Cleaning scheduler</span><span>Team tasks</span><span>Issue tracker</span><span>Upselling store</span></div>
+              <div class="t">Run your stays on autopilot</div>
+              <div class="d">Guest messaging in one inbox, cleaning &amp; maintenance orchestration, remote access and identity verification.</div>
+              <div class="apps"><span>Guest inbox</span><span>Cleaning scheduler</span><span>Smart locks</span><span>ID verification</span></div>
             </div>
           </div>
         </div>
@@ -348,7 +348,7 @@
       <!-- STEP 5 · Plan -->
       <section class="panel" data-panel="5">
         <div class="stepno">Step 5 of 5</div>
-        <h1 id="planTitle">Here's your plan, Maria</h1>
+        <h1 id="planTitle">Here's your plan</h1>
         <p class="lead" id="planLead">Based on your answers, this is the fastest path to your first automated check-in.</p>
         <div class="plan-grid">
           <div>
@@ -360,7 +360,7 @@
             <div class="pbody">
               <div class="mini-hero">
                 <div class="g" id="pvGreet">Your workspace</div>
-                <div class="h">Welcome, Maria 👋</div>
+                <div class="h">Welcome back 👋</div>
                 <div class="rail2" id="pvRail"></div>
               </div>
               <div class="mods">
@@ -605,10 +605,10 @@
     });
     if (anyTax()) steps.push({ k:'tax', phase:'Legal', t:'Enable tourist tax auto-calculation', d:'Calculated and collected per stay, per your local rates.', eta:2 });
     if (state.prios.includes('ops')){
-      steps.push({ k:'ops', phase:'Operations', t:'Set up your guest inbox & smart locks', d:'One inbox for every channel, keyless entry for every guest.', eta:5 });
+      steps.push({ k:'ops', phase:'Operations', t:'Set up your operations hub', d:'Guest inbox, smart locks, and cleaning turnovers that schedule themselves.', eta:6 });
     }
-    if (state.prios.includes('cleaning')){
-      steps.push({ k:'cleaning', phase:'Operations', t:'Invite your cleaning & maintenance team', d:'Turnovers auto-schedule from check-outs.', eta:4 });
+    if (state.prios.includes('revenue')){
+      steps.push({ k:'revenue', phase:'Revenue', t:'Open your upselling store', d:'Late check-out, upgrades and experiences — sold automatically via the guest app.', eta:3 });
     }
     steps.push({ k:'test', phase:'Launch', t:'Send yourself a test check-in link', d:'Experience exactly what your guests will see.', eta:1 });
     return steps;
@@ -619,13 +619,13 @@
     const on = ['checkin','id','guestapp'];
     if (regulated()) on.push('police');
     if (anyTax()) on.push('tax');
-    if (state.prios.includes('ops')) on.push('inbox','locks','upsell');
-    if (state.prios.includes('cleaning')) on.push('cleaning','upsell');
+    if (state.prios.includes('ops')) on.push('inbox','locks','cleaning');
+    if (state.prios.includes('revenue')) on.push('upsell');
     return [...new Set(on)];
   }
   const APPS = {
-    ops:      [ {n:'WhatsApp Inbox', bg:'#25D366'}, {n:'Nuki Smart Locks', bg:'#111827'}, {n:'Upselling Store', bg:'#385CF8'}, {n:'StayFi', bg:'#7C3AED'} ],
-    cleaning: [ {n:'Cleaning Scheduler', bg:'#0F9F80'}, {n:'Team Tasks', bg:'#F59E0B'}, {n:'Issue Tracker', bg:'#EF4444'}, {n:'Upselling Store', bg:'#385CF8'} ],
+    revenue: [ {n:'Upselling Store', bg:'#385CF8'}, {n:'StayFi', bg:'#7C3AED'}, {n:'Late Check-out Deals', bg:'#F59E0B'}, {n:'Local Experiences', bg:'#0F9F80'} ],
+    ops:     [ {n:'WhatsApp Inbox', bg:'#25D366'}, {n:'Nuki Smart Locks', bg:'#111827'}, {n:'Cleaning Scheduler', bg:'#0F9F80'}, {n:'Team Tasks', bg:'#F59E0B'} ],
   };
 
   function renderPlan(){
@@ -669,9 +669,9 @@
       mc.appendChild(el);
     });
 
-    // Apps (buckets 2 & 3, merged when both are picked)
+    // Apps (revenue & ops buckets, merged when both are picked)
     const appsRow = $('#pvApps');
-    const picked = ['ops','cleaning'].filter(k => state.prios.includes(k));
+    const picked = ['revenue','ops'].filter(k => state.prios.includes(k));
     appsRow.classList.toggle('on', picked.length > 0);
     if (picked.length){
       const seen = new Set();
@@ -698,7 +698,7 @@
     if (state.manage === 'pms') chips.push(state.pms && state.pms.id !== 'other' ? `${state.pms.name} sync` : 'PMS sync');
     if (state.manage === 'ota') chips.push('OTA calendars');
     if (state.manage === 'manual') chips.push('Manual setup');
-    const FOCUS = { compliance:'compliance', ops:'operations', cleaning:'cleaning' };
+    const FOCUS = { compliance:'compliance', revenue:'revenue', ops:'operations' };
     state.prios.forEach(p => chips.push('Focus: ' + FOCUS[p]));
     const box = $('#railChips');
     box.innerHTML = '';
@@ -774,15 +774,15 @@
     if (demo === 'compliance'){
       state.countries = [byCode('ES'), byCode('IT')]; state.regions = ['Catalonia'];
       state.ptype = 'vr'; state.size = '6-20'; state.sizeTier = 1; state.manage = 'pms'; state.pms = PMS[0]; state.prios = ['compliance'];
-    } else if (demo === 'ops'){
+    } else if (demo === 'revenue'){
       state.countries = [byCode('AE'), byCode('US')];
-      state.ptype = 'hotel'; state.size = '31-100'; state.sizeTier = 2; state.manage = 'pms'; state.pms = PMS[1]; state.prios = ['ops'];
-    } else if (demo === 'cleaning'){
+      state.ptype = 'hotel'; state.size = '31-100'; state.sizeTier = 2; state.manage = 'pms'; state.pms = PMS[1]; state.prios = ['revenue'];
+    } else if (demo === 'ops' || demo === 'cleaning'){
       state.countries = [byCode('GB')];
-      state.ptype = 'camping'; state.size = '26-75'; state.sizeTier = 1; state.manage = 'ota'; state.prios = ['cleaning'];
+      state.ptype = 'camping'; state.size = '26-75'; state.sizeTier = 1; state.manage = 'ota'; state.prios = ['ops'];
     } else if (demo === 'all'){
       state.countries = [byCode('ES')];
-      state.ptype = 'vr'; state.size = '100+'; state.sizeTier = 3; state.manage = 'pms'; state.pms = PMS[0]; state.prios = ['compliance','ops','cleaning'];
+      state.ptype = 'vr'; state.size = '100+'; state.sizeTier = 3; state.manage = 'pms'; state.pms = PMS[0]; state.prios = ['compliance','ops','revenue'];
     } else if (demo === 'manual'){
       state.countries = [byCode('FR')];
       state.ptype = 'vr'; state.size = '1-5'; state.sizeTier = 0; state.manage = 'manual'; state.prios = ['ops'];

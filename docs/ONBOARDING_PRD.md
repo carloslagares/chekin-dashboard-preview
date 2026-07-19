@@ -17,8 +17,10 @@
 
 ### Design principles (decided — do not reopen without cause)
 
-- **Location first, ICP later.** Compliance is not a user preference: the country determines it. We never let a user "opt out of the law" by picking another focus. The 3 ICPs (compliance-heavy / operations / cleaning) are asked as *focuses* in step 4, phrased as outcomes, not internal segment names.
-- **Multi-select focuses.** A 100-property PM can be compliance + ops + cleaning at once.
+- **Location first, ICP later.** Compliance is not a user preference: the country determines it. We never let a user "opt out of the law" by picking another focus. The 3 ICPs (compliance / **revenue generation** / **operations**) are asked as *focuses* in step 4, phrased as outcomes, not internal segment names.
+- **Revenue and operations are sharply separated.** Revenue = pure make-money (upselling store, guest-app sales, late check-out, experiences). Operations = pure autopilot (guest messaging, cleaning & maintenance orchestration, remote access, identity verification). They must never read as two flavors of the same thing.
+- **Multi-select focuses.** A 100-property PM can be compliance + revenue + operations at once.
+- **No personal names anywhere.** All copy addresses the user directly ("Let's get you live 🚀", "Welcome back 👋") — never "Maria" or any first name. Name data is unreliable; a wrong name is worse than none.
 - **Compliance locked.** If any selected country is regulated, the "compliance" focus renders checked, in green, with a "Required in your market" chip, and **cannot be deselected**. With no regulated country, the card renders dimmed and non-selectable.
 - **Three import paths, not two.** PMS (full sync) / direct OTA via iCal (semi-auto — keeps the "no PMS" crowd out of the manual pit) / Manual (guided form + CSV).
 - **Full-screen onboarding, no sidebar.** The side menu appears for the first time on the First-run Home.
@@ -46,7 +48,7 @@ dashboard/guest-crm/            ← Guest CRM module (self-contained capability)
 | Parameter | Where | Effect |
 |---|---|---|
 | `?step=N` | onboarding.html | Jump straight to step N, no validation |
-| `?demo=compliance\|ops\|cleaning\|manual\|multi\|all` | onboarding.html | Preload answers and show step 5 (plan) |
+| `?demo=compliance\|revenue\|ops\|manual\|multi\|all` | onboarding.html | Preload answers and show step 5 (plan). `cleaning` kept as alias of `ops` |
 | `?demo=X&go=1` | onboarding.html | Preload, save and land directly on the personalized First-run |
 | `?done=N` | v9_firstrun.html | Render with N steps already completed |
 | `?view=onboarding\|firstrun\|fable` | index.html | Deep-link to each switcher view |
@@ -117,16 +119,16 @@ Three single-select cards, each with a visible effort estimate:
 **Multi-select** focuses, phrased as outcomes:
 
 1. **Stay legally compliant, effortlessly** — with a regulated country: locked in green, "Required in your market" chip, screen title becomes *"Legal compliance is covered. What else matters?"*. With no regulated country: dimmed and non-selectable, and the copy celebrates: *"Good news — no guest registration is required in your markets."*
-2. **Save hours on daily operations** — app chips underneath (Guest inbox, Smart locks, Upselling store, Auto-messages).
-3. **Orchestrate cleaning & maintenance** — chips (Cleaning scheduler, Team tasks, Issue tracker, Upselling store).
+2. **Earn more from every stay** (`revenue`) — pure revenue generation: "Turn check-in into a sales channel — late check-out, upgrades, experiences and services sold automatically through the guest app." Chips: Upselling store, Guest app, Late check-out, Experiences.
+3. **Run your stays on autopilot** (`ops`) — pure operations: "Guest messaging in one inbox, cleaning & maintenance orchestration, remote access and identity verification." Chips: Guest inbox, Cleaning scheduler, Smart locks, ID verification.
 
 **Validation:** ≥ 1 focus (in regulated markets, compliance already counts).
 
-### Step 5 — Here's your plan, Maria
+### Step 5 — Here's your plan
 ![Step 5](screenshots/onboarding/onb_all.png)
 
 - Left: **numbered checklist** of the generated plan (§4) with `~X min` per step and total ("You can be live in about N minutes").
-- Right: **dashboard preview** (mini-hero with contextual greeting + first 4 rail steps, enabled-module chips, and a "Recommended apps" row only with an ops/cleaning focus).
+- Right: **dashboard preview** (mini-hero with contextual greeting + first 4 rail steps, enabled-module chips, and a "Recommended apps" row only with a revenue/ops focus).
 - The lead changes per segment (compliance vs "no legal paperwork… straight to revenue").
 - **"Go to my dashboard"** CTA → saves (§5) and navigates to the First-run.
 
@@ -145,8 +147,9 @@ Fixed order — also the order in which the First-run proposes to work the steps
 3. Legal    → ONE step per EACH regulated country:
               "Police reporting — {scheme}" (~4 min)              ← ES appends "+ regions" to the description
 4. Legal    → if any country has tax: "Enable tourist tax auto-calculation" (~2 min)
-5. Operations → if ops focus:      "Set up your guest inbox & smart locks" (~5 min)
-6. Operations → if cleaning focus: "Invite your cleaning & maintenance team" (~4 min)
+5. Operations → if ops focus:     "Set up your operations hub" (~6 min)
+              (inbox + smart locks + auto-scheduled cleaning turnovers + ID verification)
+6. Revenue  → if revenue focus:   "Open your upselling store" (~3 min)
 7. Launch   → always: "Send yourself a test check-in link" (~1 min)
 ```
 
@@ -167,7 +170,7 @@ Each step carries: `k` (type key), `phase` (Import/Legal/Operations/Launch), `t`
   "sizeTier": 1,              // 0-3 — use THIS for rules (team step, enterprise tone)
   "manage": "pms",            // pms | ota | manual
   "pms": "Guesty",            // name or null
-  "prios": ["compliance"],    // subset of: compliance | ops | cleaning
+  "prios": ["compliance"],    // subset of: compliance | revenue | ops
   "steps": [ { "k":"pms", "phase":"Import", "t":"Connect Guesty", "d":"…", "eta":2 } ],
   "mods":  ["checkin","id","guestapp","police","tax"]   // modules to enable
 }
@@ -183,7 +186,7 @@ Structure (top to bottom):
 
 1. **Hero** (dark gradient): contextual greeting (`🇪🇸 6-20 properties · vacation rentals`), H1 + sub **per segment** (§6.1), progress ring (`done/total`, animated %, "~N min left") and a **horizontal rail with ALL the plan steps** (done ✓ green / active white / pending numbered).
 2. **Guided setup — one step at a time**: a large card with ONLY the current step ("Step N of M · {phase}" chip, title, description, 3 bullets of what will happen, specific CTA, "Do this later", `~X min`). Next to it, the **full plan checklist** with states (done = strikethrough; active = blue and clickable) — with **phase headers** when the plan has ≥ 6 steps.
-3. **Recommended apps** (ops/cleaning focuses only): app-card grid with an "Add" button. Both catalogs merge without duplicates when two focuses are picked.
+3. **Recommended apps** (revenue/ops focuses only): app-card grid with an "Add" button. Revenue catalog: Upselling Store, StayFi, Late Check-out Deals, Local Experiences. Ops catalog: WhatsApp Inbox, Nuki Smart Locks, Cleaning Scheduler, Team Tasks. Catalogs merge without duplicates when both focuses are picked; the section heading follows the focus ("earn more from every stay" vs "run stays on autopilot").
 4. **At a glance**: 4 **locked** KPIs (dashed border, "—" value, padlock + unlock condition) — composition per segment (§6.2).
 
 **Final state:** with every step done, the guided card becomes "🎉 You're live!" with a "See my live dashboard" CTA → `index.html?view=fable`.
@@ -192,10 +195,10 @@ Structure (top to bottom):
 
 | Condition | H1 | Sub |
 |---|---|---|
-| Regulated (default) | "Let's get you live, Maria 🚀" | "Follow your plan step by step…" |
+| Regulated (default) | "Let's get you live 🚀" | "Follow your plan step by step…" |
 | Regulated + several focuses | (same) | "Compliance handled automatically, plus the operations tools you picked…" |
-| NOT regulated + ops focus | "Let's get you earning more, Maria 💸" | "No legal paperwork in your markets — straight to revenue and saved hours." |
-| NOT regulated + cleaning only | "Let's get your operations humming, Maria ✨" | "…flawless turnovers and guest experience." |
+| NOT regulated + revenue focus | "Let's get you earning more 💸" | "No legal paperwork in your markets — straight to revenue from every stay." |
+| NOT regulated + ops focus (no revenue) | "Let's get your operations humming ✨" | "…your plan puts every stay on autopilot." |
 
 ### 6.2 Locked KPIs per segment
 
@@ -204,8 +207,8 @@ Always: `{Unit}` (Properties/Rooms/Units) · `Bookings` · `Check-ins ready`. Th
 | Condition | 4th KPI | Unlock condition |
 |---|---|---|
 | Regulated | Reports submitted | "Unlocks with police reporting" |
-| Not regulated + ops | Upsell revenue | "Unlocks with the Upselling store" |
-| Not regulated + cleaning | Turnovers scheduled | "Unlocks when your team joins" |
+| Not regulated + revenue | Upsell revenue | "Unlocks with the Upselling store" |
+| Not regulated + ops | Turnovers scheduled | "Unlocks with your operations hub" |
 | Otherwise | Tourist tax collected | "Unlocks with tourist tax" |
 
 The first two KPIs read "Unlocks after your first **sync**" except `manage=manual` → "…your first **property**".
@@ -222,8 +225,8 @@ Each CTA opens a modal with the step's real form. Completing it → success stat
 | `team` | Invite your team | emails textarea, role selector (Owner/Manager/Front desk) | Send invitations |
 | `police` | Set up {scheme} | authority username + password, establishment code; "no credentials yet → we guide you" note | Activate reporting |
 | `tax` | Enable tourist tax | municipality (auto from address), toggles (collect at check-in, summaries) | Enable tourist tax |
-| `ops` | Inbox & smart locks | toggles: unified inbox, WhatsApp, locks (Nuki/Yale/TTLock), auto-messages | Set up selected |
-| `cleaning` | Invite cleaning team | emails textarea, toggles (auto-turnover, photos, issues) | Invite team |
+| `ops` | Operations hub | toggles: unified inbox, auto-messages, smart locks, auto-scheduled turnovers, ID verification; optional cleaning-team emails | Set up selected |
+| `revenue` | Upselling store | toggles: late check-out, upgrades, mid-stay cleaning, transfers, experiences; pricing note | Open my store |
 | `test` | Test check-in link | prefilled email | Send me the test link |
 
 ---
@@ -239,24 +242,24 @@ Each CTA opens a modal with the step's real form. Completing it → success stat
 **Personalization:** compliance locked at step 4; "Reports submitted" KPI; no apps section.
 ![Case 1](screenshots/onboarding/firstrun0.png)
 
-### Case 2 · Ops / revenue without compliance
-**Who:** hotel/aparthotel in UAE+USA, 31–100 rooms, Hostaway, operations focus.
-**Demo:** [`onboarding.html?demo=ops&go=1`](https://carloslagares.github.io/chekin-dashboard-preview/dashboard/onboarding.html?demo=ops&go=1)
-**Plan:** Connect Hostaway → Invite your team (tier ≥ 2) → Tourist tax (UAE) → Inbox & smart locks → Test.
-**Personalization:** "earning more 💸" hero; **rooms** vocabulary; dimmed compliance card at step 4; **Recommended apps** section (WhatsApp Inbox, Nuki, Upselling Store, StayFi); "Upsell revenue" KPI.
-![Case 2](screenshots/onboarding/fr_ops.png)
+### Case 2 · Pure revenue generation without compliance
+**Who:** hotel/aparthotel in UAE+USA, 31–100 rooms, Hostaway, revenue focus.
+**Demo:** [`onboarding.html?demo=revenue&go=1`](https://carloslagares.github.io/chekin-dashboard-preview/dashboard/onboarding.html?demo=revenue&go=1)
+**Plan:** Connect Hostaway → Invite your team (tier ≥ 2) → Tourist tax (UAE) → Open your upselling store → Test.
+**Personalization:** "earning more 💸" hero; **rooms** vocabulary; dimmed compliance card at step 4; revenue apps (Upselling Store, StayFi, Late Check-out Deals, Local Experiences); "Upsell revenue" KPI.
+![Case 2](screenshots/onboarding/fr_revenue.png)
 
-### Case 3 · Cleaning with direct OTA (no PMS)
-**Who:** camping/glamping UK, 26–75 units, manages on Airbnb/Booking, cleaning focus.
-**Demo:** [`onboarding.html?demo=cleaning&go=1`](https://carloslagares.github.io/chekin-dashboard-preview/dashboard/onboarding.html?demo=cleaning&go=1)
-**Plan:** Link iCal calendars → Invite cleaning team → Test. (No legal steps or tax: UK.)
-**Personalization:** "operations humming ✨" hero; **units** vocabulary; cleaning apps first; "Turnovers scheduled" KPI.
-![Case 3](screenshots/onboarding/fr_cleaning.png)
+### Case 3 · Pure operations with direct OTA (no PMS)
+**Who:** camping/glamping UK, 26–75 units, manages on Airbnb/Booking, operations focus.
+**Demo:** [`onboarding.html?demo=ops&go=1`](https://carloslagares.github.io/chekin-dashboard-preview/dashboard/onboarding.html?demo=ops&go=1)
+**Plan:** Link iCal calendars → Set up your operations hub (inbox + locks + turnovers + ID) → Test. (No legal steps or tax: UK.)
+**Personalization:** "operations humming ✨" hero; **units** vocabulary; ops apps (WhatsApp Inbox, Nuki, Cleaning Scheduler, Team Tasks); "Turnovers scheduled" KPI.
+![Case 3](screenshots/onboarding/fr_ops.png)
 
 ### Case 4 · Pure manual (highest friction — mind the copy)
 **Who:** small host in France, 1–5 properties, no PMS and no plans for one, ops focus.
 **Demo:** [`onboarding.html?demo=manual&go=1`](https://carloslagares.github.io/chekin-dashboard-preview/dashboard/onboarding.html?demo=manual&go=1)
-**Plan:** Add your first property (5-field form + CSV note) → Tourist tax (FR has tax without registration) → Inbox & locks → Test.
+**Plan:** Add your first property (5-field form + CSV note) → Tourist tax (FR has tax without registration) → Operations hub → Test.
 **Personalization:** KPIs read "Unlocks after your first **property**" (not "sync"); the add-property modal is step 1.
 ![Case 4](screenshots/onboarding/fr_manual.png)
 
@@ -268,10 +271,10 @@ Each CTA opens a modal with the step's real form. Completing it → success stat
 ![Case 5](screenshots/onboarding/fr_multi.png)
 
 ### Case 6 · Enterprise multi-focus (all three ICPs)
-**Who:** 100+ properties in Spain, Guesty, compliance + ops + cleaning focuses.
+**Who:** 100+ properties in Spain, Guesty, compliance + ops + revenue focuses.
 **Demo:** [`onboarding.html?demo=all&go=1`](https://carloslagares.github.io/chekin-dashboard-preview/dashboard/onboarding.html?demo=all&go=1)
-**Plan (7 steps, ~21 min):** Guesty → Team → Police SES → Tax → Inbox & locks → Cleaning team → Test, grouped Import/Legal/Operations/Launch.
-**Personalization:** hero sub "Compliance handled automatically, plus the operations tools you picked"; ops+cleaning apps merged without duplicates (Upselling Store appears once).
+**Plan (7 steps, ~21 min):** Guesty → Team → Police SES → Tax → Operations hub → Upselling store → Test, grouped Import/Legal/Operations/Revenue/Launch.
+**Personalization:** hero sub "Compliance handled automatically, plus the operations tools you picked"; revenue+ops apps merged without duplicates.
 ![Case 6](screenshots/onboarding/fr_all.png)
 
 ### Cross-cutting (applies to every case)
