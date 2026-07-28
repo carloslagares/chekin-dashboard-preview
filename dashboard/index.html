@@ -177,11 +177,12 @@
     try{ localStorage.setItem(LS, v); }catch(err){}
   }
 
-  // Initial: URL > localStorage > default V1
+  // Initial: URL > localStorage > default V8. Whatever the operator picks in
+  // the selector persists across reloads like any normal dropdown — no
+  // special-casing a variant to silently revert on the next visit.
   var saved = null; try{ saved = localStorage.getItem(LS); }catch(err){}
-  // Default landing is the dashboard (V8 Fable) — onboarding only via menu or ?view=onboarding
   var initial = (urlView && VIEW_MAP[urlView]) ? VIEW_MAP[urlView]
-              : (saved && saved !== 'onb' && menu.querySelector('.opt[data-v="'+saved+'"]') ? saved : 'v8');
+              : (saved && menu.querySelector('.opt[data-v="'+saved+'"]') ? saved : 'v8');
   activate(initial);
 
   menu.querySelectorAll('.opt').forEach(function(o){
