@@ -187,31 +187,70 @@
     '</div>';
   }
 
-  function filters(rows){
-    function group(id, label, opts, cur){
-      return '<div class="f-fgroup" data-group="' + id + '"><span class="fl">' + label + '</span>' +
-        opts.map(function(o){
-          var n = o.v === '' ? rows.length : rows.filter(o.f).length;
-          return '<button class="f-chip' + (cur === o.v ? ' on' : '') + '" data-val="' + LN.esc(o.v) + '">' +
-            LN.esc(o.l) + ' <span class="n">' + n + '</span></button>';
-        }).join('') + '</div>';
+  /* ---------- filter bar: four labelled dropdowns + live summary ----------
+     One control per dimension, so eleven claim states can never swamp the
+     three sharing modes. Zero-count options are dropped (unless selected),
+     an active dimension turns navy with its own clear button, and the
+     "Showing X of Y" line means the table is never silently filtered. */
+  var CHEV = '<svg class="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>';
+  var XICO = '<svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+  var CHECK = '<svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>';
+
+  function filters(rows, shownCount){
+    function dd(id, label, opts, cur){
+      var curOpt = null;
+      opts.forEach(function(o){ if (o.v === cur) curOpt = o; });
+      var act = cur !== '';
+      var menu = opts.map(function(o){
+        var n = o.v === '' ? rows.length : rows.filter(o.f).length;
+        if (n === 0 && o.v !== '' && o.v !== cur) return '';   // zero-count: hidden
+        return '<button class="f-ddo' + (cur === o.v ? ' on' : '') + '" role="menuitemradio" aria-checked="' +
+          (cur === o.v ? 'true' : 'false') + '" data-val="' + LN.esc(o.v) + '">' +
+          '<span class="ck">' + CHECK + '</span>' + LN.esc(o.l) +
+          '<span class="n">' + n + '</span></button>';
+      }).join('');
+      return '<div class="f-dd' + (act ? ' act' : '') + '" data-group="' + id + '">' +
+        '<button class="f-ddt" data-dd="' + id + '" aria-haspopup="true" aria-expanded="false">' +
+          '<span class="k">' + LN.esc(label) + '</span>' +
+          '<span class="v">' + LN.esc(act && curOpt ? curOpt.l : 'All') + '</span>' + CHEV + '</button>' +
+        (act ? '<button class="f-ddx" data-clear="' + id + '" aria-label="Clear ' + LN.esc(label) + ' filter">' + XICO + '</button>' : '') +
+        '<div class="f-ddm" role="menu" aria-label="' + LN.esc(label) + '">' + menu + '</div></div>';
     }
+    function all(){ return { v: '', l: 'All', f: function(){ return true; } }; }
     var states = ['live', 'watch', 'onboarding', 'pending_supplier', 'screening', 'draft', 'suspended', 'dormant', 'expired', 'terminated', 'released'];
-    return '<div class="f-filters rise" style="animation-delay:.1s">' +
-      group('state', 'State', [{ v: '', l: 'All', f: function(){ return true; } }].concat(states.map(function(s){
+    var anyActive = state.state !== '' || state.mode !== '' || state.destination !== '' || state.risk !== '';
+    return '<div class="f-filterbar rise" style="animation-delay:.1s"><div class="f-dds">' +
+      dd('state', 'State', [all()].concat(states.map(function(s){
         return { v: s, l: LN.stateLabel(s), f: function(e){ return e.claim.state === s; } };
-      }).filter(function(o){ return rows.some(o.f); })), state.state) +
-      group('mode', 'Sharing', [{ v: '', l: 'All', f: function(){ return true; } }].concat(['network', 'delayed', 'private'].map(function(m){
+      })), state.state) +
+      dd('mode', 'Sharing', [all()].concat(['network', 'delayed', 'private'].map(function(m){
         return { v: m, l: LN.modeLabel(m), f: function(e){ return e.claim.sharingMode === m; } };
       })), state.mode) +
-      group('destination', 'Destination', [{ v: '', l: 'All', f: function(){ return true; } }].concat(S.getDestinations().map(function(d){
+      dd('destination', 'Destination', [all()].concat(S.getDestinations().map(function(d){
         return { v: d.id, l: d.name, f: function(e){ return e.supplier.destinationId === d.id; } };
-      }).filter(function(o){ return rows.some(o.f); })), state.destination) +
-      group('risk', 'Health', [{ v: '', l: 'All', f: function(){ return true; } },
+      })), state.destination) +
+      dd('risk', 'Health', [all(),
         { v: 'earning', l: 'Earning now', f: function(e){ return e.currentPoolPct > 0; } },
         { v: 'risk', l: 'At risk', f: function(e){ return e.atRisk; } }], state.risk) +
-    '</div>';
+    '</div><div class="f-fsum"><span>Showing <b>' + shownCount + '</b> of <b>' + rows.length + '</b> claims</span>' +
+      (anyActive ? '<button class="f-link" id="f-clearall">Clear all filters</button>' : '') +
+    '</div></div>';
   }
+  function closeAllMenus(){
+    var open = document.querySelectorAll('.f-dd.open'), i;
+    for (i = 0; i < open.length; i++){
+      open[i].className = open[i].className.replace(' open', '');
+      var t = open[i].querySelector('[data-dd]');
+      if (t) t.setAttribute('aria-expanded', 'false');
+    }
+  }
+  // one document-level closer for click-outside and Escape (bound once)
+  document.addEventListener('click', function(e){
+    if (!(e.target.closest && e.target.closest('.f-dd'))) closeAllMenus();
+  });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape') closeAllMenus();
+  });
 
   function countdownText(claim){
     var cd = S.countdownFor(claim);
@@ -324,7 +363,7 @@
         '<a class="f-btn" href="submit.html">' + PLUS + ' Submit a supplier</a>' +
       '</div></div>' +
       statBand(t) +
-      filters(rows) +
+      filters(rows, shown.length) +
       table(shown, t) +
       detail();
 
@@ -333,18 +372,29 @@
 
   function wire(){
     var i;
-    // filter chips
-    var groups = body.querySelectorAll('[data-group]');
-    for (i = 0; i < groups.length; i++){
-      (function(el){
-        el.addEventListener('click', function(e){
-          var chip = e.target.closest ? e.target.closest('.f-chip') : null;
-          if (!chip) return;
-          state[el.getAttribute('data-group')] = chip.getAttribute('data-val');
-          render();
-        });
-      })(groups[i]);
-    }
+    // filter bar: open/close menus, pick options, clear one or all dimensions
+    var bar = body.querySelector('.f-filterbar');
+    if (bar) bar.addEventListener('click', function(e){
+      var t = e.target.closest ? e.target.closest('button') : null;
+      if (!t) return;
+      if (t.hasAttribute('data-dd')){
+        var dd = t.parentNode;
+        var wasOpen = dd.className.indexOf(' open') >= 0;
+        closeAllMenus();
+        if (!wasOpen){ dd.className += ' open'; t.setAttribute('aria-expanded', 'true'); }
+      } else if (t.hasAttribute('data-val')){
+        var host = t.closest('.f-dd');
+        if (!host) return;
+        state[host.getAttribute('data-group')] = t.getAttribute('data-val');
+        render();
+      } else if (t.hasAttribute('data-clear')){
+        state[t.getAttribute('data-clear')] = '';
+        render();
+      } else if (t.id === 'f-clearall'){
+        state.state = ''; state.mode = ''; state.destination = ''; state.risk = '';
+        render();
+      }
+    });
     // row selection
     var trs = body.querySelectorAll('[data-claim]');
     for (i = 0; i < trs.length; i++){
