@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chekin — Local Network · Bounties</title>
+<link rel="stylesheet" href="../ds/colors_and_type.css">
+<link rel="stylesheet" href="../ds/_sidebar.css">
+<link rel="stylesheet" href="../ds/_agent.css">
+<link rel="stylesheet" href="ds/_fable.css">
+</head>
+<body>
+<div class="app">
+  <div id="sidebar-slot" data-nav="local-network"></div>
+  <main>
+    <header class="top">
+      <div class="crumbs"><a href="index-fable.html"><b>Local Network</b></a> <span class="sep">/</span> Bounties</div>
+      <span id="fp-slot" style="margin-left:auto"></span>
+      <span data-agent-trigger-slot></span>
+      <button class="iconbtn" aria-label="Help"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 1 1 5.8 1c0 2-3 2-3 4M12 17h.01"/></svg></button>
+      <button class="iconbtn" aria-label="Notifications"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><div class="pip"></div></button>
+      <div class="user-av" id="user-av">GS</div>
+    </header>
+
+    <div class="page">
+      <span id="f-tabslot"></span>
+      <div id="ln-body"></div>
+    </div>
+  </main>
+</div>
+
+<div id="ln-drawer-root"></div>
+
+<script src="data/types.js"></script>
+<script src="data/config.js"></script>
+<script src="data/fixtures.js"></script>
+<script src="services/economics.js"></script>
+<script src="services/network-service.js"></script>
+<script src="services/earnings-service.js"></script>
+<script src="services/admin-service.js"></script>
+<script src="agent/agent.js"></script>
+<script src="ds/_ln.js"></script>
+<script src="../ds/_sidebar.js"></script>
+<script src="../ds/_agent.js"></script>
+<script>
+(function(){
+  'use strict';
+  var S = window.NetworkService, C = window.LN_CONFIG, I = LN.icons;
+  var body = document.getElementById('ln-body');
+
+  /* ---------- fable chrome: tabs + persona switcher + first-run ---------- */
+  var CHEV = '<svg class="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>';
+  var ARROW = '<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+  var PLUS = '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>';
+  var PERSONAS = {
+    host: { l:'Host', d:'A single-property owner — your suppliers, your earnings, gaps near you.' },
+    pm: { l:'Property manager', d:'A multi-property portfolio — the full supply book and coverage.' },
+    supplier: { l:'Supplier', d:'The provider’s own view — confirm a claim, watch your listing.' },
+    chekin: { l:'Chekin', d:'Internal staff — destination coverage, bounties and the pipeline.' },
+    admin: { l:'Admin', d:'Claim review, flags, quality watch and suspensions.' }
+  };
+  function fableTabs(active){
+    var p = S.getPersona();
+    var T = [
+      { k:'overview', l:'Overview', href:'index-fable.html' },
+      { k:'book', l:'Supply book', href:'supply-book-fable.html', per:['host','pm'] },
+      { k:'discover', l:'Discover', href:'discover-fable.html', per:['host','pm'] },
+      { k:'bounties', l:'Bounties', href:'bounties-fable.html', per:['host','pm','chekin','admin'] },
+      { k:'admin', l:'Admin review', href:'admin-review-fable.html', per:['chekin','admin'] }
+    ];
+    return '<nav class="f-tabs" aria-label="Local Network sections">' + T.filter(function(t){ return !t.per || t.per.indexOf(p) >= 0; }).map(function(t){
+      return '<a' + (t.k === active ? ' class="on"' : '') + ' href="' + t.href + '">' + t.l + '</a>';
+    }).join('') + '</nav>' +
+    (S.isFirstRun() ? '<div class="f-note"><i></i><span><b>First-run mode.</b> The programme launches empty — the bounties below are how Chekin bootstraps a destination.</span><button class="f-link" id="fr-exit">Load the demo dataset</button></div>' : '');
+  }
+  function mountChrome(active){
+    var p = S.getPersona(), acct2 = S.currentAccount();
+    var slot = document.getElementById('f-tabslot');
+    if (slot) slot.outerHTML = fableTabs(active);
+    var av = document.getElementById('user-av');
+    if (av) av.textContent = acct2 ? acct2.name.split(/\s+/).map(function(w){ return w.charAt(0); }).slice(0, 2).join('').toUpperCase() : 'CK';
+    var fp = document.getElementById('fp-slot');
+    if (fp){
+      fp.innerHTML = '<div class="f-dd fp" id="fp-dd">' +
+        '<button class="f-ddt" aria-haspopup="true" aria-expanded="false"><span class="k">Viewing as</span><span class="v">' + PERSONAS[p].l + '</span>' + CHEV + '</button>' +
+        '<div class="f-ddm" role="menu">' + S.personas.map(function(k){
+          return '<button class="fp-o' + (k === p ? ' on' : '') + '" data-p="' + k + '"><span class="pt"></span><span style="min-width:0"><span class="t">' + PERSONAS[k].l + '</span><span class="dsc">' + PERSONAS[k].d + '</span></span></button>';
+        }).join('') +
+        ((S.hasSnapshot() && !S.isFirstRun()) ? '<div class="fp-foot"><button class="fp-o" id="fp-reset"><span class="pt"></span><span><span class="t">Reset demo data</span><span class="dsc">Discard everything created or changed in this session.</span></span></button></div>' : '') +
+        '</div></div>';
+      var dd = document.getElementById('fp-dd');
+      dd.querySelector('.f-ddt').addEventListener('click', function(e){
+        e.stopPropagation();
+        dd.className = dd.className.indexOf(' open') >= 0 ? 'f-dd fp' : 'f-dd fp open';
+      });
+      document.addEventListener('click', function(e){
+        if (!(e.target.closest && e.target.closest('#fp-dd'))) dd.className = 'f-dd fp';
+      });
+      document.addEventListener('keydown', function(e){ if (e.key === 'Escape') dd.className = 'f-dd fp'; });
+      dd.addEventListener('click', function(e){
+        if (e.target.closest('#fp-reset')){ S.resetDemo(); return; }
+        var b = e.target.closest('[data-p]'); if (!b) return;
+        S.setPersona(b.getAttribute('data-p'));
+        var u = new URLSearchParams(location.search); u.delete('persona');
+        var qs = u.toString();
+        location.href = location.pathname + (qs ? '?' + qs : '');
+      });
+    }
+    var fx = document.getElementById('fr-exit');
+    if (fx) fx.addEventListener('click', function(){ S.setFirstRun(false); });
+  }
+
+  var persona = S.getPersona();
+  mountChrome('bounties');
+  var canManage = persona === 'chekin' || persona === 'admin';
+  var canFill = persona === 'host' || persona === 'pm';
+
+  var q = new URLSearchParams(location.search);
+  var state = { destination: q.get('destination') || '', category:'', status:'open', sort:'value' };
+
+  /** Five-year value of filling a gap. Built from computeAccrual on a
+   *  synthetic claim, exactly like the service's year-1 figure. */
+  function shift(iso, n){ var d = new Date(iso + 'T00:00:00Z'); d.setUTCMonth(d.getUTCMonth() + n); return d.toISOString().slice(0, 10); }
+  function synthClaim(b, liveAt){
+    return { id:'clm_p', state:'live', sharingMode:'network', liveAt: liveAt, networkAt: liveAt, bountyId: b.id,
+      roles: ['sourced','activated','maintained'].map(function(r){
+        return { role:r, holderAccountId:'_', sharePct: C.roleShares[r], since: liveAt, until: null };
+      }) };
+  }
+  function fiveYear(b){
+    var today = S._dataset.today, dest = S.getDestinationById(b.destinationId);
+    var gmv = S.assumedGmv(b.category), monthly = gmv / 12, total = 0;
+    var supplier = { id:'sup_p', category: b.category, score: 0.85 };
+    for (var m = 0; m < 60; m++){
+      total += S.computeAccrual(monthly, synthClaim(b, shift(today, -m)), supplier, dest, today).poolAmount;
+    }
+    return Math.round(total);
+  }
+
+  function list(){
+    var rows = S.getBounties({});
+    if (state.status) rows = rows.filter(function(b){ return b.status === state.status; });
+    if (state.destination) rows = rows.filter(function(b){ return b.destinationId === state.destination; });
+    if (state.category) rows = rows.filter(function(b){ return b.category === state.category; });
+    rows.forEach(function(b){ b._five = fiveYear(b); });
+    rows.sort(function(a, b){
+      if (state.sort === 'urgency') return a.daysLeft - b.daysLeft;
+      if (state.sort === 'gap') return b.gapEvidence.emptyDecisions - a.gapEvidence.emptyDecisions;
+      return b._five - a._five;
+    });
+    return rows;
+  }
+
+  /* ---------- stat band ---------- */
+  function statBand(){
+    var open = S.getBounties({ status:'open' });
+    var totalValue = open.reduce(function(t, b){ return t + fiveYear(b); }, 0);
+    var empties = open.reduce(function(t, b){ return t + b.gapEvidence.emptyDecisions; }, 0);
+    return '<div class="f-stats rise" style="animation-delay:.05s">' +
+      '<div class="f-stat"><div class="lbl">Open gaps</div><div class="val">' + open.length + '</div>' +
+        '<div class="sup">Published from real guest demand, not guesswork</div></div>' +
+      '<div class="f-stat"><div class="lbl">Pool boost</div><div class="val">&times;' + C.bountyBoostMultiplier.toFixed(2) + '</div>' +
+        '<div class="sup">For the first <b>' + C.bountyBoostMonths + ' months</b> after go-live</div></div>' +
+      '<div class="f-stat"><div class="lbl">Value on the board</div><div class="val">' + LN.money(totalValue) + '</div>' +
+        '<div class="sup">Five-year residual across all open gaps</div></div>' +
+      '<div class="f-stat"><div class="lbl">Unserved searches</div><div class="val">' + (empties ? '<span class="dot warn"></span>' : '') + LN.num(empties) + '</div>' +
+        '<div class="sup">Guest searches that ended with <b>no eligible supplier</b></div></div>' +
+    '</div>';
+  }
+
+  /* ---------- filters ---------- */
+  var DCHEV = '<svg class="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>';
+  var XICO = '<svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+  var CHECK = '<svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>';
+  function filters(shownCount){
+    var all = S.getBounties({});
+    function dd(id, label, opts, cur, showAll){
+      var curOpt = null;
+      opts.forEach(function(o){ if (o.v === cur) curOpt = o; });
+      var act = cur !== '';
+      var menu = opts.map(function(o){
+        var n = o.f ? all.filter(o.f).length : all.length;
+        if (o.f && n === 0 && o.v !== cur) return '';
+        return '<button class="f-ddo' + (cur === o.v ? ' on' : '') + '" role="menuitemradio" aria-checked="' + (cur === o.v ? 'true' : 'false') + '" data-val="' + LN.esc(o.v) + '">' +
+          '<span class="ck">' + CHECK + '</span>' + LN.esc(o.l) + (o.f ? '<span class="n">' + n + '</span>' : '') + '</button>';
+      }).join('');
+      return '<div class="f-dd' + (act && showAll !== false ? ' act' : '') + '" data-group="' + id + '">' +
+        '<button class="f-ddt" data-dd="' + id + '" aria-haspopup="true" aria-expanded="false">' +
+          '<span class="k">' + LN.esc(label) + '</span><span class="v">' + LN.esc(curOpt ? curOpt.l : 'All') + '</span>' + DCHEV + '</button>' +
+        (act && showAll !== false ? '<button class="f-ddx" data-clear="' + id + '" aria-label="Clear ' + LN.esc(label) + ' filter">' + XICO + '</button>' : '') +
+        '<div class="f-ddm" role="menu" aria-label="' + LN.esc(label) + '">' + menu + '</div></div>';
+    }
+    var cats = [];
+    all.forEach(function(b){ if (cats.indexOf(b.category) < 0) cats.push(b.category); });
+    return '<div class="f-filterbar rise" style="animation-delay:.09s"><div class="f-dds">' +
+      dd('destination', 'Destination', [{ v:'', l:'All', f:function(){ return true; } }].concat(S.getDestinations().map(function(d){
+        return { v:d.id, l:d.name, f:function(b){ return b.destinationId === d.id; } };
+      })), state.destination) +
+      dd('category', 'Category', [{ v:'', l:'All', f:function(){ return true; } }].concat(cats.sort().map(function(c){
+        return { v:c, l:LN.catLabel(c), f:function(b){ return b.category === c; } };
+      })), state.category) +
+      dd('status', 'Status', [{ v:'', l:'All', f:function(){ return true; } },
+        { v:'open', l:'Open', f:function(b){ return b.status === 'open'; } },
+        { v:'claimed', l:'Claimed', f:function(b){ return b.status === 'claimed'; } },
+        { v:'closed', l:'Closed', f:function(b){ return b.status === 'closed'; } }], state.status) +
+      dd('sort', 'Sort by', [{ v:'value', l:'Value' }, { v:'urgency', l:'Expiring soonest' }, { v:'gap', l:'Biggest gap' }], state.sort, false) +
+    '</div><div class="f-fsum"><span>Showing <b>' + shownCount + '</b> of <b>' + all.length + '</b> bounties</span></div></div>';
+  }
+  function closeAllMenus(){
+    var open = document.querySelectorAll('.f-dd.open:not(.fp)'), i;
+    for (i = 0; i < open.length; i++){
+      open[i].className = open[i].className.replace(' open', '');
+      var t = open[i].querySelector('[data-dd]');
+      if (t) t.setAttribute('aria-expanded', 'false');
+    }
+  }
+  document.addEventListener('click', function(e){
+    if (!(e.target.closest && e.target.closest('.f-dd'))) closeAllMenus();
+  });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeAllMenus(); });
+
+  /* ---------- cards ---------- */
+  function cardActions(b){
+    var out = '<button class="f-mini" data-explain="' + LN.esc(b.id) + '">How is this calculated?</button><span style="flex:1"></span>';
+    if (canManage && b.status === 'open') out += '<button class="f-mini" data-close="' + LN.esc(b.id) + '">Close bounty</button>';
+    else if (canFill && b.status === 'open') out += '<a class="f-link" href="submit-fable.html?bounty=' + LN.esc(b.id) + '">Fill this gap ' + ARROW + '</a>';
+    return out;
+  }
+  function featured(b){
+    var claimedBy = b.claimedByAccountId ? (S.getAccountById(b.claimedByAccountId) || {}).name : null;
+    return '<div class="f-feat rise" style="animation-delay:.12s;margin-bottom:20px">' +
+      '<div><div class="lbl"><span>Biggest gap on the board</span>' +
+        '<span class="cdown">' + I.clock + (b.daysLeft > 0 ? b.daysLeft + 'd left' : 'expired') + '</span>' +
+        '<span>&times;' + b.boostMultiplier.toFixed(2) + ' boost</span></div>' +
+      '<h3>' + LN.esc(b.title) + '</h3>' +
+      '<div class="ev">' + LN.num(b.gapEvidence.emptyDecisions) + ' guest searches ended with no eligible supplier' +
+        '<small>' + LN.num(b.gapEvidence.searches) + ' searches for ' + LN.esc(LN.catLabel(b.category).toLowerCase()) + ' in ' + LN.esc(b.destination.name) + ' · ' + LN.esc(b.gapEvidence.period) + '</small></div>' +
+      '<div style="margin-top:22px;display:flex;gap:12px;align-items:center">' +
+        (canFill ? '<a class="f-btn inverse" style="background:#fff;color:var(--f-navy);box-shadow:none" href="submit-fable.html?bounty=' + LN.esc(b.id) + '">Fill this gap</a>' : '') +
+        (canManage ? '<button class="f-btn inverse" style="background:#fff;color:var(--f-navy);box-shadow:none" data-close="' + LN.esc(b.id) + '">Close bounty</button>' : '') +
+        '<button class="f-link" style="color:#A8B4E8" data-explain="' + LN.esc(b.id) + '">How is this calculated?</button></div></div>' +
+      '<div class="figs">' +
+        '<div class="r"><span class="n">' + LN.money(b.projectedAnnualResidual) + '</span><span class="l">Projected year 1</span></div>' +
+        '<div class="r"><span class="n">' + LN.money(b._five) + '</span><span class="l">Over five years</span></div>' +
+        '<div class="r"><span class="n">' + LN.money(b.activationBonus) + '</span><span class="l">Activation bonus at go-live</span></div>' +
+      '</div></div>';
+  }
+  function card(b){
+    var claimedBy = b.claimedByAccountId ? (S.getAccountById(b.claimedByAccountId) || {}).name : null;
+    return '<div class="f-gap">' +
+      '<div class="row1"><span class="cat">' + LN.esc(LN.catLabel(b.category)) + ' · ' + LN.esc(b.destination.name) + '</span>' +
+        '<span class="boost">&times;' + b.boostMultiplier.toFixed(2) + ' boost</span>' +
+        (b.status === 'open'
+          ? '<span class="days' + (b.daysLeft <= 14 ? ' soon' : '') + '">' + (b.daysLeft > 0 ? b.daysLeft + 'd left' : 'expired') + '</span>'
+          : '<span class="days">' + LN.esc(b.status) + (claimedBy ? ' · ' + LN.esc(claimedBy) : '') + '</span>') + '</div>' +
+      '<h3>' + LN.esc(b.title) + '</h3>' +
+      '<div class="ev">' + LN.num(b.gapEvidence.emptyDecisions) + ' guest searches ended with no eligible supplier' +
+        '<small>' + LN.num(b.gapEvidence.searches) + ' searches · ' + LN.esc(b.gapEvidence.period) + ' · ' + LN.esc(b.destination.name) + '</small></div>' +
+      '<div class="fig">' +
+        '<div><div class="n">' + LN.money(b.projectedAnnualResidual) + '</div><div class="l">Projected year 1</div></div>' +
+        '<div><div class="n">' + LN.money(b._five) + '</div><div class="l">Over 5 years</div></div>' +
+        '<div><div class="n">' + LN.money(b.activationBonus) + '</div><div class="l">Activation bonus</div></div>' +
+      '</div>' +
+      '<div class="acts2">' + cardActions(b) + '</div>' +
+    '</div>';
+  }
+
+  /* ---------- render ---------- */
+  function render(){
+    var rows = list();
+    var defaultView = state.status === 'open' && !state.destination && !state.category && state.sort === 'value';
+    var feat = defaultView && rows.length ? rows[0] : null;
+    var rest = feat ? rows.slice(1) : rows;
+
+    body.innerHTML =
+      '<div class="f-head rise"><div>' +
+        '<div class="eyebrow">Bounties</div>' +
+        '<h1>The gap board<span class="count">' + rows.length + '</span></h1>' +
+        '<div class="sub">Demand guests keep searching for that no supplier can serve. Fill one and the sourcing pool is boosted &times;' + C.bountyBoostMultiplier + ' for ' + C.bountyBoostMonths + ' months, on top of a one-off activation bonus. Every host in the destination sees the same board.</div>' +
+      '</div><div class="acts">' +
+        (canManage ? '<button class="f-btn" id="new-bounty">' + PLUS + ' Publish a bounty</button>'
+          : canFill ? '<a class="f-btn" href="submit-fable.html">' + PLUS + ' Submit a supplier</a>' : '') +
+      '</div></div>' +
+      statBand() +
+      filters(rows.length) +
+      '<div class="f-sect tight" id="board">' +
+        (rows.length
+          ? (feat ? featured(feat) : '') +
+            (rest.length ? '<div class="f-gaps grid rise" style="animation-delay:.15s">' + rest.map(card).join('') + '</div>' : '')
+          : '<div class="f-empty"><h3>No bounties here</h3><p>' +
+            (state.destination || state.category || state.status !== 'open'
+              ? 'Nothing matches these filters. Clear them to see the whole board.'
+              : 'Chekin publishes a bounty when guests repeatedly search for something no supplier covers. Nothing is open right now.') + '</p></div>') +
+      '</div>' +
+      (persona === 'supplier' ? '<div class="tiny" style="margin-top:26px">Bounties are filled by hosts — if one matches what you do, a host near you may reach out to introduce you.</div>' : '');
+    wire();
+  }
+
+  function wire(){
+    var bar = body.querySelector('.f-filterbar');
+    if (bar) bar.addEventListener('click', function(e){
+      var t = e.target.closest('button');
+      if (!t) return;
+      if (t.hasAttribute('data-dd')){
+        var dd = t.parentNode;
+        var wasOpen = dd.className.indexOf(' open') >= 0;
+        closeAllMenus();
+        if (!wasOpen){ dd.className += ' open'; t.setAttribute('aria-expanded', 'true'); }
+      } else if (t.hasAttribute('data-val')){
+        var host = t.closest('.f-dd');
+        if (!host) return;
+        state[host.getAttribute('data-group')] = t.getAttribute('data-val');
+        render();
+      } else if (t.hasAttribute('data-clear')){
+        state[t.getAttribute('data-clear')] = '';
+        render();
+      }
+    });
+    var board = document.getElementById('board');
+    if (board) board.addEventListener('click', function(e){
+      var ex = e.target.closest('[data-explain]');
+      if (ex){ explain(ex.getAttribute('data-explain')); return; }
+      var cl = e.target.closest('[data-close]');
+      if (cl){ S.closeBounty(cl.getAttribute('data-close')); LN.toast('Bounty closed.'); render(); }
+    });
+    var nb = document.getElementById('new-bounty');
+    if (nb) nb.addEventListener('click', openNewBounty);
+  }
+
+  /* ---------- the proof drawer ---------- */
+  function explain(id){
+    var b = S.getBounties({}).filter(function(x){ return x.id === id; })[0]; if (!b) return;
+    var today = S._dataset.today, dest = S.getDestinationById(b.destinationId);
+    var gmv = S.assumedGmv(b.category);
+    var a = S.computeAccrual(gmv, synthClaim(b, today), { id:'sup_p', category:b.category, score:0.85 }, dest, today);
+    var head = '<div class="dhead"><div style="flex:1;min-width:0"><div style="font:600 18px var(--font-primary)">' + LN.esc(b.title) + '</div>' +
+      '<div class="tiny" style="margin-top:4px">' + LN.esc(dest.name) + ' · ' + LN.esc(LN.catLabel(b.category)) + '</div></div>' +
+      '<button class="dclose" data-drawer-close>' + I.x + '</button></div>';
+    var years = '<div class="kv">' + C.decaySchedule.map(function(s, i){
+      var la = shift(today, -(i * 12));
+      var yr = S.computeAccrual(gmv, synthClaim(b, la), { id:'sup_p', category:b.category, score:0.85 }, dest, today);
+      return '<div class="row"><div class="k">' + LN.esc(s.label) + '</div><div class="v">' + LN.pct(yr.poolPct) + ' → ' + LN.money(yr.poolAmount) +
+        (i === 0 && a.bountyBoost > 1 ? ' <span style="color:var(--f-warn)">boost active</span>' : '') + '</div></div>';
+    }).join('') + '</div>';
+    LN.openDrawer(head + '<div class="dbody">' +
+      '<div><div class="tiny" style="margin-bottom:8px;font-weight:600;color:var(--f-muted)">Year-one rate</div>' + LN.chain(a) +
+        '<div class="tiny" style="margin-top:10px">On ' + LN.money(gmv) + ' of annual bookings for a good-quality supplier. ' +
+        (a.saturated ? LN.esc(dest.name) + ' already covers this category, so the premium is capped at ' + LN.pct(a.premiumCapPct) + '.'
+          : 'Full premium of ' + LN.pct(a.premiumCapPct) + ' applies here.') + '</div></div>' +
+      '<div><div class="tiny" style="margin-bottom:8px;font-weight:600;color:var(--f-muted)">Year by year</div>' + years +
+        '<div class="tiny" style="margin-top:10px">The &times;' + C.bountyBoostMultiplier + ' boost runs for ' + C.bountyBoostMonths + ' months, then the normal decay schedule takes over. Plus ' + LN.money(b.activationBonus) + ' once, at go-live.</div></div>' +
+      '<div><div class="tiny" style="margin-bottom:8px;font-weight:600;color:var(--f-muted)">The evidence</div>' +
+        '<div class="tiny" style="font-size:12.5px;line-height:18px;color:var(--f-ink)">' + LN.num(b.gapEvidence.emptyDecisions) + ' searches with no eligible supplier, out of ' + LN.num(b.gapEvidence.searches) + ', ' + LN.esc(b.gapEvidence.period) + '. Bounties are published from real demand, not guesswork.</div></div>' +
+      '</div>', b.status === 'open' && canFill
+        ? '<a class="btn-primary" href="submit-fable.html?bounty=' + LN.esc(b.id) + '" style="text-decoration:none">Fill this gap</a><button class="tbtn" data-drawer-close>Close</button>'
+        : '<button class="tbtn" data-drawer-close>Close</button>');
+  }
+
+  /* ---------- publish (chekin / admin) ---------- */
+  function openNewBounty(){
+    var head = '<div class="dhead"><div style="flex:1;min-width:0"><div style="font:600 18px var(--font-primary)">Publish a bounty</div>' +
+      '<div class="tiny" style="margin-top:4px">Visible to every host in the destination</div></div>' +
+      '<button class="dclose" data-drawer-close>' + I.x + '</button></div>';
+    LN.openDrawer(head + '<div class="dbody">' +
+      '<div class="f-field"><label>Title</label><input id="b-title" placeholder="e.g. Evening private chef"></div>' +
+      '<div class="f-fieldgrid" style="gap:18px">' +
+        '<div class="f-field"><label>Destination</label><select id="b-dest">' + S.getDestinations().map(function(d){ return '<option value="' + d.id + '">' + LN.esc(d.name) + '</option>'; }).join('') + '</select></div>' +
+        '<div class="f-field"><label>Category</label><select id="b-cat">' + LN.categories().map(function(c){ return '<option value="' + c + '">' + LN.esc(LN.catLabel(c)) + '</option>'; }).join('') + '</select></div>' +
+        '<div class="f-field"><label>Searches with no supplier</label><input id="b-empty" type="number" value="120"></div>' +
+        '<div class="f-field"><label>Activation bonus (' + C.currency + ')</label><input id="b-bonus" type="number" value="150"></div>' +
+      '</div>' +
+      '<div class="tiny" style="font-size:12.5px;line-height:18px">The boost is fixed at &times;' + C.bountyBoostMultiplier + ' for ' + C.bountyBoostMonths + ' months by config — it is not set per bounty.</div>' +
+      '</div>', '<button class="btn-primary" id="b-save">Publish</button><button class="tbtn" data-drawer-close>Cancel</button>');
+    document.getElementById('b-save').addEventListener('click', function(){
+      var title = document.getElementById('b-title').value.replace(/^\s+|\s+$/g, '');
+      if (!title){ LN.toast('Give the bounty a title first.'); return; }
+      var empty = +document.getElementById('b-empty').value || 0;
+      S.createBounty({
+        title: title, destinationId: document.getElementById('b-dest').value,
+        category: document.getElementById('b-cat').value,
+        gapEvidence: { searches: Math.round(empty * 1.15), emptyDecisions: empty, period: 'last 30 days' },
+        activationBonus: +document.getElementById('b-bonus').value || 0, days: 60
+      });
+      LN.closeDrawer(); LN.toast('Bounty published.'); state.status = 'open'; render();
+    });
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>

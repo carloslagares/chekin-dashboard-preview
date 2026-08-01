@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chekin — Local Network · Discover</title>
+<link rel="stylesheet" href="../ds/colors_and_type.css">
+<link rel="stylesheet" href="../ds/_sidebar.css">
+<link rel="stylesheet" href="../ds/_agent.css">
+<link rel="stylesheet" href="ds/_fable.css">
+</head>
+<body>
+<div class="app">
+  <div id="sidebar-slot" data-nav="local-network"></div>
+  <main>
+    <header class="top">
+      <div class="crumbs"><a href="index-fable.html"><b>Local Network</b></a> <span class="sep">/</span> Discover</div>
+      <span id="fp-slot" style="margin-left:auto"></span>
+      <span data-agent-trigger-slot></span>
+      <button class="iconbtn" aria-label="Help"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 1 1 5.8 1c0 2-3 2-3 4M12 17h.01"/></svg></button>
+      <button class="iconbtn" aria-label="Notifications"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><div class="pip"></div></button>
+      <div class="user-av" id="user-av">GS</div>
+    </header>
+
+    <div class="page">
+      <span id="f-tabslot"></span>
+      <div id="ln-body"></div>
+    </div>
+  </main>
+</div>
+
+<div id="ln-drawer-root"></div>
+
+<script src="data/types.js"></script>
+<script src="data/config.js"></script>
+<script src="data/fixtures.js"></script>
+<script src="services/economics.js"></script>
+<script src="services/network-service.js"></script>
+<script src="services/earnings-service.js"></script>
+<script src="services/admin-service.js"></script>
+<script src="agent/agent.js"></script>
+<script src="ds/_ln.js"></script>
+<script src="../ds/_sidebar.js"></script>
+<script src="../ds/_agent.js"></script>
+<script>
+(function(){
+  'use strict';
+  var S = window.NetworkService, C = window.LN_CONFIG, I = LN.icons;
+  var body = document.getElementById('ln-body');
+
+  /* ---------- fable chrome: tabs + persona switcher + first-run ---------- */
+  var CHEV = '<svg class="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>';
+  var PLUS = '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>';
+  var SHIELD = '<svg viewBox="0 0 24 24"><path d="M12 2 4 5v7c0 5 3.5 8 8 10 4.5-2 8-5 8-10V5z"/><path d="m9 12 2 2 4-4"/></svg>';
+  var PERSONAS = {
+    host: { l:'Host', d:'A single-property owner — your suppliers, your earnings, gaps near you.' },
+    pm: { l:'Property manager', d:'A multi-property portfolio — the full supply book and coverage.' },
+    supplier: { l:'Supplier', d:'The provider’s own view — confirm a claim, watch your listing.' },
+    chekin: { l:'Chekin', d:'Internal staff — destination coverage, bounties and the pipeline.' },
+    admin: { l:'Admin', d:'Claim review, flags, quality watch and suspensions.' }
+  };
+  function fableTabs(active){
+    var p = S.getPersona();
+    var T = [
+      { k:'overview', l:'Overview', href:'index-fable.html' },
+      { k:'book', l:'Supply book', href:'supply-book-fable.html', per:['host','pm'] },
+      { k:'discover', l:'Discover', href:'discover-fable.html', per:['host','pm'] },
+      { k:'bounties', l:'Bounties', href:'bounties-fable.html', per:['host','pm','chekin','admin'] },
+      { k:'admin', l:'Admin review', href:'admin-review-fable.html', per:['chekin','admin'] }
+    ];
+    return '<nav class="f-tabs" aria-label="Local Network sections">' + T.filter(function(t){ return !t.per || t.per.indexOf(p) >= 0; }).map(function(t){
+      return '<a' + (t.k === active ? ' class="on"' : '') + ' href="' + t.href + '">' + t.l + '</a>';
+    }).join('') + '</nav>' +
+    (S.isFirstRun() ? '<div class="f-note"><i></i><span><b>First-run mode.</b> The programme launches empty — every page is showing its true pre-launch state.</span><button class="f-link" id="fr-exit">Load the demo dataset</button></div>' : '');
+  }
+  function mountChrome(active){
+    var p = S.getPersona(), acct2 = S.currentAccount();
+    var slot = document.getElementById('f-tabslot');
+    if (slot) slot.outerHTML = fableTabs(active);
+    var av = document.getElementById('user-av');
+    if (av) av.textContent = acct2 ? acct2.name.split(/\s+/).map(function(w){ return w.charAt(0); }).slice(0, 2).join('').toUpperCase() : 'CK';
+    var fp = document.getElementById('fp-slot');
+    if (fp){
+      fp.innerHTML = '<div class="f-dd fp" id="fp-dd">' +
+        '<button class="f-ddt" aria-haspopup="true" aria-expanded="false"><span class="k">Viewing as</span><span class="v">' + PERSONAS[p].l + '</span>' + CHEV + '</button>' +
+        '<div class="f-ddm" role="menu">' + S.personas.map(function(k){
+          return '<button class="fp-o' + (k === p ? ' on' : '') + '" data-p="' + k + '"><span class="pt"></span><span style="min-width:0"><span class="t">' + PERSONAS[k].l + '</span><span class="dsc">' + PERSONAS[k].d + '</span></span></button>';
+        }).join('') +
+        ((S.hasSnapshot() && !S.isFirstRun()) ? '<div class="fp-foot"><button class="fp-o" id="fp-reset"><span class="pt"></span><span><span class="t">Reset demo data</span><span class="dsc">Discard everything created or changed in this session.</span></span></button></div>' : '') +
+        '</div></div>';
+      var dd = document.getElementById('fp-dd');
+      dd.querySelector('.f-ddt').addEventListener('click', function(e){
+        e.stopPropagation();
+        dd.className = dd.className.indexOf(' open') >= 0 ? 'f-dd fp' : 'f-dd fp open';
+      });
+      document.addEventListener('click', function(e){
+        if (!(e.target.closest && e.target.closest('#fp-dd'))) dd.className = 'f-dd fp';
+      });
+      document.addEventListener('keydown', function(e){ if (e.key === 'Escape') dd.className = 'f-dd fp'; });
+      dd.addEventListener('click', function(e){
+        if (e.target.closest('#fp-reset')){ S.resetDemo(); return; }
+        var b = e.target.closest('[data-p]'); if (!b) return;
+        S.setPersona(b.getAttribute('data-p'));
+        var u = new URLSearchParams(location.search); u.delete('persona');
+        var qs = u.toString();
+        location.href = location.pathname + (qs ? '?' + qs : '');
+      });
+    }
+    var fx = document.getElementById('fr-exit');
+    if (fx) fx.addEventListener('click', function(){ S.setFirstRun(false); });
+  }
+
+  var persona = S.getPersona();
+  mountChrome(persona === 'chekin' || persona === 'admin' ? '' : 'discover');
+
+  /* ---------- persona guard ---------- */
+  var acct = S.currentAccount();
+  if (persona === 'supplier' || !acct){
+    var g = persona === 'supplier'
+      ? { t:'Not your view', b:'Discover is where hosts see the network supply their guests can book. Your own listing lives on your supplier page.', cta:'Open your listing', href:'supplier-detail-fable.html' }
+      : { t:'Discover is a host view', b:'Chekin staff have no properties, so there is no coverage to browse here. Destination coverage lives on the overview; the pipeline lives in the review queue.', cta:'Back to the overview', href:'index-fable.html' };
+    body.innerHTML = '<div class="f-head rise"><div><div class="eyebrow">Discover</div><h1>Network supply</h1></div></div>' +
+      '<div class="f-sect tight"><div class="f-empty"><h3>' + g.t + '</h3><p>' + g.b + '</p>' +
+      '<a class="f-btn" href="' + g.href + '">' + g.cta + '</a></div></div>';
+    return;
+  }
+
+  var state = { category:'', minScore:'', distance:'', blocked:'', search:'' };
+  var hostShare = C.baseNrpPctOfGmv * C.servingPropertySharePctOfExternalNrp / 100;
+  function sHref(s){ return 'supplier-detail-fable.html?supplier=' + encodeURIComponent(s.id); }
+
+  function rows(){
+    // Ordered by score then distance only. Who sourced a supplier must never
+    // influence what anyone sees — invariant #1.
+    return S.getNetworkSupplyForAccount(acct.id).sort(function(a, b){
+      return b.supplier.score - a.supplier.score || a.distanceKm - b.distanceKm;
+    });
+  }
+  function filtered(all){
+    return all.filter(function(r){
+      if (state.category && r.supplier.category !== state.category) return false;
+      if (state.minScore && r.supplier.score < +state.minScore) return false;
+      if (state.distance && r.distanceKm > +state.distance) return false;
+      if (state.blocked === 'blocked' && !r.blocked) return false;
+      if (state.blocked === 'available' && r.blocked) return false;
+      if (state.search && (r.supplier.name + ' ' + r.supplier.subcategory).toLowerCase().indexOf(state.search.toLowerCase()) < 0) return false;
+      return true;
+    });
+  }
+
+  /* ---------- the invariant banner: non-negotiable, always visible ---------- */
+  function banner(){
+    return '<div class="f-banner rise" style="animation-delay:.04s;margin-top:44px">' +
+      '<div class="ic">' + SHIELD + '</div>' +
+      '<div style="min-width:0"><div class="t">Network supply never reduces your share.</div>' +
+      '<div class="d">You keep ' + LN.pct(hostShare) + ' of booking value on every one of these — exactly what you keep on centrally-sourced inventory. The sourcing host is paid out of the extra ' + LN.pct(C.networkPremiumPctOfGmv) + ' commission a local supplier accepts: money that would not exist without them.</div></div>' +
+      '<button class="f-btn inverse" id="see-maths">See the maths</button></div>';
+  }
+
+  /* ---------- filters (labelled dropdowns, one per dimension) ---------- */
+  var DCHEV = '<svg class="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>';
+  var XICO = '<svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+  var CHECK = '<svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>';
+  function filters(all, shownCount){
+    function dd(id, label, opts, cur){
+      var curOpt = null;
+      opts.forEach(function(o){ if (o.v === cur) curOpt = o; });
+      var act = cur !== '';
+      var menu = opts.map(function(o){
+        var n = o.v === '' ? all.length : all.filter(o.f).length;
+        if (n === 0 && o.v !== '' && o.v !== cur) return '';
+        return '<button class="f-ddo' + (cur === o.v ? ' on' : '') + '" role="menuitemradio" aria-checked="' + (cur === o.v ? 'true' : 'false') + '" data-val="' + LN.esc(o.v) + '">' +
+          '<span class="ck">' + CHECK + '</span>' + LN.esc(o.l) + '<span class="n">' + n + '</span></button>';
+      }).join('');
+      return '<div class="f-dd' + (act ? ' act' : '') + '" data-group="' + id + '">' +
+        '<button class="f-ddt" data-dd="' + id + '" aria-haspopup="true" aria-expanded="false">' +
+          '<span class="k">' + LN.esc(label) + '</span><span class="v">' + LN.esc(act && curOpt ? curOpt.l : 'All') + '</span>' + DCHEV + '</button>' +
+        (act ? '<button class="f-ddx" data-clear="' + id + '" aria-label="Clear ' + LN.esc(label) + ' filter">' + XICO + '</button>' : '') +
+        '<div class="f-ddm" role="menu" aria-label="' + LN.esc(label) + '">' + menu + '</div></div>';
+    }
+    function allOpt(){ return { v:'', l:'All', f:function(){ return true; } }; }
+    var cats = [];
+    all.forEach(function(r){ if (cats.indexOf(r.supplier.category) < 0) cats.push(r.supplier.category); });
+    var anyActive = state.category !== '' || state.minScore !== '' || state.distance !== '' || state.blocked !== '';
+    return '<div class="f-filterbar rise" style="animation-delay:.08s"><div class="f-dds">' +
+      dd('category', 'Category', [allOpt()].concat(cats.sort().map(function(c){
+        return { v:c, l:LN.catLabel(c), f:function(r){ return r.supplier.category === c; } };
+      })), state.category) +
+      dd('minScore', 'Score', [allOpt(),
+        { v:'0.9', l:'0.90+', f:function(r){ return r.supplier.score >= 0.9; } },
+        { v:'0.8', l:'0.80+', f:function(r){ return r.supplier.score >= 0.8; } },
+        { v:'0.7', l:'0.70+', f:function(r){ return r.supplier.score >= 0.7; } }], state.minScore) +
+      dd('distance', 'Distance', [allOpt(),
+        { v:'2', l:'≤ 2 km', f:function(r){ return r.distanceKm <= 2; } },
+        { v:'5', l:'≤ 5 km', f:function(r){ return r.distanceKm <= 5; } },
+        { v:'10', l:'≤ 10 km', f:function(r){ return r.distanceKm <= 10; } }], state.distance) +
+      dd('blocked', 'Status', [allOpt(),
+        { v:'available', l:'Bookable', f:function(r){ return !r.blocked; } },
+        { v:'blocked', l:'Blocked', f:function(r){ return r.blocked; } }], state.blocked) +
+    '</div>' +
+    '<div class="f-search" style="flex:1;max-width:300px;height:38px;border-radius:10px"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>' +
+      '<input id="q" placeholder="Search…" value="' + LN.esc(state.search) + '"></div>' +
+    '<div class="f-fsum"><span>Showing <b>' + shownCount + '</b> of <b>' + all.length + '</b> suppliers</span>' +
+      (anyActive ? '<button class="f-link" id="f-clearall">Clear all filters</button>' : '') + '</div></div>';
+  }
+  function closeAllMenus(){
+    var open = document.querySelectorAll('.f-dd.open:not(.fp)'), i;
+    for (i = 0; i < open.length; i++){
+      open[i].className = open[i].className.replace(' open', '');
+      var t = open[i].querySelector('[data-dd]');
+      if (t) t.setAttribute('aria-expanded', 'false');
+    }
+  }
+  document.addEventListener('click', function(e){
+    if (!(e.target.closest && e.target.closest('.f-dd'))) closeAllMenus();
+  });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeAllMenus(); });
+
+  /* ---------- cards ---------- */
+  function bandDot(score){
+    var band = S.qualityBand(score);
+    var cls = band.multiplier >= 1.25 ? 'live' : band.multiplier >= 1 ? 'onboarding' : 'watch';
+    return '<span class="f-state ' + cls + '"><i></i>' + score.toFixed(2) + ' · ' + LN.esc(band.label) + '</span>';
+  }
+  function card(r){
+    var s = r.supplier;
+    return '<div class="f-scard' + (r.blocked ? ' blocked' : '') + '">' +
+      '<div class="cat">' + LN.esc(LN.catLabel(s.category)) +
+        '<span class="f-state ' + (r.blocked ? 'suspended' : 'live') + '"><i></i>' + (r.blocked ? 'Blocked' : 'Bookable') + '</span></div>' +
+      '<h3><a href="' + sHref(s) + '">' + LN.esc(s.name) + '</a></h3>' +
+      '<div class="sub">' + LN.esc(s.subcategory) + ' · from ' + LN.money(s.priceFrom) + '</div>' +
+      '<div class="meta">' + bandDot(s.score) + '<span><b>' + r.distanceKm + ' km</b> away</span>' +
+        '<span>' + r.properties.length + ' of your propert' + (r.properties.length === 1 ? 'y' : 'ies') + '</span></div>' +
+      /* Attribution is informational only — it never affects ordering. */
+      '<div class="attr">Sourced by <b>' + (r.sourcedByOther ? LN.esc(r.sourcedByName) : 'you') + '</b> · you keep <b style="color:var(--f-good)">' + LN.pct(hostShare) + '</b> of every booking</div>' +
+      '<div class="ft">' +
+        '<button class="f-mini' + (r.blocked ? ' brand' : '') + '" data-block="' + LN.esc(s.id) + '">' + (r.blocked ? 'Unblock' : 'Block') + '</button>' +
+        '<button class="f-mini" data-blockcat="' + LN.esc(s.category) + '" title="Block every supplier in this category">Block category</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  /* ---------- render ---------- */
+  function render(focusSearch){
+    var all = rows(), shown = filtered(all);
+    var blockedCats = acct.blockedCategories || [];
+    var blockedCount = all.filter(function(r){ return r.blocked; }).length;
+
+    body.innerHTML =
+      '<div class="f-head rise"><div>' +
+        '<div class="eyebrow">Discover</div>' +
+        '<h1>Network supply for your properties<span class="count">' + shown.length + '</span></h1>' +
+        '<div class="sub">Suppliers other hosts introduced that your guests can now book. You can block any supplier, or a whole category, at any time, for any reason.</div>' +
+      '</div><div class="acts">' +
+        '<a class="f-btn" href="submit-fable.html">' + PLUS + ' Introduce your own</a>' +
+      '</div></div>' +
+      banner() +
+      filters(all, shown.length) +
+      (blockedCats.length ? '<div class="f-note" style="margin:24px 0 0"><i style="background:var(--f-bad)"></i><span><b>Blocked categories:</b> ' +
+        blockedCats.map(function(c){ return LN.esc(LN.catLabel(c)); }).join(', ') +
+        ' — no supplier in these is ever offered at any of your properties.</span>' +
+        '<button class="f-link" id="manage-cats">Manage</button></div>' : '') +
+      '<div class="f-sect tight">' +
+        (shown.length
+          ? '<div class="f-grid3 rise" id="grid" style="animation-delay:.12s">' + shown.map(card).join('') + '</div>'
+          : '<div class="f-empty"><h3>' + (all.length ? 'Nothing matches these filters' : 'No network supply here yet') + '</h3>' +
+            '<p>' + (all.length
+              ? 'Clear a filter to see the rest of the network supply available to your properties.'
+              : 'Nobody has introduced a local supplier that covers your properties yet. You could be the first — and you would earn on every booking they generate, at every property in the coverage area.') + '</p>' +
+            (all.length ? '' : '<a class="f-btn" href="submit-fable.html">' + PLUS + ' Introduce a supplier</a>') + '</div>') +
+      '</div>' +
+      '<div class="tiny" style="margin-top:28px">' + blockedCount + ' blocked · ' + blockedCats.length + ' categor' + (blockedCats.length === 1 ? 'y' : 'ies') + ' blocked account-wide · Ordering is blind to who sourced a supplier — score and distance only.</div>';
+
+    wire();
+    if (focusSearch){
+      var qi = document.getElementById('q');
+      if (qi){ qi.focus(); qi.setSelectionRange(qi.value.length, qi.value.length); }
+    }
+  }
+
+  function wire(){
+    var bar = body.querySelector('.f-filterbar');
+    if (bar) bar.addEventListener('click', function(e){
+      var t = e.target.closest('button');
+      if (!t) return;
+      if (t.hasAttribute('data-dd')){
+        var dd = t.parentNode;
+        var wasOpen = dd.className.indexOf(' open') >= 0;
+        closeAllMenus();
+        if (!wasOpen){ dd.className += ' open'; t.setAttribute('aria-expanded', 'true'); }
+      } else if (t.hasAttribute('data-val')){
+        var host = t.closest('.f-dd');
+        if (!host) return;
+        state[host.getAttribute('data-group')] = t.getAttribute('data-val');
+        render();
+      } else if (t.hasAttribute('data-clear')){
+        state[t.getAttribute('data-clear')] = '';
+        render();
+      } else if (t.id === 'f-clearall'){
+        state.category = ''; state.minScore = ''; state.distance = ''; state.blocked = ''; state.search = '';
+        render();
+      }
+    });
+    var qi = document.getElementById('q');
+    if (qi) qi.addEventListener('input', function(){ state.search = qi.value; render(true); });
+
+    var grid = document.getElementById('grid');
+    if (grid) grid.addEventListener('click', function(e){
+      var b = e.target.closest('[data-block]');
+      if (b){
+        var id = b.getAttribute('data-block'), s = S.getSupplierById(id);
+        var isBlocked = S.getProperties(acct.id).some(function(p){ return p.blockedSupplierIds.indexOf(id) >= 0; });
+        if (isBlocked){ S.unblockSupplierForAccount(acct.id, id); LN.toast(s.name + ' is bookable again at your properties.'); }
+        else { S.blockSupplierForAccount(acct.id, id); LN.toast(s.name + ' blocked at your properties. Their claim, score and other hosts are unaffected.'); }
+        render(); return;
+      }
+      var bc = e.target.closest('[data-blockcat]');
+      if (bc){
+        var cat = bc.getAttribute('data-blockcat');
+        S.blockCategoryForAccount(acct.id, cat);
+        var on = (acct.blockedCategories || []).indexOf(cat) >= 0;
+        LN.toast(on ? LN.catLabel(cat) + ' blocked across all your properties.' : LN.catLabel(cat) + ' unblocked.');
+        render();
+      }
+    });
+
+    var mc = document.getElementById('manage-cats');
+    if (mc) mc.addEventListener('click', openCategoryDrawer);
+
+    var sm = document.getElementById('see-maths');
+    if (sm) sm.addEventListener('click', function(){
+      // use a real live claim so the drawer's numbers are the real ones
+      var sample = rows().filter(function(r){ return r.claim && r.claim.state === 'live'; })[0];
+      if (!sample){ LN.openEconomicsDrawer({ network:true, poolPct: C.basePoolPctOfGmv }); return; }
+      var d = S.getDestinationById(sample.supplier.destinationId);
+      var a = S.computeAccrual(100, sample.claim, sample.supplier, d);
+      LN.openEconomicsDrawer({ network:true, poolPct: a.poolPct, supplierName: sample.supplier.name, chainHtml: LN.chain(a) });
+    });
+  }
+
+  function openCategoryDrawer(){
+    var blocked = acct.blockedCategories || [];
+    var head = '<div class="dhead"><div style="flex:1;min-width:0"><div style="font:600 18px var(--font-primary)">Blocked categories</div>' +
+      '<div class="tiny" style="margin-top:4px">Applies to every property on ' + LN.esc(acct.name) + '</div></div>' +
+      '<button class="dclose" data-drawer-close>' + I.x + '</button></div>';
+    var list = '<div class="f-checks">' + LN.categories().map(function(c){
+      var on = blocked.indexOf(c) >= 0;
+      return '<div class="f-checkrow' + (on ? ' miss' : '') + '"><span class="ic">' + (on ? I.block : I.check) + '</span>' +
+        '<span class="tx">' + LN.esc(LN.catLabel(c)) + '</span>' +
+        '<button class="f-mini' + (on ? ' brand' : '') + '" data-togglecat="' + c + '">' + (on ? 'Unblock' : 'Block') + '</button></div>';
+    }).join('') + '</div>';
+    LN.openDrawer(head + '<div class="dbody">' +
+      '<div class="tiny" style="font-size:12.5px;line-height:18px">Blocking a category is absolute — no supplier in it is ever offered at your properties, whoever introduced them. It has no effect on their claims or on other hosts.</div>' +
+      list + '</div>', '<button class="tbtn" data-drawer-close>Done</button>');
+    document.getElementById('ln-drawer-root').addEventListener('click', function(e){
+      var b = e.target.closest('[data-togglecat]'); if (!b) return;
+      S.blockCategoryForAccount(acct.id, b.getAttribute('data-togglecat'));
+      LN.closeDrawer(); render();
+    });
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>

@@ -97,7 +97,7 @@
   function suspendSupplier(id, reason) {
     var s = S.getSupplierById(id); if (!s) return null;
     s.status = 'suspended';
-    var c = getClaimBySupplier(id);
+    var c = S.getClaimBySupplier(id);
     if (c && ['live', 'watch'].indexOf(c.state) >= 0) S.advanceClaim(c.id, 'suspended', { title: 'Supplier suspended', detail: reason || '', actor: 'Chekin admin' });
     return s;
   }

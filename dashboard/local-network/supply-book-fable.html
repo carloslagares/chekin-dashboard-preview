@@ -15,19 +15,15 @@
   <main>
     <header class="top">
       <div class="crumbs"><a href="index-fable.html"><b>Local Network</b></a> <span class="sep">/</span> Supply book</div>
-      <span data-agent-trigger-slot style="margin-left:auto"></span>
+      <span id="fp-slot" style="margin-left:auto"></span>
+      <span data-agent-trigger-slot></span>
       <button class="iconbtn" aria-label="Help"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 1 1 5.8 1c0 2-3 2-3 4M12 17h.01"/></svg></button>
       <button class="iconbtn" aria-label="Notifications"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><div class="pip"></div></button>
-      <div class="user-av">GS</div>
+      <div class="user-av" id="user-av">GS</div>
     </header>
 
     <div class="page">
-      <nav class="f-tabs" aria-label="Local Network sections">
-        <a href="index-fable.html">Overview</a>
-        <a class="on" href="supply-book-fable.html">Supply book</a>
-        <a href="discover.html">Discover</a>
-        <a href="bounties.html">Bounties</a>
-      </nav>
+      <span id="f-tabslot"></span>
       <div id="ln-body"></div>
     </div>
   </main>
@@ -52,10 +48,78 @@
   var S = window.NetworkService, C = window.LN_CONFIG;
   var body = document.getElementById('ln-body');
 
-  // Always render the owner (PM) view in this redesign.
+  /* ---------- fable chrome: tabs + persona switcher + first-run ---------- */
+  var FPCHEV = '<svg class="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>';
+  var PERSONAS = {
+    host: { l:'Host', d:'A single-property owner — your suppliers, your earnings, gaps near you.' },
+    pm: { l:'Property manager', d:'A multi-property portfolio — the full supply book and coverage.' },
+    supplier: { l:'Supplier', d:'The provider’s own view — confirm a claim, watch your listing.' },
+    chekin: { l:'Chekin', d:'Internal staff — destination coverage, bounties and the pipeline.' },
+    admin: { l:'Admin', d:'Claim review, flags, quality watch and suspensions.' }
+  };
+  function fableTabs(active){
+    var p = S.getPersona();
+    var T = [
+      { k:'overview', l:'Overview', href:'index-fable.html' },
+      { k:'book', l:'Supply book', href:'supply-book-fable.html', per:['host','pm'] },
+      { k:'discover', l:'Discover', href:'discover-fable.html', per:['host','pm'] },
+      { k:'bounties', l:'Bounties', href:'bounties-fable.html', per:['host','pm','chekin','admin'] },
+      { k:'admin', l:'Admin review', href:'admin-review-fable.html', per:['chekin','admin'] }
+    ];
+    return '<nav class="f-tabs" aria-label="Local Network sections">' + T.filter(function(t){ return !t.per || t.per.indexOf(p) >= 0; }).map(function(t){
+      return '<a' + (t.k === active ? ' class="on"' : '') + ' href="' + t.href + '">' + t.l + '</a>';
+    }).join('') + '</nav>' +
+    (S.isFirstRun() ? '<div class="f-note"><i></i><span><b>First-run mode.</b> The programme launches empty — every page is showing its true pre-launch state.</span><button class="f-link" id="fr-exit">Load the demo dataset</button></div>' : '');
+  }
+  function mountChrome(active){
+    var p = S.getPersona(), acct2 = S.currentAccount();
+    var slot = document.getElementById('f-tabslot');
+    if (slot) slot.outerHTML = fableTabs(active);
+    var av = document.getElementById('user-av');
+    if (av) av.textContent = acct2 ? acct2.name.split(/\s+/).map(function(w){ return w.charAt(0); }).slice(0, 2).join('').toUpperCase() : 'CK';
+    var fp = document.getElementById('fp-slot');
+    if (fp){
+      fp.innerHTML = '<div class="f-dd fp" id="fp-dd">' +
+        '<button class="f-ddt" aria-haspopup="true" aria-expanded="false"><span class="k">Viewing as</span><span class="v">' + PERSONAS[p].l + '</span>' + FPCHEV + '</button>' +
+        '<div class="f-ddm" role="menu">' + S.personas.map(function(k){
+          return '<button class="fp-o' + (k === p ? ' on' : '') + '" data-p="' + k + '"><span class="pt"></span><span style="min-width:0"><span class="t">' + PERSONAS[k].l + '</span><span class="dsc">' + PERSONAS[k].d + '</span></span></button>';
+        }).join('') +
+        ((S.hasSnapshot() && !S.isFirstRun()) ? '<div class="fp-foot"><button class="fp-o" id="fp-reset"><span class="pt"></span><span><span class="t">Reset demo data</span><span class="dsc">Discard everything created or changed in this session.</span></span></button></div>' : '') +
+        '</div></div>';
+      var dd = document.getElementById('fp-dd');
+      dd.querySelector('.f-ddt').addEventListener('click', function(e){
+        e.stopPropagation();
+        dd.className = dd.className.indexOf(' open') >= 0 ? 'f-dd fp' : 'f-dd fp open';
+      });
+      document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && dd.className.indexOf(' open') >= 0) dd.className = 'f-dd fp'; });
+      dd.addEventListener('click', function(e){
+        if (e.target.closest('#fp-reset')){ S.resetDemo(); return; }
+        var b = e.target.closest('[data-p]'); if (!b) return;
+        S.setPersona(b.getAttribute('data-p'));
+        var u = new URLSearchParams(location.search); u.delete('persona');
+        var qs = u.toString();
+        location.href = location.pathname + (qs ? '?' + qs : '');
+      });
+    }
+    var fx = document.getElementById('fr-exit');
+    if (fx) fx.addEventListener('click', function(){ S.setFirstRun(false); });
+  }
+
   var persona = S.getPersona();
+  mountChrome(persona === 'chekin' || persona === 'admin' ? '' : 'book');
+
+  /* ---------- persona guard: the book belongs to hosts ---------- */
+  if (persona === 'supplier' || persona === 'chekin' || persona === 'admin'){
+    var g = persona === 'supplier'
+      ? { t:'Suppliers have no supply book', b:'The supply book is a host’s portfolio of introductions. As a supplier you have a listing, not a book — your page shows your status, your score and what Chekin still needs from you.', cta:'Open your listing', href:'supplier-detail-fable.html' }
+      : { t:'The book belongs to hosts', b:'Each host account has its own supply book. The internal view of every claim in flight is the review queue.', cta:'Open the review queue', href:'admin-review-fable.html' };
+    body.innerHTML = '<div class="f-head rise"><div><div class="eyebrow">Portfolio</div><h1>Supply book</h1></div></div>' +
+      '<div class="f-sect tight"><div class="f-empty"><h3>' + g.t + '</h3><p>' + g.b + '</p>' +
+      '<a class="f-btn" href="' + g.href + '">' + g.cta + '</a></div></div>';
+    return;
+  }
   var acctId = S.currentAccountId();
-  if (!acctId || (persona !== 'pm' && persona !== 'host')) acctId = S._dataset.personaAccounts.pm;
+  function sHref(s){ return 'supplier-detail-fable.html?supplier=' + encodeURIComponent(s.id); }
 
   var ARROW = '<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
   var PLUS  = '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>';
@@ -266,7 +330,7 @@
         (any ? 'No claims match these filters' : 'Your supply book is empty') + '</h3><p>' +
         (any ? 'Clear a filter to see the rest of the book.'
              : 'Every supplier you introduce becomes a line here — with its live rate, its decay step and what it is projected to earn.') + '</p>' +
-        (any ? '' : '<a class="f-btn" href="submit.html">' + PLUS + ' Submit a supplier</a>') + '</div>';
+        (any ? '' : '<a class="f-btn" href="submit-fable.html">' + PLUS + ' Submit a supplier</a>') + '</div>';
     }
     return '<div class="f-tablewrap"><table class="f-table"><thead><tr>' +
       '<th>Supplier</th><th>State</th><th>Roles</th><th>Sharing</th>' +
@@ -309,7 +373,7 @@
       '<div class="note">' + (e.blockedReason
         ? LN.esc(e.blockedReason)
         : 'Trailing-12-month bookings of ' + LN.money(series[0].gmv) + ' held flat, so the shape is purely the decay schedule.') +
-      '</div></div><a class="f-link" href="' + LN.supplierHref(e.supplier) + '">Open supplier ' + ARROW + '</a></div>' +
+      '</div></div><a class="f-link" href="' + sHref(e.supplier) + '">Open supplier ' + ARROW + '</a></div>' +
       decayChart(series) + '</div>';
 
     var right = '<div>' +
@@ -360,7 +424,7 @@
           ' live suppliers, avg score ' + prog.avgScore.toFixed(2) +
           '</span><span class="why">— faster review, same rates</span></div>' : '') +
       '</div><div class="acts">' +
-        '<a class="f-btn" href="submit.html">' + PLUS + ' Submit a supplier</a>' +
+        '<a class="f-btn" href="submit-fable.html">' + PLUS + ' Submit a supplier</a>' +
       '</div></div>' +
       statBand(t) +
       filters(rows, shown.length) +

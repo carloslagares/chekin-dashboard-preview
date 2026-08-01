@@ -70,15 +70,16 @@ python3 -m http.server 8080
 | `dashboard/guest-crm/index.html` | Guest CRM |
 | `dashboard/index.html?view=network` | Local Network inside the variant switcher |
 | `dashboard/index.html?view=crm` | Guest CRM inside the variant switcher |
-| `dashboard/local-network/index.html` | Local Network — host overview (default persona: PM) |
-| `dashboard/local-network/index.html?first_run=1` | Local Network before anything exists — the true empty state |
-| `dashboard/local-network/supply-book.html` | The host's portfolio: claims, decay curve, 5-year book value |
-| `dashboard/local-network/submit.html` | Submit-a-supplier wizard (5 steps) |
-| `dashboard/local-network/submit.html?bounty=bty_cad_transfer` | The wizard pre-filled from a bounty |
-| `dashboard/local-network/supplier-detail.html?supplier=sup_riera` | One supplier: claim stepper, roles, economics, quality |
-| `dashboard/local-network/discover.html` | Network supply available to my properties, with the veto |
-| `dashboard/local-network/bounties.html` | Bounty board — demand gaps with boosted rates |
-| `dashboard/local-network/admin-review.html` | Chekin admin: claim queue, flags, quality watch (Admin persona) |
+| `dashboard/local-network/index-fable.html` | **Local Network — the published design (Fable).** Seven pages, all five personas |
+| `dashboard/local-network/index.html` | The first-pass design, kept for comparison |
+| `dashboard/local-network/index-fable.html?first_run=1` | Local Network before anything exists — the true empty state |
+| `dashboard/local-network/supply-book-fable.html` | The host's portfolio: claims, decay curve, 5-year book value |
+| `dashboard/local-network/submit-fable.html` | Submit-a-supplier wizard (5 steps) |
+| `dashboard/local-network/submit-fable.html?bounty=bty_cad_transfer` | The wizard pre-filled from a bounty |
+| `dashboard/local-network/supplier-detail-fable.html?supplier=sup_riera` | One supplier: claim stepper, roles, economics, quality |
+| `dashboard/local-network/discover-fable.html` | Network supply available to my properties, with the veto |
+| `dashboard/local-network/bounties-fable.html` | Bounty board — demand gaps with boosted rates |
+| `dashboard/local-network/admin-review-fable.html` | Chekin admin: claim queue, flags, quality watch (Admin persona) |
 
 These are prototypes (HTML/CSS/JS), not production code — recreate in the product
 stack; match the visual output, not the internal structure.

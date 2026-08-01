@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chekin — Local Network · Admin review</title>
+<link rel="stylesheet" href="../ds/colors_and_type.css">
+<link rel="stylesheet" href="../ds/_sidebar.css">
+<link rel="stylesheet" href="../ds/_agent.css">
+<link rel="stylesheet" href="ds/_fable.css">
+</head>
+<body>
+<div class="app">
+  <div id="sidebar-slot" data-nav="local-network"></div>
+  <main>
+    <header class="top">
+      <div class="crumbs"><a href="index-fable.html"><b>Local Network</b></a> <span class="sep">/</span> Admin review</div>
+      <span id="fp-slot" style="margin-left:auto"></span>
+      <span data-agent-trigger-slot></span>
+      <button class="iconbtn" aria-label="Help"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 1 1 5.8 1c0 2-3 2-3 4M12 17h.01"/></svg></button>
+      <button class="iconbtn" aria-label="Notifications"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><div class="pip"></div></button>
+      <div class="user-av" id="user-av">CK</div>
+    </header>
+
+    <div class="page">
+      <span id="f-tabslot"></span>
+      <div id="ln-body"></div>
+    </div>
+  </main>
+</div>
+
+<div id="ln-drawer-root"></div>
+
+<script src="data/types.js"></script>
+<script src="data/config.js"></script>
+<script src="data/fixtures.js"></script>
+<script src="services/economics.js"></script>
+<script src="services/network-service.js"></script>
+<script src="services/earnings-service.js"></script>
+<script src="services/admin-service.js"></script>
+<script src="agent/agent.js"></script>
+<script src="ds/_ln.js"></script>
+<script src="../ds/_sidebar.js"></script>
+<script src="../ds/_agent.js"></script>
+<script>
+(function(){
+  'use strict';
+  var S = window.NetworkService, C = window.LN_CONFIG, I = LN.icons;
+  var body = document.getElementById('ln-body');
+
+  /* ---------- fable chrome: tabs + persona switcher + first-run ---------- */
+  var CHEV = '<svg class="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>';
+  var ARROW = '<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+  var PERSONAS = {
+    host: { l:'Host', d:'A single-property owner — your suppliers, your earnings, gaps near you.' },
+    pm: { l:'Property manager', d:'A multi-property portfolio — the full supply book and coverage.' },
+    supplier: { l:'Supplier', d:'The provider’s own view — confirm a claim, watch your listing.' },
+    chekin: { l:'Chekin', d:'Internal staff — destination coverage, bounties and the pipeline.' },
+    admin: { l:'Admin', d:'Claim review, flags, quality watch and suspensions.' }
+  };
+  function fableTabs(active){
+    var p = S.getPersona();
+    var T = [
+      { k:'overview', l:'Overview', href:'index-fable.html' },
+      { k:'book', l:'Supply book', href:'supply-book-fable.html', per:['host','pm'] },
+      { k:'discover', l:'Discover', href:'discover-fable.html', per:['host','pm'] },
+      { k:'bounties', l:'Bounties', href:'bounties-fable.html', per:['host','pm','chekin','admin'] },
+      { k:'admin', l:'Admin review', href:'admin-review-fable.html', per:['chekin','admin'] }
+    ];
+    return '<nav class="f-tabs" aria-label="Local Network sections">' + T.filter(function(t){ return !t.per || t.per.indexOf(p) >= 0; }).map(function(t){
+      return '<a' + (t.k === active ? ' class="on"' : '') + ' href="' + t.href + '">' + t.l + '</a>';
+    }).join('') + '</nav>' +
+    (S.isFirstRun() ? '<div class="f-note"><i></i><span><b>First-run mode.</b> The programme launches empty — every page is showing its true pre-launch state.</span><button class="f-link" id="fr-exit">Load the demo dataset</button></div>' : '');
+  }
+  function mountChrome(active){
+    var p = S.getPersona(), acct2 = S.currentAccount();
+    var slot = document.getElementById('f-tabslot');
+    if (slot) slot.outerHTML = fableTabs(active);
+    var av = document.getElementById('user-av');
+    if (av) av.textContent = acct2 ? acct2.name.split(/\s+/).map(function(w){ return w.charAt(0); }).slice(0, 2).join('').toUpperCase() : 'CK';
+    var fp = document.getElementById('fp-slot');
+    if (fp){
+      fp.innerHTML = '<div class="f-dd fp" id="fp-dd">' +
+        '<button class="f-ddt" aria-haspopup="true" aria-expanded="false"><span class="k">Viewing as</span><span class="v">' + PERSONAS[p].l + '</span>' + CHEV + '</button>' +
+        '<div class="f-ddm" role="menu">' + S.personas.map(function(k){
+          return '<button class="fp-o' + (k === p ? ' on' : '') + '" data-p="' + k + '"><span class="pt"></span><span style="min-width:0"><span class="t">' + PERSONAS[k].l + '</span><span class="dsc">' + PERSONAS[k].d + '</span></span></button>';
+        }).join('') +
+        ((S.hasSnapshot() && !S.isFirstRun()) ? '<div class="fp-foot"><button class="fp-o" id="fp-reset"><span class="pt"></span><span><span class="t">Reset demo data</span><span class="dsc">Discard everything created or changed in this session.</span></span></button></div>' : '') +
+        '</div></div>';
+      var dd = document.getElementById('fp-dd');
+      dd.querySelector('.f-ddt').addEventListener('click', function(e){
+        e.stopPropagation();
+        dd.className = dd.className.indexOf(' open') >= 0 ? 'f-dd fp' : 'f-dd fp open';
+      });
+      document.addEventListener('click', function(e){
+        if (!(e.target.closest && e.target.closest('#fp-dd'))) dd.className = 'f-dd fp';
+      });
+      document.addEventListener('keydown', function(e){ if (e.key === 'Escape') dd.className = 'f-dd fp'; });
+      dd.addEventListener('click', function(e){
+        if (e.target.closest('#fp-reset')){ S.resetDemo(); return; }
+        var b = e.target.closest('[data-p]'); if (!b) return;
+        S.setPersona(b.getAttribute('data-p'));
+        var u = new URLSearchParams(location.search); u.delete('persona');
+        var qs = u.toString();
+        location.href = location.pathname + (qs ? '?' + qs : '');
+      });
+    }
+    var fx = document.getElementById('fr-exit');
+    if (fx) fx.addEventListener('click', function(){ S.setFirstRun(false); });
+  }
+
+  var persona = S.getPersona();
+  mountChrome('admin');
+
+  if (persona !== 'admin' && persona !== 'chekin'){
+    body.innerHTML = '<div class="f-head rise"><div><div class="eyebrow">Internal</div><h1>Admin review</h1></div></div>' +
+      '<div class="f-sect tight"><div class="f-empty"><h3>Chekin staff only</h3>' +
+      '<p>The review queue, flags and suspensions are internal. Switch the persona in the header to Chekin or Admin to see them.</p>' +
+      '<a class="f-btn" href="index-fable.html">Back to the overview</a></div></div>';
+    return;
+  }
+
+  var q = new URLSearchParams(location.search);
+  var tab = q.get('tab') || 'queue';
+  if (['queue','flags','watch','suspensions'].indexOf(tab) < 0) tab = 'queue';
+  var openRows = {};
+
+  function sHref(s){ return 'supplier-detail-fable.html?supplier=' + encodeURIComponent(s.id); }
+  function stateWord(st){ return '<span class="f-state ' + LN.esc(st) + '"><i></i>' + LN.esc(LN.stateLabel(st)) + '</span>'; }
+  function gateReasons(sup){
+    var out = [];
+    if (C.hardGateCategories.indexOf(sup.category) >= 0) out.push(LN.catLabel(sup.category).toLowerCase());
+    (sup.riskFlags || []).forEach(function(r){ if (C.hardGateRisks.indexOf(r) >= 0) out.push(r); });
+    return out;
+  }
+
+  /* ---------- render ---------- */
+  function render(){
+    var queue = S.getReviewQueue(), flags = S.getFlags(), watch = S.getQualityWatch(), susp = S.getSuspensions();
+    var TABS = [
+      { k:'queue', l:'Queue', n:queue.length },
+      { k:'flags', l:'Flags', n:flags.length },
+      { k:'watch', l:'Quality watch', n:watch.length },
+      { k:'suspensions', l:'Suspensions', n:susp.length }
+    ];
+    body.innerHTML =
+      '<div class="f-head rise"><div>' +
+        '<div class="eyebrow">Internal</div>' +
+        '<h1>Admin review</h1>' +
+        '<div class="sub">Claims awaiting a decision, flags raised for a human, and the quality watchlist. Nothing here is decided automatically — every row ends with a person.</div>' +
+      '</div></div>' +
+      '<div class="f-subtabs rise" style="animation-delay:.04s;margin-top:40px">' + TABS.map(function(t){
+        return '<button class="f-subtab' + (t.k === tab ? ' on' : '') + '" data-tab="' + t.k + '">' + t.l + '<span class="n">' + t.n + '</span></button>';
+      }).join('') + '</div>' +
+      '<div class="f-sect tight rise" style="animation-delay:.08s" id="tabbody">' +
+        (tab === 'flags' ? flagsView(flags) : tab === 'watch' ? watchView(watch) : tab === 'suspensions' ? suspView(susp) : queueView(queue)) +
+      '</div>';
+    wire();
+  }
+
+  /* ---------- queue ---------- */
+  function queueView(queue){
+    if (!queue.length) return '<div class="f-empty"><h3>Nothing waiting</h3>' +
+      '<p>No claims are awaiting a decision. New submissions land here the moment a host sends them.</p></div>';
+    return '<div class="f-xrows">' + queue.map(function(r){
+      var gates = gateReasons(r.supplier);
+      var sc = r.screening;
+      var open = openRows[r.claim.id] ? ' open' : '';
+      var outcome = sc.outcome === 'pass'
+        ? '<span class="f-state live"><i></i>Checks passed</span>'
+        : sc.outcome === 'blocked'
+          ? '<span class="f-state suspended"><i></i>Blocked</span>'
+          : '<span class="f-state watch"><i></i>Needs a decision</span>';
+      return '<div class="f-xrow' + open + '" data-row="' + LN.esc(r.claim.id) + '">' +
+        '<div class="xh">' +
+          '<div class="av' + (gates.length ? ' bad' : '') + '">' + LN.esc(r.supplier.name.charAt(0)) + '</div>' +
+          '<div class="tx"><div class="t">' + LN.esc(r.supplier.name) +
+            stateWord(r.claim.state) + LN.countdownChip(r.claim) +
+            (gates.length ? '<span class="f-gate">' + I.warn + 'Safety gate</span>' : '') +
+            (r.claim.selfDealingDeclared ? '<span class="f-gate">Self-dealing</span>' : '') +
+            (r.claim.bountyId ? '<span style="font:600 12px var(--font-primary);color:var(--f-warn)">Bounty</span>' : '') + '</div>' +
+          '<div class="d">' + LN.esc(LN.catLabel(r.supplier.category)) + ' · ' +
+            LN.esc((S.getDestinationById(r.supplier.destinationId) || {}).name) + ' · introduced by ' +
+            LN.esc((r.account || {}).name || '—') + ' · waiting ' + r.waitingDays + ' day' + (r.waitingDays === 1 ? '' : 's') + '</div></div>' +
+          outcome +
+          '<svg class="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>' +
+        '</div>' +
+        '<div class="xb">' +
+          (gates.length ? '<div class="f-gate" style="margin-bottom:18px"><span style="white-space:normal">' + I.warn.replace('<svg', '<svg style="flex-shrink:0"') + ' Hard admin gate — ' + LN.esc(gates.join(', ')) + '. A Local Curator’s review is never sufficient for this claim.</span></div>' : '') +
+          '<div class="f-xgrid">' +
+            '<div><div class="tiny" style="font-weight:600;color:var(--f-muted);margin-bottom:4px">Screening</div>' +
+              '<div class="f-checks" style="border-top:none">' + sc.checks.map(function(c){
+                var cls = c.status === 'pass' ? '' : c.status === 'fail' ? ' fail' : ' warn';
+                return '<div class="f-srow' + cls + '"><span class="ic">' + (c.status === 'pass' ? I.check : c.status === 'fail' ? I.x : I.warn) + '</span>' +
+                  '<span><span class="t">' + LN.esc(c.check) + '</span><div class="d">' + LN.esc(c.message) + '</div></span></div>';
+              }).join('') + '</div></div>' +
+            '<div><div class="tiny" style="font-weight:600;color:var(--f-muted);margin-bottom:4px">The claim</div>' +
+              '<div class="f-kv">' +
+                '<div class="r"><span class="k">Sharing mode</span><span class="v">' + LN.esc(LN.modeLabel(r.claim.sharingMode)) +
+                  (r.claim.exclusivityUntil ? ' · exclusive to ' + LN.relDate(r.claim.exclusivityUntil) : '') + '</span></div>' +
+                '<div class="r"><span class="k">Coverage</span><span class="v">' + r.supplier.coverage.km + ' of ' + r.supplier.coverage.capKm + ' km · ' + r.supplier.coverage.propertiesInCoverage + ' properties</span></div>' +
+                '<div class="r"><span class="k">Legal entity</span><span class="v">' + LN.esc(r.supplier.legalEntity) + '</span></div>' +
+                '<div class="r"><span class="k">Content</span><span class="v">' + r.supplier.contentCompleteness + '% · insurance ' +
+                  (r.supplier.insuranceOnFile ? 'on file' : 'missing') + ', licence ' + (r.supplier.licenceOnFile ? 'on file' : 'missing') + '</span></div>' +
+              '</div>' +
+              '<div class="tiny" style="font-weight:600;color:var(--f-muted);margin:16px 0 8px">Rate if approved · per ' + LN.money(100) + '</div>' +
+              LN.chain(rateFor(r), { small:true }) + '</div>' +
+          '</div>' +
+          '<div style="display:flex;gap:10px;align-items:center;margin-top:22px;flex-wrap:wrap">' +
+            '<button class="f-btn" data-approve="' + LN.esc(r.claim.id) + '"' + (sc.outcome === 'blocked' ? ' disabled style="opacity:.45;cursor:default" title="A failing check must be resolved first"' : '') + '>Approve</button>' +
+            (canReject(r.claim) ? '<button class="f-btn danger" data-reject="' + LN.esc(r.claim.id) + '">Reject</button>'
+              : '<span class="tiny" style="align-self:center">Awaiting the supplier — it expires by itself if they never confirm.</span>') +
+            '<button class="f-btn ghost" data-info="' + LN.esc(r.claim.id) + '">Request info</button>' +
+            '<a class="f-link" style="margin-left:auto" href="' + sHref(r.supplier) + '">Open supplier ' + ARROW + '</a>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('') + '</div>';
+  }
+  /** The state machine decides whether a rejection is even possible. */
+  function canReject(claim){
+    return ((S.transitions[claim.state] || []).indexOf('terminated') >= 0);
+  }
+  /** What the claim would earn if approved — computed, never guessed. */
+  function rateFor(r){
+    var today = S._dataset.today;
+    var c = {}, k;
+    for (k in r.claim) if (Object.prototype.hasOwnProperty.call(r.claim, k)) c[k] = r.claim[k];
+    c.state = 'live'; c.liveAt = today;
+    c.networkAt = c.sharingMode === 'network' ? today : null;
+    return S.computeAccrual(100, c, r.supplier, S.getDestinationById(r.supplier.destinationId), today);
+  }
+
+  /* ---------- flags ---------- */
+  function flagsView(flags){
+    if (!flags.length) return '<div class="f-empty"><h3>No open flags</h3>' +
+      '<p>Exclusion hits, declared self-dealing, price outliers and quality problems all surface here.</p></div>';
+    var KIND = { exclusion:'Exclusion', self_dealing:'Self-dealing', price_outlier:'Price outlier', quality_watch:'Quality', duplicate:'Duplicate', safety:'Safety' };
+    return '<div class="f-xrows">' + flags.map(function(f, i){
+      var sup = S.getSupplierById(f.supplierId);
+      var open = openRows['flg' + i] ? ' open' : '';
+      var sev = f.severity === 'high' ? 'suspended' : f.severity === 'medium' ? 'watch' : '';
+      return '<div class="f-xrow' + open + '" data-row="flg' + i + '">' +
+        '<div class="xh">' +
+          '<div class="av' + (f.severity === 'high' ? ' bad' : f.severity === 'medium' ? ' warn' : '') + '">' + I.warn + '</div>' +
+          '<div class="tx"><div class="t">' + LN.esc(f.title) + '</div>' +
+          '<div class="d">' + LN.esc(f.detail) + '</div></div>' +
+          '<span class="f-state ' + sev + '"><i></i>' + LN.esc(KIND[f.kind] || f.kind) + ' · ' + LN.esc(f.severity) + '</span>' +
+          '<svg class="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>' +
+        '</div>' +
+        '<div class="xb">' +
+          '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">' +
+            (sup ? '<a class="f-btn ghost" href="' + sHref(sup) + '">Open ' + LN.esc(sup.name) + '</a>' : '') +
+            (f.claimId && canReject(S.getClaimById(f.claimId) || {}) ? '<button class="f-btn danger" data-reject="' + LN.esc(f.claimId) + '">Reject the claim</button>' : '') +
+            (sup && sup.status !== 'suspended' ? '<button class="f-btn danger" data-suspend="' + LN.esc(sup.id) + '">Suspend the supplier</button>' : '') +
+            '<button class="f-btn ghost" data-dismiss="1">Dismiss</button>' +
+          '</div>' +
+          '<div class="tiny" style="margin-top:14px;max-width:680px">Suspending a supplier is a guest-safety action and stops them being bookable. Rejecting a claim only ends the residual — it never affects what guests can book.</div>' +
+        '</div>' +
+      '</div>';
+    }).join('') + '</div>';
+  }
+
+  /* ---------- quality watch ---------- */
+  function watchView(watch){
+    if (!watch.length) return '<div class="f-empty"><h3>Nothing on the watchlist</h3>' +
+      '<p>Suppliers appear here when their score drops toward the quality floor of ' + C.qualityFloorForAccrual.toFixed(2) + '.</p></div>';
+    var bandState = { Excellent:'live', Good:'onboarding', 'At risk':'watch', Failing:'suspended' };
+    return '<div class="f-tablewrap" style="margin-top:0"><table class="f-table"><thead><tr>' +
+      '<th>Supplier</th><th>State</th><th class="num">Score</th><th>Band</th><th>Falling driver</th><th style="text-align:right">6-month trend</th><th class="num">Pool rate now</th>' +
+      '</tr></thead><tbody>' + watch.map(function(w){
+        var s = w.supplier, dest = S.getDestinationById(s.destinationId);
+        var a = w.claim ? S.computeAccrual(100, w.claim, s, dest) : null;
+        return '<tr data-href="' + sHref(s) + '">' +
+          '<td><div class="nm">' + LN.esc(s.name) + '</div><div class="em">' + LN.esc(LN.catLabel(s.category)) + ' · ' + LN.esc(dest.name) + '</div></td>' +
+          '<td>' + (w.claim ? stateWord(w.claim.state) : '<span class="f-state"><i></i>Unclaimed</span>') + '</td>' +
+          '<td class="num"><b>' + s.score.toFixed(2) + '</b></td>' +
+          '<td><span class="f-state ' + (bandState[w.band.label] || '') + '"><i></i>' + LN.esc(w.band.label) + ' ×' + w.band.multiplier.toFixed(2) + '</span></td>' +
+          '<td>' + LN.esc(w.driver) + '</td>' +
+          '<td style="text-align:right">' + LN.sparkline(s.scoreHistory) + ' <span class="sub" style="display:inline">' + (w.delta > 0 ? '+' : '') + w.delta.toFixed(2) + '</span></td>' +
+          '<td class="num">' + (a && !a.blockedReason ? '<b>' + LN.pct(a.poolPct) + '</b>' : '<span style="color:var(--f-faint)">none</span>') + '</td>' +
+        '</tr>';
+      }).join('') + '</tbody></table></div>' +
+      '<div class="tiny" style="margin-top:18px;max-width:720px">Below <b>' + C.qualityFloorForAccrual.toFixed(2) + '</b> the residual stops entirely. The supplier stays bookable either way — quality problems are handled by suspension, not by quietly removing supply guests are relying on.</div>';
+  }
+
+  /* ---------- suspensions ---------- */
+  function suspView(susp){
+    if (!susp.length) return '<div class="f-empty"><h3>No suspensions on record</h3>' +
+      '<p>Two suspensions within 12 months voids a claim. Nothing is close to that right now.</p></div>';
+    return '<div class="f-xrows">' + susp.map(function(x, i){
+      var events = (x.claim.timeline || []).filter(function(e){ return e.kind === 'suspended'; });
+      var voided = x.claim.suspensionsLast12m >= C.suspensionsVoidingClaim;
+      var open = openRows['sus' + i] ? ' open' : '';
+      return '<div class="f-xrow' + open + '" data-row="sus' + i + '">' +
+        '<div class="xh">' +
+          '<div class="av bad">' + I.block + '</div>' +
+          '<div class="tx"><div class="t">' + LN.esc(x.supplier.name) + stateWord(x.claim.state) +
+            (voided ? '<span class="f-gate">Claim voided</span>' : '') + '</div>' +
+          '<div class="d">' + x.claim.suspensionsLast12m + ' of ' + C.suspensionsVoidingClaim + ' suspensions in 12 months · claim held by ' + LN.esc((x.account || {}).name || '—') + '</div></div>' +
+          '<svg class="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>' +
+        '</div>' +
+        '<div class="xb">' +
+          '<div class="f-feed" style="border-top:none">' + events.map(function(e){
+            return '<div class="f-ev bad"><span class="pt"></span><div class="tx"><div class="t">' + LN.esc(e.title) + '</div>' +
+              '<div class="d">' + LN.esc(e.detail) + '</div></div><span class="when">' + LN.relDate(e.at) + '</span></div>';
+          }).join('') + '</div>' +
+          '<div class="tiny" style="margin-top:14px;max-width:680px">The supplier record is <b>' + LN.esc(x.supplier.status) + '</b>. Suspending a claim stops the residual; it does not stop guests booking. Those are separate decisions on purpose.</div>' +
+          '<div style="display:flex;gap:10px;align-items:center;margin-top:18px">' +
+            '<a class="f-btn ghost" href="' + sHref(x.supplier) + '">Open supplier</a>' +
+            (x.claim.state === 'suspended' && !voided ? '<button class="f-btn" data-reinstate="' + LN.esc(x.claim.id) + '">Reinstate the claim</button>' : '') +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('') + '</div>';
+  }
+
+  /* ---------- wiring ---------- */
+  function wire(){
+    var i;
+    var tabs = body.querySelectorAll('[data-tab]');
+    for (i = 0; i < tabs.length; i++) (function(b){
+      b.addEventListener('click', function(){
+        tab = b.getAttribute('data-tab');
+        openRows = {};
+        try {
+          var u = new URLSearchParams(location.search); u.set('tab', tab);
+          history.replaceState(null, '', location.pathname + '?' + u.toString());
+        } catch (e){}
+        render();
+      });
+    })(tabs[i]);
+
+    var heads = body.querySelectorAll('.f-xrow .xh');
+    for (i = 0; i < heads.length; i++) (function(h){
+      h.addEventListener('click', function(e){
+        if (e.target.closest('button') || e.target.closest('a')) return;
+        var row = h.parentNode, id = row.getAttribute('data-row');
+        openRows[id] = !openRows[id];
+        row.className = openRows[id] ? 'f-xrow open' : 'f-xrow';
+      });
+    })(heads[i]);
+
+    var trs = body.querySelectorAll('tr[data-href]');
+    for (i = 0; i < trs.length; i++) (function(tr){
+      tr.addEventListener('click', function(){ location.href = tr.getAttribute('data-href'); });
+    })(trs[i]);
+
+    var tb = document.getElementById('tabbody');
+    if (tb) tb.addEventListener('click', function(e){
+      var a = e.target.closest('[data-approve]');
+      if (a && !a.disabled){ try { S.approveClaim(a.getAttribute('data-approve')); LN.toast('Claim advanced.'); } catch (err){ LN.toast(err.message); } render(); return; }
+      var r = e.target.closest('[data-reject]');
+      if (r){ openReject(r.getAttribute('data-reject')); return; }
+      var inf = e.target.closest('[data-info]');
+      if (inf){ LN.toast('Requested more information from the sourcing host.'); return; }
+      var s = e.target.closest('[data-suspend]');
+      if (s){ openSuspend(s.getAttribute('data-suspend')); return; }
+      var d = e.target.closest('[data-dismiss]');
+      if (d){ LN.toast('Flag dismissed for this session.'); return; }
+      var re = e.target.closest('[data-reinstate]');
+      if (re){
+        try { S.advanceClaim(re.getAttribute('data-reinstate'), 'live', { title:'Claim reinstated', detail:'Reviewed by a Chekin admin.', actor:'Chekin admin' }); LN.toast('Claim reinstated.'); }
+        catch (err){ LN.toast(err.message); }
+        render();
+      }
+    });
+  }
+
+  /* A reason is mandatory — the service refuses a rejection without one. */
+  function openReject(claimId){
+    var c = S.getClaimById(claimId), sup = c ? S.getSupplierById(c.supplierId) : null;
+    if (!sup) return;
+    var head = '<div class="dhead"><div style="flex:1;min-width:0"><div style="font:600 18px var(--font-primary)">Reject this claim</div>' +
+      '<div class="tiny" style="margin-top:4px">' + LN.esc(sup.name) + '</div></div><button class="dclose" data-drawer-close>' + I.x + '</button></div>';
+    LN.openDrawer(head + '<div class="dbody">' +
+      '<div class="tiny" style="font-size:12.5px;line-height:18px">The reason is sent to the sourcing host and stored on the claim timeline. Rejecting the claim does not remove the supplier or affect any guest.</div>' +
+      '<div class="f-field"><label>Reason (required)</label><textarea id="rj" rows="4" placeholder="Why this claim cannot proceed…"></textarea></div>' +
+      '</div>', '<button class="btn-primary" id="rj-go">Reject claim</button><button class="tbtn" data-drawer-close>Cancel</button>');
+    document.getElementById('rj-go').addEventListener('click', function(){
+      var reason = document.getElementById('rj').value.replace(/^\s+|\s+$/g, '');
+      if (!reason){ LN.toast('A reason is required.'); return; }
+      try { S.rejectClaim(claimId, reason); LN.closeDrawer(); LN.toast('Claim rejected.'); render(); }
+      catch (err){ LN.toast(err.message); }
+    });
+  }
+  function openSuspend(supplierId){
+    var sup = S.getSupplierById(supplierId); if (!sup) return;
+    var head = '<div class="dhead"><div style="flex:1;min-width:0"><div style="font:600 18px var(--font-primary)">Suspend this supplier</div>' +
+      '<div class="tiny" style="margin-top:4px">' + LN.esc(sup.name) + '</div></div><button class="dclose" data-drawer-close>' + I.x + '</button></div>';
+    LN.openDrawer(head + '<div class="dbody">' +
+      '<div class="f-gate"><span style="white-space:normal">This stops guests booking this supplier immediately. Use it for safety and guest-harm problems, not for disputes about who earns.</span></div>' +
+      '<div class="f-field"><label>Reason (required)</label><textarea id="sp" rows="4" placeholder="What happened…"></textarea></div>' +
+      '</div>', '<button class="btn-primary" id="sp-go">Suspend supplier</button><button class="tbtn" data-drawer-close>Cancel</button>');
+    document.getElementById('sp-go').addEventListener('click', function(){
+      var reason = document.getElementById('sp').value.replace(/^\s+|\s+$/g, '');
+      if (!reason){ LN.toast('A reason is required.'); return; }
+      suspendSupplier(supplierId, reason);
+      LN.closeDrawer(); LN.toast(sup.name + ' suspended.'); render();
+    });
+  }
+  // S.suspendSupplier sets the supplier record but can throw before touching
+  // the claim; finish the claim-side suspension ourselves if it does.
+  function suspendSupplier(id, reason){
+    try { S.suspendSupplier(id, reason); }
+    catch (err){
+      var c = S.getClaimBySupplier(id);
+      if (c && ['live','watch'].indexOf(c.state) >= 0){
+        try { S.advanceClaim(c.id, 'suspended', { title:'Supplier suspended', detail: reason || '', actor:'Chekin admin' }); } catch (e2){}
+      }
+    }
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>
