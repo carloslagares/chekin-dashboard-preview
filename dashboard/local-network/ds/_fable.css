@@ -230,16 +230,19 @@ header.top{display:flex;align-items:center;gap:14px;padding:0 44px;height:64px;b
 @media (max-width:1080px){.f-fsum{margin-left:0;width:100%}}
 
 /* ── Table (supply book) ── */
-.f-tablewrap{overflow-x:auto;margin-top:28px}
+/* Pulled into the left gutter so the selected-row rule sits outside the text
+   column rather than up against it. The first cell pads back by the same
+   amount, so the supplier name stays aligned with everything else on the page. */
+.f-tablewrap{overflow-x:auto;margin-top:28px;margin-left:-18px}
 table.f-table{width:100%;border-collapse:collapse;min-width:900px}
 table.f-table th{padding:0 11px 14px;text-align:left;font:600 10.5px var(--font-primary);letter-spacing:.1em;text-transform:uppercase;color:var(--f-faint);border-bottom:1px solid var(--f-hair-strong);white-space:nowrap}
 table.f-table th.num,table.f-table td.num{text-align:right;font-variant-numeric:tabular-nums}
 table.f-table td{padding:19px 11px;border-bottom:1px solid var(--f-hair);font:500 13.5px/19px var(--font-primary);color:var(--f-ink);vertical-align:middle}
-table.f-table th:first-child,table.f-table td:first-child{padding-left:2px}
+table.f-table th:first-child,table.f-table td:first-child{padding-left:18px}
 table.f-table th:last-child,table.f-table td:last-child{padding-right:2px}
 table.f-table tbody tr{cursor:pointer;transition:background .12s}
 table.f-table tbody tr:hover{background:#F7F8FD}
-table.f-table tbody tr.sel{background:var(--f-wash);box-shadow:inset 2px 0 0 var(--f-brand)}
+table.f-table tbody tr.sel{background:var(--f-wash);box-shadow:inset 3px 0 0 var(--f-brand)}
 table.f-table .nm{font:600 14px/18px var(--font-primary);color:var(--f-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:210px}
 table.f-table .em{font:400 12px/16px var(--font-primary);color:var(--f-faint);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:210px}
 table.f-table tr.sum td{border-bottom:none;border-top:1px solid var(--f-navy);padding-top:18px;font:600 13.5px var(--font-primary);color:var(--f-ink);cursor:default;background:none}
