@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chekin — Local Network · Supplier</title>
+<link rel="stylesheet" href="../ds/colors_and_type.css">
+<link rel="stylesheet" href="../ds/_sidebar.css">
+<link rel="stylesheet" href="../ds/_agent.css">
+<link rel="stylesheet" href="ds/_ln.css">
+<style>
+  .moneygrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .moneygrid .mb{padding:12px 14px;border:1px solid var(--stroke-gray-lighter);border-radius:var(--radius-md);background:var(--bg-neutral-light)}
+  .moneygrid .mb .mv{font:800 19px var(--font-primary);color:var(--text-dark);font-variant-numeric:tabular-nums}
+  .moneygrid .mb .ml{font:500 10.5px var(--font-primary);color:var(--text-gray-medium);text-transform:uppercase;letter-spacing:.03em;margin-top:2px}
+  @media (max-width:640px){.moneygrid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div id="sidebar-slot" data-nav="local-network"></div>
+  <main>
+    <header class="top">
+      <div class="crumbs"><a href="index.html"><b>Local Network</b></a> <span class="sep">/</span> <a href="supply-book.html">Supply book</a> <span class="sep">/</span> <span id="crumb">Supplier</span></div>
+      <span data-agent-trigger-slot style="margin-left:auto"></span>
+      <button class="iconbtn" aria-label="Help"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 1 1 5.8 1c0 2-3 2-3 4M12 17h.01"/></svg></button>
+      <button class="iconbtn" aria-label="Notifications"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><div class="pip"></div></button>
+      <div class="user-av">GS</div>
+    </header>
+
+    <div class="page">
+      <div id="ln-firstrun"></div>
+      <div id="ln-persona"></div>
+      <div id="ln-subnav"></div>
+      <div id="ln-body"></div>
+    </div>
+  </main>
+</div>
+
+<div id="ln-drawer-root"></div>
+
+<script src="data/types.js"></script>
+<script src="data/config.js"></script>
+<script src="data/fixtures.js"></script>
+<script src="services/economics.js"></script>
+<script src="services/network-service.js"></script>
+<script src="services/earnings-service.js"></script>
+<script src="services/admin-service.js"></script>
+<script src="agent/agent.js"></script>
+<script src="ds/_ln.js"></script>
+<script src="../ds/_sidebar.js"></script>
+<script src="../ds/_agent.js"></script>
+<script>
+(function(){
+  var S = window.NetworkService, C = window.LN_CONFIG, I = LN.icons;
+  LN.boot({ active:'supply-book' });
+
+  var body = document.getElementById('ln-body');
+  var q = new URLSearchParams(location.search);
+  var claim = q.get('claim') ? S.getClaimById(q.get('claim')) : null;
+  var sup = claim ? S.getSupplierById(claim.supplierId)
+    : (q.get('supplier') ? S.getSupplierById(q.get('supplier')) : null);
+  if (sup && !claim) claim = S.getClaimBySupplier(sup.id);
+
+  if (!sup){
+    body.innerHTML = '<div class="pagehead reveal"><div><h1>Supplier</h1></div></div>'+
+      '<div class="card"><div class="bd">'+LN.empty({ title:'No supplier selected', icon:I.store,
+        body: S.isFirstRun()
+          ? 'First-run mode is on, so there is no network supply yet. Introduce a supplier and this page will show its claim, coverage and economics.'
+          : 'Open a supplier from the supply book or from discover.',
+        cta:{ label:'Open the supply book', onclick:"location.href='supply-book.html'" } })+'</div></div>';
+    return;
+  }
+
+  var dest = S.getDestinationById(sup.destinationId);
+  var persona = S.getPersona();
+  var acctId = S.currentAccountId();
+  // whether the account currently in view actually holds a role on this claim
+  var mine = !!(claim && acctId && S.holdsAnyRole(claim, acctId));
+  var acr = claim ? S.computeAccrual(100, claim, sup, dest) : null;
+  document.getElementById('crumb').textContent = sup.name;
+  document.title = 'Chekin — Local Network · ' + sup.name;
+
+  /* ---------- claim state stepper ---------- */
+  var MAIN = ['screening','pending_supplier','onboarding','live'];
+  var TERMINAL = { watch:'warnstate', suspended:'badstate', terminated:'badstate', expired:'badstate', dormant:'', released:'' };
+  function stepper(){
+    if (!claim) return '<div class="tiny">This supplier has no claim — it is centrally-sourced marketplace supply, so nobody earns a residual on it.</div>';
+    var st = claim.state;
+    var reachedIdx = MAIN.indexOf(st);
+    // states past 'live' on the machine still count as having reached live
+    var pastLive = ['live','watch','suspended','terminated','dormant','released'].indexOf(st) >= 0;
+    var order = ['draft'].concat(MAIN);
+    var curIdx = st==='draft' ? 0 : (reachedIdx >= 0 ? reachedIdx+1 : (pastLive ? 4 : 0));
+    var html = '<div class="claimsteps">'+order.map(function(s,i){
+      var cls = i < curIdx ? 'done' : i === curIdx ? (TERMINAL[st] || 'active') : '';
+      var sub = '';
+      if (i === curIdx){
+        var cd = S.countdownFor(claim);
+        if (cd) sub = cd.overdue ? Math.abs(cd.days)+'d overdue' : cd.days+'d '+cd.label;
+      }
+      return '<div class="cstep '+cls+'"><div class="n">'+(i<curIdx?I.check:(i+1))+'</div>'+
+        '<div class="t">'+LN.esc(LN.stateLabel(s))+'</div>'+(sub?'<div class="sub">'+LN.esc(sub)+'</div>':'')+'</div>';
+    }).join('')+'</div>';
+    if (TERMINAL[st] !== undefined && MAIN.indexOf(st) < 0 && st !== 'draft'){
+      html += '<div class="claim-terminal">'+LN.statePill(st)+'<span>'+LN.esc(terminalNote(st))+'</span>'+LN.countdownChip(claim)+'</div>';
+    }
+    return html;
+  }
+  function terminalNote(st){
+    return ({
+      watch: 'Score is in the at-risk band. Accrual is reduced while the remediation window is open — the supplier stays fully bookable.',
+      suspended: 'Accrual is zero until the claim is reinstated. Two suspensions within 12 months voids the claim. The supplier is unaffected.',
+      terminated: 'The claim has ended. The supplier record stays and can be re-introduced by anyone.',
+      expired: 'The supplier never confirmed within '+C.claimWindows.supplierConfirmDays+' days. They returned to the open pool.',
+      dormant: 'The sourcing host is no longer an active Chekin customer. There is a '+C.claimWindows.dormantReactivationMonths+'-month window to reactivate.',
+      released: 'The reactivation window closed. This supplier is unclaimed and open to anyone.'
+    })[st] || '';
+  }
+
+  /* ---------- roles ---------- */
+  function rolesPanel(){
+    if (!claim) return '<div class="tiny">No claim, so no roles.</div>';
+    return '<div class="roles">'+['sourced','activated','maintained'].map(function(r){
+      var held = (claim.roles||[]).filter(function(x){ return x.role===r && !x.until; })[0];
+      var past = (claim.roles||[]).filter(function(x){ return x.role===r && x.until; })[0];
+      var who = held ? (S.getAccountById(held.holderAccountId)||{}).name : null;
+      return '<div class="role '+(held?'held':'released')+'">'+
+        '<div class="rt"><span class="rn">'+r+'</span><span class="rp">'+C.roleShares[r]+'%</span></div>'+
+        '<div class="rh">'+(who ? LN.esc(who) : 'Not held — this share stays with Chekin')+'</div>'+
+        '<div class="rs">'+(held ? 'since '+LN.relDate(held.since)
+          : past ? LN.esc(past.releaseReason||'Released')+' · '+LN.relDate(past.until) : '—')+'</div>'+
+      '</div>';
+    }).join('')+'</div>'+
+    '<div class="tiny" style="margin-top:11px">Three separable contributions. Usually one host holds all three. A released role is never paid to anyone else — no account ever earns from another account\'s work.</div>';
+  }
+
+  /* ---------- economics ---------- */
+  function economicsPanel(){
+    if (!claim) return '<div class="tiny">Centrally-sourced supply pays no residual.</div>';
+    var accruals = S.getAccruals({ claimId: claim.id });
+    var today = S._dataset.today;
+    var mine = function(a){ return S.shareOf(a, acctId); };
+    var mtd = accruals.filter(function(a){ return a.periodMonth === today.slice(0,7); }).reduce(function(t,a){ return t+mine(a); },0);
+    var ytd = accruals.filter(function(a){ return a.periodMonth.slice(0,4) === today.slice(0,4); }).reduce(function(t,a){ return t+mine(a); },0);
+    var life = accruals.reduce(function(t,a){ return t+mine(a); },0);
+    var byMonth = {};
+    accruals.forEach(function(a){ byMonth[a.periodMonth] = (byMonth[a.periodMonth]||0) + mine(a); });
+    var series = Object.keys(byMonth).sort().slice(-18).map(function(m){ return { month:m, amount:Math.round(byMonth[m]*100)/100 }; });
+
+    return '<div style="display:flex;flex-direction:column;gap:16px">'+
+      '<div>'+
+        '<div class="tiny" style="margin-bottom:7px">Rate on every €100 of bookings, right now</div>'+
+        LN.chain(acr)+
+        '<div class="tiny" style="margin-top:9px">'+
+          (acr.blockedReason ? '' :
+            'Premium available in '+LN.esc(dest.name)+' for '+LN.esc(LN.catLabel(sup.category))+': <b>'+LN.pct(acr.premiumCapPct)+'</b>'+
+            (acr.saturated ? ' — reduced, because '+LN.esc(dest.name)+' already covers this category well.' : ' — the full network premium.'))+
+        '</div>'+
+      '</div>'+
+      '<div class="moneygrid">'+
+        '<div class="mb"><div class="mv">'+LN.money(mtd,{cents:true})+'</div><div class="ml">This month</div></div>'+
+        '<div class="mb"><div class="mv">'+LN.money(ytd,{cents:true})+'</div><div class="ml">Year to date</div></div>'+
+        '<div class="mb"><div class="mv">'+LN.money(life,{cents:true})+'</div><div class="ml">Lifetime</div></div>'+
+      '</div>'+
+      (series.length ? '<div><div class="tiny" style="margin-bottom:6px">Your residual by month</div>'+LN.barChart(series)+'</div>' : '')+
+      (mine ? '' : '<div class="tiny">This claim is held by <b>'+LN.esc((S.getAccountById(claim.sourcingAccountId)||{}).name||'another host')+'</b>, so these figures are theirs, not yours. Your own share on any booking is unaffected either way.</div>')+
+      '<div><button class="tbtn sm" id="see-maths">See the maths</button>'+
+        (mine ? ' <button class="tbtn sm" id="switch-mode">Change sharing mode</button>' : '')+'</div>'+
+    '</div>';
+  }
+
+  /* ---------- persona-specific actions ---------- */
+  function actionBar(){
+    if (!claim) return '';
+    if (persona === 'admin' || persona === 'chekin'){
+      var pending = ['screening','pending_supplier','onboarding'].indexOf(claim.state) >= 0;
+      return '<div class="card reveal"><div class="bd"><div class="toolbar">'+
+        '<span class="tiny" style="font-weight:600">Chekin actions</span>'+
+        (pending ? '<button class="btn-primary" id="a-approve">'+I.check+' Advance this claim</button>' : '')+
+        (['terminated','expired','released'].indexOf(claim.state) < 0 ? '<button class="tbtn danger" id="a-reject">'+I.x+' Reject the claim</button>' : '')+
+        (sup.status !== 'suspended' ? '<button class="tbtn danger" id="a-suspend">Suspend the supplier</button>' : '')+
+        '<div class="spacer"></div><a class="tbtn ghost" href="admin-review.html">Review queue '+I.arrow+'</a>'+
+        '</div><div class="tiny" style="margin-top:9px">Rejecting a claim ends the residual only. Suspending the supplier stops guests booking them — two different decisions, deliberately kept apart.</div></div></div>';
+    }
+    if (persona === 'supplier'){
+      return '<div class="card reveal"><div class="bd"><div class="toolbar">'+
+        '<span class="tiny" style="font-weight:600">Your listing</span>'+
+        (claim.state === 'pending_supplier' ? '<button class="btn-primary" id="a-confirm">'+I.check+' Confirm the introduction</button>' : '')+
+        '<button class="tbtn" onclick="LN.toast(\'Profile editing is not part of this prototype.\')">Complete your profile</button>'+
+        '</div><div class="tiny" style="margin-top:9px">You are viewing this as the supplier. What a host earns for introducing you does not come out of your rate — it comes out of the commission you already agreed.</div></div></div>';
+    }
+    return '';
+  }
+
+  /* ---------- quality ---------- */
+  function qualityPanel(){
+    var hist = sup.scoreHistory || [];
+    var delta = hist.length>1 ? Math.round((hist[hist.length-1]-hist[0])*100)/100 : 0;
+    var susp = (claim && claim.timeline || []).filter(function(e){ return e.kind==='suspended'; });
+    return LN.gauge(sup.score)+
+      '<div style="display:flex;align-items:center;gap:12px;margin:14px 0">'+
+        LN.sparkline(hist)+
+        '<div class="tiny">'+(delta<0 ? '<b style="color:var(--text-danger)">'+delta.toFixed(2)+'</b> over six months'
+          : delta>0 ? '<b style="color:var(--text-success)">+'+delta.toFixed(2)+'</b> over six months'
+          : 'Flat over six months')+'</div>'+
+      '</div>'+
+      LN.drivers(sup.scoreBreakdown)+
+      '<div class="tiny" style="margin-top:12px">Below '+C.qualityFloorForAccrual.toFixed(2)+' nothing accrues at all. '+
+        (sup.score < 0.75 ? 'This supplier is under the ×1.00 band, so the pool is reduced.' : 'This supplier is at or above the ×1.00 band.')+'</div>'+
+      (susp.length ? '<div style="margin-top:14px"><div class="tiny" style="margin-bottom:6px">Suspension history</div>'+
+        susp.map(function(e){ return '<div class="gatewarn" style="margin-bottom:6px">'+I.warn+'<span>'+LN.esc(e.title)+' · '+LN.relDate(e.at)+' — '+LN.esc(e.detail)+'</span></div>'; }).join('')+
+        '<div class="tiny">'+ (claim.suspensionsLast12m||0) +' of '+C.suspensionsVoidingClaim+' suspensions in the last 12 months.</div></div>' : '');
+  }
+
+  /* ---------- content ---------- */
+  var CONTENT_KEYS = ['photos','price_list','cancellation_policy','languages','insurance_certificate','accessibility_notes'];
+  function contentPanel(){
+    return '<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">'+
+      '<div class="meter '+(sup.contentCompleteness>=80?'green':'amber')+'" style="flex:1"><i style="width:'+sup.contentCompleteness+'%"></i></div>'+
+      '<b class="num">'+sup.contentCompleteness+'%</b></div>'+
+      '<div class="checklist">'+CONTENT_KEYS.map(function(k){
+        var missing = (sup.missingContent||[]).indexOf(k)>=0;
+        return '<div class="citem'+(missing?'':' done')+'"><div class="cb">'+(missing?I.plus:I.check)+'</div>'+
+          '<div class="ctx">'+LN.esc(k.replace(/_/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();}))+'</div>'+
+          (missing?'<button class="tbtn sm" data-fix="'+k+'">Request</button>':'')+'</div>';
+      }).join('')+'</div>'+
+      '<div class="tiny" style="margin-top:10px">Insurance '+(sup.insuranceOnFile?'on file':'<b style="color:var(--text-amber)">missing</b>')+
+        ' · Licence '+(sup.licenceOnFile?'on file':'<b style="color:var(--text-amber)">missing</b>')+
+        ' · '+sup.media.length+' media asset'+(sup.media.length===1?'':'s')+'</div>';
+  }
+
+  /* ---------- coverage ---------- */
+  function coveragePanel(){
+    var cov = sup.coverage;
+    return LN.coverageMap(cov.km, cov.capKm, cov.propertiesInCoverage, dest.activeProperties)+
+      '<div class="covreach"><div class="big">'+cov.propertiesInCoverage+'</div>'+
+        '<div class="tx">of '+dest.activeProperties+' properties in '+LN.esc(dest.name)+' can book this supplier.</div></div>'+
+      '<div class="kv" style="margin-top:12px">'+
+        '<div class="row"><div class="k">Basis</div><div class="v">'+LN.esc(cov.basis)+(cov.minutes?' · '+cov.minutes+' min':'')+'</div></div>'+
+        '<div class="row"><div class="k">Radius</div><div class="v">'+cov.km+' km</div></div>'+
+        '<div class="row"><div class="k">Category cap</div><div class="v">'+cov.capKm+' km <span class="tiny">— the most '+LN.esc(LN.catLabel(sup.category))+' can ever reach</span></div></div>'+
+      '</div>';
+  }
+
+  /* ---------- timeline ---------- */
+  function timelinePanel(){
+    if (!claim || !claim.timeline.length) return '<div class="tiny">No events recorded.</div>';
+    return '<div class="timeline">'+claim.timeline.slice().reverse().map(function(e){
+      var k = LN.feedKind(e.kind) || 'info';
+      return '<div class="tl-item '+k+'"><div class="dot">'+LN.feedIcon(e.kind)+'</div>'+
+        '<div class="ct"><div class="t">'+LN.esc(e.title)+'</div>'+
+        '<div class="d">'+LN.esc(e.detail)+'</div>'+
+        '<div class="when">'+LN.relDate(e.at)+' · '+LN.esc(e.actor||'System')+'</div></div></div>';
+    }).join('')+'</div>';
+  }
+
+  /* ---------- render ---------- */
+  var risk = (sup.riskFlags||[]).filter(function(r){ return C.hardGateRisks.indexOf(r)>=0; });
+  body.innerHTML =
+    '<div class="pagehead reveal"><div>'+
+      '<h1>'+LN.esc(sup.name)+' '+(claim?LN.statePill(claim.state):'<span class="badge gray">Unclaimed</span>')+' '+(claim?LN.countdownChip(claim):'')+'</h1>'+
+      '<div class="sub">'+LN.esc(sup.subcategory)+' · '+LN.esc(LN.catLabel(sup.category))+' · '+LN.esc(dest.name)+
+        ' · from '+LN.money(sup.priceFrom)+' · '+LN.esc(sup.legalEntity)+' ('+LN.esc(sup.taxId)+')</div>'+
+      '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">'+
+        (claim?LN.modePill(claim.sharingMode):'')+
+        '<span class="pill">'+LN.esc(sup.origin==='central'?'Central supply':sup.origin==='network'?'Network-sourced':'Property partner')+'</span>'+
+        (sup.aggregatorPresence?'<span class="pill">On an aggregator</span>':'')+
+        (claim && claim.bountyId?'<span class="pill violet">'+I.target+' Bounty-sourced</span>':'')+
+        (claim && claim.selfDealingDeclared?'<span class="badge red">Self-dealing declared</span>':'')+
+        sup.languages.map(function(l){ return '<span class="pill">'+LN.esc(l.toUpperCase())+'</span>'; }).join('')+
+      '</div>'+
+    '</div>'+
+    '<a class="tbtn" href="supply-book.html">Back to the book</a></div>'+
+    (risk.length ? '<div class="gatewarn reveal">'+I.warn+'<span>Safety category — '+LN.esc(risk.join(', '))+'. This supplier always needs a Chekin admin decision, regardless of curator review.</span></div>' : '')+
+    (claim && claim.exclusivityUntil && S.countdownFor(claim) ? '<div class="ln-note reveal"><div class="ic">'+I.clock+'</div><div class="tx">'+
+      '<b>Delayed exclusivity.</b> Exclusive to '+LN.esc((S.getAccountById(claim.sourcingAccountId)||{}).name||'the sourcing host')+
+      ' until '+LN.relDate(claim.exclusivityUntil)+'. The residual starts when the window closes, with a ×'+C.delayedBoostMultiplier+' boost for '+C.delayedBoostMonths+' months.</div></div>' : '')+
+    LN.section('Claim state', stepper())+
+    actionBar()+
+    '<div class="grid-2-1 reveal" style="animation-delay:.06s">'+
+      '<div style="display:flex;flex-direction:column;gap:16px">'+
+        LN.section('Economics', economicsPanel())+
+        LN.section('Roles', rolesPanel())+
+        LN.section('Coverage', coveragePanel())+
+        LN.section('Timeline', timelinePanel())+
+      '</div>'+
+      '<div style="display:flex;flex-direction:column;gap:16px">'+
+        LN.section('Quality', qualityPanel())+
+        LN.section('Content', contentPanel())+
+        LN.section('Contact', '<div class="kv">'+
+          '<div class="row"><div class="k">Contact</div><div class="v">'+LN.esc(sup.contact.name)+'</div></div>'+
+          '<div class="row"><div class="k">Email</div><div class="v">'+LN.esc(sup.contact.email)+'</div></div>'+
+          '<div class="row"><div class="k">Phone</div><div class="v">'+LN.esc(sup.contact.phone)+'</div></div>'+
+          '<div class="row"><div class="k">Live since</div><div class="v">'+(sup.liveAt?LN.relDate(sup.liveAt):'—')+'</div></div>'+
+        '</div>')+
+      '</div>'+
+    '</div>';
+
+  /* ---------- wiring ---------- */
+  var m = document.getElementById('see-maths');
+  if (m) m.addEventListener('click', function(){
+    LN.openEconomicsDrawer({ network:true, poolPct:acr.poolPct, supplierName:sup.name, chainHtml:LN.chain(acr) });
+  });
+  var sm = document.getElementById('switch-mode');
+  if (sm) sm.addEventListener('click', function(){ openModeDrawer(); });
+  document.querySelectorAll('[data-fix]').forEach(function(b){
+    b.addEventListener('click', function(){
+      LN.toast('Requested "'+b.getAttribute('data-fix').replace(/_/g,' ')+'" from '+sup.name+'.');
+    });
+  });
+
+  bind('a-approve', function(){
+    try { S.approveClaim(claim.id); LN.toast('Claim advanced.'); reload(); }
+    catch(err){ LN.toast(err.message); }
+  });
+  bind('a-reject', function(){
+    var reason = window.prompt('Reason for rejecting this claim (required):');
+    if (!reason) return;
+    try { S.rejectClaim(claim.id, reason); LN.toast('Claim rejected. The supplier is unaffected.'); reload(); }
+    catch(err){ LN.toast(err.message); }
+  });
+  bind('a-suspend', function(){
+    var reason = window.prompt('Why is this supplier being suspended? (required)');
+    if (!reason) return;
+    S.suspendSupplier(sup.id, reason); LN.toast(sup.name+' suspended.'); reload();
+  });
+  bind('a-confirm', function(){
+    try { S.advanceClaim(claim.id, 'onboarding', { title:'Supplier confirmed', detail:'Confirmed by '+sup.name+'.', actor:sup.name });
+      LN.toast('Introduction confirmed. Onboarding has '+C.claimWindows.activationDays+' days.'); reload(); }
+    catch(err){ LN.toast(err.message); }
+  });
+  function bind(id, fn){ var el = document.getElementById(id); if (el) el.addEventListener('click', fn); }
+  function reload(){ setTimeout(function(){ location.reload(); }, 700); }
+
+  /* Sharing-mode change uses the agent's propose → diff → confirm flow. */
+  function openModeDrawer(){
+    var opts = ['network','delayed','private'].filter(function(x){ return x !== claim.sharingMode; });
+    var head = '<div class="dhead"><div style="flex:1"><div style="font:600 18px var(--font-primary)">Change sharing mode</div>'+
+      '<div class="tiny" style="margin-top:3px">'+LN.esc(sup.name)+' is currently <b>'+LN.esc(LN.modeLabel(claim.sharingMode))+'</b></div></div>'+
+      '<button class="dclose" data-drawer-close>'+I.x+'</button></div>';
+    var cards = opts.map(function(mode){
+      var p = window.LNAgent.proposeMode(sup, mode);
+      return '<div class="card"><div class="bd">'+
+        '<div style="font:600 15px var(--font-primary);margin-bottom:8px">Switch to '+LN.esc(LN.modeLabel(mode))+'</div>'+
+        '<div class="kv">'+p.diff.map(function(d){
+          return '<div class="row"><div class="k">'+LN.esc(d.property)+'</div>'+
+            '<div class="v"><span class="tiny">'+LN.esc(String(d.before))+'</span> → <b>'+LN.esc(String(d.after))+'</b></div></div>';
+        }).join('')+'</div>'+
+        '<div class="tiny" style="margin:10px 0">'+LN.esc(p.note)+'</div>'+
+        LN.chain(p.afterChain, { small:true })+
+        '<button class="btn-primary" style="margin-top:12px" data-apply="'+mode+'">Confirm this change</button>'+
+      '</div></div>';
+    }).join('');
+    LN.openDrawer(head+'<div class="dbody">'+
+      '<div class="ln-note"><div class="ic">'+I.info+'</div><div class="tx">Every option is priced by the same calculation — only the sharing mode differs. Nothing changes until you confirm.</div></div>'+
+      cards+'</div>', '<button class="tbtn" data-drawer-close>Cancel</button>');
+    document.getElementById('ln-drawer-root').addEventListener('click', function(e){
+      var b = e.target.closest('[data-apply]'); if (!b) return;
+      var p = window.LNAgent.proposeMode(sup, b.getAttribute('data-apply'));
+      var res = window.LNAgent.apply(p);
+      LN.closeDrawer();
+      LN.toast(res.message);
+      setTimeout(function(){ location.reload(); }, 700);
+    });
+  }
+})();
+</script>
+</body>
+</html>

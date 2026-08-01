@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chekin — Local Network · Discover</title>
+<link rel="stylesheet" href="../ds/colors_and_type.css">
+<link rel="stylesheet" href="../ds/_sidebar.css">
+<link rel="stylesheet" href="../ds/_agent.css">
+<link rel="stylesheet" href="ds/_ln.css">
+</head>
+<body>
+<div class="app">
+  <div id="sidebar-slot" data-nav="local-network"></div>
+  <main>
+    <header class="top">
+      <div class="crumbs"><a href="index.html"><b>Local Network</b></a> <span class="sep">/</span> Discover</div>
+      <span data-agent-trigger-slot style="margin-left:auto"></span>
+      <button class="iconbtn" aria-label="Help"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 1 1 5.8 1c0 2-3 2-3 4M12 17h.01"/></svg></button>
+      <button class="iconbtn" aria-label="Notifications"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><div class="pip"></div></button>
+      <div class="user-av">GS</div>
+    </header>
+
+    <div class="page">
+      <div id="ln-firstrun"></div>
+      <div id="ln-persona"></div>
+      <div id="ln-subnav"></div>
+      <div id="ln-body"></div>
+    </div>
+  </main>
+</div>
+
+<div id="ln-drawer-root"></div>
+
+<script src="data/types.js"></script>
+<script src="data/config.js"></script>
+<script src="data/fixtures.js"></script>
+<script src="services/economics.js"></script>
+<script src="services/network-service.js"></script>
+<script src="services/earnings-service.js"></script>
+<script src="services/admin-service.js"></script>
+<script src="agent/agent.js"></script>
+<script src="ds/_ln.js"></script>
+<script src="../ds/_sidebar.js"></script>
+<script src="../ds/_agent.js"></script>
+<script>
+(function(){
+  var S = window.NetworkService, C = window.LN_CONFIG, I = LN.icons;
+  LN.boot({ active:'discover' });
+
+  var body = document.getElementById('ln-body');
+  var persona = S.getPersona();
+  if (persona === 'supplier'){
+    body.innerHTML = '<div class="pagehead"><div><h1>Discover</h1></div></div><div class="card"><div class="bd">'+
+      LN.empty({ title:'Not your view', icon:I.store, body:'Discover is where hosts see the network supply their guests can book.',
+        cta:{ label:'Back to your overview', onclick:"location.href='index.html'" } })+'</div></div>';
+    return;
+  }
+
+  var acct = S.currentAccount() || S.getAccountById('acc_pm_gaditana');
+  var state = { category:'', minScore:'', distance:'', blocked:'', search:'' };
+  var hostShare = C.baseNrpPctOfGmv * C.servingPropertySharePctOfExternalNrp / 100;
+
+  function rows(){
+    // NOTE: this list is ordered by score and distance only. Who sourced a
+    // supplier must never influence what anyone sees — invariant #1.
+    return S.getNetworkSupplyForAccount(acct.id).sort(function(a,b){
+      return b.supplier.score - a.supplier.score || a.distanceKm - b.distanceKm;
+    });
+  }
+  function filtered(all){
+    return all.filter(function(r){
+      if (state.category && r.supplier.category !== state.category) return false;
+      if (state.minScore && r.supplier.score < +state.minScore) return false;
+      if (state.distance && r.distanceKm > +state.distance) return false;
+      if (state.blocked === 'blocked' && !r.blocked) return false;
+      if (state.blocked === 'available' && r.blocked) return false;
+      if (state.search && (r.supplier.name+' '+r.supplier.subcategory).toLowerCase().indexOf(state.search.toLowerCase()) < 0) return false;
+      return true;
+    });
+  }
+
+  function render(){
+    var all = rows(), shown = filtered(all);
+    var blockedCats = acct.blockedCategories || [];
+
+    body.innerHTML =
+      '<div class="pagehead reveal"><div><h1>Network supply for your properties <span class="count">'+shown.length+'</span></h1>'+
+        '<div class="sub">Suppliers other hosts introduced that your guests can now book. You can block any supplier or whole category, at any time, for any reason.</div></div>'+
+        '<a class="tbtn" href="submit.html">'+I.plus+' Introduce your own</a></div>'+
+
+      /* The promise, stated plainly and provably — invariant #2. */
+      '<div class="ln-invariant reveal" style="animation-delay:.02s"><div class="ic">'+I.shield+'</div><div class="tx">'+
+        '<div class="t">Network supply never reduces your share. You earn exactly the same as on centrally-sourced inventory.</div>'+
+        '<div class="d">'+LN.pct(hostShare)+' of booking value comes to you either way. The sourcing host is paid out of the extra '+LN.pct(C.networkPremiumPctOfGmv)+' commission a local supplier accepts — money that would not exist without them.</div>'+
+      '</div><button class="btn-primary" id="see-maths">See the maths</button></div>'+
+
+      '<section class="toolbar reveal" style="animation-delay:.05s">'+
+        '<div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>'+
+        '<input id="q" placeholder="Search network supply…" value="'+LN.esc(state.search)+'"></div>'+
+        '<div class="spacer"></div>'+
+        '<span class="tiny">'+all.filter(function(r){ return r.blocked; }).length+' blocked · '+blockedCats.length+' categor'+(blockedCats.length===1?'y':'ies')+' blocked account-wide</span>'+
+      '</section>'+
+
+      filters(all)+
+      (blockedCats.length ? '<div class="ln-note reveal"><div class="ic">'+I.block+'</div><div class="tx">'+
+        '<b>Blocked categories:</b> '+blockedCats.map(function(c){ return LN.esc(LN.catLabel(c)); }).join(', ')+
+        ' — no supplier in these categories is offered at any of your properties. '+
+        '<button class="tbtn sm" id="clear-cats" style="margin-left:6px">Manage</button></div></div>' : '')+
+
+      '<div class="grid3 reveal" id="grid" style="animation-delay:.1s">'+
+        (shown.length ? shown.map(card).join('') : LN.empty({
+          title: all.length ? 'Nothing matches these filters' : 'No network supply here yet',
+          icon: I.store,
+          body: all.length ? 'Clear a filter to see the rest of the network supply available to your properties.'
+            : 'Nobody has introduced a local supplier that covers your properties yet. You could be the first — and you would earn on every booking they generate.',
+          cta: all.length ? null : { label:'Introduce a supplier', onclick:"location.href='submit.html'" }
+        }))+
+      '</div>';
+    wire();
+  }
+
+  function filters(all){
+    function group(id, label, opts, cur){
+      return '<div class="chips" data-group="'+id+'"><span class="tiny" style="margin-right:2px">'+label+'</span>'+
+        opts.map(function(o){
+          return '<button class="chip'+(cur===o.v?' active':'')+'" data-val="'+LN.esc(o.v)+'">'+LN.esc(o.l)+
+            (o.f?' <span class="count">'+all.filter(o.f).length+'</span>':'')+'</button>';
+        }).join('')+'</div>';
+    }
+    var cats = [];
+    all.forEach(function(r){ if (cats.indexOf(r.supplier.category)<0) cats.push(r.supplier.category); });
+    return '<section class="reveal" style="animation-delay:.08s;display:flex;flex-direction:column;gap:10px">'+
+      group('category','Category', [{v:'',l:'All',f:function(){return true;}}].concat(cats.sort().map(function(c){
+        return { v:c, l:LN.catLabel(c), f:function(r){ return r.supplier.category===c; } };
+      })), state.category)+
+      group('minScore','Score', [{v:'',l:'Any'},{v:'0.9',l:'0.90+',f:function(r){return r.supplier.score>=0.9;}},
+        {v:'0.8',l:'0.80+',f:function(r){return r.supplier.score>=0.8;}},
+        {v:'0.7',l:'0.70+',f:function(r){return r.supplier.score>=0.7;}}], state.minScore)+
+      group('distance','Distance', [{v:'',l:'Any'},{v:'2',l:'≤2 km',f:function(r){return r.distanceKm<=2;}},
+        {v:'5',l:'≤5 km',f:function(r){return r.distanceKm<=5;}},
+        {v:'10',l:'≤10 km',f:function(r){return r.distanceKm<=10;}}], state.distance)+
+      group('blocked','Status', [{v:'',l:'All',f:function(){return true;}},
+        {v:'available',l:'Bookable',f:function(r){return !r.blocked;}},
+        {v:'blocked',l:'Blocked',f:function(r){return r.blocked;}}], state.blocked)+
+    '</section>';
+  }
+
+  function card(r){
+    var s = r.supplier, band = S.qualityBand(s.score);
+    return '<div class="card scard'+(r.blocked?' blocked':'')+'">'+
+      '<div class="st"><div class="sav">'+I.store+'</div>'+
+        '<h3><a href="'+LN.supplierHref(s)+'">'+LN.esc(s.name)+'</a></h3>'+
+        (r.blocked?'<span class="badge red">Blocked</span>':'<span class="badge green">Bookable</span>')+'</div>'+
+      '<p class="desc">'+LN.esc(s.subcategory)+' · from '+LN.money(s.priceFrom)+'</p>'+
+      '<div class="meta">'+
+        '<span class="pill brand">'+LN.esc(LN.catLabel(s.category))+'</span>'+
+        '<span class="pill">'+r.distanceKm+' km</span>'+
+        '<span class="badge '+(band.multiplier>=1.25?'green':band.multiplier>=1?'blue':'amber')+'">'+s.score.toFixed(2)+' · '+LN.esc(band.label)+'</span>'+
+      '</div>'+
+      /* Attribution is informational only — it never affects ordering. */
+      '<div class="attrib">'+I.users+(r.sourcedByOther
+        ? 'Sourced by '+LN.esc(r.sourcedByName)
+        : 'Sourced by you')+'</div>'+
+      '<div class="tiny">Available at '+r.properties.length+' of your propert'+(r.properties.length===1?'y':'ies')+'</div>'+
+      '<div class="ft">'+
+        '<span class="tiny">You keep '+LN.pct(hostShare)+'</span><span class="spacer"></span>'+
+        '<button class="tbtn sm'+(r.blocked?' brand':'')+'" data-block="'+s.id+'">'+(r.blocked?'Unblock':I.block+' Block')+'</button>'+
+        '<button class="tbtn sm" data-blockcat="'+s.category+'" title="Block every supplier in this category">Block category</button>'+
+      '</div>'+
+    '</div>';
+  }
+
+  function wire(){
+    document.querySelectorAll('[data-group]').forEach(function(el){
+      el.addEventListener('click', function(e){
+        var chip = e.target.closest('.chip'); if (!chip) return;
+        state[el.getAttribute('data-group')] = chip.getAttribute('data-val');
+        render();
+      });
+    });
+    var qi = document.getElementById('q');
+    if (qi) qi.addEventListener('input', function(){ state.search = qi.value; render(); qi = document.getElementById('q'); if(qi){ qi.focus(); qi.setSelectionRange(qi.value.length, qi.value.length); } });
+
+    var grid = document.getElementById('grid');
+    grid.addEventListener('click', function(e){
+      var b = e.target.closest('[data-block]');
+      if (b){
+        var id = b.getAttribute('data-block'), s = S.getSupplierById(id);
+        var isBlocked = S.getProperties(acct.id).some(function(p){ return p.blockedSupplierIds.indexOf(id)>=0; });
+        if (isBlocked){ S.unblockSupplierForAccount(acct.id, id); LN.toast(s.name+' is bookable again.'); }
+        else { S.blockSupplierForAccount(acct.id, id); LN.toast(s.name+' blocked at your properties. Their claim, score and other hosts are unaffected.'); }
+        render(); return;
+      }
+      var bc = e.target.closest('[data-blockcat]');
+      if (bc){
+        var cat = bc.getAttribute('data-blockcat');
+        S.blockCategoryForAccount(acct.id, cat);
+        var on = (acct.blockedCategories||[]).indexOf(cat) >= 0;
+        LN.toast(on ? LN.catLabel(cat)+' blocked across all your properties.' : LN.catLabel(cat)+' unblocked.');
+        render();
+      }
+    });
+
+    var cc = document.getElementById('clear-cats');
+    if (cc) cc.addEventListener('click', openCategoryDrawer);
+
+    var sm = document.getElementById('see-maths');
+    if (sm) sm.addEventListener('click', function(){
+      // use a real live claim so the numbers on screen are the real ones
+      var sample = rows().filter(function(r){ return r.claim && r.claim.state==='live'; })[0];
+      if (!sample){ LN.openEconomicsDrawer({ network:true, poolPct:C.basePoolPctOfGmv }); return; }
+      var d = S.getDestinationById(sample.supplier.destinationId);
+      var a = S.computeAccrual(100, sample.claim, sample.supplier, d);
+      LN.openEconomicsDrawer({ network:true, poolPct:a.poolPct, supplierName:sample.supplier.name, chainHtml:LN.chain(a) });
+    });
+  }
+
+  function openCategoryDrawer(){
+    var blocked = acct.blockedCategories || [];
+    var head = '<div class="dhead"><div style="flex:1"><div style="font:600 18px var(--font-primary)">Blocked categories</div>'+
+      '<div class="tiny" style="margin-top:3px">Applies to every property on '+LN.esc(acct.name)+'</div></div>'+
+      '<button class="dclose" data-drawer-close>'+I.x+'</button></div>';
+    var list = '<div class="checklist">'+LN.categories().map(function(c){
+      var on = blocked.indexOf(c) >= 0;
+      return '<div class="citem'+(on?'':' done')+'"><div class="cb">'+(on?I.block:I.check)+'</div>'+
+        '<div class="ctx">'+LN.esc(LN.catLabel(c))+'</div>'+
+        '<button class="tbtn sm'+(on?' brand':'')+'" data-togglecat="'+c+'">'+(on?'Unblock':'Block')+'</button></div>';
+    }).join('')+'</div>';
+    LN.openDrawer(head+'<div class="dbody">'+
+      '<div class="ln-note"><div class="ic">'+I.shield+'</div><div class="tx">Blocking a category is absolute — no supplier in it is ever offered at your properties, whoever introduced them. It has no effect on their claims or on other hosts.</div></div>'+
+      LN.section('Categories', list)+'</div>', '<button class="tbtn" data-drawer-close>Done</button>');
+    document.getElementById('ln-drawer-root').addEventListener('click', function(e){
+      var b = e.target.closest('[data-togglecat]'); if (!b) return;
+      S.blockCategoryForAccount(acct.id, b.getAttribute('data-togglecat'));
+      LN.closeDrawer(); render();
+    });
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>

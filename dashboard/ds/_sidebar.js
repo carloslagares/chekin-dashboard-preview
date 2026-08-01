@@ -36,6 +36,10 @@
       <svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 3.6a3.2 3.2 0 0 1 0 6.2M18.5 20a5.5 5.5 0 0 0-3.2-5"/><path d="M19 6.5 19.6 8 21 8.6 19.6 9.2 19 10.7 18.4 9.2 17 8.6 18.4 8 Z"/></svg>
       Guest CRM
     </div>
+    <div class="nav-item" data-k="local-network">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.6"/><circle cx="5" cy="5.5" r="2"/><circle cx="19" cy="5.5" r="2"/><circle cx="5" cy="18.5" r="2"/><circle cx="19" cy="18.5" r="2"/><path d="m6.6 7.1 3.6 3.4M17.4 7.1l-3.6 3.4M6.6 16.9l3.6-3.4M17.4 16.9l-3.6-3.4"/></svg>
+      Local Network
+    </div>
     <div class="nav-item" data-k="documents">
       <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></svg>
       Documents
@@ -184,14 +188,16 @@
       compTaxes.insertAdjacentHTML('afterend', VIEWS);
     }
     // Resolve hrefs relative to the project root regardless of page depth.
-    // Guest CRM pages live under /guest-crm/, dashboard pages at the root.
-    const inCrm = location.pathname.indexOf('/guest-crm/') >= 0;
-    const base = inCrm ? '../' : '';
+    // Self-contained modules live one level down (/guest-crm/, /local-network/);
+    // dashboard pages sit at the root.
+    const inModule = /\/(guest-crm|local-network)\//.test(location.pathname);
+    const base = inModule ? '../' : '';
     const NAV_HREFS = {
       home:              base + 'index.html',
       bookings:          base + 'bookings.html',
       properties:        base + 'properties.html',
       'guest-crm':       base + 'guest-crm/index.html',
+      'local-network':   base + 'local-network/index.html',
       'view-agenda':     base + 'index.html?view=agenda',
       'view-compliance': base + 'index.html?view=compliance',
       'view-ai':         base + 'index.html?view=ai',

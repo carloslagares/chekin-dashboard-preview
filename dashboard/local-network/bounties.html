@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chekin — Local Network · Bounties</title>
+<link rel="stylesheet" href="../ds/colors_and_type.css">
+<link rel="stylesheet" href="../ds/_sidebar.css">
+<link rel="stylesheet" href="../ds/_agent.css">
+<link rel="stylesheet" href="ds/_ln.css">
+</head>
+<body>
+<div class="app">
+  <div id="sidebar-slot" data-nav="local-network"></div>
+  <main>
+    <header class="top">
+      <div class="crumbs"><a href="index.html"><b>Local Network</b></a> <span class="sep">/</span> Bounties</div>
+      <span data-agent-trigger-slot style="margin-left:auto"></span>
+      <button class="iconbtn" aria-label="Help"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 1 1 5.8 1c0 2-3 2-3 4M12 17h.01"/></svg></button>
+      <button class="iconbtn" aria-label="Notifications"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><div class="pip"></div></button>
+      <div class="user-av">GS</div>
+    </header>
+
+    <div class="page">
+      <div id="ln-firstrun"></div>
+      <div id="ln-persona"></div>
+      <div id="ln-subnav"></div>
+      <div id="ln-body"></div>
+    </div>
+  </main>
+</div>
+
+<div id="ln-drawer-root"></div>
+
+<script src="data/types.js"></script>
+<script src="data/config.js"></script>
+<script src="data/fixtures.js"></script>
+<script src="services/economics.js"></script>
+<script src="services/network-service.js"></script>
+<script src="services/earnings-service.js"></script>
+<script src="services/admin-service.js"></script>
+<script src="agent/agent.js"></script>
+<script src="ds/_ln.js"></script>
+<script src="../ds/_sidebar.js"></script>
+<script src="../ds/_agent.js"></script>
+<script>
+(function(){
+  var S = window.NetworkService, C = window.LN_CONFIG, I = LN.icons;
+  LN.boot({ active:'bounties' });
+
+  var body = document.getElementById('ln-body');
+  var persona = S.getPersona();
+  var canManage = persona === 'chekin' || persona === 'admin';
+  var q = new URLSearchParams(location.search);
+  var state = { destination: q.get('destination') || '', category:'', sort:'value', status:'open' };
+
+  /** Five-year value of filling a gap. Built from computeAccrual on a
+   *  synthetic claim, exactly like the service's year-1 figure. */
+  function fiveYear(b){
+    var today = S._dataset.today, dest = S.getDestinationById(b.destinationId);
+    var gmv = S.assumedGmv(b.category), monthly = gmv/12, total = 0;
+    var supplier = { id:'sup_p', category:b.category, score:0.85 };
+    for (var m=0;m<60;m++){
+      var liveAt = shift(today, -m);
+      total += S.computeAccrual(monthly, { id:'clm_p', state:'live', sharingMode:'network', liveAt:liveAt,
+        networkAt:liveAt, bountyId:b.id, roles:['sourced','activated','maintained'].map(function(r){
+          return { role:r, holderAccountId:'_', sharePct:C.roleShares[r], since:liveAt, until:null }; })
+      }, supplier, dest, today).poolAmount;
+    }
+    return Math.round(total);
+  }
+  function shift(iso,n){ var d=new Date(iso+'T00:00:00Z'); d.setUTCMonth(d.getUTCMonth()+n); return d.toISOString().slice(0,10); }
+
+  function list(){
+    var rows = S.getBounties({});
+    if (state.status) rows = rows.filter(function(b){ return b.status === state.status; });
+    if (state.destination) rows = rows.filter(function(b){ return b.destinationId === state.destination; });
+    if (state.category) rows = rows.filter(function(b){ return b.category === state.category; });
+    rows.forEach(function(b){ b._five = fiveYear(b); });
+    rows.sort(function(a,b){
+      if (state.sort === 'value') return b._five - a._five;
+      if (state.sort === 'urgency') return a.daysLeft - b.daysLeft;
+      return b.gapEvidence.emptyDecisions - a.gapEvidence.emptyDecisions;
+    });
+    return rows;
+  }
+
+  function render(){
+    var rows = list();
+    var open = S.getBounties({ status:'open' });
+    var totalValue = open.reduce(function(t,b){ return t + fiveYear(b); }, 0);
+
+    body.innerHTML =
+      '<div class="pagehead reveal"><div><h1>Bounty board <span class="count">'+rows.length+'</span></h1>'+
+        '<div class="sub">Gaps where guests keep searching and no supplier can serve them. Fill one and the sourcing pool is boosted ×'+C.bountyBoostMultiplier+' for '+C.bountyBoostMonths+' months, on top of an activation bonus. Every host in the destination sees the same board.</div></div>'+
+        (canManage ? '<button class="btn-primary" id="new-bounty">'+I.plus+' Publish a bounty</button>'
+                   : '<a class="btn-primary" href="submit.html">'+I.plus+' Submit a supplier</a>')+'</div>'+
+
+      '<section class="kpis reveal" style="animation-delay:.04s">'+
+        LN.kpi({ ic:'violet', svg:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.4"/>', v:open.length, l:'Open bounties' })+
+        LN.kpi({ ic:'amber', svg:'<path d="M12 2 13.5 8 19 9.5 13.5 11 12 17 10.5 11 5 9.5 10.5 8 Z"/>', v:'×'+C.bountyBoostMultiplier.toFixed(2), l:'Boost for '+C.bountyBoostMonths+' months' })+
+        LN.kpi({ ic:'green', svg:'<circle cx="12" cy="12" r="9"/><path d="M12 7v10M14.5 9.5A2.5 2.5 0 0 0 12 8h-.5a2 2 0 0 0 0 4h1a2 2 0 0 1 0 4H12a2.5 2.5 0 0 1-2.5-1.5"/>', v:LN.money(totalValue), l:'5-year value on the board' })+
+        LN.kpi({ ic:'red', svg:'<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4"/>',
+          v:LN.num(open.reduce(function(t,b){ return t+b.gapEvidence.emptyDecisions; },0)), l:'Guest searches with no supplier' })+
+      '</section>'+
+
+      filters()+
+
+      '<div class="grid3 reveal" id="grid" style="animation-delay:.1s">'+
+        (rows.length ? rows.map(card).join('') : LN.empty({
+          title:'No bounties here', icon:I.target,
+          body: state.destination || state.category
+            ? 'Nothing matches these filters. Clear them to see the whole board.'
+            : 'Chekin publishes a bounty when guests repeatedly search for something no supplier covers. Nothing is open right now.'
+        }))+
+      '</div>';
+    wire();
+  }
+
+  function filters(){
+    function group(id, label, opts, cur){
+      return '<div class="chips" data-group="'+id+'"><span class="tiny" style="margin-right:2px">'+label+'</span>'+
+        opts.map(function(o){ return '<button class="chip'+(cur===o.v?' active':'')+'" data-val="'+LN.esc(o.v)+'">'+LN.esc(o.l)+'</button>'; }).join('')+'</div>';
+    }
+    var cats = [];
+    S.getBounties({}).forEach(function(b){ if (cats.indexOf(b.category)<0) cats.push(b.category); });
+    return '<section class="reveal" style="animation-delay:.08s;display:flex;flex-direction:column;gap:10px">'+
+      group('destination','Destination', [{v:'',l:'All'}].concat(S.getDestinations().map(function(d){ return {v:d.id,l:d.name}; })), state.destination)+
+      group('category','Category', [{v:'',l:'All'}].concat(cats.sort().map(function(c){ return {v:c,l:LN.catLabel(c)}; })), state.category)+
+      group('status','Status', [{v:'open',l:'Open'},{v:'claimed',l:'Claimed'},{v:'closed',l:'Closed'},{v:'',l:'All'}], state.status)+
+      group('sort','Sort by', [{v:'value',l:'Value'},{v:'urgency',l:'Expiring soonest'},{v:'gap',l:'Biggest gap'}], state.sort)+
+    '</section>';
+  }
+
+  function card(b){
+    var claimedBy = b.claimedByAccountId ? (S.getAccountById(b.claimedByAccountId)||{}).name : null;
+    var urgent = b.daysLeft <= 14;
+    return '<div class="card bcard">'+
+      '<div class="boost">×'+b.boostMultiplier.toFixed(2)+' boost</div>'+
+      '<h3>'+LN.esc(b.title)+'</h3>'+
+      '<div class="meta">'+
+        '<span class="pill brand">'+LN.esc(LN.catLabel(b.category))+'</span>'+
+        '<span class="pill">'+LN.esc(b.destination.name)+'</span>'+
+        (b.status === 'open'
+          ? '<span class="cdown'+(urgent?' warn':'')+'">'+I.clock+(b.daysLeft > 0 ? b.daysLeft+'d left' : 'expired')+'</span>'
+          : '<span class="badge '+(b.status==='claimed'?'green':'gray')+'">'+LN.esc(b.status)+(claimedBy?' · '+LN.esc(claimedBy):'')+'</span>')+
+      '</div>'+
+      '<div class="gap">'+
+        '<div class="g1">'+LN.num(b.gapEvidence.emptyDecisions)+' guest searches ended with no eligible supplier</div>'+
+        '<div class="g2">'+LN.num(b.gapEvidence.searches)+' searches for '+LN.esc(LN.catLabel(b.category).toLowerCase())+' in '+LN.esc(b.destination.name)+', '+LN.esc(b.gapEvidence.period)+'.</div>'+
+      '</div>'+
+      '<div class="money">'+
+        '<div class="mbox"><div class="mv">'+LN.money(b.projectedAnnualResidual)+'</div><div class="ml">Projected year 1</div></div>'+
+        '<div class="mbox"><div class="mv">'+LN.money(b._five || fiveYear(b))+'</div><div class="ml">Over 5 years</div></div>'+
+      '</div>'+
+      '<div class="tiny">Plus a <b>'+LN.money(b.activationBonus)+'</b> one-off activation bonus when they go live. Projection assumes '+LN.money(S.assumedGmv(b.category))+' of annual bookings for a good-quality supplier.</div>'+
+      '<div class="ft">'+
+        '<button class="tbtn sm" data-explain="'+b.id+'">How is this calculated?</button><span class="spacer"></span>'+
+        (canManage
+          ? '<button class="tbtn sm" data-close="'+b.id+'">Close</button>'
+          : b.status === 'open'
+            ? '<a class="btn-primary" style="height:30px;padding:0 12px;font-size:12.5px" href="submit.html?bounty='+b.id+'">Fill this gap</a>'
+            : '<span class="tiny">'+(claimedBy ? 'Claimed by '+LN.esc(claimedBy) : 'Closed')+'</span>')+
+      '</div>'+
+    '</div>';
+  }
+
+  function wire(){
+    document.querySelectorAll('[data-group]').forEach(function(el){
+      el.addEventListener('click', function(e){
+        var chip = e.target.closest('.chip'); if (!chip) return;
+        state[el.getAttribute('data-group')] = chip.getAttribute('data-val');
+        render();
+      });
+    });
+    var grid = document.getElementById('grid');
+    grid.addEventListener('click', function(e){
+      var ex = e.target.closest('[data-explain]');
+      if (ex){ explain(ex.getAttribute('data-explain')); return; }
+      var cl = e.target.closest('[data-close]');
+      if (cl){ S.closeBounty(cl.getAttribute('data-close')); LN.toast('Bounty closed.'); render(); }
+    });
+    var nb = document.getElementById('new-bounty');
+    if (nb) nb.addEventListener('click', openNewBounty);
+  }
+
+  function explain(id){
+    var b = S.getBounties({}).filter(function(x){ return x.id===id; })[0]; if (!b) return;
+    var today = S._dataset.today, dest = S.getDestinationById(b.destinationId);
+    var gmv = S.assumedGmv(b.category);
+    var a = S.computeAccrual(gmv, { id:'clm_p', state:'live', sharingMode:'network', liveAt:today, networkAt:today,
+      bountyId:b.id, roles:['sourced','activated','maintained'].map(function(r){
+        return { role:r, holderAccountId:'_', sharePct:C.roleShares[r], since:today, until:null }; }) },
+      { id:'sup_p', category:b.category, score:0.85 }, dest, today);
+    var head = '<div class="dhead"><div style="flex:1"><div style="font:600 18px var(--font-primary)">'+LN.esc(b.title)+'</div>'+
+      '<div class="tiny" style="margin-top:3px">'+LN.esc(dest.name)+' · '+LN.esc(LN.catLabel(b.category))+'</div></div>'+
+      '<button class="dclose" data-drawer-close>'+I.x+'</button></div>';
+    LN.openDrawer(head+'<div class="dbody">'+
+      LN.section('Year-one rate', LN.chain(a)+'<div class="tiny" style="margin-top:9px">On '+LN.money(gmv)+' of annual bookings. '+
+        (a.saturated ? LN.esc(dest.name)+' already covers this category, so the premium is capped at '+LN.pct(a.premiumCapPct)+'.'
+          : 'Full premium of '+LN.pct(a.premiumCapPct)+' applies here.')+'</div>')+
+      LN.section('Year by year', '<div class="kv">'+C.decaySchedule.map(function(s,i){
+        var la = shift(today, -(i*12));
+        var yr = S.computeAccrual(gmv, { id:'clm_p', state:'live', sharingMode:'network', liveAt:la, networkAt:la,
+          bountyId:b.id, roles:[{role:'sourced',holderAccountId:'_',sharePct:100,since:la,until:null}] },
+          { id:'sup_p', category:b.category, score:0.85 }, dest, today);
+        return '<div class="row"><div class="k">'+LN.esc(s.label)+'</div><div class="v">'+LN.pct(yr.poolPct)+' → '+LN.money(yr.poolAmount)+
+          (i===0 && a.bountyBoost>1 ? ' <span class="badge amber">boost active</span>' : '')+'</div></div>';
+      }).join('')+'</div>'+
+      '<div class="tiny" style="margin-top:10px">The ×'+C.bountyBoostMultiplier+' boost runs for '+C.bountyBoostMonths+' months, then the normal decay schedule takes over.</div>')+
+      LN.section('The evidence', '<div class="gap"><div class="g1">'+LN.num(b.gapEvidence.emptyDecisions)+' searches with no eligible supplier</div>'+
+        '<div class="g2">Out of '+LN.num(b.gapEvidence.searches)+' searches, '+LN.esc(b.gapEvidence.period)+'. Bounties are published from real demand, not guesswork.</div></div>')+
+      '</div>', b.status==='open' && !canManage
+        ? '<a class="btn-primary" href="submit.html?bounty='+b.id+'">Fill this gap</a><button class="tbtn" data-drawer-close>Close</button>'
+        : '<button class="tbtn" data-drawer-close>Close</button>');
+  }
+
+  function openNewBounty(){
+    var head = '<div class="dhead"><div style="flex:1"><div style="font:600 18px var(--font-primary)">Publish a bounty</div>'+
+      '<div class="tiny" style="margin-top:3px">Visible to every host in the destination</div></div>'+
+      '<button class="dclose" data-drawer-close>'+I.x+'</button></div>';
+    LN.openDrawer(head+'<div class="dbody">'+LN.section('Details',
+      '<div class="field"><label>Title</label><input id="b-title" placeholder="e.g. Evening private chef"></div>'+
+      '<div class="fieldgrid" style="margin-top:12px">'+
+        '<div class="field"><label>Destination</label><select id="b-dest">'+S.getDestinations().map(function(d){ return '<option value="'+d.id+'">'+LN.esc(d.name)+'</option>'; }).join('')+'</select></div>'+
+        '<div class="field"><label>Category</label><select id="b-cat">'+LN.categories().map(function(c){ return '<option value="'+c+'">'+LN.esc(LN.catLabel(c))+'</option>'; }).join('')+'</select></div>'+
+        '<div class="field"><label>Searches with no supplier</label><input id="b-empty" type="number" value="120"></div>'+
+        '<div class="field"><label>Activation bonus ('+C.currency+')</label><input id="b-bonus" type="number" value="150"></div>'+
+      '</div>')+
+      '<div class="ln-note"><div class="ic">'+I.info+'</div><div class="tx">The boost is fixed at ×'+C.bountyBoostMultiplier+' for '+C.bountyBoostMonths+' months by config — it is not set per bounty.</div></div>'+
+      '</div>', '<button class="btn-primary" id="b-save">Publish</button><button class="tbtn" data-drawer-close>Cancel</button>');
+    document.getElementById('b-save').addEventListener('click', function(){
+      var title = document.getElementById('b-title').value.trim();
+      if (!title){ LN.toast('Give the bounty a title first.'); return; }
+      var empty = +document.getElementById('b-empty').value || 0;
+      S.createBounty({
+        title: title, destinationId: document.getElementById('b-dest').value,
+        category: document.getElementById('b-cat').value,
+        gapEvidence: { searches: Math.round(empty*1.15), emptyDecisions: empty, period:'last 30 days' },
+        activationBonus: +document.getElementById('b-bonus').value || 0, days: 60
+      });
+      LN.closeDrawer(); LN.toast('Bounty published.'); state.status='open'; render();
+    });
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>

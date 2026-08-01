@@ -17,6 +17,14 @@ dashboard/            ← THE APP. Self-contained, exportable as-is.
                         segments, deals, automation, consent), data/, services/,
                         agent/ and ds/_crm.*. It only consumes ../ds/ (shared
                         design system) and links back via ../index.html.
+  local-network/      ← LOCAL NETWORK. Supply-side residual programme inside the
+                        AppSell marketplace: a host introduces a local supplier,
+                        who then becomes bookable by every property in coverage,
+                        and the introducing host earns an ongoing residual.
+                        Same self-contained shape: pages (overview, supply book,
+                        supplier detail, submit wizard, discover, bounties, admin
+                        review), data/, services/, agent/ and ds/_ln.*.
+                        All economics live in data/config.js.
 
 docs/                 ← documentation only — NOT needed to run anything
   ONBOARDING_PRD.md   onboarding + first-run PRD (frontend)
@@ -54,6 +62,15 @@ python3 -m http.server 8080
 | `dashboard/index.html?view=firstrun` | First-run home (post-onboarding) |
 | `dashboard/onboarding.html?demo=ops&go=1` | Preset demo → personalized first-run (also: compliance, cleaning, manual, multi, all) |
 | `dashboard/guest-crm/index.html` | Guest CRM |
+| `dashboard/local-network/index.html` | Local Network — host overview (default persona: PM) |
+| `dashboard/local-network/index.html?first_run=1` | Local Network before anything exists — the true empty state |
+| `dashboard/local-network/supply-book.html` | The host's portfolio: claims, decay curve, 5-year book value |
+| `dashboard/local-network/submit.html` | Submit-a-supplier wizard (5 steps) |
+| `dashboard/local-network/submit.html?bounty=bty_cad_transfer` | The wizard pre-filled from a bounty |
+| `dashboard/local-network/supplier-detail.html?supplier=sup_riera` | One supplier: claim stepper, roles, economics, quality |
+| `dashboard/local-network/discover.html` | Network supply available to my properties, with the veto |
+| `dashboard/local-network/bounties.html` | Bounty board — demand gaps with boosted rates |
+| `dashboard/local-network/admin-review.html` | Chekin admin: claim queue, flags, quality watch (Admin persona) |
 
 These are prototypes (HTML/CSS/JS), not production code — recreate in the product
 stack; match the visual output, not the internal structure.
