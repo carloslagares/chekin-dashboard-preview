@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chekin — Local Network</title>
+<link rel="stylesheet" href="../ds/colors_and_type.css">
+<link rel="stylesheet" href="../ds/_sidebar.css">
+<link rel="stylesheet" href="../ds/_agent.css">
+<link rel="stylesheet" href="ds/_fable.css">
+</head>
+<body>
+<div class="app">
+  <div id="sidebar-slot" data-nav="local-network"></div>
+  <main>
+    <header class="top">
+      <div class="crumbs"><b>Local Network</b> <span class="sep">/</span> Overview</div>
+      <span data-agent-trigger-slot style="margin-left:auto"></span>
+      <button class="iconbtn" aria-label="Help"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 1 1 5.8 1c0 2-3 2-3 4M12 17h.01"/></svg></button>
+      <button class="iconbtn" aria-label="Notifications"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><div class="pip"></div></button>
+      <div class="user-av">GS</div>
+    </header>
+
+    <div class="page">
+      <nav class="f-tabs" aria-label="Local Network sections">
+        <a class="on" href="index-fable.html">Overview</a>
+        <a href="supply-book-fable.html">Supply book</a>
+        <a href="discover.html">Discover</a>
+        <a href="bounties.html">Bounties</a>
+      </nav>
+      <div id="ln-body"></div>
+    </div>
+  </main>
+</div>
+
+<div id="ln-drawer-root"></div>
+
+<script src="data/types.js"></script>
+<script src="data/config.js"></script>
+<script src="data/fixtures.js"></script>
+<script src="services/economics.js"></script>
+<script src="services/network-service.js"></script>
+<script src="services/earnings-service.js"></script>
+<script src="services/admin-service.js"></script>
+<script src="agent/agent.js"></script>
+<script src="ds/_ln.js"></script>
+<script src="../ds/_sidebar.js"></script>
+<script src="../ds/_agent.js"></script>
+<script>
+(function(){
+  'use strict';
+  var S = window.NetworkService;
+  var body = document.getElementById('ln-body');
+
+  // This redesign renders the owner (PM) view regardless of the stored persona.
+  var persona = S.getPersona();
+  var acctId = S.currentAccountId();
+  if (!acctId || (persona !== 'pm' && persona !== 'host')) acctId = S._dataset.personaAccounts.pm;
+  var acct = S.getAccountById(acctId);
+
+  var ARROW = '<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+  var PLUS  = '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>';
+
+  /* ---------- small chart: 12-month trend sparkline ----------
+     De-emphasis hue for the path, accent dot on the current month. */
+  function spark(values){
+    var vals = (values || []).slice();
+    if (vals.length < 2) vals = [0, 0];
+    var W = 78, H = 30, P = 4;
+    var max = Math.max.apply(null, vals), min = Math.min.apply(null, vals);
+    var span = (max - min) || 1;
+    var pts = vals.map(function(v, i){
+      return [(P + (i / (vals.length - 1)) * (W - 2 * P)).toFixed(1),
+              (H - P - ((v - min) / span) * (H - 2 * P)).toFixed(1)];
+    });
+    var d = pts.map(function(p, i){ return (i ? 'L' : 'M') + p[0] + ' ' + p[1]; }).join(' ');
+    var last = pts[pts.length - 1];
+    return '<svg width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '" aria-hidden="true">' +
+      '<path d="' + d + '" fill="none" stroke="#C9D4FB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' +
+      '<circle cx="' + last[0] + '" cy="' + last[1] + '" r="3.4" fill="#385BF8" stroke="#FFFFFF" stroke-width="2"/></svg>';
+  }
+
+  function stateWord(state){
+    return '<span class="f-state ' + LN.esc(state) + '"><i></i>' + LN.esc(LN.stateLabel(state)) + '</span>';
+  }
+
+  function preferredDest(){
+    var props = S.getProperties(acctId), counts = {}, best = null;
+    props.forEach(function(p){ counts[p.destinationId] = (counts[p.destinationId] || 0) + 1; });
+    Object.keys(counts).forEach(function(k){ if (!best || counts[k] > counts[best]) best = k; });
+    return best ? S.getDestinationById(best) : null;
+  }
+
+  /* ---------- sections ---------- */
+  function statBand(book, watch){
+    var t = book.totals;
+    return '<div class="f-stats rise" style="animation-delay:.05s">' +
+      '<div class="f-stat"><div class="lbl">Live claims</div>' +
+        '<div class="val"><span class="dot"></span>' + t.live + '</div>' +
+        '<div class="sup"><b>' + t.claims + '</b> claims in the book</div></div>' +
+      '<div class="f-stat"><div class="lbl">Supply-book run-rate</div>' +
+        '<div class="val">' + LN.money(t.projectedAnnual) + '</div>' +
+        '<div class="sup"><b>' + LN.money(t.fiveYearValue) + '</b> projected over five years</div></div>' +
+      '<div class="f-stat"><div class="lbl">Residual this month</div>' +
+        '<div class="val">' + LN.money(t.mtd, { cents: true }) + '</div>' +
+        '<div class="sup"><b>' + LN.money(t.ytd) + '</b> year to date</div></div>' +
+      '<div class="f-stat"><div class="lbl">Needing attention</div>' +
+        '<div class="val">' + (watch.length ? '<span class="dot warn"></span>' : '') + watch.length + '</div>' +
+        '<div class="sup">' + (watch.length
+          ? '<span class="warn">Reduced or zero accrual</span> until they recover'
+          : '<span class="good">All suppliers healthy</span> and accruing') + '</div></div>' +
+    '</div>';
+  }
+
+  function bookSection(book){
+    var rows = book.entries.slice().sort(function(a, b){ return b.projectedAnnual - a.projectedAnnual; }).slice(0, 5);
+    var inner;
+    if (!rows.length){
+      inner = '<div class="f-empty"><h3>No claims yet</h3>' +
+        '<p>Introduce a local supplier and they appear here with their live rate and projected residual.</p>' +
+        '<a class="f-btn" href="submit.html">' + PLUS + ' Submit a supplier</a></div>';
+    } else {
+      inner = '<div class="f-book">' + rows.map(function(e, i){
+        return '<div class="f-brow" data-href="' + LN.supplierHref(e.supplier) + '">' +
+          '<div class="ix">' + (i + 1) + '</div>' +
+          '<div class="who"><div class="nm">' + LN.esc(e.supplier.name) + '</div>' +
+            '<div class="mt">' + stateWord(e.claim.state) + ' &nbsp;·&nbsp; ' +
+              LN.esc(LN.catLabel(e.supplier.category)) + ' &nbsp;·&nbsp; ' + LN.esc(e.destination.name) + '</div></div>' +
+          '<div class="spk">' + spark(e.trend) + '</div>' +
+          '<div class="fig"><div class="a">' + LN.money(e.projectedAnnual) + '<small>/ yr</small></div>' +
+            '<div class="b">' + LN.money(e.mtdResidual, { cents: true }) + ' this month · pool ' +
+            (e.blockedReason ? '—' : LN.pct(e.currentPoolPct)) + '</div></div>' +
+        '</div>';
+      }).join('') + '</div>' +
+      '<div class="f-foot"><a class="f-link" href="supply-book-fable.html">Open the full book ' + ARROW + '</a></div>';
+    }
+    return '<div><div class="f-sh"><div><h2>Your supply book</h2>' +
+      '<div class="note">Top claims by projected annual residual.</div></div></div>' + inner + '</div>';
+  }
+
+  function gapsSection(){
+    var dest = preferredDest();
+    var bounties = S.getBounties({ destination: dest && dest.id, status: 'open' }).slice(0, 3);
+    if (!bounties.length) bounties = S.getBounties({ status: 'open' }).slice(0, 3);
+    var inner;
+    if (!bounties.length){
+      inner = '<div class="f-empty"><h3>No open gaps</h3>' +
+        '<p>Chekin publishes a bounty when guests keep searching for something no supplier covers.</p></div>';
+    } else {
+      inner = '<div class="f-gaps">' + bounties.map(function(b){
+        return '<a class="f-gap" href="submit.html?bounty=' + LN.esc(b.id) + '">' +
+          '<div class="row1"><span class="cat">' + LN.esc(LN.catLabel(b.category)) + ' · ' + LN.esc(b.destination.name) + '</span>' +
+            '<span class="boost">&times;' + b.boostMultiplier.toFixed(2) + ' boost</span>' +
+            '<span class="days' + (b.daysLeft <= 14 ? ' soon' : '') + '">' + b.daysLeft + 'd left</span></div>' +
+          '<h3>' + LN.esc(b.title) + '</h3>' +
+          '<div class="ev">' + LN.num(b.gapEvidence.emptyDecisions) + ' guest searches ended with no eligible supplier' +
+            '<small>' + LN.num(b.gapEvidence.searches) + ' searches · ' + LN.esc(b.gapEvidence.period) + ' · ' + LN.esc(b.destination.name) + '</small></div>' +
+          '<div class="fig">' +
+            '<div><div class="n">' + LN.money(b.projectedAnnualResidual) + '</div><div class="l">Projected year 1</div></div>' +
+            '<div><div class="n">' + LN.money(b.activationBonus) + '</div><div class="l">Activation bonus</div></div></div>' +
+          '<div class="go"><span class="f-link">Fill this gap ' + ARROW + '</span></div>' +
+        '</a>';
+      }).join('') + '</div>' +
+      '<div class="f-foot"><a class="f-link" href="bounties.html">All open gaps ' + ARROW + '</a></div>';
+    }
+    return '<div><div class="f-sh"><div><h2>Gaps near you</h2>' +
+      '<div class="note">Demand Chekin is paying a boost to fill.</div></div></div>' + inner + '</div>';
+  }
+
+  function coverageSection(){
+    var rows = S.getNewInCoverage(acctId, 4);
+    var inner;
+    if (!rows.length){
+      inner = '<div class="f-list"><div class="f-ev"><div class="tx"><div class="d">Nothing new has become available to your properties in the last six months.</div></div></div></div>';
+    } else {
+      inner = '<div class="f-list" id="new-cov">' + rows.map(function(r){
+        return '<div class="f-item' + (r.blocked ? ' blocked' : '') + '">' +
+          '<div class="av">' + LN.esc(r.supplier.name.charAt(0)) + '</div>' +
+          '<div class="tx"><div class="t"><a href="' + LN.supplierHref(r.supplier) + '">' + LN.esc(r.supplier.name) + '</a></div>' +
+            '<div class="d">' + LN.esc(LN.catLabel(r.supplier.category)) + ' · ' + r.distanceKm + ' km · score ' +
+              r.supplier.score.toFixed(2) + ' · sourced by ' + LN.esc(r.sourcedByName) + '</div></div>' +
+          '<button class="f-mini' + (r.blocked ? ' brand' : '') + '" data-block="' + LN.esc(r.supplier.id) + '">' +
+            (r.blocked ? 'Unblock' : 'Block') + '</button>' +
+        '</div>';
+      }).join('') + '</div>';
+    }
+    return '<div><div class="f-sh"><div><h2>New in your coverage</h2>' +
+      '<div class="note">Supply other hosts introduced that your guests can now book. You keep your usual share on every one — and you can block any of them.</div></div></div>' + inner + '</div>';
+  }
+
+  function activitySection(){
+    var rows = S.getActivity({ limit: 8 });
+    var inner;
+    if (!rows.length){
+      inner = '<div class="f-feed"><div class="f-ev"><div class="tx"><div class="d">Nothing has happened yet.</div></div></div></div>';
+    } else {
+      inner = '<div class="f-feed">' + rows.map(function(a){
+        var sup = S.getSupplierById(a.supplierId);
+        return '<div class="f-ev ' + LN.feedKind(a.kind) + '"><span class="pt"></span>' +
+          '<div class="tx"><div class="t">' + LN.esc(a.title) +
+            (sup ? ' · <a href="' + LN.supplierHref(sup) + '">' + LN.esc(sup.name) + '</a>' : '') + '</div>' +
+          '<div class="d">' + LN.esc(a.detail) + '</div></div>' +
+          '<div class="when">' + LN.relDate(a.at) + '</div></div>';
+      }).join('') + '</div>';
+    }
+    return '<div><div class="f-sh"><div><h2>Activity</h2></div></div>' + inner + '</div>';
+  }
+
+  /* ---------- render ---------- */
+  function render(){
+    var book = S.getSupplyBook(acctId);
+    var watch = book.entries.filter(function(e){ return e.claim.state === 'watch' || e.claim.state === 'suspended'; });
+
+    body.innerHTML =
+      '<div class="f-head rise"><div>' +
+        '<div class="eyebrow">Overview</div>' +
+        '<h1>Local Network</h1>' +
+        '<div class="sub">Every supplier ' + (acct ? LN.esc(acct.name) : 'you') + ' has introduced, what it earns across the network, and where supply is still missing.</div>' +
+      '</div><div class="acts">' +
+        '<a class="f-btn ghost" href="discover.html">Browse network supply</a>' +
+        '<a class="f-btn" href="submit.html">' + PLUS + ' Submit a supplier</a>' +
+      '</div></div>' +
+      statBand(book, watch) +
+      '<div class="f-sect"><div class="f-cols">' +
+        '<div class="f-stack">' + bookSection(book) + coverageSection() + '</div>' +
+        '<div class="f-stack">' + gapsSection() + activitySection() + '</div>' +
+      '</div></div>';
+
+    wire();
+  }
+
+  function wire(){
+    // row navigation
+    var i, rows = body.querySelectorAll('[data-href]');
+    for (i = 0; i < rows.length; i++){
+      (function(el){
+        el.addEventListener('click', function(){ location.href = el.getAttribute('data-href'); });
+      })(rows[i]);
+    }
+    // block / unblock
+    var cov = document.getElementById('new-cov');
+    if (cov) cov.addEventListener('click', function(e){
+      var b = e.target.closest ? e.target.closest('[data-block]') : null;
+      if (!b) return;
+      var id = b.getAttribute('data-block');
+      var sup = S.getSupplierById(id);
+      var already = S.getProperties(acctId).some(function(p){ return p.blockedSupplierIds.indexOf(id) >= 0; });
+      if (already){
+        S.unblockSupplierForAccount(acctId, id);
+        LN.toast(sup.name + ' is bookable again at your properties.');
+      } else {
+        S.blockSupplierForAccount(acctId, id);
+        LN.toast(sup.name + ' blocked at your properties. Their claim and score are unaffected.');
+      }
+      render();
+    });
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>

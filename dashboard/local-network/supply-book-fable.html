@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chekin — Local Network · Supply book</title>
+<link rel="stylesheet" href="../ds/colors_and_type.css">
+<link rel="stylesheet" href="../ds/_sidebar.css">
+<link rel="stylesheet" href="../ds/_agent.css">
+<link rel="stylesheet" href="ds/_fable.css">
+</head>
+<body>
+<div class="app">
+  <div id="sidebar-slot" data-nav="local-network"></div>
+  <main>
+    <header class="top">
+      <div class="crumbs"><a href="index-fable.html"><b>Local Network</b></a> <span class="sep">/</span> Supply book</div>
+      <span data-agent-trigger-slot style="margin-left:auto"></span>
+      <button class="iconbtn" aria-label="Help"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 1 1 5.8 1c0 2-3 2-3 4M12 17h.01"/></svg></button>
+      <button class="iconbtn" aria-label="Notifications"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><div class="pip"></div></button>
+      <div class="user-av">GS</div>
+    </header>
+
+    <div class="page">
+      <nav class="f-tabs" aria-label="Local Network sections">
+        <a href="index-fable.html">Overview</a>
+        <a class="on" href="supply-book-fable.html">Supply book</a>
+        <a href="discover.html">Discover</a>
+        <a href="bounties.html">Bounties</a>
+      </nav>
+      <div id="ln-body"></div>
+    </div>
+  </main>
+</div>
+
+<div id="ln-drawer-root"></div>
+
+<script src="data/types.js"></script>
+<script src="data/config.js"></script>
+<script src="data/fixtures.js"></script>
+<script src="services/economics.js"></script>
+<script src="services/network-service.js"></script>
+<script src="services/earnings-service.js"></script>
+<script src="services/admin-service.js"></script>
+<script src="agent/agent.js"></script>
+<script src="ds/_ln.js"></script>
+<script src="../ds/_sidebar.js"></script>
+<script src="../ds/_agent.js"></script>
+<script>
+(function(){
+  'use strict';
+  var S = window.NetworkService, C = window.LN_CONFIG;
+  var body = document.getElementById('ln-body');
+
+  // Always render the owner (PM) view in this redesign.
+  var persona = S.getPersona();
+  var acctId = S.currentAccountId();
+  if (!acctId || (persona !== 'pm' && persona !== 'host')) acctId = S._dataset.personaAccounts.pm;
+
+  var ARROW = '<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+  var PLUS  = '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>';
+  var STAR  = '<svg viewBox="0 0 24 24"><path d="m12 3 2.6 5.6 6 .8-4.4 4.2 1.1 6-5.3-2.9-5.3 2.9 1.1-6L3.4 9.4l6-.8z"/></svg>';
+
+  var state = { state: '', mode: '', destination: '', risk: '', selected: null };
+
+  function allEntries(){ return S.getSupplyBook(acctId).entries; }
+  function filtered(rows){
+    return rows.filter(function(e){
+      if (state.state && e.claim.state !== state.state) return false;
+      if (state.mode && e.claim.sharingMode !== state.mode) return false;
+      if (state.destination && e.supplier.destinationId !== state.destination) return false;
+      if (state.risk === 'risk' && !e.atRisk) return false;
+      if (state.risk === 'earning' && e.currentPoolPct <= 0) return false;
+      return true;
+    });
+  }
+  function totalsOf(rows){
+    function sum(k){ return Math.round(rows.reduce(function(t, e){ return t + e[k]; }, 0) * 100) / 100; }
+    var five = 0;
+    rows.forEach(function(e){
+      S.projectResidual(e.claim.id, 5, acctId).forEach(function(y){ five += y.amount; });
+    });
+    return { mtd: sum('mtdResidual'), lifetime: sum('lifetimeResidual'),
+      projectedAnnual: sum('projectedAnnual'), gmv: sum('liveGmv'), fiveYear: Math.round(five) };
+  }
+
+  /* ---------- marks ---------- */
+  function spark(values){
+    var vals = (values || []).slice();
+    if (vals.length < 2) vals = [0, 0];
+    var W = 78, H = 30, P = 4;
+    var max = Math.max.apply(null, vals), min = Math.min.apply(null, vals);
+    var span = (max - min) || 1;
+    var pts = vals.map(function(v, i){
+      return [(P + (i / (vals.length - 1)) * (W - 2 * P)).toFixed(1),
+              (H - P - ((v - min) / span) * (H - 2 * P)).toFixed(1)];
+    });
+    var d = pts.map(function(p, i){ return (i ? 'L' : 'M') + p[0] + ' ' + p[1]; }).join(' ');
+    var last = pts[pts.length - 1];
+    return '<svg width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '" aria-hidden="true">' +
+      '<path d="' + d + '" fill="none" stroke="#C9D4FB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' +
+      '<circle cx="' + last[0] + '" cy="' + last[1] + '" r="3.4" fill="#385BF8" stroke="#FFFFFF" stroke-width="2"/></svg>';
+  }
+  function stateWord(s){
+    return '<span class="f-state ' + LN.esc(s) + '"><i></i>' + LN.esc(LN.stateLabel(s)) + '</span>';
+  }
+  function roleTags(e){
+    return '<div class="f-roles">' + ['sourced', 'activated', 'maintained'].map(function(r){
+      var on = e.rolesHeld.indexOf(r) >= 0;
+      return '<span class="f-role' + (on ? '' : ' off') + '" title="' + r + ' · ' + C.roleShares[r] + '%">' +
+        r.charAt(0).toUpperCase() + '</span>';
+    }).join('') + '</div>';
+  }
+
+  /* ---------- the five-year decay curve ---------- */
+  function decayChart(series){
+    var W = 720, H = 270, P = { l: 64, r: 26, t: 34, b: 44 };
+    var iw = W - P.l - P.r, ih = H - P.t - P.b;
+    // round the scale to clean ticks: step = nice(max/3), axis max = 3 steps
+    var rawMax = (Math.max.apply(null, series.map(function(s){ return s.amount; })) || 1) * 1.1;
+    var exp = Math.pow(10, Math.floor(Math.log(rawMax / 3) / Math.LN10));
+    var f = (rawMax / 3) / exp;
+    var step = (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * exp;
+    var max = step * 3;
+    function x(i){ return P.l + (series.length === 1 ? iw / 2 : (i / (series.length - 1)) * iw); }
+    function y(v){ return P.t + ih - (v / max) * ih; }
+    var line = series.map(function(s, i){ return (i ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(s.amount).toFixed(1); }).join(' ');
+    var area = line + ' L' + x(series.length - 1).toFixed(1) + ' ' + (P.t + ih) + ' L' + x(0).toFixed(1) + ' ' + (P.t + ih) + ' Z';
+    var grid = '', i;
+    for (i = 0; i <= 3; i++){
+      var gv = max * i / 3, gy = y(gv);
+      grid += '<line class="grid" x1="' + P.l + '" y1="' + gy.toFixed(1) + '" x2="' + (W - P.r) + '" y2="' + gy.toFixed(1) + '"/>' +
+        '<text class="axis" x="' + (P.l - 10) + '" y="' + (gy + 4).toFixed(1) + '" text-anchor="end">' + LN.money(Math.round(gv)) + '</text>';
+    }
+    // step boundaries: a quiet vertical hairline + the pool rate at that step
+    var marks = '', lastStep = null;
+    series.forEach(function(s, idx){
+      if (s.decayStep !== lastStep){
+        lastStep = s.decayStep;
+        if (idx > 0) marks += '<line class="stepline" x1="' + x(idx).toFixed(1) + '" y1="' + P.t + '" x2="' + x(idx).toFixed(1) + '" y2="' + (P.t + ih) + '"/>';
+        marks += '<text class="dsub" x="' + (x(idx) + (idx === series.length - 1 ? -4 : 5)).toFixed(1) + '" y="' + (P.t - 8) + '"' +
+          (idx === series.length - 1 ? ' text-anchor="end"' : '') + '>pool ' + LN.pct(s.poolPct) + '</text>';
+      }
+    });
+    var pts = series.map(function(s, idx){
+      return '<circle class="pt" cx="' + x(idx).toFixed(1) + '" cy="' + y(s.amount).toFixed(1) + '" r="4.5"/>';
+    }).join('');
+    // selective direct labels: first and last year only — the tooltip carries the rest
+    function amountLabel(idx){
+      var s = series[idx];
+      var anchor = idx === 0 ? 'start' : idx === series.length - 1 ? 'end' : 'middle';
+      var lx = idx === 0 ? x(idx) : idx === series.length - 1 ? x(idx) + 4 : x(idx);
+      return '<text class="dlabel" x="' + lx.toFixed(1) + '" y="' + (y(s.amount) - 12).toFixed(1) + '" text-anchor="' + anchor + '">' +
+        LN.money(Math.round(s.amount)) + '</text>';
+    }
+    var labels = series.length > 1 ? amountLabel(0) + amountLabel(series.length - 1) : amountLabel(0);
+    var xlab = series.map(function(s, idx){
+      return '<text class="axis strong" x="' + x(idx).toFixed(1) + '" y="' + (H - 14) + '" text-anchor="middle">Year ' + s.year + '</text>';
+    }).join('');
+    // invisible hover columns
+    var hover = series.map(function(s, idx){
+      var x0 = idx === 0 ? P.l : (x(idx - 1) + x(idx)) / 2;
+      var x1 = idx === series.length - 1 ? W - P.r : (x(idx) + x(idx + 1)) / 2;
+      return '<rect data-yr="' + idx + '" x="' + x0.toFixed(1) + '" y="' + P.t + '" width="' + (x1 - x0).toFixed(1) +
+        '" height="' + ih + '" fill="transparent" data-cx="' + x(idx).toFixed(1) + '" data-cy="' + y(s.amount).toFixed(1) + '"/>';
+    }).join('');
+    return '<div class="f-chartbox"><svg class="f-chart" id="decay-svg" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Projected residual by year">' +
+      grid + '<path class="area" d="' + area + '"/>' + marks + '<path class="line" d="' + line + '"/>' +
+      pts + labels + xlab + hover + '</svg><div class="f-tip" id="decay-tip"></div></div>';
+  }
+
+  /* ---------- sections ---------- */
+  function statBand(t){
+    return '<div class="f-stats rise" style="animation-delay:.05s">' +
+      '<div class="f-stat"><div class="lbl">Annual run-rate</div>' +
+        '<div class="val">' + LN.money(t.projectedAnnual) + '</div>' +
+        '<div class="sup">On today’s rates and trailing bookings</div></div>' +
+      '<div class="f-stat"><div class="lbl">Five-year book value</div>' +
+        '<div class="val">' + LN.money(t.fiveYear) + '</div>' +
+        '<div class="sup">Decay schedule applied, bookings held flat</div></div>' +
+      '<div class="f-stat"><div class="lbl">Bookings driven · 12m</div>' +
+        '<div class="val">' + LN.money(t.gmv) + '</div>' +
+        '<div class="sup">GMV across all claims in the book</div></div>' +
+      '<div class="f-stat"><div class="lbl">Earned to date</div>' +
+        '<div class="val">' + LN.money(t.lifetime) + '</div>' +
+        '<div class="sup"><b>' + LN.money(t.mtd, { cents: true }) + '</b> of that this month</div></div>' +
+    '</div>';
+  }
+
+  function filters(rows){
+    function group(id, label, opts, cur){
+      return '<div class="f-fgroup" data-group="' + id + '"><span class="fl">' + label + '</span>' +
+        opts.map(function(o){
+          var n = o.v === '' ? rows.length : rows.filter(o.f).length;
+          return '<button class="f-chip' + (cur === o.v ? ' on' : '') + '" data-val="' + LN.esc(o.v) + '">' +
+            LN.esc(o.l) + ' <span class="n">' + n + '</span></button>';
+        }).join('') + '</div>';
+    }
+    var states = ['live', 'watch', 'onboarding', 'pending_supplier', 'screening', 'draft', 'suspended', 'dormant', 'expired', 'terminated', 'released'];
+    return '<div class="f-filters rise" style="animation-delay:.1s">' +
+      group('state', 'State', [{ v: '', l: 'All', f: function(){ return true; } }].concat(states.map(function(s){
+        return { v: s, l: LN.stateLabel(s), f: function(e){ return e.claim.state === s; } };
+      }).filter(function(o){ return rows.some(o.f); })), state.state) +
+      group('mode', 'Sharing', [{ v: '', l: 'All', f: function(){ return true; } }].concat(['network', 'delayed', 'private'].map(function(m){
+        return { v: m, l: LN.modeLabel(m), f: function(e){ return e.claim.sharingMode === m; } };
+      })), state.mode) +
+      group('destination', 'Destination', [{ v: '', l: 'All', f: function(){ return true; } }].concat(S.getDestinations().map(function(d){
+        return { v: d.id, l: d.name, f: function(e){ return e.supplier.destinationId === d.id; } };
+      }).filter(function(o){ return rows.some(o.f); })), state.destination) +
+      group('risk', 'Health', [{ v: '', l: 'All', f: function(){ return true; } },
+        { v: 'earning', l: 'Earning now', f: function(e){ return e.currentPoolPct > 0; } },
+        { v: 'risk', l: 'At risk', f: function(e){ return e.atRisk; } }], state.risk) +
+    '</div>';
+  }
+
+  function countdownText(claim){
+    var cd = S.countdownFor(claim);
+    if (!cd) return '';
+    var txt = cd.overdue ? Math.abs(cd.days) + 'd overdue' : cd.days + 'd ' + cd.label;
+    return '<div class="sub">' + LN.esc(txt) + '</div>';
+  }
+
+  function table(rows, t){
+    if (!rows.length){
+      var any = allEntries().length;
+      return '<div class="f-empty" style="margin-top:36px"><h3>' +
+        (any ? 'No claims match these filters' : 'Your supply book is empty') + '</h3><p>' +
+        (any ? 'Clear a filter to see the rest of the book.'
+             : 'Every supplier you introduce becomes a line here — with its live rate, its decay step and what it is projected to earn.') + '</p>' +
+        (any ? '' : '<a class="f-btn" href="submit.html">' + PLUS + ' Submit a supplier</a>') + '</div>';
+    }
+    return '<div class="f-tablewrap"><table class="f-table"><thead><tr>' +
+      '<th>Supplier</th><th>State</th><th>Roles</th><th>Sharing</th>' +
+      '<th class="num">GMV 12m</th><th class="num">Pool rate</th><th class="num">This month</th><th class="num">Projected / yr</th><th style="text-align:right">Trend</th>' +
+      '</tr></thead><tbody>' +
+      rows.map(function(e){
+        var sel = e.claim.id === state.selected;
+        return '<tr data-claim="' + LN.esc(e.claim.id) + '"' + (sel ? ' class="sel"' : '') + '>' +
+          '<td><div class="nm">' + LN.esc(e.supplier.name) + '</div>' +
+            '<div class="em">' + LN.esc(LN.catLabel(e.supplier.category)) + ' · ' + LN.esc(e.destination.name) + '</div></td>' +
+          '<td>' + stateWord(e.claim.state) + countdownText(e.claim) + '</td>' +
+          '<td>' + roleTags(e) + '<div class="sub">' + e.roleSharePct + '%</div></td>' +
+          '<td><span class="f-mode ' + LN.esc(e.claim.sharingMode) + '">' + LN.esc(LN.modeLabel(e.claim.sharingMode)) + '</span></td>' +
+          '<td class="num">' + LN.money(e.liveGmv) + '</td>' +
+          '<td class="num">' + (e.blockedReason ? '<span style="color:var(--f-faint)">—</span>' : '<b>' + LN.pct(e.currentPoolPct) + '</b>') + '</td>' +
+          '<td class="num">' + LN.money(e.mtdResidual, { cents: true }) + '</td>' +
+          '<td class="num"><b>' + LN.money(e.projectedAnnual) + '</b></td>' +
+          '<td style="text-align:right">' + spark(e.trend) + '</td>' +
+        '</tr>';
+      }).join('') +
+      '<tr class="sum"><td colspan="4">Total · ' + rows.length + ' claim' + (rows.length === 1 ? '' : 's') + '</td>' +
+        '<td class="num">' + LN.money(t.gmv) + '</td><td class="num" style="color:var(--f-faint);font-weight:500">—</td>' +
+        '<td class="num">' + LN.money(t.mtd, { cents: true }) + '</td>' +
+        '<td class="num">' + LN.money(t.projectedAnnual) + '</td>' +
+        '<td style="text-align:right"><b>' + LN.money(t.fiveYear) + '</b><div class="sub">5-yr value</div></td></tr>' +
+      '</tbody></table></div>';
+  }
+
+  function detail(){
+    if (!state.selected) return '';
+    var e = allEntries().filter(function(x){ return x.claim.id === state.selected; })[0];
+    if (!e) return '';
+    var series = S.projectResidual(e.claim.id, 5, acctId);
+    if (!series.length) return '';
+    var acr = S.computeAccrual(100, e.claim, e.supplier, e.destination);
+    var five = Math.round(series.reduce(function(t, y){ return t + y.amount; }, 0));
+    var maxYear = Math.max.apply(null, series.map(function(y){ return y.amount; })) || 1;
+
+    var left = '<div><div class="f-sh"><div><h2>Residual over five years — ' + LN.esc(e.supplier.name) + '</h2>' +
+      '<div class="note">' + (e.blockedReason
+        ? LN.esc(e.blockedReason)
+        : 'Trailing-12-month bookings of ' + LN.money(series[0].gmv) + ' held flat, so the shape is purely the decay schedule.') +
+      '</div></div><a class="f-link" href="' + LN.supplierHref(e.supplier) + '">Open supplier ' + ARROW + '</a></div>' +
+      decayChart(series) + '</div>';
+
+    var right = '<div>' +
+      '<div class="f-navypanel"><div class="lbl">Five-year value</div>' +
+        '<div class="big">' + LN.money(five) + '</div>' +
+        '<div class="note">What this claim pays you across the full decay schedule.</div>' +
+        '<div class="f-yr">' + series.map(function(y){
+          return '<div class="r"><span class="y">Year ' + y.year + '</span>' +
+            '<span class="bar"><i style="width:' + Math.max(2, (y.amount / maxYear) * 100).toFixed(1) + '%"></i></span>' +
+            '<span class="v">' + LN.money(Math.round(y.amount)) + '</span></div>';
+        }).join('') + '</div></div>' +
+      '<div class="f-facts">' +
+        '<div class="f-fact"><div class="fl">This year’s rate · per ' + LN.money(100) + ' of bookings</div>' +
+          LN.chain(acr) +
+          '<div class="note" style="font:400 12px/18px var(--font-primary);color:var(--f-faint);margin-top:12px">' +
+          (acr.blockedReason ? '' :
+            (acr.saturated
+              ? LN.esc(e.destination.name) + ' already covers ' + LN.esc(LN.catLabel(e.supplier.category)) + ' well, so the premium is capped at ' + LN.pct(acr.premiumCapPct) + '.'
+              : 'Full premium of ' + LN.pct(acr.premiumCapPct) + ' available in ' + LN.esc(e.destination.name) + '.')) + '</div></div>' +
+        '<div class="f-fact"><div class="fl">Decay schedule</div><div class="f-kv">' +
+          C.decaySchedule.map(function(s, i){
+            var on = series[0].decayStep === i + 1;
+            return '<div class="r"><span class="k">' + LN.esc(s.label) + '</span>' +
+              '<span class="v">&times;' + s.multiplier.toFixed(2) + (on ? '<span class="cur">now</span>' : '') + '</span></div>';
+          }).join('') + '</div></div>' +
+      '</div></div>';
+
+    return '<div class="f-detail rise">' + left + right + '</div>';
+  }
+
+  /* ---------- render ---------- */
+  function render(){
+    var rows = allEntries();
+    var shown = filtered(rows);
+    var t = totalsOf(shown);
+    var prog = S.curatorProgress(acctId);
+    if (!state.selected || !shown.some(function(e){ return e.claim.id === state.selected; })){
+      var live = shown.filter(function(e){ return e.currentPoolPct > 0; });
+      state.selected = (live[0] || shown[0] || {}).claim ? (live[0] || shown[0]).claim.id : null;
+    }
+
+    body.innerHTML =
+      '<div class="f-head rise"><div>' +
+        '<div class="eyebrow">Portfolio</div>' +
+        '<h1>Supply book<span class="count">' + shown.length + '</span></h1>' +
+        '<div class="sub">Your claims as an asset — what each one earns today, and what the decay schedule says it is worth over five years.</div>' +
+        (prog.met ? '<div class="f-curator">' + STAR + '<span><b>Local Curator</b> · ' + prog.liveSuppliers +
+          ' live suppliers, avg score ' + prog.avgScore.toFixed(2) +
+          '</span><span class="why">— faster review, same rates</span></div>' : '') +
+      '</div><div class="acts">' +
+        '<a class="f-btn" href="submit.html">' + PLUS + ' Submit a supplier</a>' +
+      '</div></div>' +
+      statBand(t) +
+      filters(rows) +
+      table(shown, t) +
+      detail();
+
+    wire();
+  }
+
+  function wire(){
+    var i;
+    // filter chips
+    var groups = body.querySelectorAll('[data-group]');
+    for (i = 0; i < groups.length; i++){
+      (function(el){
+        el.addEventListener('click', function(e){
+          var chip = e.target.closest ? e.target.closest('.f-chip') : null;
+          if (!chip) return;
+          state[el.getAttribute('data-group')] = chip.getAttribute('data-val');
+          render();
+        });
+      })(groups[i]);
+    }
+    // row selection
+    var trs = body.querySelectorAll('[data-claim]');
+    for (i = 0; i < trs.length; i++){
+      (function(tr){
+        tr.addEventListener('click', function(){
+          state.selected = tr.getAttribute('data-claim');
+          render();
+        });
+      })(trs[i]);
+    }
+    // chart hover
+    var svg = document.getElementById('decay-svg'), tip = document.getElementById('decay-tip');
+    if (svg && tip){
+      var e0 = allEntries().filter(function(x){ return x.claim.id === state.selected; })[0];
+      var series = e0 ? S.projectResidual(e0.claim.id, 5, acctId) : [];
+      svg.addEventListener('mousemove', function(ev){
+        var r = ev.target;
+        if (!r || !r.getAttribute || r.getAttribute('data-yr') == null){ tip.className = 'f-tip'; return; }
+        var s = series[parseInt(r.getAttribute('data-yr'), 10)];
+        if (!s){ tip.className = 'f-tip'; return; }
+        tip.innerHTML = '<b>Year ' + s.year + '</b> <span class="m">· ' + LN.esc(s.decayLabel) + '</span><br>' +
+          LN.money(Math.round(s.amount)) + ' <span class="m">at pool ' + LN.pct(s.poolPct) + '</span>';
+        tip.style.left = (parseFloat(r.getAttribute('data-cx')) / 720 * 100) + '%';
+        tip.style.top = (parseFloat(r.getAttribute('data-cy')) / 270 * 100) + '%';
+        tip.className = 'f-tip show';
+      });
+      svg.addEventListener('mouseleave', function(){ tip.className = 'f-tip'; });
+    }
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>
