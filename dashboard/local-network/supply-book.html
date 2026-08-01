@@ -188,7 +188,7 @@
       '</tr></thead><tbody>'+
       rows.map(function(e){
         var sel = e.claim.id === state.selected;
-        return '<tr data-claim="'+e.claim.id+'"'+(sel?' style="background:#F3F6FF;box-shadow:inset 3px 0 0 var(--text-brand)"':'')+'>'+
+        return '<tr data-claim="'+e.claim.id+'"'+(sel?' class="sel"':'')+'>'+
           '<td><div class="sname"><div class="sav">'+I.store+'</div><div style="min-width:0">'+
             '<div class="nm">'+LN.esc(e.supplier.name)+'</div>'+
             '<div class="em">'+LN.esc(LN.catLabel(e.supplier.category))+' · '+LN.esc(e.destination.name)+

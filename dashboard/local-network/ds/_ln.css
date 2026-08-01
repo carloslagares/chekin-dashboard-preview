@@ -155,12 +155,20 @@ table.ln{width:100%;border-collapse:collapse}
 table.ln thead{background:var(--bg-neutral-cold);border-bottom:1px solid var(--stroke-gray-light)}
 table.ln th{height:46px;padding:0 14px;text-align:left;font:600 12.5px var(--font-primary);color:var(--text-gray-dark);white-space:nowrap}
 table.ln th.num,table.ln td.num{text-align:right;font-variant-numeric:tabular-nums}
-table.ln tbody tr{border-bottom:1px solid var(--stroke-gray-lighter);transition:background .12s,box-shadow .12s;box-shadow:inset 3px 0 0 transparent;cursor:pointer}
+table.ln tbody tr{border-bottom:1px solid var(--stroke-gray-lighter);transition:background .12s;cursor:pointer}
 table.ln tbody tr:last-child{border-bottom:none}
-table.ln tbody tr:hover{background:#F7F9FF;box-shadow:inset 3px 0 0 var(--text-brand)}
+table.ln tbody tr:hover{background:#F7F9FF}
+/* Row marker: a short rounded bar inset from the row edges and sitting in the
+   cell's left padding, so it never crowds the first column's text. */
+table.ln tbody tr td:first-child{position:relative}
+table.ln tbody tr:hover td:first-child::before,
+table.ln tbody tr.sel td:first-child::before{content:"";position:absolute;left:8px;top:13px;bottom:13px;width:3px;border-radius:3px;background:var(--text-brand)}
+table.ln tbody tr.sel{background:#F3F6FF}
+table.ln tbody tr.totals td:first-child::before{display:none}
 table.ln tbody tr.totals{background:var(--bg-neutral-cold);cursor:default;font-weight:700}
-table.ln tbody tr.totals:hover{background:var(--bg-neutral-cold);box-shadow:inset 3px 0 0 transparent}
+table.ln tbody tr.totals:hover{background:var(--bg-neutral-cold)}
 table.ln td{height:62px;padding:0 14px;vertical-align:middle;font:500 14px/20px var(--font-primary);color:var(--text-dark)}
+table.ln th:first-child,table.ln td:first-child{padding-left:30px}
 .sname{display:flex;align-items:center;gap:11px;min-width:0}
 .sav{width:36px;height:36px;border-radius:10px;background:var(--bg-sky-light);color:var(--text-brand);display:grid;place-items:center;flex-shrink:0}
 .sav svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.8}
