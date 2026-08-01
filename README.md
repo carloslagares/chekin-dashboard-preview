@@ -31,9 +31,12 @@ docs/                 ← documentation only — NOT needed to run anything
   Chekin_Onboarding_PRD.pdf
   screenshots/        captures used by the PRDs
   guest-crm/          Guest CRM PRD + roadmaps (md, pdf, html)
-  local-network/      Local Network technical architecture (ARCHITECTURE.md) —
-                      layering, the economics kernel, the claim state machine,
-                      determinism, and where each invariant is enforced
+  local-network/      Local Network technical architecture — layering, the
+                      economics kernel, the claim state machine, determinism,
+                      and where each invariant is enforced. ARCHITECTURE.md is
+                      the source; the PDF is typeset in the AppSell document
+                      format (Chekin_AppSell_Local_Network_Technical_
+                      Architecture.pdf) as a companion to Docs 1 and 3.
 
 _archive/             ← legacy prototypes kept for reference (not linked from the app):
                         Welcome.html (old switcher), guestapp/, website/, uploads/,
