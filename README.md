@@ -31,6 +31,9 @@ docs/                 ← documentation only — NOT needed to run anything
   Chekin_Onboarding_PRD.pdf
   screenshots/        captures used by the PRDs
   guest-crm/          Guest CRM PRD + roadmaps (md, pdf, html)
+  local-network/      Local Network technical architecture (ARCHITECTURE.md) —
+                      layering, the economics kernel, the claim state machine,
+                      determinism, and where each invariant is enforced
 
 _archive/             ← legacy prototypes kept for reference (not linked from the app):
                         Welcome.html (old switcher), guestapp/, website/, uploads/,
@@ -62,6 +65,8 @@ python3 -m http.server 8080
 | `dashboard/index.html?view=firstrun` | First-run home (post-onboarding) |
 | `dashboard/onboarding.html?demo=ops&go=1` | Preset demo → personalized first-run (also: compliance, cleaning, manual, multi, all) |
 | `dashboard/guest-crm/index.html` | Guest CRM |
+| `dashboard/index.html?view=network` | Local Network inside the variant switcher |
+| `dashboard/index.html?view=crm` | Guest CRM inside the variant switcher |
 | `dashboard/local-network/index.html` | Local Network — host overview (default persona: PM) |
 | `dashboard/local-network/index.html?first_run=1` | Local Network before anything exists — the true empty state |
 | `dashboard/local-network/supply-book.html` | The host's portfolio: claims, decay curve, 5-year book value |

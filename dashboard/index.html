@@ -43,6 +43,7 @@
   .trigger .gen.g47{background:rgba(22,22,67,.07);color:var(--ink2)}
   .trigger .gen.g48{background:#D5F5EC;color:var(--success)}
   .trigger .gen.gf5{background:#EEE9FF;color:#6C4CF1}
+  .trigger .gen.gmod{background:#E4EDFF;color:#385BF8}
   .trigger .chev{width:16px;height:16px;stroke:var(--ink2);fill:none;stroke-width:2;margin-right:6px;transition:transform .2s}
   .switcher.open .trigger .chev{transform:rotate(180deg)}
 
@@ -64,6 +65,7 @@
   .menu .group .pill.g47{background:rgba(22,22,67,.07);color:var(--ink2)}
   .menu .group .pill.g48{background:#D5F5EC;color:var(--success)}
   .menu .group .pill.gf5{background:#EEE9FF;color:#6C4CF1}
+  .menu .group .pill.gmod{background:#E4EDFF;color:#385BF8}
   .menu .group .ln{flex:1;height:1px;background:var(--line)}
 
   .opt{
@@ -78,6 +80,7 @@
   .opt .t{flex:1;min-width:0}
   .opt .new{font:800 9px var(--font-primary);padding:2px 7px;border-radius:5px;background:#D5F5EC;color:var(--success);letter-spacing:.06em}
   .opt .new.f5{background:#EEE9FF;color:#6C4CF1}
+  .opt .new.mod{background:#E4EDFF;color:#385BF8}
   .opt .check{width:16px;height:16px;stroke:var(--blue);fill:none;stroke-width:2.6;opacity:0}
   .opt.active{background:var(--blue-light)}
   .opt.active .v{background:var(--blue);color:#fff}
@@ -116,6 +119,10 @@
     <button class="opt" data-v="v8" data-label="Fable refine" data-gen="f5" role="menuitem"><span class="v">V8</span><span class="t">Fable refine</span><span class="new f5">NEW</span><svg class="check" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button>
     <button class="opt" data-v="onb" data-label="Onboarding" data-gen="f5" role="menuitem"><span class="v">OB</span><span class="t">Onboarding</span><span class="new f5">NEW</span><svg class="check" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button>
     <button class="opt" data-v="v9f" data-label="First run" data-gen="f5" role="menuitem"><span class="v">FR</span><span class="t">First-run home</span><span class="new f5">NEW</span><svg class="check" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button>
+
+    <div class="group"><span class="pill gmod">Modules</span>Self-contained<span class="ln"></span></div>
+    <button class="opt" data-v="crm" data-label="Guest CRM" data-gen="mod" role="menuitem"><span class="v">CRM</span><span class="t">Guest CRM</span><svg class="check" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button>
+    <button class="opt" data-v="ln" data-label="Local Network" data-gen="mod" role="menuitem"><span class="v">LN</span><span class="t">Local Network</span><span class="new mod">NEW</span><svg class="check" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button>
   </div>
 </div>
 
@@ -130,6 +137,8 @@
   <iframe class="variant" data-v="v8" data-src="variants/v8_fable.html" title="V8 Fable refine — Fable 5"></iframe>
   <iframe class="variant" data-v="onb" data-src="onboarding.html" title="Onboarding — Fable 5"></iframe>
   <iframe class="variant" data-v="v9f" data-src="variants/v9_firstrun.html" title="First-run home — Fable 5"></iframe>
+  <iframe class="variant" data-v="crm" data-src="guest-crm/index.html" title="Guest CRM"></iframe>
+  <iframe class="variant" data-v="ln" data-src="local-network/index.html" title="Local Network"></iframe>
 </div>
 
 <script>
@@ -147,7 +156,8 @@
   var curGen   = document.getElementById('curGen');
 
   // Deep-link via ?view=agenda|compliance|ai|calendar|refined (from sidebar)
-  var VIEW_MAP = { agenda:'v2', compliance:'v3', ai:'v4', calendar:'v5', refined:'v7', mobile:'v6', fable:'v8', onboarding:'onb', firstrun:'v9f' };
+  var VIEW_MAP = { agenda:'v2', compliance:'v3', ai:'v4', calendar:'v5', refined:'v7', mobile:'v6', fable:'v8', onboarding:'onb', firstrun:'v9f',
+                   crm:'crm', network:'ln', 'local-network':'ln' };
   var urlView = new URLSearchParams(location.search).get('view');
 
   var LS = 'chekin_welcome_variant';
@@ -171,9 +181,10 @@
     curV.textContent = v.toUpperCase();
     curLabel.textContent = opt.getAttribute('data-label');
     var gen = opt.getAttribute('data-gen');
-    var GEN_LABEL = { '47':'4.7', '48':'4.8', 'f5':'Fable' };
+    var GEN_LABEL = { '47':'4.7', '48':'4.8', 'f5':'Fable', 'mod':'Module' };
     curGen.textContent = GEN_LABEL[gen] || gen;
-    curGen.className = 'gen ' + (gen === '48' ? 'g48' : gen === 'f5' ? 'gf5' : 'g47');
+    // class follows the gen key directly, so adding a group needs no branch here
+    curGen.className = 'gen g' + gen;
     try{ localStorage.setItem(LS, v); }catch(err){}
   }
 
