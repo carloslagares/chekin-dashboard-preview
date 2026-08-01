@@ -60,17 +60,28 @@
     admin: { l:'Admin', d:'Claim review, flags, quality watch and suspensions.' }
   };
   function fableTabs(active){
-    var p = S.getPersona();
-    var T = [
-      { k:'overview', l:'Overview', href:'index-fable.html' },
-      { k:'book', l:'Supply book', href:'supply-book-fable.html', per:['host','pm'] },
-      { k:'discover', l:'Discover', href:'discover-fable.html', per:['host','pm'] },
-      { k:'bounties', l:'Bounties', href:'bounties-fable.html', per:['host','pm','chekin','admin'] },
-      { k:'admin', l:'Admin review', href:'admin-review-fable.html', per:['chekin','admin'] }
-    ];
-    return '<nav class="f-tabs" aria-label="Local Network sections">' + T.filter(function(t){ return !t.per || t.per.indexOf(p) >= 0; }).map(function(t){
-      return '<a' + (t.k === active ? ' class="on"' : '') + ' href="' + t.href + '">' + t.l + '</a>';
-    }).join('') + '</nav>' +
+    /* Module navigation is gated on features.moduleNav (data/config.js) —
+       flip it to true and the original tab bar returns unchanged. Tabs for
+       flag-gated pages only appear when their own flag is also on. */
+    var F = C.features || {};
+    var nav = '';
+    if (F.moduleNav){
+      var p = S.getPersona();
+      var T = [
+        { k:'overview', l:'Overview', href:'index-fable.html' },
+        { k:'book', l:'Supply book', href:'supply-book-fable.html', per:['host','pm'] },
+        { k:'discover', l:'Discover', href:'discover-fable.html', per:['host','pm'], flag:'discover' },
+        { k:'bounties', l:'Bounties', href:'bounties-fable.html', per:['host','pm','chekin','admin'], flag:'bounties' },
+        { k:'admin', l:'Admin review', href:'admin-review-fable.html', per:['chekin','admin'] }
+      ];
+      nav = '<nav class="f-tabs" aria-label="Local Network sections">' + T.filter(function(t){
+        if (t.flag && !F[t.flag]) return false;
+        return !t.per || t.per.indexOf(p) >= 0;
+      }).map(function(t){
+        return '<a' + (t.k === active ? ' class="on"' : '') + ' href="' + t.href + '">' + t.l + '</a>';
+      }).join('') + '</nav>';
+    }
+    return nav +
     (S.isFirstRun() ? '<div class="f-note"><i></i><span><b>First-run mode.</b> The programme launches empty — the bounties below are how Chekin bootstraps a destination.</span><button class="f-link" id="fr-exit">Load the demo dataset</button></div>' : '');
   }
   function mountChrome(active){
@@ -112,6 +123,17 @@
 
   var persona = S.getPersona();
   mountChrome('bounties');
+
+  /* features.bounties — the board ships unlinked and switched off. Everything
+     below this guard is intact; flip the flag and the page is back. */
+  if (!((C.features || {}).bounties)){
+    body.innerHTML = '<div class="f-head rise"><div><div class="eyebrow">Bounties</div><h1>The gap board</h1></div></div>' +
+      '<div class="f-sect tight"><div class="f-empty"><h3>Bounties are not enabled</h3>' +
+      '<p>The gap board is switched off in this build. Flip <b>features.bounties</b> to true in data/config.js and it returns exactly as designed.</p>' +
+      '<a class="f-btn" href="index-fable.html">Back to your supply book</a></div></div>';
+    return;
+  }
+
   var canManage = persona === 'chekin' || persona === 'admin';
   var canFill = persona === 'host' || persona === 'pm';
 

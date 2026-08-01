@@ -14,7 +14,7 @@
   <div id="sidebar-slot" data-nav="local-network"></div>
   <main>
     <header class="top">
-      <div class="crumbs"><a href="index-fable.html"><b>Local Network</b></a> <span class="sep">/</span> <a href="supply-book-fable.html">Supply book</a> <span class="sep">/</span> <span id="crumb">Supplier</span></div>
+      <div class="crumbs"><a href="index-fable.html"><b>Local Network</b></a> <span class="sep">/</span> <a href="index-fable.html" id="crumb-book">Supply book</a> <span class="sep">/</span> <span id="crumb">Supplier</span></div>
       <span id="fp-slot" style="margin-left:auto"></span>
       <span data-agent-trigger-slot></span>
       <button class="iconbtn" aria-label="Help"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 1 1 5.8 1c0 2-3 2-3 4M12 17h.01"/></svg></button>
@@ -59,17 +59,28 @@
     admin: { l:'Admin', d:'Claim review, flags, quality watch and suspensions.' }
   };
   function fableTabs(active){
-    var p = S.getPersona();
-    var T = [
-      { k:'overview', l:'Overview', href:'index-fable.html' },
-      { k:'book', l:'Supply book', href:'supply-book-fable.html', per:['host','pm'] },
-      { k:'discover', l:'Discover', href:'discover-fable.html', per:['host','pm'] },
-      { k:'bounties', l:'Bounties', href:'bounties-fable.html', per:['host','pm','chekin','admin'] },
-      { k:'admin', l:'Admin review', href:'admin-review-fable.html', per:['chekin','admin'] }
-    ];
-    return '<nav class="f-tabs" aria-label="Local Network sections">' + T.filter(function(t){ return !t.per || t.per.indexOf(p) >= 0; }).map(function(t){
-      return '<a' + (t.k === active ? ' class="on"' : '') + ' href="' + t.href + '">' + t.l + '</a>';
-    }).join('') + '</nav>' +
+    /* Module navigation is gated on features.moduleNav (data/config.js) —
+       flip it to true and the original tab bar returns unchanged. Tabs for
+       flag-gated pages only appear when their own flag is also on. */
+    var F = C.features || {};
+    var nav = '';
+    if (F.moduleNav){
+      var p = S.getPersona();
+      var T = [
+        { k:'overview', l:'Overview', href:'index-fable.html' },
+        { k:'book', l:'Supply book', href:'supply-book-fable.html', per:['host','pm'] },
+        { k:'discover', l:'Discover', href:'discover-fable.html', per:['host','pm'], flag:'discover' },
+        { k:'bounties', l:'Bounties', href:'bounties-fable.html', per:['host','pm','chekin','admin'], flag:'bounties' },
+        { k:'admin', l:'Admin review', href:'admin-review-fable.html', per:['chekin','admin'] }
+      ];
+      nav = '<nav class="f-tabs" aria-label="Local Network sections">' + T.filter(function(t){
+        if (t.flag && !F[t.flag]) return false;
+        return !t.per || t.per.indexOf(p) >= 0;
+      }).map(function(t){
+        return '<a' + (t.k === active ? ' class="on"' : '') + ' href="' + t.href + '">' + t.l + '</a>';
+      }).join('') + '</nav>';
+    }
+    return nav +
     (S.isFirstRun() ? '<div class="f-note"><i></i><span><b>First-run mode.</b> The programme launches empty — every page is showing its true pre-launch state.</span><button class="f-link" id="fr-exit">Load the demo dataset</button></div>' : '');
   }
   function mountChrome(active){
@@ -111,6 +122,11 @@
 
   var persona = S.getPersona();
   mountChrome(persona === 'chekin' || persona === 'admin' ? 'admin' : persona === 'supplier' ? '' : 'book');
+  /* With module navigation off, the index IS the supply book — back-links
+     follow the flag so nothing points at an orphaned page. */
+  var BOOK_HREF = (C.features || {}).moduleNav ? 'supply-book-fable.html' : 'index-fable.html';
+  var crumbBook = document.getElementById('crumb-book');
+  if (crumbBook) crumbBook.setAttribute('href', BOOK_HREF);
 
   /* ---------- resolve the supplier ---------- */
   var q = new URLSearchParams(location.search);
@@ -129,7 +145,7 @@
       '<p>' + (S.isFirstRun()
         ? 'First-run mode is on, so there is no network supply yet. Introduce a supplier and this page will show its claim, coverage and economics.'
         : 'Open a supplier from the supply book or from discover and this page shows its claim, coverage and economics.') + '</p>' +
-      '<a class="f-btn" href="' + (persona === 'chekin' || persona === 'admin' ? 'admin-review-fable.html' : 'supply-book-fable.html') + '">' +
+      '<a class="f-btn" href="' + (persona === 'chekin' || persona === 'admin' ? 'admin-review-fable.html' : BOOK_HREF) + '">' +
         (persona === 'chekin' || persona === 'admin' ? 'Open the review queue' : 'Open the supply book') + '</a></div></div>';
     return;
   }
@@ -411,7 +427,7 @@
       (gated ? '<div class="f-gate" style="margin-top:14px">' + I.warn + '<span style="white-space:normal">Safety-gated' +
         (gateRisks.length ? ' — ' + LN.esc(gateRisks.join(', ')) : '') + '. Always needs a Chekin admin decision, regardless of curator review.</span></div>' : '') +
     '</div><div class="acts">' +
-      '<a class="f-btn ghost" href="' + (persona === 'chekin' || persona === 'admin' ? 'admin-review-fable.html' : 'supply-book-fable.html') + '">' +
+      '<a class="f-btn ghost" href="' + (persona === 'chekin' || persona === 'admin' ? 'admin-review-fable.html' : BOOK_HREF) + '">' +
         (persona === 'chekin' || persona === 'admin' ? 'Review queue' : 'Back to the book') + '</a>' +
     '</div></div>' +
     statBand() +

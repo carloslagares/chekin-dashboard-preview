@@ -11,6 +11,26 @@
 window.LN_CONFIG = {
   currency: 'EUR',
 
+  /* ---------- Feature flags ----------
+     The programme launches as a single page: your suppliers and what they
+     earn. Everything below is built, tested and kept in the repo — flipping a
+     flag to true brings it back with no other change. Nothing else in the
+     module branches on these; each surface reads its own flag.
+
+     A caveat worth knowing before flipping `discover` back off in future:
+     discover is the ONLY place a serving host can block a supplier or a
+     category. That veto is invariant #3 of the programme. With this flag off
+     the veto exists in the service layer (blockSupplierForAccount,
+     blockCategoryForAccount) but has no user interface. */
+  features: {
+    moduleNav: false,        // the Overview / Supply book / Discover / Bounties tabs
+    bounties: false,         // the bounty board page
+    gaps: false,             // the "gaps near you" section and any bounty CTA
+    discover: false,         // network-supply browser — and the host's veto UI
+    activityFeed: false,     // the claim-event feed
+    newInCoverage: false     // "new in your coverage" + its inline block action
+  },
+
   /* ---------- Base platform economics (context, not editable here) ----------
      Mirrors the AppSell marketplace doc §17. Shown in the UI purely so hosts
      can see that the residual is NOT carved out of anyone else's share.

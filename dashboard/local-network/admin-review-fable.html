@@ -59,17 +59,28 @@
     admin: { l:'Admin', d:'Claim review, flags, quality watch and suspensions.' }
   };
   function fableTabs(active){
-    var p = S.getPersona();
-    var T = [
-      { k:'overview', l:'Overview', href:'index-fable.html' },
-      { k:'book', l:'Supply book', href:'supply-book-fable.html', per:['host','pm'] },
-      { k:'discover', l:'Discover', href:'discover-fable.html', per:['host','pm'] },
-      { k:'bounties', l:'Bounties', href:'bounties-fable.html', per:['host','pm','chekin','admin'] },
-      { k:'admin', l:'Admin review', href:'admin-review-fable.html', per:['chekin','admin'] }
-    ];
-    return '<nav class="f-tabs" aria-label="Local Network sections">' + T.filter(function(t){ return !t.per || t.per.indexOf(p) >= 0; }).map(function(t){
-      return '<a' + (t.k === active ? ' class="on"' : '') + ' href="' + t.href + '">' + t.l + '</a>';
-    }).join('') + '</nav>' +
+    /* Module navigation is gated on features.moduleNav (data/config.js) —
+       flip it to true and the original tab bar returns unchanged. Tabs for
+       flag-gated pages only appear when their own flag is also on. */
+    var F = C.features || {};
+    var nav = '';
+    if (F.moduleNav){
+      var p = S.getPersona();
+      var T = [
+        { k:'overview', l:'Overview', href:'index-fable.html' },
+        { k:'book', l:'Supply book', href:'supply-book-fable.html', per:['host','pm'] },
+        { k:'discover', l:'Discover', href:'discover-fable.html', per:['host','pm'], flag:'discover' },
+        { k:'bounties', l:'Bounties', href:'bounties-fable.html', per:['host','pm','chekin','admin'], flag:'bounties' },
+        { k:'admin', l:'Admin review', href:'admin-review-fable.html', per:['chekin','admin'] }
+      ];
+      nav = '<nav class="f-tabs" aria-label="Local Network sections">' + T.filter(function(t){
+        if (t.flag && !F[t.flag]) return false;
+        return !t.per || t.per.indexOf(p) >= 0;
+      }).map(function(t){
+        return '<a' + (t.k === active ? ' class="on"' : '') + ' href="' + t.href + '">' + t.l + '</a>';
+      }).join('') + '</nav>';
+    }
+    return nav +
     (S.isFirstRun() ? '<div class="f-note"><i></i><span><b>First-run mode.</b> The programme launches empty — every page is showing its true pre-launch state.</span><button class="f-link" id="fr-exit">Load the demo dataset</button></div>' : '');
   }
   function mountChrome(active){

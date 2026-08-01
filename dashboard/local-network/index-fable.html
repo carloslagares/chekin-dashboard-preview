@@ -14,7 +14,7 @@
   <div id="sidebar-slot" data-nav="local-network"></div>
   <main>
     <header class="top">
-      <div class="crumbs"><b>Local Network</b> <span class="sep">/</span> Overview</div>
+      <div class="crumbs"><b>Local Network</b></div>
       <span id="fp-slot" style="margin-left:auto"></span>
       <span data-agent-trigger-slot></span>
       <button class="iconbtn" aria-label="Help"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 1 1 5.8 1c0 2-3 2-3 4M12 17h.01"/></svg></button>
@@ -48,30 +48,47 @@
   var S = window.NetworkService, C = window.LN_CONFIG, I = LN.icons;
   var body = document.getElementById('ln-body');
 
+  /* ---------- feature flags ----------
+     The programme ships as one page: the host's claims and what they earn.
+     Every surface below that is switched off still has its render function
+     here, intact — flip its flag in data/config.js and it comes back with
+     no other edit. A missing flag reads as false. */
+  function F(k){ return !!((C.features || {})[k]); }
+
   /* ---------- fable chrome: tabs + persona switcher + first-run ---------- */
   var CHEV = '<svg class="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>';
   var ARROW = '<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
   var PLUS = '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>';
+  var STAR = '<svg viewBox="0 0 24 24"><path d="m12 3 2.6 5.6 6 .8-4.4 4.2 1.1 6-5.3-2.9-5.3 2.9 1.1-6L3.4 9.4l6-.8z"/></svg>';
   var PERSONAS = {
-    host: { l:'Host', d:'A single-property owner — your suppliers, your earnings, gaps near you.' },
-    pm: { l:'Property manager', d:'A multi-property portfolio — the full supply book and coverage.' },
+    host: { l:'Host', d:'A single-property owner — your suppliers and your earnings.' },
+    pm: { l:'Property manager', d:'A multi-property portfolio — the full supply book.' },
     supplier: { l:'Supplier', d:'The provider’s own view — confirm a claim, watch your listing.' },
-    chekin: { l:'Chekin', d:'Internal staff — destination coverage, bounties and the pipeline.' },
+    chekin: { l:'Chekin', d:'Internal staff — destination coverage and the pipeline.' },
     admin: { l:'Admin', d:'Claim review, flags, quality watch and suspensions.' }
   };
   function fableTabs(active){
-    var p = S.getPersona();
-    var T = [
-      { k:'overview', l:'Overview', href:'index-fable.html' },
-      { k:'book', l:'Supply book', href:'supply-book-fable.html', per:['host','pm'] },
-      { k:'discover', l:'Discover', href:'discover-fable.html', per:['host','pm'] },
-      { k:'bounties', l:'Bounties', href:'bounties-fable.html', per:['host','pm','chekin','admin'] },
-      { k:'admin', l:'Admin review', href:'admin-review-fable.html', per:['chekin','admin'] }
-    ];
-    return '<nav class="f-tabs" aria-label="Local Network sections">' + T.filter(function(t){ return !t.per || t.per.indexOf(p) >= 0; }).map(function(t){
-      return '<a' + (t.k === active ? ' class="on"' : '') + ' href="' + t.href + '">' + t.l + '</a>';
-    }).join('') + '</nav>' +
-    (S.isFirstRun() ? '<div class="f-note"><i></i><span><b>First-run mode.</b> The programme launches empty — every page is showing its true pre-launch state.</span><button class="f-link" id="fr-exit">Load the demo dataset</button></div>' : '');
+    /* Module navigation is gated on features.moduleNav — the bar below is the
+       original tab set and returns exactly as it was when the flag flips. */
+    var nav = '';
+    if (F('moduleNav')){
+      var p = S.getPersona();
+      var T = [
+        { k:'overview', l:'Overview', href:'index-fable.html' },
+        { k:'book', l:'Supply book', href:'supply-book-fable.html', per:['host','pm'] },
+        { k:'discover', l:'Discover', href:'discover-fable.html', per:['host','pm'], flag:'discover' },
+        { k:'bounties', l:'Bounties', href:'bounties-fable.html', per:['host','pm','chekin','admin'], flag:'bounties' },
+        { k:'admin', l:'Admin review', href:'admin-review-fable.html', per:['chekin','admin'] }
+      ];
+      nav = '<nav class="f-tabs" aria-label="Local Network sections">' + T.filter(function(t){
+        if (t.flag && !F(t.flag)) return false;
+        return !t.per || t.per.indexOf(p) >= 0;
+      }).map(function(t){
+        return '<a' + (t.k === active ? ' class="on"' : '') + ' href="' + t.href + '">' + t.l + '</a>';
+      }).join('') + '</nav>';
+    }
+    return nav +
+    (S.isFirstRun() ? '<div class="f-note"><i></i><span><b>First-run mode.</b> The programme launches empty — this page is showing its true pre-launch state.</span><button class="f-link" id="fr-exit">Load the demo dataset</button></div>' : '');
   }
   function mountChrome(active){
     var p = S.getPersona(), acct2 = S.currentAccount();
@@ -112,6 +129,7 @@
 
   var persona = S.getPersona();
   mountChrome('overview');
+  var acctId = S.currentAccountId();
   function sHref(s){ return 'supplier-detail-fable.html?supplier=' + encodeURIComponent(s.id || s); }
 
   /* ---------- shared marks ---------- */
@@ -134,6 +152,19 @@
   function stateWord(state){
     return '<span class="f-state ' + LN.esc(state) + '"><i></i>' + LN.esc(LN.stateLabel(state)) + '</span>';
   }
+  function roleTags(e){
+    return '<div class="f-roles">' + ['sourced', 'activated', 'maintained'].map(function(r){
+      var on = e.rolesHeld.indexOf(r) >= 0;
+      return '<span class="f-role' + (on ? '' : ' off') + '" title="' + r + ' · ' + C.roleShares[r] + '%">' +
+        r.charAt(0).toUpperCase() + '</span>';
+    }).join('') + '</div>';
+  }
+
+  /* ============================================================
+     GATED SURFACES — off by default, intact, one flag away.
+     ============================================================ */
+
+  /* features.activityFeed — the claim-event feed */
   function activitySection(limit){
     var rows = S.getActivity({ limit: limit || 8 });
     var inner;
@@ -152,129 +183,423 @@
     return '<div><div class="f-sh"><div><h2>Activity</h2></div></div>' + inner + '</div>';
   }
 
-  /* ============================================================
-     HOST / PM — the owner view
-     ============================================================ */
-  function renderOwner(){
-    var acctId = S.currentAccountId();
-    var acct = S.getAccountById(acctId);
-    var book = S.getSupplyBook(acctId);
-    if (!book.entries.length){ renderPitch(acct); return; }
-    var watch = book.entries.filter(function(e){ return e.claim.state === 'watch' || e.claim.state === 'suspended'; });
-
-    function preferredDest(){
-      var props = S.getProperties(acctId), counts = {}, best = null;
-      props.forEach(function(p){ counts[p.destinationId] = (counts[p.destinationId] || 0) + 1; });
-      Object.keys(counts).forEach(function(k){ if (!best || counts[k] > counts[best]) best = k; });
-      return best ? S.getDestinationById(best) : null;
-    }
-
-    function statBand(){
-      var t = book.totals;
-      return '<div class="f-stats rise" style="animation-delay:.05s">' +
-        '<div class="f-stat"><div class="lbl">Live claims</div>' +
-          '<div class="val"><span class="dot"></span>' + t.live + '</div>' +
-          '<div class="sup"><b>' + t.claims + '</b> claims in the book</div></div>' +
-        '<div class="f-stat"><div class="lbl">Supply-book run-rate</div>' +
-          '<div class="val">' + LN.money(t.projectedAnnual) + '</div>' +
-          '<div class="sup"><b>' + LN.money(t.fiveYearValue) + '</b> projected over five years</div></div>' +
-        '<div class="f-stat"><div class="lbl">Residual this month</div>' +
-          '<div class="val">' + LN.money(t.mtd, { cents: true }) + '</div>' +
-          '<div class="sup"><b>' + LN.money(t.ytd) + '</b> year to date</div></div>' +
-        '<div class="f-stat"><div class="lbl">Needing attention</div>' +
-          '<div class="val">' + (watch.length ? '<span class="dot warn"></span>' : '') + watch.length + '</div>' +
-          '<div class="sup">' + (watch.length
-            ? '<span class="warn">Reduced or zero accrual</span> until they recover'
-            : '<span class="good">All suppliers healthy</span> and accruing') + '</div></div>' +
-      '</div>';
-    }
-
-    function bookSection(){
-      var rows = book.entries.slice().sort(function(a, b){ return b.projectedAnnual - a.projectedAnnual; }).slice(0, 5);
-      var inner = '<div class="f-book">' + rows.map(function(e, i){
-        return '<div class="f-brow" data-href="' + sHref(e.supplier) + '">' +
-          '<div class="ix">' + (i + 1) + '</div>' +
-          '<div class="who"><div class="nm">' + LN.esc(e.supplier.name) + '</div>' +
-            '<div class="mt">' + stateWord(e.claim.state) + ' &nbsp;·&nbsp; ' +
-              LN.esc(LN.catLabel(e.supplier.category)) + ' &nbsp;·&nbsp; ' + LN.esc(e.destination.name) + '</div></div>' +
-          '<div class="spk">' + spark(e.trend) + '</div>' +
-          '<div class="fig"><div class="a">' + LN.money(e.projectedAnnual) + '<small>/ yr</small></div>' +
-            '<div class="b">' + LN.money(e.mtdResidual, { cents: true }) + ' this month · pool ' +
-            (e.blockedReason ? '—' : LN.pct(e.currentPoolPct)) + '</div></div>' +
-        '</div>';
+  /* features.gaps — "gaps near you" and its bounty CTAs */
+  function preferredDest(){
+    var props = S.getProperties(acctId), counts = {}, best = null;
+    props.forEach(function(p){ counts[p.destinationId] = (counts[p.destinationId] || 0) + 1; });
+    Object.keys(counts).forEach(function(k){ if (!best || counts[k] > counts[best]) best = k; });
+    return best ? S.getDestinationById(best) : null;
+  }
+  function gapsSection(){
+    var dest = preferredDest();
+    var bounties = S.getBounties({ destination: dest && dest.id, status: 'open' }).slice(0, 3);
+    if (!bounties.length) bounties = S.getBounties({ status: 'open' }).slice(0, 3);
+    var inner;
+    if (!bounties.length){
+      inner = '<div class="f-empty"><h3>No open gaps</h3>' +
+        '<p>Chekin publishes a bounty when guests keep searching for something no supplier covers.</p></div>';
+    } else {
+      inner = '<div class="f-gaps">' + bounties.map(function(b){
+        return '<a class="f-gap" href="submit-fable.html?bounty=' + LN.esc(b.id) + '">' +
+          '<div class="row1"><span class="cat">' + LN.esc(LN.catLabel(b.category)) + ' · ' + LN.esc(b.destination.name) + '</span>' +
+            '<span class="boost">&times;' + b.boostMultiplier.toFixed(2) + ' boost</span>' +
+            '<span class="days' + (b.daysLeft <= 14 ? ' soon' : '') + '">' + b.daysLeft + 'd left</span></div>' +
+          '<h3>' + LN.esc(b.title) + '</h3>' +
+          '<div class="ev">' + LN.num(b.gapEvidence.emptyDecisions) + ' guest searches ended with no eligible supplier' +
+            '<small>' + LN.num(b.gapEvidence.searches) + ' searches · ' + LN.esc(b.gapEvidence.period) + ' · ' + LN.esc(b.destination.name) + '</small></div>' +
+          '<div class="fig">' +
+            '<div><div class="n">' + LN.money(b.projectedAnnualResidual) + '</div><div class="l">Projected year 1</div></div>' +
+            '<div><div class="n">' + LN.money(b.activationBonus) + '</div><div class="l">Activation bonus</div></div></div>' +
+          '<div class="go"><span class="f-link">Fill this gap ' + ARROW + '</span></div>' +
+        '</a>';
       }).join('') + '</div>' +
-      '<div class="f-foot"><a class="f-link" href="supply-book-fable.html">Open the full book ' + ARROW + '</a></div>';
-      return '<div><div class="f-sh"><div><h2>Your supply book</h2>' +
-        '<div class="note">Top claims by projected annual residual.</div></div></div>' + inner + '</div>';
+      (F('bounties') ? '<div class="f-foot"><a class="f-link" href="bounties-fable.html">All open gaps ' + ARROW + '</a></div>' : '');
     }
+    return '<div><div class="f-sh"><div><h2>Gaps near you</h2>' +
+      '<div class="note">Demand Chekin is paying a boost to fill.</div></div></div>' + inner + '</div>';
+  }
 
-    function gapsSection(){
-      var dest = preferredDest();
-      var bounties = S.getBounties({ destination: dest && dest.id, status: 'open' }).slice(0, 3);
-      if (!bounties.length) bounties = S.getBounties({ status: 'open' }).slice(0, 3);
-      var inner;
-      if (!bounties.length){
-        inner = '<div class="f-empty"><h3>No open gaps</h3>' +
-          '<p>Chekin publishes a bounty when guests keep searching for something no supplier covers.</p></div>';
-      } else {
-        inner = '<div class="f-gaps">' + bounties.map(function(b){
-          return '<a class="f-gap" href="submit-fable.html?bounty=' + LN.esc(b.id) + '">' +
-            '<div class="row1"><span class="cat">' + LN.esc(LN.catLabel(b.category)) + ' · ' + LN.esc(b.destination.name) + '</span>' +
-              '<span class="boost">&times;' + b.boostMultiplier.toFixed(2) + ' boost</span>' +
-              '<span class="days' + (b.daysLeft <= 14 ? ' soon' : '') + '">' + b.daysLeft + 'd left</span></div>' +
-            '<h3>' + LN.esc(b.title) + '</h3>' +
-            '<div class="ev">' + LN.num(b.gapEvidence.emptyDecisions) + ' guest searches ended with no eligible supplier' +
-              '<small>' + LN.num(b.gapEvidence.searches) + ' searches · ' + LN.esc(b.gapEvidence.period) + ' · ' + LN.esc(b.destination.name) + '</small></div>' +
-            '<div class="fig">' +
-              '<div><div class="n">' + LN.money(b.projectedAnnualResidual) + '</div><div class="l">Projected year 1</div></div>' +
-              '<div><div class="n">' + LN.money(b.activationBonus) + '</div><div class="l">Activation bonus</div></div></div>' +
-            '<div class="go"><span class="f-link">Fill this gap ' + ARROW + '</span></div>' +
-          '</a>';
-        }).join('') + '</div>' +
-        '<div class="f-foot"><a class="f-link" href="bounties-fable.html">All open gaps ' + ARROW + '</a></div>';
-      }
-      return '<div><div class="f-sh"><div><h2>Gaps near you</h2>' +
-        '<div class="note">Demand Chekin is paying a boost to fill.</div></div></div>' + inner + '</div>';
+  /* features.newInCoverage — supply other hosts introduced + the block action */
+  function coverageSection(){
+    var rows = S.getNewInCoverage(acctId, 4);
+    var inner;
+    if (!rows.length){
+      inner = '<div class="f-list"><div class="f-ev"><div class="tx"><div class="d">Nothing new has become available to your properties in the last six months.</div></div></div></div>';
+    } else {
+      inner = '<div class="f-list" id="new-cov">' + rows.map(function(r){
+        return '<div class="f-item' + (r.blocked ? ' blocked' : '') + '">' +
+          '<div class="av">' + LN.esc(r.supplier.name.charAt(0)) + '</div>' +
+          '<div class="tx"><div class="t"><a href="' + sHref(r.supplier) + '">' + LN.esc(r.supplier.name) + '</a></div>' +
+            '<div class="d">' + LN.esc(LN.catLabel(r.supplier.category)) + ' · ' + r.distanceKm + ' km · score ' +
+              r.supplier.score.toFixed(2) + ' · sourced by ' + LN.esc(r.sourcedByName) + '</div></div>' +
+          '<button class="f-mini' + (r.blocked ? ' brand' : '') + '" data-block="' + LN.esc(r.supplier.id) + '">' +
+            (r.blocked ? 'Unblock' : 'Block') + '</button>' +
+        '</div>';
+      }).join('') + '</div>';
     }
+    return '<div><div class="f-sh"><div><h2>New in your coverage</h2>' +
+      '<div class="note">Supply other hosts introduced that your guests can now book. You keep your usual share on every one — and you can block any of them.</div></div></div>' + inner + '</div>';
+  }
 
-    function coverageSection(){
-      var rows = S.getNewInCoverage(acctId, 4);
-      var inner;
-      if (!rows.length){
-        inner = '<div class="f-list"><div class="f-ev"><div class="tx"><div class="d">Nothing new has become available to your properties in the last six months.</div></div></div></div>';
-      } else {
-        inner = '<div class="f-list" id="new-cov">' + rows.map(function(r){
-          return '<div class="f-item' + (r.blocked ? ' blocked' : '') + '">' +
-            '<div class="av">' + LN.esc(r.supplier.name.charAt(0)) + '</div>' +
-            '<div class="tx"><div class="t"><a href="' + sHref(r.supplier) + '">' + LN.esc(r.supplier.name) + '</a></div>' +
-              '<div class="d">' + LN.esc(LN.catLabel(r.supplier.category)) + ' · ' + r.distanceKm + ' km · score ' +
-                r.supplier.score.toFixed(2) + ' · sourced by ' + LN.esc(r.sourcedByName) + '</div></div>' +
-            '<button class="f-mini' + (r.blocked ? ' brand' : '') + '" data-block="' + LN.esc(r.supplier.id) + '">' +
-              (r.blocked ? 'Unblock' : 'Block') + '</button>' +
-          '</div>';
-        }).join('') + '</div>';
+  /* The extra sections slot under the book. Empty (and rendering nothing)
+     while all three flags are off. */
+  function extrasSect(){
+    var left = '', right = '';
+    if (F('newInCoverage')) left += coverageSection();
+    if (F('gaps')) right += gapsSection();
+    if (F('activityFeed')) right += activitySection(8);
+    if (!left && !right) return '';
+    if (left && right){
+      return '<div class="f-sect"><div class="f-cols">' +
+        '<div class="f-stack">' + left + '</div>' +
+        '<div class="f-stack">' + right + '</div></div></div>';
+    }
+    return '<div class="f-sect"><div class="f-cols">' +
+      '<div class="f-stack">' + (left || right) + '</div><div></div></div></div>';
+  }
+
+  /* ============================================================
+     HOST / PM — the one page: the book as an asset
+     ============================================================ */
+  var state = { state: '', mode: '', destination: '', risk: '', selected: null };
+
+  function allEntries(){ return S.getSupplyBook(acctId).entries; }
+  function filteredRows(rows){
+    return rows.filter(function(e){
+      if (state.state && e.claim.state !== state.state) return false;
+      if (state.mode && e.claim.sharingMode !== state.mode) return false;
+      if (state.destination && e.supplier.destinationId !== state.destination) return false;
+      if (state.risk === 'risk' && !e.atRisk) return false;
+      if (state.risk === 'earning' && e.currentPoolPct <= 0) return false;
+      return true;
+    });
+  }
+  function totalsOf(rows){
+    function sum(k){ return Math.round(rows.reduce(function(t, e){ return t + e[k]; }, 0) * 100) / 100; }
+    var five = 0;
+    rows.forEach(function(e){
+      S.projectResidual(e.claim.id, 5, acctId).forEach(function(y){ five += y.amount; });
+    });
+    return { mtd: sum('mtdResidual'), lifetime: sum('lifetimeResidual'),
+      projectedAnnual: sum('projectedAnnual'), gmv: sum('liveGmv'), fiveYear: Math.round(five) };
+  }
+
+  /* ---------- the five-year decay curve ---------- */
+  function decayChart(series){
+    var W = 720, H = 270, P = { l: 64, r: 26, t: 34, b: 44 };
+    var iw = W - P.l - P.r, ih = H - P.t - P.b;
+    // round the scale to clean ticks: step = nice(max/3), axis max = 3 steps
+    var rawMax = (Math.max.apply(null, series.map(function(s){ return s.amount; })) || 1) * 1.1;
+    var exp = Math.pow(10, Math.floor(Math.log(rawMax / 3) / Math.LN10));
+    var f = (rawMax / 3) / exp;
+    var step = (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * exp;
+    var max = step * 3;
+    function x(i){ return P.l + (series.length === 1 ? iw / 2 : (i / (series.length - 1)) * iw); }
+    function y(v){ return P.t + ih - (v / max) * ih; }
+    var line = series.map(function(s, i){ return (i ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(s.amount).toFixed(1); }).join(' ');
+    var area = line + ' L' + x(series.length - 1).toFixed(1) + ' ' + (P.t + ih) + ' L' + x(0).toFixed(1) + ' ' + (P.t + ih) + ' Z';
+    var grid = '', i;
+    for (i = 0; i <= 3; i++){
+      var gv = max * i / 3, gy = y(gv);
+      grid += '<line class="grid" x1="' + P.l + '" y1="' + gy.toFixed(1) + '" x2="' + (W - P.r) + '" y2="' + gy.toFixed(1) + '"/>' +
+        '<text class="axis" x="' + (P.l - 10) + '" y="' + (gy + 4).toFixed(1) + '" text-anchor="end">' + LN.money(Math.round(gv)) + '</text>';
+    }
+    // step boundaries: a quiet vertical hairline + the pool rate at that step
+    var marks = '', lastStep = null;
+    series.forEach(function(s, idx){
+      if (s.decayStep !== lastStep){
+        lastStep = s.decayStep;
+        if (idx > 0) marks += '<line class="stepline" x1="' + x(idx).toFixed(1) + '" y1="' + P.t + '" x2="' + x(idx).toFixed(1) + '" y2="' + (P.t + ih) + '"/>';
+        marks += '<text class="dsub" x="' + (x(idx) + (idx === series.length - 1 ? -4 : 5)).toFixed(1) + '" y="' + (P.t - 8) + '"' +
+          (idx === series.length - 1 ? ' text-anchor="end"' : '') + '>pool ' + LN.pct(s.poolPct) + '</text>';
       }
-      return '<div><div class="f-sh"><div><h2>New in your coverage</h2>' +
-        '<div class="note">Supply other hosts introduced that your guests can now book. You keep your usual share on every one — and you can block any of them.</div></div></div>' + inner + '</div>';
+    });
+    var pts = series.map(function(s, idx){
+      return '<circle class="pt" cx="' + x(idx).toFixed(1) + '" cy="' + y(s.amount).toFixed(1) + '" r="4.5"/>';
+    }).join('');
+    // selective direct labels: first and last year only — the tooltip carries the rest
+    function amountLabel(idx){
+      var s = series[idx];
+      var anchor = idx === 0 ? 'start' : idx === series.length - 1 ? 'end' : 'middle';
+      var lx = idx === 0 ? x(idx) : idx === series.length - 1 ? x(idx) + 4 : x(idx);
+      return '<text class="dlabel" x="' + lx.toFixed(1) + '" y="' + (y(s.amount) - 12).toFixed(1) + '" text-anchor="' + anchor + '">' +
+        LN.money(Math.round(s.amount)) + '</text>';
+    }
+    var labels = series.length > 1 ? amountLabel(0) + amountLabel(series.length - 1) : amountLabel(0);
+    var xlab = series.map(function(s, idx){
+      return '<text class="axis strong" x="' + x(idx).toFixed(1) + '" y="' + (H - 14) + '" text-anchor="middle">Year ' + s.year + '</text>';
+    }).join('');
+    // invisible hover columns
+    var hover = series.map(function(s, idx){
+      var x0 = idx === 0 ? P.l : (x(idx - 1) + x(idx)) / 2;
+      var x1 = idx === series.length - 1 ? W - P.r : (x(idx) + x(idx + 1)) / 2;
+      return '<rect data-yr="' + idx + '" x="' + x0.toFixed(1) + '" y="' + P.t + '" width="' + (x1 - x0).toFixed(1) +
+        '" height="' + ih + '" fill="transparent" data-cx="' + x(idx).toFixed(1) + '" data-cy="' + y(s.amount).toFixed(1) + '"/>';
+    }).join('');
+    return '<div class="f-chartbox"><svg class="f-chart" id="decay-svg" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Projected residual by year">' +
+      grid + '<path class="area" d="' + area + '"/>' + marks + '<path class="line" d="' + line + '"/>' +
+      pts + labels + xlab + hover + '</svg><div class="f-tip" id="decay-tip"></div></div>';
+  }
+
+  /* ---------- stat band ---------- */
+  function statBand(t){
+    return '<div class="f-stats rise" style="animation-delay:.05s">' +
+      '<div class="f-stat"><div class="lbl">Annual run-rate</div>' +
+        '<div class="val">' + LN.money(t.projectedAnnual) + '</div>' +
+        '<div class="sup">On today’s rates and trailing bookings</div></div>' +
+      '<div class="f-stat"><div class="lbl">Five-year book value</div>' +
+        '<div class="val">' + LN.money(t.fiveYear) + '</div>' +
+        '<div class="sup">Decay schedule applied, bookings held flat</div></div>' +
+      '<div class="f-stat"><div class="lbl">Bookings driven · 12m</div>' +
+        '<div class="val">' + LN.money(t.gmv) + '</div>' +
+        '<div class="sup">GMV across all claims in the book</div></div>' +
+      '<div class="f-stat"><div class="lbl">Earned to date</div>' +
+        '<div class="val">' + LN.money(t.lifetime) + '</div>' +
+        '<div class="sup"><b>' + LN.money(t.mtd, { cents: true }) + '</b> of that this month</div></div>' +
+    '</div>';
+  }
+
+  /* ---------- filter bar: four labelled dropdowns + live summary ----------
+     One control per dimension, so eleven claim states can never swamp the
+     three sharing modes. Zero-count options are dropped (unless selected),
+     an active dimension turns navy with its own clear button, and the
+     "Showing X of Y" line means the table is never silently filtered. */
+  var XICO = '<svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+  var CHECK = '<svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>';
+
+  function filters(rows, shownCount){
+    function dd(id, label, opts, cur){
+      var curOpt = null;
+      opts.forEach(function(o){ if (o.v === cur) curOpt = o; });
+      var act = cur !== '';
+      var menu = opts.map(function(o){
+        var n = o.v === '' ? rows.length : rows.filter(o.f).length;
+        if (n === 0 && o.v !== '' && o.v !== cur) return '';   // zero-count: hidden
+        return '<button class="f-ddo' + (cur === o.v ? ' on' : '') + '" role="menuitemradio" aria-checked="' +
+          (cur === o.v ? 'true' : 'false') + '" data-val="' + LN.esc(o.v) + '">' +
+          '<span class="ck">' + CHECK + '</span>' + LN.esc(o.l) +
+          '<span class="n">' + n + '</span></button>';
+      }).join('');
+      return '<div class="f-dd' + (act ? ' act' : '') + '" data-group="' + id + '">' +
+        '<button class="f-ddt" data-dd="' + id + '" aria-haspopup="true" aria-expanded="false">' +
+          '<span class="k">' + LN.esc(label) + '</span>' +
+          '<span class="v">' + LN.esc(act && curOpt ? curOpt.l : 'All') + '</span>' + CHEV + '</button>' +
+        (act ? '<button class="f-ddx" data-clear="' + id + '" aria-label="Clear ' + LN.esc(label) + ' filter">' + XICO + '</button>' : '') +
+        '<div class="f-ddm" role="menu" aria-label="' + LN.esc(label) + '">' + menu + '</div></div>';
+    }
+    function all(){ return { v: '', l: 'All', f: function(){ return true; } }; }
+    var states = ['live', 'watch', 'onboarding', 'pending_supplier', 'screening', 'draft', 'suspended', 'dormant', 'expired', 'terminated', 'released'];
+    var anyActive = state.state !== '' || state.mode !== '' || state.destination !== '' || state.risk !== '';
+    return '<div class="f-filterbar rise" style="animation-delay:.1s"><div class="f-dds">' +
+      dd('state', 'State', [all()].concat(states.map(function(s){
+        return { v: s, l: LN.stateLabel(s), f: function(e){ return e.claim.state === s; } };
+      })), state.state) +
+      dd('mode', 'Sharing', [all()].concat(['network', 'delayed', 'private'].map(function(m){
+        return { v: m, l: LN.modeLabel(m), f: function(e){ return e.claim.sharingMode === m; } };
+      })), state.mode) +
+      dd('destination', 'Destination', [all()].concat(S.getDestinations().map(function(d){
+        return { v: d.id, l: d.name, f: function(e){ return e.supplier.destinationId === d.id; } };
+      })), state.destination) +
+      dd('risk', 'Health', [all(),
+        { v: 'earning', l: 'Earning now', f: function(e){ return e.currentPoolPct > 0; } },
+        { v: 'risk', l: 'At risk', f: function(e){ return e.atRisk; } }], state.risk) +
+    '</div><div class="f-fsum"><span>Showing <b>' + shownCount + '</b> of <b>' + rows.length + '</b> claims</span>' +
+      (anyActive ? '<button class="f-link" id="f-clearall">Clear all filters</button>' : '') +
+    '</div></div>';
+  }
+  function closeAllMenus(){
+    var open = document.querySelectorAll('.f-dd.open:not(.fp)'), i;
+    for (i = 0; i < open.length; i++){
+      open[i].className = open[i].className.replace(' open', '');
+      var t = open[i].querySelector('[data-dd]');
+      if (t) t.setAttribute('aria-expanded', 'false');
+    }
+  }
+  // one document-level closer for click-outside and Escape (bound once)
+  document.addEventListener('click', function(e){
+    if (!(e.target.closest && e.target.closest('.f-dd'))) closeAllMenus();
+  });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape') closeAllMenus();
+  });
+
+  function countdownText(claim){
+    var cd = S.countdownFor(claim);
+    if (!cd) return '';
+    var txt = cd.overdue ? Math.abs(cd.days) + 'd overdue' : cd.days + 'd ' + cd.label;
+    return '<div class="sub">' + LN.esc(txt) + '</div>';
+  }
+
+  function table(rows, t){
+    if (!rows.length){
+      var any = allEntries().length;
+      return '<div class="f-empty" style="margin-top:36px"><h3>' +
+        (any ? 'No claims match these filters' : 'Your supply book is empty') + '</h3><p>' +
+        (any ? 'Clear a filter to see the rest of the book.'
+             : 'Every supplier you introduce becomes a line here — with its live rate, its decay step and what it is projected to earn.') + '</p>' +
+        (any ? '' : '<a class="f-btn" href="submit-fable.html">' + PLUS + ' Submit a supplier</a>') + '</div>';
+    }
+    return '<div class="f-tablewrap"><table class="f-table"><thead><tr>' +
+      '<th>Supplier</th><th>State</th><th>Roles</th><th>Sharing</th>' +
+      '<th class="num">GMV 12m</th><th class="num">Pool rate</th><th class="num">This month</th><th class="num">Projected / yr</th><th style="text-align:right">Trend</th>' +
+      '</tr></thead><tbody>' +
+      rows.map(function(e){
+        var sel = e.claim.id === state.selected;
+        return '<tr data-claim="' + LN.esc(e.claim.id) + '"' + (sel ? ' class="sel"' : '') + '>' +
+          '<td><div class="nm">' + LN.esc(e.supplier.name) + '</div>' +
+            '<div class="em">' + LN.esc(LN.catLabel(e.supplier.category)) + ' · ' + LN.esc(e.destination.name) + '</div></td>' +
+          '<td>' + stateWord(e.claim.state) + countdownText(e.claim) + '</td>' +
+          '<td>' + roleTags(e) + '<div class="sub">' + e.roleSharePct + '%</div></td>' +
+          '<td><span class="f-mode ' + LN.esc(e.claim.sharingMode) + '">' + LN.esc(LN.modeLabel(e.claim.sharingMode)) + '</span></td>' +
+          '<td class="num">' + LN.money(e.liveGmv) + '</td>' +
+          '<td class="num">' + (e.blockedReason ? '<span style="color:var(--f-faint)">—</span>' : '<b>' + LN.pct(e.currentPoolPct) + '</b>') + '</td>' +
+          '<td class="num">' + LN.money(e.mtdResidual, { cents: true }) + '</td>' +
+          '<td class="num"><b>' + LN.money(e.projectedAnnual) + '</b></td>' +
+          '<td style="text-align:right">' + spark(e.trend) + '</td>' +
+        '</tr>';
+      }).join('') +
+      '<tr class="sum"><td colspan="4">Total · ' + rows.length + ' claim' + (rows.length === 1 ? '' : 's') + '</td>' +
+        '<td class="num">' + LN.money(t.gmv) + '</td><td class="num" style="color:var(--f-faint);font-weight:500">—</td>' +
+        '<td class="num">' + LN.money(t.mtd, { cents: true }) + '</td>' +
+        '<td class="num">' + LN.money(t.projectedAnnual) + '</td>' +
+        '<td style="text-align:right"><b>' + LN.money(t.fiveYear) + '</b><div class="sub">5-yr value</div></td></tr>' +
+      '</tbody></table></div>';
+  }
+
+  function detail(){
+    if (!state.selected) return '';
+    var e = allEntries().filter(function(x){ return x.claim.id === state.selected; })[0];
+    if (!e) return '';
+    var series = S.projectResidual(e.claim.id, 5, acctId);
+    if (!series.length) return '';
+    var acr = S.computeAccrual(100, e.claim, e.supplier, e.destination);
+    var five = Math.round(series.reduce(function(t, y){ return t + y.amount; }, 0));
+    var maxYear = Math.max.apply(null, series.map(function(y){ return y.amount; })) || 1;
+
+    var left = '<div><div class="f-sh"><div><h2>Residual over five years — ' + LN.esc(e.supplier.name) + '</h2>' +
+      '<div class="note">' + (e.blockedReason
+        ? LN.esc(e.blockedReason)
+        : 'Trailing-12-month bookings of ' + LN.money(series[0].gmv) + ' held flat, so the shape is purely the decay schedule.') +
+      '</div></div><a class="f-link" href="' + sHref(e.supplier) + '">Open supplier ' + ARROW + '</a></div>' +
+      decayChart(series) + '</div>';
+
+    var right = '<div>' +
+      '<div class="f-navypanel"><div class="lbl">Five-year value</div>' +
+        '<div class="big">' + LN.money(five) + '</div>' +
+        '<div class="note">What this claim pays you across the full decay schedule.</div>' +
+        '<div class="f-yr">' + series.map(function(y){
+          return '<div class="r"><span class="y">Year ' + y.year + '</span>' +
+            '<span class="bar"><i style="width:' + Math.max(2, (y.amount / maxYear) * 100).toFixed(1) + '%"></i></span>' +
+            '<span class="v">' + LN.money(Math.round(y.amount)) + '</span></div>';
+        }).join('') + '</div></div>' +
+      '<div class="f-facts">' +
+        '<div class="f-fact"><div class="fl">This year’s rate · per ' + LN.money(100) + ' of bookings</div>' +
+          LN.chain(acr) +
+          '<div class="note" style="font:400 12px/18px var(--font-primary);color:var(--f-faint);margin-top:12px">' +
+          (acr.blockedReason ? '' :
+            (acr.saturated
+              ? LN.esc(e.destination.name) + ' already covers ' + LN.esc(LN.catLabel(e.supplier.category)) + ' well, so the premium is capped at ' + LN.pct(acr.premiumCapPct) + '.'
+              : 'Full premium of ' + LN.pct(acr.premiumCapPct) + ' available in ' + LN.esc(e.destination.name) + '.')) + '</div></div>' +
+        '<div class="f-fact"><div class="fl">Decay schedule</div><div class="f-kv">' +
+          C.decaySchedule.map(function(s, i){
+            var on = series[0].decayStep === i + 1;
+            return '<div class="r"><span class="k">' + LN.esc(s.label) + '</span>' +
+              '<span class="v">&times;' + s.multiplier.toFixed(2) + (on ? '<span class="cur">now</span>' : '') + '</span></div>';
+          }).join('') + '</div></div>' +
+      '</div></div>';
+
+    return '<div class="f-detail rise">' + left + right + '</div>';
+  }
+
+  /* ---------- render (host / pm) ---------- */
+  function renderBook(){
+    var acct = S.getAccountById(acctId);
+    var rows = allEntries();
+    if (!rows.length){ renderPitch(acct); return; }
+    var shown = filteredRows(rows);
+    var t = totalsOf(shown);
+    var prog = S.curatorProgress(acctId);
+    if (!state.selected || !shown.some(function(e){ return e.claim.id === state.selected; })){
+      var live = shown.filter(function(e){ return e.currentPoolPct > 0; });
+      state.selected = (live[0] || shown[0] || {}).claim ? (live[0] || shown[0]).claim.id : null;
     }
 
     body.innerHTML =
       '<div class="f-head rise"><div>' +
-        '<div class="eyebrow">Overview</div>' +
-        '<h1>Local Network</h1>' +
-        '<div class="sub">Every supplier ' + (acct ? LN.esc(acct.name) : 'you') + ' has introduced, what it earns across the network, and where supply is still missing.</div>' +
+        '<div class="eyebrow">Local Network</div>' +
+        '<h1>Your supply book<span class="count">' + shown.length + '</span></h1>' +
+        '<div class="sub">Every supplier ' + (acct ? LN.esc(acct.name) : 'you') + ' has introduced, held as an asset — what each claim earns today, and what the decay schedule says it is worth over five years.</div>' +
+        (prog.met ? '<div class="f-curator">' + STAR + '<span><b>Local Curator</b> · ' + prog.liveSuppliers +
+          ' live suppliers, avg score ' + prog.avgScore.toFixed(2) +
+          '</span><span class="why">— faster review, same rates</span></div>' : '') +
       '</div><div class="acts">' +
-        '<a class="f-btn ghost" href="discover-fable.html">Browse network supply</a>' +
+        (F('discover') ? '<a class="f-btn ghost" href="discover-fable.html">Browse network supply</a>' : '') +
         '<a class="f-btn" href="submit-fable.html">' + PLUS + ' Submit a supplier</a>' +
       '</div></div>' +
-      statBand() +
-      '<div class="f-sect"><div class="f-cols">' +
-        '<div class="f-stack">' + bookSection() + coverageSection() + '</div>' +
-        '<div class="f-stack">' + gapsSection() + activitySection(8) + '</div>' +
-      '</div></div>';
+      statBand(t) +
+      filters(rows, shown.length) +
+      table(shown, t) +
+      detail() +
+      extrasSect();
 
-    // row navigation + block toggles
-    var i, rows = body.querySelectorAll('[data-href]');
+    wire();
+  }
+
+  function wire(){
+    var i;
+    // filter bar: open/close menus, pick options, clear one or all dimensions
+    var bar = body.querySelector('.f-filterbar');
+    if (bar) bar.addEventListener('click', function(e){
+      var t = e.target.closest ? e.target.closest('button') : null;
+      if (!t) return;
+      if (t.hasAttribute('data-dd')){
+        var dd = t.parentNode;
+        var wasOpen = dd.className.indexOf(' open') >= 0;
+        closeAllMenus();
+        if (!wasOpen){ dd.className += ' open'; t.setAttribute('aria-expanded', 'true'); }
+      } else if (t.hasAttribute('data-val')){
+        var host = t.closest('.f-dd');
+        if (!host) return;
+        state[host.getAttribute('data-group')] = t.getAttribute('data-val');
+        renderBook();
+      } else if (t.hasAttribute('data-clear')){
+        state[t.getAttribute('data-clear')] = '';
+        renderBook();
+      } else if (t.id === 'f-clearall'){
+        state.state = ''; state.mode = ''; state.destination = ''; state.risk = '';
+        renderBook();
+      }
+    });
+    // row selection
+    var trs = body.querySelectorAll('[data-claim]');
+    for (i = 0; i < trs.length; i++){
+      (function(tr){
+        tr.addEventListener('click', function(){
+          state.selected = tr.getAttribute('data-claim');
+          renderBook();
+        });
+      })(trs[i]);
+    }
+    // chart hover
+    var svg = document.getElementById('decay-svg'), tip = document.getElementById('decay-tip');
+    if (svg && tip){
+      var e0 = allEntries().filter(function(x){ return x.claim.id === state.selected; })[0];
+      var series = e0 ? S.projectResidual(e0.claim.id, 5, acctId) : [];
+      svg.addEventListener('mousemove', function(ev){
+        var r = ev.target;
+        if (!r || !r.getAttribute || r.getAttribute('data-yr') == null){ tip.className = 'f-tip'; return; }
+        var s = series[parseInt(r.getAttribute('data-yr'), 10)];
+        if (!s){ tip.className = 'f-tip'; return; }
+        tip.innerHTML = '<b>Year ' + s.year + '</b> <span class="m">· ' + LN.esc(s.decayLabel) + '</span><br>' +
+          LN.money(Math.round(s.amount)) + ' <span class="m">at pool ' + LN.pct(s.poolPct) + '</span>';
+        tip.style.left = (parseFloat(r.getAttribute('data-cx')) / 720 * 100) + '%';
+        tip.style.top = (parseFloat(r.getAttribute('data-cy')) / 270 * 100) + '%';
+        tip.className = 'f-tip show';
+      });
+      svg.addEventListener('mouseleave', function(){ tip.className = 'f-tip'; });
+    }
+    // row navigation + coverage block toggles (features.newInCoverage)
+    var rows = body.querySelectorAll('[data-href]');
     for (i = 0; i < rows.length; i++) (function(el){
       el.addEventListener('click', function(){ location.href = el.getAttribute('data-href'); });
     })(rows[i]);
@@ -292,7 +617,7 @@
         S.blockSupplierForAccount(acctId, id);
         LN.toast(sup.name + ' blocked at your properties. Their claim and score are unaffected.');
       }
-      renderOwner();
+      renderBook();
     });
   }
 
@@ -377,7 +702,7 @@
           }).join('') + '</div></div>' +
       '</div></div>' +
 
-      gapsPitchSection() +
+      (F('gaps') ? gapsPitchSection() : '') +
       '<div class="f-sect" style="text-align:center;padding:56px 0 8px;border-top:1px solid var(--f-hair)">' +
         '<div style="font:600 20px/28px var(--font-primary);letter-spacing:-.01em">The first claim in ' + LN.esc(dest ? dest.name : 'your destination') + ' could be yours.</div>' +
         '<a class="f-btn" style="margin-top:22px" href="submit-fable.html">' + PLUS + ' Submit a supplier</a></div>';
@@ -391,12 +716,13 @@
       el.addEventListener('click', function(){ location.href = el.getAttribute('data-href'); });
     })(rows[i]);
   }
+  /* features.gaps — bounty pitch cards on the empty state */
   function gapsPitchSection(){
     var bounties = S.getBounties({ status:'open' }).slice(0, 3);
     if (!bounties.length) return '';
     return '<div class="f-sect"><div class="f-sh"><div><h2>Gaps Chekin is already paying to fill</h2>' +
       '<div class="note">Real guest demand with no supplier to serve it. Fill one and the pool is boosted &times;' + C.bountyBoostMultiplier + ' for ' + C.bountyBoostMonths + ' months.</div></div>' +
-      '<a class="f-link" href="bounties-fable.html">The whole board ' + ARROW + '</a></div>' +
+      (F('bounties') ? '<a class="f-link" href="bounties-fable.html">The whole board ' + ARROW + '</a>' : '') + '</div>' +
       '<div class="f-gaps grid">' + bounties.map(function(b){
         return '<a class="f-gap" href="submit-fable.html?bounty=' + LN.esc(b.id) + '">' +
           '<div class="row1"><span class="cat">' + LN.esc(LN.catLabel(b.category)) + ' · ' + LN.esc(b.destination.name) + '</span>' +
@@ -464,6 +790,7 @@
 
   /* ============================================================
      CHEKIN — destination coverage;  ADMIN — the pipeline
+     (bounty figures and gap-board links gated on features.bounties)
      ============================================================ */
   function renderStaff(){
     var queue = S.getReviewQueue(), flags = S.getFlags(), watch = S.getQualityWatch(), susp = S.getSuspensions();
@@ -483,7 +810,7 @@
     }
     function destSection(){
       var rows = S.getDestinations().map(function(d){
-        var open = S.getBounties({ status:'open', destination: d.id });
+        var open = F('bounties') ? S.getBounties({ status:'open', destination: d.id }) : [];
         var cats = LN.categories();
         return '<div class="f-gap" style="background:var(--f-wash)">' +
           '<div class="row1"><span class="cat">' + LN.esc(d.country) + ' · ' + LN.esc(d.supplyDensity) + ' density</span>' +
@@ -493,13 +820,13 @@
             '<div><div class="n">' + d.activeProperties + '</div><div class="l">Active properties</div></div>' +
             '<div><div class="n">' + d.liveSuppliers + '</div><div class="l">Live suppliers</div></div>' +
             '<div><div class="n">' + d.categoriesCovered.length + ' / ' + cats.length + '</div><div class="l">Categories covered</div></div>' +
-            '<div><div class="n">' + open.length + '</div><div class="l">Open bounties</div></div>' +
+            (F('bounties') ? '<div><div class="n">' + open.length + '</div><div class="l">Open bounties</div></div>' : '') +
           '</div>' +
-          '<div class="go"><a class="f-link" href="bounties-fable.html?destination=' + LN.esc(d.id) + '">Gap board for ' + LN.esc(d.name) + ' ' + ARROW + '</a></div>' +
+          (F('bounties') ? '<div class="go"><a class="f-link" href="bounties-fable.html?destination=' + LN.esc(d.id) + '">Gap board for ' + LN.esc(d.name) + ' ' + ARROW + '</a></div>' : '') +
         '</div>';
       }).join('');
       return '<div><div class="f-sh"><div><h2>Destination coverage</h2>' +
-        '<div class="note">Where the network is dense, and where Chekin is paying to bootstrap it.</div></div></div>' +
+        '<div class="note">Where the network is dense' + (F('bounties') ? ', and where Chekin is paying to bootstrap it' : ' and where it is still thin') + '.</div></div></div>' +
         '<div class="f-gaps">' + rows + '</div></div>';
     }
     function queuePreview(){
@@ -530,15 +857,16 @@
         '<h1>' + (isAdmin ? 'The pipeline' : 'The network, by destination') + '</h1>' +
         '<div class="sub">' + (isAdmin
           ? 'Everything waiting on a Chekin decision — claims, flags and quality drift.'
-          : 'Host-sourced supply per destination, the gaps being paid to close, and the pipeline behind them.') + '</div>' +
+          : 'Host-sourced supply per destination, and the pipeline behind it.') + '</div>' +
       '</div><div class="acts">' +
-        '<a class="f-btn ghost" href="bounties-fable.html">Gap board</a>' +
+        (F('bounties') ? '<a class="f-btn ghost" href="bounties-fable.html">Gap board</a>' : '') +
         '<a class="f-btn" href="admin-review-fable.html">Review queue' + (queue.length ? ' · ' + queue.length : '') + '</a>' +
       '</div></div>' +
       pipelineBand() +
       '<div class="f-sect"><div class="f-cols">' +
         '<div class="f-stack">' + (isAdmin ? queuePreview() : destSection()) + '</div>' +
-        '<div class="f-stack">' + (isAdmin ? destSection() : queuePreview()) + activitySection(6) + '</div>' +
+        '<div class="f-stack">' + (isAdmin ? destSection() : queuePreview()) +
+          (F('activityFeed') ? activitySection(6) : '') + '</div>' +
       '</div></div>';
 
     var i, rows = body.querySelectorAll('[data-href]');
@@ -550,7 +878,7 @@
   /* ---------- route by persona ---------- */
   if (persona === 'supplier') renderSupplier();
   else if (persona === 'chekin' || persona === 'admin') renderStaff();
-  else renderOwner();
+  else renderBook();
 })();
 </script>
 </body>
