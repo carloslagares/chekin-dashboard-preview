@@ -38,7 +38,7 @@
     </div>
     <div class="nav-item" data-k="local-network">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.6"/><circle cx="5" cy="5.5" r="2"/><circle cx="19" cy="5.5" r="2"/><circle cx="5" cy="18.5" r="2"/><circle cx="19" cy="18.5" r="2"/><path d="m6.6 7.1 3.6 3.4M17.4 7.1l-3.6 3.4M6.6 16.9l3.6-3.4M17.4 16.9l-3.6-3.4"/></svg>
-      Local Network
+      Local Experiences
     </div>
     <div class="nav-item" data-k="documents">
       <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></svg>

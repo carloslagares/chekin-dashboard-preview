@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Chekin — Local Network</title>
+<title>Chekin — Local Experiences</title>
 <link rel="stylesheet" href="../ds/colors_and_type.css">
 <link rel="stylesheet" href="../ds/_sidebar.css">
 <link rel="stylesheet" href="../ds/_agent.css">
@@ -14,7 +14,7 @@
   <div id="sidebar-slot" data-nav="local-network"></div>
   <main>
     <header class="top">
-      <div class="crumbs"><b>Local Network</b></div>
+      <div class="crumbs"><b>Local Experiences</b></div>
       <span id="fp-slot" style="margin-left:auto"></span>
       <span data-agent-trigger-slot></span>
       <button class="iconbtn" aria-label="Help"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 1 1 5.8 1c0 2-3 2-3 4M12 17h.01"/></svg></button>
@@ -45,21 +45,18 @@
 <script>
 (function(){
   'use strict';
-  var S = window.NetworkService, C = window.LN_CONFIG, I = LN.icons;
+  var S = window.NetworkService, C = window.LN_CONFIG;
   var body = document.getElementById('ln-body');
 
   /* ---------- feature flags ----------
-     The programme ships as one page: the host's claims and what they earn.
-     Every surface below that is switched off still has its render function
-     here, intact — flip its flag in data/config.js and it comes back with
-     no other edit. A missing flag reads as false. */
+     A missing flag reads as false. The only gated surface on this page is the
+     open-bounty call-to-action in the hero — features.gaps brings it back with
+     no other edit, exactly like every other gated surface in the module. */
   function F(k){ return !!((C.features || {})[k]); }
 
   /* ---------- fable chrome: tabs + persona switcher + first-run ---------- */
   var CHEV = '<svg class="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>';
   var ARROW = '<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
-  var PLUS = '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>';
-  var STAR = '<svg viewBox="0 0 24 24"><path d="m12 3 2.6 5.6 6 .8-4.4 4.2 1.1 6-5.3-2.9-5.3 2.9 1.1-6L3.4 9.4l6-.8z"/></svg>';
   var PERSONAS = {
     host: { l:'Host', d:'A single-property owner — your suppliers and your earnings.' },
     pm: { l:'Property manager', d:'A multi-property portfolio — the full supply book.' },
@@ -80,7 +77,7 @@
         { k:'bounties', l:'Bounties', href:'bounties-fable.html', per:['host','pm','chekin','admin'], flag:'bounties' },
         { k:'admin', l:'Admin review', href:'admin-review-fable.html', per:['chekin','admin'] }
       ];
-      nav = '<nav class="f-tabs" aria-label="Local Network sections">' + T.filter(function(t){
+      nav = '<nav class="f-tabs" aria-label="Local Experiences sections">' + T.filter(function(t){
         if (t.flag && !F(t.flag)) return false;
         return !t.per || t.per.indexOf(p) >= 0;
       }).map(function(t){
@@ -127,758 +124,181 @@
     if (fx) fx.addEventListener('click', function(){ S.setFirstRun(false); });
   }
 
-  var persona = S.getPersona();
   mountChrome('overview');
-  var acctId = S.currentAccountId();
-  function sHref(s){ return 'supplier-detail-fable.html?supplier=' + encodeURIComponent(s.id || s); }
-
-  /* ---------- shared marks ---------- */
-  function spark(values){
-    var vals = (values || []).slice();
-    if (vals.length < 2) vals = [0, 0];
-    var W = 78, H = 30, P = 4;
-    var max = Math.max.apply(null, vals), min = Math.min.apply(null, vals);
-    var span = (max - min) || 1;
-    var pts = vals.map(function(v, i){
-      return [(P + (i / (vals.length - 1)) * (W - 2 * P)).toFixed(1),
-              (H - P - ((v - min) / span) * (H - 2 * P)).toFixed(1)];
-    });
-    var d = pts.map(function(p, i){ return (i ? 'L' : 'M') + p[0] + ' ' + p[1]; }).join(' ');
-    var last = pts[pts.length - 1];
-    return '<svg width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '" aria-hidden="true">' +
-      '<path d="' + d + '" fill="none" stroke="#C9D4FB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' +
-      '<circle cx="' + last[0] + '" cy="' + last[1] + '" r="3.4" fill="#385BF8" stroke="#FFFFFF" stroke-width="2"/></svg>';
-  }
-  function stateWord(state){
-    return '<span class="f-state ' + LN.esc(state) + '"><i></i>' + LN.esc(LN.stateLabel(state)) + '</span>';
-  }
-  function roleTags(e){
-    return '<div class="f-roles">' + ['sourced', 'activated', 'maintained'].map(function(r){
-      var on = e.rolesHeld.indexOf(r) >= 0;
-      return '<span class="f-role' + (on ? '' : ' off') + '" title="' + r + ' · ' + C.roleShares[r] + '%">' +
-        r.charAt(0).toUpperCase() + '</span>';
-    }).join('') + '</div>';
-  }
 
   /* ============================================================
-     GATED SURFACES — off by default, intact, one flag away.
+     THE LANDING — Local Experiences, before the book.
+     Every euro and every percentage below comes out of
+     NetworkService.computeAccrual over LN_CONFIG. Nothing is typed in:
+     change the decay schedule or the premium in data/config.js and this
+     page follows with no other edit.
      ============================================================ */
+  var today = S._dataset.today;
+  var acctId = S.currentAccountId();
 
-  /* features.activityFeed — the claim-event feed */
-  function activitySection(limit){
-    var rows = S.getActivity({ limit: limit || 8 });
-    var inner;
-    if (!rows.length){
-      inner = '<div class="f-feed"><div class="f-ev"><div class="tx"><div class="d">Nothing has happened yet. The feed starts with the first claim.</div></div></div></div>';
-    } else {
-      inner = '<div class="f-feed">' + rows.map(function(a){
-        var sup = S.getSupplierById(a.supplierId);
-        return '<div class="f-ev ' + LN.feedKind(a.kind) + '"><span class="pt"></span>' +
-          '<div class="tx"><div class="t">' + LN.esc(a.title) +
-            (sup ? ' · <a href="' + sHref(sup) + '">' + LN.esc(sup.name) + '</a>' : '') + '</div>' +
-          '<div class="d">' + LN.esc(a.detail) + '</div></div>' +
-          '<div class="when">' + LN.relDate(a.at) + '</div></div>';
-      }).join('') + '</div>';
-    }
-    return '<div><div class="f-sh"><div><h2>Activity</h2></div></div>' + inner + '</div>';
-  }
+  /* the example provider: the category the programme leads with, at the top
+     quality band the config defines — never a hard-coded score */
+  var EX = { id:'sup_lx', category:'experience', score: C.qualityBands[0].min };
 
-  /* features.gaps — "gaps near you" and its bounty CTAs */
   function preferredDest(){
-    var props = S.getProperties(acctId), counts = {}, best = null;
+    var props = acctId ? S.getProperties(acctId) : [];
+    var counts = {}, best = null;
     props.forEach(function(p){ counts[p.destinationId] = (counts[p.destinationId] || 0) + 1; });
     Object.keys(counts).forEach(function(k){ if (!best || counts[k] > counts[best]) best = k; });
-    return best ? S.getDestinationById(best) : null;
+    var d = best ? S.getDestinationById(best) : null;
+    return d || S.getDestinations()[0] || null;
   }
-  function gapsSection(){
-    var dest = preferredDest();
-    var bounties = S.getBounties({ destination: dest && dest.id, status: 'open' }).slice(0, 3);
-    if (!bounties.length) bounties = S.getBounties({ status: 'open' }).slice(0, 3);
-    var inner;
-    if (!bounties.length){
-      inner = '<div class="f-empty"><h3>No open gaps</h3>' +
-        '<p>Chekin publishes a bounty when guests keep searching for something no supplier covers.</p></div>';
-    } else {
-      inner = '<div class="f-gaps">' + bounties.map(function(b){
-        return '<a class="f-gap" href="submit-fable.html?bounty=' + LN.esc(b.id) + '">' +
-          '<div class="row1"><span class="cat">' + LN.esc(LN.catLabel(b.category)) + ' · ' + LN.esc(b.destination.name) + '</span>' +
-            '<span class="boost">&times;' + b.boostMultiplier.toFixed(2) + ' boost</span>' +
-            '<span class="days' + (b.daysLeft <= 14 ? ' soon' : '') + '">' + b.daysLeft + 'd left</span></div>' +
-          '<h3>' + LN.esc(b.title) + '</h3>' +
-          '<div class="ev">' + LN.num(b.gapEvidence.emptyDecisions) + ' guest searches ended with no eligible supplier' +
-            '<small>' + LN.num(b.gapEvidence.searches) + ' searches · ' + LN.esc(b.gapEvidence.period) + ' · ' + LN.esc(b.destination.name) + '</small></div>' +
-          '<div class="fig">' +
-            '<div><div class="n">' + LN.money(b.projectedAnnualResidual) + '</div><div class="l">Projected year 1</div></div>' +
-            '<div><div class="n">' + LN.money(b.activationBonus) + '</div><div class="l">Activation bonus</div></div></div>' +
-          '<div class="go"><span class="f-link">Fill this gap ' + ARROW + '</span></div>' +
-        '</a>';
-      }).join('') + '</div>' +
-      (F('bounties') ? '<div class="f-foot"><a class="f-link" href="bounties-fable.html">All open gaps ' + ARROW + '</a></div>' : '');
+  var dest = preferredDest();
+  // the landing illustrates the full premium — if this destination already
+  // covers the category well, illustrate with one that does not
+  if (dest && S.isSaturated(dest, EX)){
+    var open = S.getDestinations().filter(function(d){ return !S.isSaturated(d, EX); })[0];
+    if (open) dest = open;
+  }
+
+  function shiftM(iso, n){ var d = new Date(iso + 'T00:00:00Z'); d.setUTCMonth(d.getUTCMonth() + n); return d.toISOString().slice(0, 10); }
+  function claimAt(liveAt){
+    return { id:'clm_lx', state:'live', sharingMode:'network', liveAt: liveAt, networkAt: liveAt, bountyId: null,
+      roles: ['sourced','activated','maintained'].map(function(r){
+        return { role:r, holderAccountId:'_', sharePct: C.roleShares[r], since: liveAt, until: null };
+      }) };
+  }
+  /* five yearly residual totals for one provider doing `annual` of bookings —
+     sixty monthly accruals through the pricing engine, so the 5%→2% shape is
+     purely LN_CONFIG's decay schedule */
+  function yearlyFor(annual){
+    var monthly = annual / 12, ys = [0, 0, 0, 0, 0];
+    for (var m = 0; m < 60; m++){
+      ys[Math.floor(m / 12)] += S.computeAccrual(monthly, claimAt(shiftM(today, -m)), EX, dest, today).poolAmount;
     }
-    return '<div><div class="f-sh"><div><h2>Gaps near you</h2>' +
-      '<div class="note">Demand Chekin is paying a boost to fill.</div></div></div>' + inner + '</div>';
+    return ys;
+  }
+  // the two rates the copy quotes: month one, and the perpetual floor
+  var r1 = S.computeAccrual(100, claimAt(today), EX, dest, today);
+  var floorFrom = C.decaySchedule[C.decaySchedule.length - 1].fromMonth;
+  var rF = S.computeAccrual(100, claimAt(shiftM(today, -floorFrom)), EX, dest, today);
+
+  // calculator bounds follow the config's planning assumption for the category
+  var gBase = S.assumedGmv(EX.category);
+  var gStep = 500;
+  var gMin = Math.max(gStep, Math.round(gBase / 4 / gStep) * gStep);
+  var gMax = gBase * 5;
+
+  /* ---------- gated: the open-bounty call-to-action (features.gaps) ---------- */
+  function bountyChip(){
+    if (!F('gaps')) return '';
+    var inDest = S.getBounties({ status:'open', destination: dest && dest.id });
+    var openB = inDest.length ? inDest : S.getBounties({ status:'open' });
+    if (!openB.length) return '';
+    var where = (inDest.length && dest) ? ' in ' + LN.esc(dest.name) : '';
+    var CLOCK = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5l3 2"/></svg>';
+    var txt = CLOCK + '<span>' + openB.length + ' open ' + (openB.length === 1 ? 'bounty' : 'bounties') + where + ' right now</span>';
+    return F('bounties')
+      ? '<div><a class="f-bountychip" href="bounties-fable.html">' + txt + '</a></div>'
+      : '<div><div class="f-bountychip">' + txt + '</div></div>';
   }
 
-  /* features.newInCoverage — supply other hosts introduced + the block action */
-  function coverageSection(){
-    var rows = S.getNewInCoverage(acctId, 4);
-    var inner;
-    if (!rows.length){
-      inner = '<div class="f-list"><div class="f-ev"><div class="tx"><div class="d">Nothing new has become available to your properties in the last six months.</div></div></div></div>';
-    } else {
-      inner = '<div class="f-list" id="new-cov">' + rows.map(function(r){
-        return '<div class="f-item' + (r.blocked ? ' blocked' : '') + '">' +
-          '<div class="av">' + LN.esc(r.supplier.name.charAt(0)) + '</div>' +
-          '<div class="tx"><div class="t"><a href="' + sHref(r.supplier) + '">' + LN.esc(r.supplier.name) + '</a></div>' +
-            '<div class="d">' + LN.esc(LN.catLabel(r.supplier.category)) + ' · ' + r.distanceKm + ' km · score ' +
-              r.supplier.score.toFixed(2) + ' · sourced by ' + LN.esc(r.sourcedByName) + '</div></div>' +
-          '<button class="f-mini' + (r.blocked ? ' brand' : '') + '" data-block="' + LN.esc(r.supplier.id) + '">' +
-            (r.blocked ? 'Unblock' : 'Block') + '</button>' +
-        '</div>';
-      }).join('') + '</div>';
+  /* ---------- the four steps ---------- */
+  var STEPS = [
+    { t:'You introduce', d:'Name a local provider you already trust. One form, two minutes.' },
+    { t:'We contract them', d:'Chekin verifies, signs and onboards them. You carry no liability.' },
+    { t:'The network sells them', d:'Every property in the coverage area can offer it to their guests.' },
+    { t:'You get paid', d:'A residual on every booking they ever generate — not only yours.' }
+  ];
+  function stepsBand(){
+    return '<div class="f-sect tight"><div class="f-stats rise" style="animation-delay:.05s">' + STEPS.map(function(s, i){
+      return '<div class="f-stat"><div class="lbl">Step ' + (i + 1) + '</div>' +
+        '<div class="val" style="font-size:19px;line-height:26px;white-space:normal">' + s.t + '</div>' +
+        '<div class="sup">' + s.d + '</div></div>';
+    }).join('') + '</div></div>';
+  }
+
+  /* ---------- the earnings calculator ---------- */
+  function barSvg(ys){
+    var W = 400, H = 210, PT = 26, PB = 26, GAP = 14;
+    var bw = (W - GAP * (ys.length - 1)) / ys.length;
+    var ih = H - PT - PB;
+    var max = Math.max.apply(null, ys) || 1;
+    var OPS = [1, .72, .55, .42, .34];
+    var out = '';
+    for (var i = 0; i < ys.length; i++){
+      var h = Math.max(4, (ys[i] / max) * ih);
+      var x = i * (bw + GAP), y = H - PB - h;
+      out += '<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + h.toFixed(1) + '" rx="5" fill="#FFFFFF" fill-opacity="' + (OPS[i] || .3) + '"/>' +
+        '<text class="v" x="' + (x + bw / 2).toFixed(1) + '" y="' + (y - 8).toFixed(1) + '" text-anchor="middle">' + LN.money(ys[i]) + '</text>' +
+        '<text class="y" x="' + (x + bw / 2).toFixed(1) + '" y="' + (H - 8) + '" text-anchor="middle">Y' + (i + 1) + '</text>';
     }
-    return '<div><div class="f-sh"><div><h2>New in your coverage</h2>' +
-      '<div class="note">Supply other hosts introduced that your guests can now book. You keep your usual share on every one — and you can block any of them.</div></div></div>' + inner + '</div>';
+    return '<svg class="f-cbars" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Projected residual by year over five years">' + out + '</svg>';
   }
-
-  /* The extra sections slot under the book. Empty (and rendering nothing)
-     while all three flags are off. */
-  function extrasSect(){
-    var left = '', right = '';
-    if (F('newInCoverage')) left += coverageSection();
-    if (F('gaps')) right += gapsSection();
-    if (F('activityFeed')) right += activitySection(8);
-    if (!left && !right) return '';
-    if (left && right){
-      return '<div class="f-sect"><div class="f-cols">' +
-        '<div class="f-stack">' + left + '</div>' +
-        '<div class="f-stack">' + right + '</div></div></div>';
-    }
-    return '<div class="f-sect"><div class="f-cols">' +
-      '<div class="f-stack">' + (left || right) + '</div><div></div></div></div>';
-  }
-
-  /* ============================================================
-     HOST / PM — the one page: the book as an asset
-     ============================================================ */
-  var state = { state: '', mode: '', destination: '', risk: '', selected: null };
-
-  function allEntries(){ return S.getSupplyBook(acctId).entries; }
-  function filteredRows(rows){
-    return rows.filter(function(e){
-      if (state.state && e.claim.state !== state.state) return false;
-      if (state.mode && e.claim.sharingMode !== state.mode) return false;
-      if (state.destination && e.supplier.destinationId !== state.destination) return false;
-      if (state.risk === 'risk' && !e.atRisk) return false;
-      if (state.risk === 'earning' && e.currentPoolPct <= 0) return false;
-      return true;
-    });
-  }
-  function totalsOf(rows){
-    function sum(k){ return Math.round(rows.reduce(function(t, e){ return t + e[k]; }, 0) * 100) / 100; }
-    var five = 0;
-    rows.forEach(function(e){
-      S.projectResidual(e.claim.id, 5, acctId).forEach(function(y){ five += y.amount; });
-    });
-    return { mtd: sum('mtdResidual'), lifetime: sum('lifetimeResidual'),
-      projectedAnnual: sum('projectedAnnual'), gmv: sum('liveGmv'), fiveYear: Math.round(five) };
-  }
-
-  /* ---------- the five-year decay curve ---------- */
-  function decayChart(series){
-    var W = 720, H = 270, P = { l: 64, r: 26, t: 34, b: 44 };
-    var iw = W - P.l - P.r, ih = H - P.t - P.b;
-    // round the scale to clean ticks: step = nice(max/3), axis max = 3 steps
-    var rawMax = (Math.max.apply(null, series.map(function(s){ return s.amount; })) || 1) * 1.1;
-    var exp = Math.pow(10, Math.floor(Math.log(rawMax / 3) / Math.LN10));
-    var f = (rawMax / 3) / exp;
-    var step = (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * exp;
-    var max = step * 3;
-    function x(i){ return P.l + (series.length === 1 ? iw / 2 : (i / (series.length - 1)) * iw); }
-    function y(v){ return P.t + ih - (v / max) * ih; }
-    var line = series.map(function(s, i){ return (i ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(s.amount).toFixed(1); }).join(' ');
-    var area = line + ' L' + x(series.length - 1).toFixed(1) + ' ' + (P.t + ih) + ' L' + x(0).toFixed(1) + ' ' + (P.t + ih) + ' Z';
-    var grid = '', i;
-    for (i = 0; i <= 3; i++){
-      var gv = max * i / 3, gy = y(gv);
-      grid += '<line class="grid" x1="' + P.l + '" y1="' + gy.toFixed(1) + '" x2="' + (W - P.r) + '" y2="' + gy.toFixed(1) + '"/>' +
-        '<text class="axis" x="' + (P.l - 10) + '" y="' + (gy + 4).toFixed(1) + '" text-anchor="end">' + LN.money(Math.round(gv)) + '</text>';
-    }
-    // step boundaries: a quiet vertical hairline + the pool rate at that step
-    var marks = '', lastStep = null;
-    series.forEach(function(s, idx){
-      if (s.decayStep !== lastStep){
-        lastStep = s.decayStep;
-        if (idx > 0) marks += '<line class="stepline" x1="' + x(idx).toFixed(1) + '" y1="' + P.t + '" x2="' + x(idx).toFixed(1) + '" y2="' + (P.t + ih) + '"/>';
-        marks += '<text class="dsub" x="' + (x(idx) + (idx === series.length - 1 ? -4 : 5)).toFixed(1) + '" y="' + (P.t - 8) + '"' +
-          (idx === series.length - 1 ? ' text-anchor="end"' : '') + '>pool ' + LN.pct(s.poolPct) + '</text>';
-      }
-    });
-    var pts = series.map(function(s, idx){
-      return '<circle class="pt" cx="' + x(idx).toFixed(1) + '" cy="' + y(s.amount).toFixed(1) + '" r="4.5"/>';
-    }).join('');
-    // selective direct labels: first and last year only — the tooltip carries the rest
-    function amountLabel(idx){
-      var s = series[idx];
-      var anchor = idx === 0 ? 'start' : idx === series.length - 1 ? 'end' : 'middle';
-      var lx = idx === 0 ? x(idx) : idx === series.length - 1 ? x(idx) + 4 : x(idx);
-      return '<text class="dlabel" x="' + lx.toFixed(1) + '" y="' + (y(s.amount) - 12).toFixed(1) + '" text-anchor="' + anchor + '">' +
-        LN.money(Math.round(s.amount)) + '</text>';
-    }
-    var labels = series.length > 1 ? amountLabel(0) + amountLabel(series.length - 1) : amountLabel(0);
-    var xlab = series.map(function(s, idx){
-      return '<text class="axis strong" x="' + x(idx).toFixed(1) + '" y="' + (H - 14) + '" text-anchor="middle">Year ' + s.year + '</text>';
-    }).join('');
-    // invisible hover columns
-    var hover = series.map(function(s, idx){
-      var x0 = idx === 0 ? P.l : (x(idx - 1) + x(idx)) / 2;
-      var x1 = idx === series.length - 1 ? W - P.r : (x(idx) + x(idx + 1)) / 2;
-      return '<rect data-yr="' + idx + '" x="' + x0.toFixed(1) + '" y="' + P.t + '" width="' + (x1 - x0).toFixed(1) +
-        '" height="' + ih + '" fill="transparent" data-cx="' + x(idx).toFixed(1) + '" data-cy="' + y(s.amount).toFixed(1) + '"/>';
-    }).join('');
-    return '<div class="f-chartbox"><svg class="f-chart" id="decay-svg" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Projected residual by year">' +
-      grid + '<path class="area" d="' + area + '"/>' + marks + '<path class="line" d="' + line + '"/>' +
-      pts + labels + xlab + hover + '</svg><div class="f-tip" id="decay-tip"></div></div>';
-  }
-
-  /* ---------- stat band ---------- */
-  function statBand(t){
-    return '<div class="f-stats rise" style="animation-delay:.05s">' +
-      '<div class="f-stat"><div class="lbl">Annual run-rate</div>' +
-        '<div class="val">' + LN.money(t.projectedAnnual) + '</div>' +
-        '<div class="sup">On today’s rates and trailing bookings</div></div>' +
-      '<div class="f-stat"><div class="lbl">Five-year book value</div>' +
-        '<div class="val">' + LN.money(t.fiveYear) + '</div>' +
-        '<div class="sup">Decay schedule applied, bookings held flat</div></div>' +
-      '<div class="f-stat"><div class="lbl">Bookings driven · 12m</div>' +
-        '<div class="val">' + LN.money(t.gmv) + '</div>' +
-        '<div class="sup">GMV across all claims in the book</div></div>' +
-      '<div class="f-stat"><div class="lbl">Earned to date</div>' +
-        '<div class="val">' + LN.money(t.lifetime) + '</div>' +
-        '<div class="sup"><b>' + LN.money(t.mtd, { cents: true }) + '</b> of that this month</div></div>' +
-    '</div>';
-  }
-
-  /* ---------- filter bar: four labelled dropdowns + live summary ----------
-     One control per dimension, so eleven claim states can never swamp the
-     three sharing modes. Zero-count options are dropped (unless selected),
-     an active dimension turns navy with its own clear button, and the
-     "Showing X of Y" line means the table is never silently filtered. */
-  var XICO = '<svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>';
-  var CHECK = '<svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>';
-
-  function filters(rows, shownCount){
-    function dd(id, label, opts, cur){
-      var curOpt = null;
-      opts.forEach(function(o){ if (o.v === cur) curOpt = o; });
-      var act = cur !== '';
-      var menu = opts.map(function(o){
-        var n = o.v === '' ? rows.length : rows.filter(o.f).length;
-        if (n === 0 && o.v !== '' && o.v !== cur) return '';   // zero-count: hidden
-        return '<button class="f-ddo' + (cur === o.v ? ' on' : '') + '" role="menuitemradio" aria-checked="' +
-          (cur === o.v ? 'true' : 'false') + '" data-val="' + LN.esc(o.v) + '">' +
-          '<span class="ck">' + CHECK + '</span>' + LN.esc(o.l) +
-          '<span class="n">' + n + '</span></button>';
-      }).join('');
-      return '<div class="f-dd' + (act ? ' act' : '') + '" data-group="' + id + '">' +
-        '<button class="f-ddt" data-dd="' + id + '" aria-haspopup="true" aria-expanded="false">' +
-          '<span class="k">' + LN.esc(label) + '</span>' +
-          '<span class="v">' + LN.esc(act && curOpt ? curOpt.l : 'All') + '</span>' + CHEV + '</button>' +
-        (act ? '<button class="f-ddx" data-clear="' + id + '" aria-label="Clear ' + LN.esc(label) + ' filter">' + XICO + '</button>' : '') +
-        '<div class="f-ddm" role="menu" aria-label="' + LN.esc(label) + '">' + menu + '</div></div>';
-    }
-    function all(){ return { v: '', l: 'All', f: function(){ return true; } }; }
-    var states = ['live', 'watch', 'onboarding', 'pending_supplier', 'screening', 'draft', 'suspended', 'dormant', 'expired', 'terminated', 'released'];
-    var anyActive = state.state !== '' || state.mode !== '' || state.destination !== '' || state.risk !== '';
-    return '<div class="f-filterbar rise" style="animation-delay:.1s"><div class="f-dds">' +
-      dd('state', 'State', [all()].concat(states.map(function(s){
-        return { v: s, l: LN.stateLabel(s), f: function(e){ return e.claim.state === s; } };
-      })), state.state) +
-      dd('mode', 'Sharing', [all()].concat(['network', 'delayed', 'private'].map(function(m){
-        return { v: m, l: LN.modeLabel(m), f: function(e){ return e.claim.sharingMode === m; } };
-      })), state.mode) +
-      dd('destination', 'Destination', [all()].concat(S.getDestinations().map(function(d){
-        return { v: d.id, l: d.name, f: function(e){ return e.supplier.destinationId === d.id; } };
-      })), state.destination) +
-      dd('risk', 'Health', [all(),
-        { v: 'earning', l: 'Earning now', f: function(e){ return e.currentPoolPct > 0; } },
-        { v: 'risk', l: 'At risk', f: function(e){ return e.atRisk; } }], state.risk) +
-    '</div><div class="f-fsum"><span>Showing <b>' + shownCount + '</b> of <b>' + rows.length + '</b> claims</span>' +
-      (anyActive ? '<button class="f-link" id="f-clearall">Clear all filters</button>' : '') +
+  function calcSection(){
+    var CHECKICO = '<svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>';
+    return '<div class="f-sect"><div class="f-navypanel f-calc rise" style="animation-delay:.1s">' +
+      '<div>' +
+        '<div class="lbl">What your supply book could earn</div>' +
+        '<div class="big" id="calc-total"></div>' +
+        '<div class="note" id="calc-note"></div>' +
+        '<div class="ctrl"><div class="row"><span>Providers you introduce</span><b id="val-n"></b></div>' +
+          '<input type="range" id="rng-n" min="1" max="12" step="1" value="6" aria-label="Providers you introduce"></div>' +
+        '<div class="ctrl"><div class="row"><span>Bookings per provider / year</span><b id="val-g"></b></div>' +
+          '<input type="range" id="rng-g" min="' + gMin + '" max="' + gMax + '" step="' + gStep + '" value="' + gBase + '" aria-label="Bookings per provider per year"></div>' +
+        '<div class="fine">Illustrative, at an ' + LN.esc(r1.qualityLabel.toLowerCase()) + ' provider quality score' + (dest ? ' in ' + LN.esc(dest.name) : '') + '. Your share is <b>' + LN.pct(r1.poolPct) + '</b> of the booking value in year one, easing to a <b>' + LN.pct(rF.poolPct) + '</b> floor you keep for as long as the provider stays live. Every figure is computed by the live pricing engine — nothing here is typed in.</div>' +
+      '</div>' +
+      '<div style="min-width:0"><div id="calc-bars"></div>' +
+        '<div class="keep">' + CHECKICO + '<span>You keep earning even when the guest is someone else’s</span></div>' +
+      '</div>' +
     '</div></div>';
   }
-  function closeAllMenus(){
-    var open = document.querySelectorAll('.f-dd.open:not(.fp)'), i;
-    for (i = 0; i < open.length; i++){
-      open[i].className = open[i].className.replace(' open', '');
-      var t = open[i].querySelector('[data-dd]');
-      if (t) t.setAttribute('aria-expanded', 'false');
-    }
-  }
-  // one document-level closer for click-outside and Escape (bound once)
-  document.addEventListener('click', function(e){
-    if (!(e.target.closest && e.target.closest('.f-dd'))) closeAllMenus();
-  });
-  document.addEventListener('keydown', function(e){
-    if (e.key === 'Escape') closeAllMenus();
-  });
-
-  function countdownText(claim){
-    var cd = S.countdownFor(claim);
-    if (!cd) return '';
-    var txt = cd.overdue ? Math.abs(cd.days) + 'd overdue' : cd.days + 'd ' + cd.label;
-    return '<div class="sub">' + LN.esc(txt) + '</div>';
+  function recalc(){
+    var n = parseInt(document.getElementById('rng-n').value, 10);
+    var g = parseInt(document.getElementById('rng-g').value, 10);
+    var ys = yearlyFor(g).map(function(v){ return Math.round(v * n); });
+    var five = ys.reduce(function(a, b){ return a + b; }, 0);
+    document.getElementById('calc-total').textContent = LN.money(five);
+    document.getElementById('calc-note').innerHTML = 'over five years · <b style="color:#E3E8FF">' + LN.money(ys[0]) + '</b> of it in year one — decay schedule applied, bookings held flat';
+    document.getElementById('val-n').textContent = n + (n === 1 ? ' provider' : ' providers');
+    document.getElementById('val-g').textContent = LN.money(g);
+    document.getElementById('calc-bars').innerHTML = barSvg(ys);
   }
 
-  function table(rows, t){
-    if (!rows.length){
-      var any = allEntries().length;
-      return '<div class="f-empty" style="margin-top:36px"><h3>' +
-        (any ? 'No claims match these filters' : 'Your supply book is empty') + '</h3><p>' +
-        (any ? 'Clear a filter to see the rest of the book.'
-             : 'Every supplier you introduce becomes a line here — with its live rate, its decay step and what it is projected to earn.') + '</p>' +
-        (any ? '' : '<a class="f-btn" href="submit-fable.html">' + PLUS + ' Submit a supplier</a>') + '</div>';
-    }
-    return '<div class="f-tablewrap"><table class="f-table"><thead><tr>' +
-      '<th>Supplier</th><th>State</th><th>Roles</th><th>Sharing</th>' +
-      '<th class="num">GMV 12m</th><th class="num">Pool rate</th><th class="num">This month</th><th class="num">Projected / yr</th><th style="text-align:right">Trend</th>' +
-      '</tr></thead><tbody>' +
-      rows.map(function(e){
-        var sel = e.claim.id === state.selected;
-        return '<tr data-claim="' + LN.esc(e.claim.id) + '"' + (sel ? ' class="sel"' : '') + '>' +
-          '<td><div class="nm">' + LN.esc(e.supplier.name) + '</div>' +
-            '<div class="em">' + LN.esc(LN.catLabel(e.supplier.category)) + ' · ' + LN.esc(e.destination.name) + '</div></td>' +
-          '<td>' + stateWord(e.claim.state) + countdownText(e.claim) + '</td>' +
-          '<td>' + roleTags(e) + '<div class="sub">' + e.roleSharePct + '%</div></td>' +
-          '<td><span class="f-mode ' + LN.esc(e.claim.sharingMode) + '">' + LN.esc(LN.modeLabel(e.claim.sharingMode)) + '</span></td>' +
-          '<td class="num">' + LN.money(e.liveGmv) + '</td>' +
-          '<td class="num">' + (e.blockedReason ? '<span style="color:var(--f-faint)">—</span>' : '<b>' + LN.pct(e.currentPoolPct) + '</b>') + '</td>' +
-          '<td class="num">' + LN.money(e.mtdResidual, { cents: true }) + '</td>' +
-          '<td class="num"><b>' + LN.money(e.projectedAnnual) + '</b></td>' +
-          '<td style="text-align:right">' + spark(e.trend) + '</td>' +
-        '</tr>';
-      }).join('') +
-      '<tr class="sum"><td colspan="4">Total · ' + rows.length + ' claim' + (rows.length === 1 ? '' : 's') + '</td>' +
-        '<td class="num">' + LN.money(t.gmv) + '</td><td class="num" style="color:var(--f-faint);font-weight:500">—</td>' +
-        '<td class="num">' + LN.money(t.mtd, { cents: true }) + '</td>' +
-        '<td class="num">' + LN.money(t.projectedAnnual) + '</td>' +
-        '<td style="text-align:right"><b>' + LN.money(t.fiveYear) + '</b><div class="sub">5-yr value</div></td></tr>' +
-      '</tbody></table></div>';
+  /* ---------- the three benefit cells ---------- */
+  var BENEFITS = [
+    { i:'<circle cx="12" cy="12" r="9"/><path d="M12 7v10M9 9.5c0-1.4 1.3-2.5 3-2.5s3 1.1 3 2.5-1.3 2-3 2.5-3 1.1-3 2.5 1.3 2.5 3 2.5 3-1.1 3-2.5"/>',
+      t:'Income for work you already do',
+      d:'You recommend these providers for free today. Now the recommendation pays, on every booking, for years.' },
+    { i:'<path d="M12 2 4 5v7c0 5 3.5 8 8 10 4.5-2 8-5 8-10V5z"/><path d="M9 12l2 2 4-4"/>',
+      t:'Guest experience you control',
+      d:'Your own trusted operators in the guest flow instead of a faceless aggregator listing.' },
+    { i:'<path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/>',
+      t:'A supply book, not a payout',
+      d:'Every provider you add is a line in a portfolio with projected annual income — visible and growing.' }
+  ];
+  function benefitsSection(){
+    return '<div class="f-sect"><div class="f-benefits rise" style="animation-delay:.05s">' + BENEFITS.map(function(b){
+      return '<div class="f-benefit"><div class="bi"><svg viewBox="0 0 24 24">' + b.i + '</svg></div>' +
+        '<h3>' + b.t + '</h3><p>' + b.d + '</p></div>';
+    }).join('') + '</div></div>';
   }
 
-  function detail(){
-    if (!state.selected) return '';
-    var e = allEntries().filter(function(x){ return x.claim.id === state.selected; })[0];
-    if (!e) return '';
-    var series = S.projectResidual(e.claim.id, 5, acctId);
-    if (!series.length) return '';
-    var acr = S.computeAccrual(100, e.claim, e.supplier, e.destination);
-    var five = Math.round(series.reduce(function(t, y){ return t + y.amount; }, 0));
-    var maxYear = Math.max.apply(null, series.map(function(y){ return y.amount; })) || 1;
+  /* ---------- render ---------- */
+  body.innerHTML =
+    '<div class="f-head rise"><div>' +
+      '<div class="eyebrow">New revenue stream</div>' +
+      '<h1>Local Experiences</h1>' +
+      '<div class="sub">Introduce the local providers you already recommend — the kayak school, the family winery, the private chef. Chekin contracts them, the whole network in your area can sell them, and you earn a share of every booking they ever generate.</div>' +
+      bountyChip() +
+    '</div><div class="acts">' +
+      '<a class="f-btn" href="supply-book-fable.html">Open your supply book ' + ARROW + '</a>' +
+    '</div></div>' +
+    stepsBand() +
+    calcSection() +
+    benefitsSection() +
+    '<div class="f-sect" style="text-align:center;padding:56px 0 8px;border-top:1px solid var(--f-hair)">' +
+      '<div style="font:600 20px/28px var(--font-primary);letter-spacing:-.01em">Every introduction becomes a line in your supply book.</div>' +
+      '<a class="f-btn" style="margin-top:22px" href="supply-book-fable.html">Open your supply book ' + ARROW + '</a></div>';
 
-    var left = '<div><div class="f-sh"><div><h2>Residual over five years — ' + LN.esc(e.supplier.name) + '</h2>' +
-      '<div class="note">' + (e.blockedReason
-        ? LN.esc(e.blockedReason)
-        : 'Trailing-12-month bookings of ' + LN.money(series[0].gmv) + ' held flat, so the shape is purely the decay schedule.') +
-      '</div></div><a class="f-link" href="' + sHref(e.supplier) + '">Open supplier ' + ARROW + '</a></div>' +
-      decayChart(series) + '</div>';
-
-    var right = '<div>' +
-      '<div class="f-navypanel"><div class="lbl">Five-year value</div>' +
-        '<div class="big">' + LN.money(five) + '</div>' +
-        '<div class="note">What this claim pays you across the full decay schedule.</div>' +
-        '<div class="f-yr">' + series.map(function(y){
-          return '<div class="r"><span class="y">Year ' + y.year + '</span>' +
-            '<span class="bar"><i style="width:' + Math.max(2, (y.amount / maxYear) * 100).toFixed(1) + '%"></i></span>' +
-            '<span class="v">' + LN.money(Math.round(y.amount)) + '</span></div>';
-        }).join('') + '</div></div>' +
-      '<div class="f-facts">' +
-        '<div class="f-fact"><div class="fl">This year’s rate · per ' + LN.money(100) + ' of bookings</div>' +
-          LN.chain(acr) +
-          '<div class="note" style="font:400 12px/18px var(--font-primary);color:var(--f-faint);margin-top:12px">' +
-          (acr.blockedReason ? '' :
-            (acr.saturated
-              ? LN.esc(e.destination.name) + ' already covers ' + LN.esc(LN.catLabel(e.supplier.category)) + ' well, so the premium is capped at ' + LN.pct(acr.premiumCapPct) + '.'
-              : 'Full premium of ' + LN.pct(acr.premiumCapPct) + ' available in ' + LN.esc(e.destination.name) + '.')) + '</div></div>' +
-        '<div class="f-fact"><div class="fl">Decay schedule</div><div class="f-kv">' +
-          C.decaySchedule.map(function(s, i){
-            var on = series[0].decayStep === i + 1;
-            return '<div class="r"><span class="k">' + LN.esc(s.label) + '</span>' +
-              '<span class="v">&times;' + s.multiplier.toFixed(2) + (on ? '<span class="cur">now</span>' : '') + '</span></div>';
-          }).join('') + '</div></div>' +
-      '</div></div>';
-
-    return '<div class="f-detail rise">' + left + right + '</div>';
-  }
-
-  /* ---------- render (host / pm) ---------- */
-  function renderBook(){
-    var acct = S.getAccountById(acctId);
-    var rows = allEntries();
-    if (!rows.length){ renderPitch(acct); return; }
-    var shown = filteredRows(rows);
-    var t = totalsOf(shown);
-    var prog = S.curatorProgress(acctId);
-    if (!state.selected || !shown.some(function(e){ return e.claim.id === state.selected; })){
-      var live = shown.filter(function(e){ return e.currentPoolPct > 0; });
-      state.selected = (live[0] || shown[0] || {}).claim ? (live[0] || shown[0]).claim.id : null;
-    }
-
-    body.innerHTML =
-      '<div class="f-head rise"><div>' +
-        '<div class="eyebrow">Local Network</div>' +
-        '<h1>Your supply book<span class="count">' + shown.length + '</span></h1>' +
-        '<div class="sub">Every supplier ' + (acct ? LN.esc(acct.name) : 'you') + ' has introduced, held as an asset — what each claim earns today, and what the decay schedule says it is worth over five years.</div>' +
-        (prog.met ? '<div class="f-curator">' + STAR + '<span><b>Local Curator</b> · ' + prog.liveSuppliers +
-          ' live suppliers, avg score ' + prog.avgScore.toFixed(2) +
-          '</span><span class="why">— faster review, same rates</span></div>' : '') +
-      '</div><div class="acts">' +
-        (F('discover') ? '<a class="f-btn ghost" href="discover-fable.html">Browse network supply</a>' : '') +
-        '<a class="f-btn" href="submit-fable.html">' + PLUS + ' Submit a supplier</a>' +
-      '</div></div>' +
-      statBand(t) +
-      filters(rows, shown.length) +
-      table(shown, t) +
-      detail() +
-      extrasSect();
-
-    wire();
-  }
-
-  function wire(){
-    var i;
-    // filter bar: open/close menus, pick options, clear one or all dimensions
-    var bar = body.querySelector('.f-filterbar');
-    if (bar) bar.addEventListener('click', function(e){
-      var t = e.target.closest ? e.target.closest('button') : null;
-      if (!t) return;
-      if (t.hasAttribute('data-dd')){
-        var dd = t.parentNode;
-        var wasOpen = dd.className.indexOf(' open') >= 0;
-        closeAllMenus();
-        if (!wasOpen){ dd.className += ' open'; t.setAttribute('aria-expanded', 'true'); }
-      } else if (t.hasAttribute('data-val')){
-        var host = t.closest('.f-dd');
-        if (!host) return;
-        state[host.getAttribute('data-group')] = t.getAttribute('data-val');
-        renderBook();
-      } else if (t.hasAttribute('data-clear')){
-        state[t.getAttribute('data-clear')] = '';
-        renderBook();
-      } else if (t.id === 'f-clearall'){
-        state.state = ''; state.mode = ''; state.destination = ''; state.risk = '';
-        renderBook();
-      }
-    });
-    // row selection
-    var trs = body.querySelectorAll('[data-claim]');
-    for (i = 0; i < trs.length; i++){
-      (function(tr){
-        tr.addEventListener('click', function(){
-          state.selected = tr.getAttribute('data-claim');
-          renderBook();
-        });
-      })(trs[i]);
-    }
-    // chart hover
-    var svg = document.getElementById('decay-svg'), tip = document.getElementById('decay-tip');
-    if (svg && tip){
-      var e0 = allEntries().filter(function(x){ return x.claim.id === state.selected; })[0];
-      var series = e0 ? S.projectResidual(e0.claim.id, 5, acctId) : [];
-      svg.addEventListener('mousemove', function(ev){
-        var r = ev.target;
-        if (!r || !r.getAttribute || r.getAttribute('data-yr') == null){ tip.className = 'f-tip'; return; }
-        var s = series[parseInt(r.getAttribute('data-yr'), 10)];
-        if (!s){ tip.className = 'f-tip'; return; }
-        tip.innerHTML = '<b>Year ' + s.year + '</b> <span class="m">· ' + LN.esc(s.decayLabel) + '</span><br>' +
-          LN.money(Math.round(s.amount)) + ' <span class="m">at pool ' + LN.pct(s.poolPct) + '</span>';
-        tip.style.left = (parseFloat(r.getAttribute('data-cx')) / 720 * 100) + '%';
-        tip.style.top = (parseFloat(r.getAttribute('data-cy')) / 270 * 100) + '%';
-        tip.className = 'f-tip show';
-      });
-      svg.addEventListener('mouseleave', function(){ tip.className = 'f-tip'; });
-    }
-    // row navigation + coverage block toggles (features.newInCoverage)
-    var rows = body.querySelectorAll('[data-href]');
-    for (i = 0; i < rows.length; i++) (function(el){
-      el.addEventListener('click', function(){ location.href = el.getAttribute('data-href'); });
-    })(rows[i]);
-    var cov = document.getElementById('new-cov');
-    if (cov) cov.addEventListener('click', function(e){
-      var b = e.target.closest ? e.target.closest('[data-block]') : null;
-      if (!b) return;
-      var id = b.getAttribute('data-block');
-      var sup = S.getSupplierById(id);
-      var already = S.getProperties(acctId).some(function(p){ return p.blockedSupplierIds.indexOf(id) >= 0; });
-      if (already){
-        S.unblockSupplierForAccount(acctId, id);
-        LN.toast(sup.name + ' is bookable again at your properties.');
-      } else {
-        S.blockSupplierForAccount(acctId, id);
-        LN.toast(sup.name + ' blocked at your properties. Their claim and score are unaffected.');
-      }
-      renderBook();
-    });
-  }
-
-  /* ============================================================
-     FIRST-RUN PITCH — the programme, before the first claim.
-     The worked example is computed by computeAccrual, never typed in.
-     ============================================================ */
-  function renderPitch(acct){
-    var today = S._dataset.today;
-    var dests = S.getDestinations();
-    var myProps = acct ? S.getProperties(acct.id) : [];
-    var destId = myProps.length ? myProps[0].destinationId : (dests[0] || {}).id;
-    var counts = {};
-    myProps.forEach(function(p){ counts[p.destinationId] = (counts[p.destinationId] || 0) + 1; });
-    Object.keys(counts).forEach(function(k){ if (counts[k] > (counts[destId] || 0)) destId = k; });
-    var dest = S.getDestinationById(destId);
-    // the example: a good local experience supplier, shared to the network
-    var exCat = 'experience';
-    var openHere = S.getBounties({ status:'open', destination: destId });
-    if (openHere.length) exCat = openHere[0].category;
-    var gmv = S.assumedGmv(exCat), monthly = gmv / 12;
-    var supplier = { id:'sup_p', category: exCat, score: 0.85 };
-    function shiftM(iso, n){ var d = new Date(iso + 'T00:00:00Z'); d.setUTCMonth(d.getUTCMonth() + n); return d.toISOString().slice(0, 10); }
-    function claimAt(liveAt){
-      return { id:'clm_p', state:'live', sharingMode:'network', liveAt: liveAt, networkAt: liveAt, bountyId: null,
-        roles: ['sourced','activated','maintained'].map(function(r){
-          return { role:r, holderAccountId:'_', sharePct: C.roleShares[r], since: liveAt, until: null };
-        }) };
-    }
-    var years = [0, 0, 0, 0, 0];
-    for (var m = 0; m < 60; m++) years[Math.floor(m / 12)] += S.computeAccrual(monthly, claimAt(shiftM(today, -m)), supplier, dest, today).poolAmount;
-    years = years.map(function(v){ return Math.round(v); });
-    var five = years.reduce(function(a, b){ return a + b; }, 0);
-    var maxYear = Math.max.apply(null, years) || 1;
-    var rate = S.computeAccrual(100, claimAt(today), supplier, dest, today);
-    var hostShare = C.baseNrpPctOfGmv * C.servingPropertySharePctOfExternalNrp / 100;
-    var reach = dest ? dest.activeProperties : 0;
-
-    var HOW = [
-      { t:'Introduce once', d:'You know the kayak school, the private chef, the winery. Introduce one to Chekin — five steps, one form.' },
-      { t:'Everyone can book them', d:'Once live, every property in their coverage area can offer them to guests' + (dest ? ' — ' + reach + ' properties in ' + LN.esc(dest.name) + ' alone' : '') + '.' },
-      { t:'You earn on all of it', d:'A residual on every booking they ever generate, wherever it comes from — scaled by their quality, stepping down to a permanent floor.' }
-    ];
-
-    body.innerHTML =
-      '<div class="f-head rise"><div>' +
-        '<div class="eyebrow">Local Network</div>' +
-        '<h1>Know a great local supplier?<br>Introduce them once. Earn on every booking.</h1>' +
-        '<div class="sub">The Local Network pays hosts an ongoing residual for bringing local experience suppliers into the marketplace. Your supply book is empty — this is what it could hold.</div>' +
-      '</div><div class="acts">' +
-        '<a class="f-btn" href="submit-fable.html">' + PLUS + ' Submit your first supplier</a>' +
-      '</div></div>' +
-
-      '<div class="f-sect tight"><div class="f-stats rise" style="animation-delay:.05s">' + HOW.map(function(h, i){
-        return '<div class="f-stat"><div class="lbl">Step ' + (i + 1) + '</div>' +
-          '<div class="val" style="font-size:19px;line-height:26px;white-space:normal">' + h.t + '</div>' +
-          '<div class="sup">' + h.d + '</div></div>';
-      }).join('') +
-        '<div class="f-stat"><div class="lbl">Never at anyone’s cost</div>' +
-        '<div class="val" style="font-size:19px;line-height:26px;white-space:normal">Nobody’s share shrinks</div>' +
-        '<div class="sup">Serving hosts keep their usual ' + LN.pct(hostShare) + ' — your residual is funded by the extra ' + LN.pct(C.networkPremiumPctOfGmv) + ' commission a local supplier accepts.</div></div>' +
-      '</div></div>' +
-
-      '<div class="f-sect"><div class="f-cols">' +
-        '<div><div class="f-sh"><div><h2>A worked example</h2>' +
-          '<div class="note">A good ' + LN.esc(LN.catLabel(exCat).toLowerCase()) + ' supplier in ' + LN.esc(dest ? dest.name : 'your destination') + ' doing ' + LN.money(gmv) + ' of bookings a year, shared to the network from day one, all three roles held. Every figure below comes out of the live pricing engine — nothing is typed in.</div></div></div>' +
-          '<div class="tiny" style="margin-bottom:10px">Rate on every ' + LN.money(100) + ' of their bookings</div>' +
-          LN.chain(rate) +
-          '<div class="tiny" style="margin-top:12px;max-width:600px">' +
-            (rate.saturated
-              ? LN.esc(dest.name) + ' already covers ' + LN.esc(LN.catLabel(exCat).toLowerCase()) + ' well, so the premium is capped at ' + LN.pct(rate.premiumCapPct) + ' — pick a genuine gap and the full ' + LN.pct(C.networkPremiumPctOfGmv) + ' applies.'
-              : 'The full ' + LN.pct(rate.premiumCapPct) + ' premium is available for this category in ' + LN.esc(dest ? dest.name : 'this destination') + '.') + '</div>' +
-          '<div style="margin-top:18px"><button class="f-mini" id="see-maths">See where the money comes from</button></div>' +
-        '</div>' +
-        '<div class="f-navypanel rise" style="animation-delay:.1s"><div class="lbl">What that is worth</div>' +
-          '<div class="big">' + LN.money(five) + '</div>' +
-          '<div class="note">Over five years, from one introduction — decay schedule applied, bookings held flat.</div>' +
-          '<div class="f-yr">' + years.map(function(v, i){
-            return '<div class="r"><span class="y">Year ' + (i + 1) + '</span>' +
-              '<span class="bar"><i style="width:' + Math.max(2, (v / maxYear) * 100).toFixed(1) + '%"></i></span>' +
-              '<span class="v">' + LN.money(v) + '</span></div>';
-          }).join('') + '</div></div>' +
-      '</div></div>' +
-
-      (F('gaps') ? gapsPitchSection() : '') +
-      '<div class="f-sect" style="text-align:center;padding:56px 0 8px;border-top:1px solid var(--f-hair)">' +
-        '<div style="font:600 20px/28px var(--font-primary);letter-spacing:-.01em">The first claim in ' + LN.esc(dest ? dest.name : 'your destination') + ' could be yours.</div>' +
-        '<a class="f-btn" style="margin-top:22px" href="submit-fable.html">' + PLUS + ' Submit a supplier</a></div>';
-
-    var sm = document.getElementById('see-maths');
-    if (sm) sm.addEventListener('click', function(){
-      LN.openEconomicsDrawer({ network:true, poolPct: rate.poolPct, chainHtml: LN.chain(rate) });
-    });
-    var i, rows = body.querySelectorAll('[data-href]');
-    for (i = 0; i < rows.length; i++) (function(el){
-      el.addEventListener('click', function(){ location.href = el.getAttribute('data-href'); });
-    })(rows[i]);
-  }
-  /* features.gaps — bounty pitch cards on the empty state */
-  function gapsPitchSection(){
-    var bounties = S.getBounties({ status:'open' }).slice(0, 3);
-    if (!bounties.length) return '';
-    return '<div class="f-sect"><div class="f-sh"><div><h2>Gaps Chekin is already paying to fill</h2>' +
-      '<div class="note">Real guest demand with no supplier to serve it. Fill one and the pool is boosted &times;' + C.bountyBoostMultiplier + ' for ' + C.bountyBoostMonths + ' months.</div></div>' +
-      (F('bounties') ? '<a class="f-link" href="bounties-fable.html">The whole board ' + ARROW + '</a>' : '') + '</div>' +
-      '<div class="f-gaps grid">' + bounties.map(function(b){
-        return '<a class="f-gap" href="submit-fable.html?bounty=' + LN.esc(b.id) + '">' +
-          '<div class="row1"><span class="cat">' + LN.esc(LN.catLabel(b.category)) + ' · ' + LN.esc(b.destination.name) + '</span>' +
-            '<span class="boost">&times;' + b.boostMultiplier.toFixed(2) + '</span>' +
-            '<span class="days' + (b.daysLeft <= 14 ? ' soon' : '') + '">' + b.daysLeft + 'd left</span></div>' +
-          '<h3>' + LN.esc(b.title) + '</h3>' +
-          '<div class="ev">' + LN.num(b.gapEvidence.emptyDecisions) + ' guest searches with no supplier' +
-            '<small>' + LN.esc(b.gapEvidence.period) + '</small></div>' +
-          '<div class="fig"><div><div class="n">' + LN.money(b.projectedAnnualResidual) + '</div><div class="l">Projected year 1</div></div>' +
-          '<div><div class="n">' + LN.money(b.activationBonus) + '</div><div class="l">Activation bonus</div></div></div>' +
-        '</a>';
-      }).join('') + '</div></div>';
-  }
-
-  /* ============================================================
-     SUPPLIER — their own listing
-     ============================================================ */
-  function renderSupplier(){
-    var acct = S.currentAccount();
-    var sup = S._dataset.supplierAccountSupplierId ? S.getSupplierById(S._dataset.supplierAccountSupplierId) : null;
-    if (!sup){
-      body.innerHTML = '<div class="f-head rise"><div><div class="eyebrow">Your listing</div><h1>Local Network</h1></div></div>' +
-        '<div class="f-sect tight"><div class="f-empty"><h3>No listing yet</h3>' +
-        '<p>You appear here once a host introduces you to the Chekin marketplace and you confirm the introduction. Nothing is listed under ' + (acct ? LN.esc(acct.name) : 'your account') + ' right now.</p></div></div>';
-      return;
-    }
-    var claim = S.getClaimBySupplier(sup.id);
-    var dest = S.getDestinationById(sup.destinationId);
-    var cd = claim ? S.countdownFor(claim) : null;
-    body.innerHTML =
-      '<div class="f-head rise"><div>' +
-        '<div class="eyebrow">Your listing</div>' +
-        '<h1>' + LN.esc(sup.name) + '</h1>' +
-        '<div class="sub">' + LN.esc(sup.subcategory) + ' · ' + LN.esc(dest.name) + ' · what guests can book, and what Chekin still needs from you.</div>' +
-      '</div><div class="acts">' +
-        (claim && claim.state === 'pending_supplier' ? '<a class="f-btn" href="supplier-detail-fable.html?supplier=' + LN.esc(sup.id) + '">Confirm the introduction</a>' : '<a class="f-btn ghost" href="supplier-detail-fable.html?supplier=' + LN.esc(sup.id) + '">Open your listing page</a>') +
-      '</div></div>' +
-      '<div class="f-stats rise" style="animation-delay:.05s">' +
-        '<div class="f-stat"><div class="lbl">Status</div><div class="val" style="font-size:22px">' + (claim ? stateWord(claim.state) : '—') + '</div>' +
-          '<div class="sup">' + (cd ? (cd.overdue ? Math.abs(cd.days) + 'd overdue' : cd.days + 'd ' + LN.esc(cd.label)) : 'Bookable by guests across your coverage area') + '</div></div>' +
-        '<div class="f-stat"><div class="lbl">Quality score</div><div class="val">' + sup.score.toFixed(2) + '</div>' +
-          '<div class="sup"><b>' + LN.esc(S.qualityBand(sup.score).label) + '</b> band — it decides how visible you are</div></div>' +
-        '<div class="f-stat"><div class="lbl">Reach</div><div class="val">' + sup.coverage.propertiesInCoverage + '</div>' +
-          '<div class="sup">of ' + dest.activeProperties + ' properties in ' + LN.esc(dest.name) + ' can offer you</div></div>' +
-        '<div class="f-stat"><div class="lbl">Profile complete</div><div class="val">' + sup.contentCompleteness + '%</div>' +
-          '<div class="sup">' + ((sup.missingContent || []).length ? '<span class="warn">' + sup.missingContent.length + ' item' + (sup.missingContent.length === 1 ? '' : 's') + ' still missing</span>' : '<span class="good">Nothing missing</span>') + '</div></div>' +
-      '</div>' +
-      '<div class="f-sect"><div class="f-cols">' +
-        '<div><div class="f-sh"><div><h2>How the introduction works for you</h2></div></div>' +
-          '<div class="f-kv">' +
-            '<div class="r"><span class="k">Introduced by</span><span class="v">' + LN.esc(claim ? ((S.getAccountById(claim.sourcingAccountId) || {}).name || '—') : '—') + '</span></div>' +
-            '<div class="r"><span class="k">Your price to guests</span><span class="v">from ' + LN.money(sup.priceFrom) + '</span></div>' +
-            '<div class="r"><span class="k">Live since</span><span class="v">' + (sup.liveAt ? LN.relDate(sup.liveAt) : 'Not live yet') + '</span></div>' +
-          '</div>' +
-          '<div class="tiny" style="margin-top:14px;max-width:620px">What the introducing host earns never comes out of your rate — it is funded from the commission you already agreed with Chekin. Your only job is quality: confirm fast, cancel rarely, keep guests happy.</div></div>' +
-        '<div><div class="f-sh"><div><h2>Complete your profile</h2>' +
-          '<div class="note">Missing content holds your listing back in search.</div></div></div>' +
-          '<div class="f-checks">' + ['photos','price_list','cancellation_policy','languages','insurance_certificate','accessibility_notes'].map(function(k){
-            var missing = (sup.missingContent || []).indexOf(k) >= 0;
-            return '<div class="f-checkrow' + (missing ? ' miss' : '') + '"><span class="ic">' + (missing ? I.plus : I.check) + '</span>' +
-              '<span class="tx">' + LN.esc(k.replace(/_/g, ' ').replace(/\b\w/, function(c){ return c.toUpperCase(); })) + '</span></div>';
-          }).join('') + '</div></div>' +
-      '</div></div>';
-  }
-
-  /* ============================================================
-     CHEKIN — destination coverage;  ADMIN — the pipeline
-     (bounty figures and gap-board links gated on features.bounties)
-     ============================================================ */
-  function renderStaff(){
-    var queue = S.getReviewQueue(), flags = S.getFlags(), watch = S.getQualityWatch(), susp = S.getSuspensions();
-    var isAdmin = persona === 'admin';
-
-    function pipelineBand(){
-      return '<div class="f-stats rise" style="animation-delay:.05s">' +
-        '<div class="f-stat"><div class="lbl">Review queue</div><div class="val">' + (queue.length ? '<span class="dot warn"></span>' : '') + queue.length + '</div>' +
-          '<div class="sup">Claims awaiting a human decision</div></div>' +
-        '<div class="f-stat"><div class="lbl">Open flags</div><div class="val">' + flags.length + '</div>' +
-          '<div class="sup"><b>' + flags.filter(function(f){ return f.severity === 'high'; }).length + '</b> high severity</div></div>' +
-        '<div class="f-stat"><div class="lbl">Quality watch</div><div class="val">' + watch.length + '</div>' +
-          '<div class="sup">Scores drifting toward the ' + C.qualityFloorForAccrual.toFixed(2) + ' floor</div></div>' +
-        '<div class="f-stat"><div class="lbl">Suspensions</div><div class="val">' + susp.length + '</div>' +
-          '<div class="sup">' + C.suspensionsVoidingClaim + ' within 12 months voids a claim</div></div>' +
-      '</div>';
-    }
-    function destSection(){
-      var rows = S.getDestinations().map(function(d){
-        var open = F('bounties') ? S.getBounties({ status:'open', destination: d.id }) : [];
-        var cats = LN.categories();
-        return '<div class="f-gap" style="background:var(--f-wash)">' +
-          '<div class="row1"><span class="cat">' + LN.esc(d.country) + ' · ' + LN.esc(d.supplyDensity) + ' density</span>' +
-            (d.densityFloorMet ? '<span class="f-state live" style="margin-left:auto"><i></i>Floor met</span>' : '<span class="f-state watch" style="margin-left:auto"><i></i>Under-supplied</span>') + '</div>' +
-          '<h3>' + LN.esc(d.name) + '</h3>' +
-          '<div class="fig">' +
-            '<div><div class="n">' + d.activeProperties + '</div><div class="l">Active properties</div></div>' +
-            '<div><div class="n">' + d.liveSuppliers + '</div><div class="l">Live suppliers</div></div>' +
-            '<div><div class="n">' + d.categoriesCovered.length + ' / ' + cats.length + '</div><div class="l">Categories covered</div></div>' +
-            (F('bounties') ? '<div><div class="n">' + open.length + '</div><div class="l">Open bounties</div></div>' : '') +
-          '</div>' +
-          (F('bounties') ? '<div class="go"><a class="f-link" href="bounties-fable.html?destination=' + LN.esc(d.id) + '">Gap board for ' + LN.esc(d.name) + ' ' + ARROW + '</a></div>' : '') +
-        '</div>';
-      }).join('');
-      return '<div><div class="f-sh"><div><h2>Destination coverage</h2>' +
-        '<div class="note">Where the network is dense' + (F('bounties') ? ', and where Chekin is paying to bootstrap it' : ' and where it is still thin') + '.</div></div></div>' +
-        '<div class="f-gaps">' + rows + '</div></div>';
-    }
-    function queuePreview(){
-      var rows = queue.slice(0, 4);
-      var inner;
-      if (!rows.length){
-        inner = '<div class="f-empty"><h3>Nothing waiting</h3><p>New submissions land here the moment a host sends them.</p></div>';
-      } else {
-        inner = '<div class="f-list">' + rows.map(function(r){
-          return '<div class="f-item" data-href="admin-review-fable.html">' +
-            '<div class="av">' + LN.esc(r.supplier.name.charAt(0)) + '</div>' +
-            '<div class="tx"><div class="t">' + LN.esc(r.supplier.name) + ' &nbsp;' + stateWord(r.claim.state) + '</div>' +
-              '<div class="d">' + LN.esc(LN.catLabel(r.supplier.category)) + ' · introduced by ' + LN.esc((r.account || {}).name || '—') +
-              ' · waiting ' + r.waitingDays + 'd' + (r.hardGate ? ' · safety gate' : '') + '</div></div>' +
-            '<span class="f-state ' + (r.screening.outcome === 'pass' ? 'live' : r.screening.outcome === 'blocked' ? 'suspended' : 'watch') + '"><i></i>' +
-              (r.screening.outcome === 'pass' ? 'Passed' : r.screening.outcome === 'blocked' ? 'Blocked' : 'Decision') + '</span>' +
-          '</div>';
-        }).join('') + '</div>' +
-        '<div class="f-foot"><a class="f-link" href="admin-review-fable.html">Open the review queue ' + ARROW + '</a></div>';
-      }
-      return '<div><div class="f-sh"><div><h2>Awaiting a decision</h2>' +
-        '<div class="note">Nothing here is decided automatically.</div></div></div>' + inner + '</div>';
-    }
-
-    body.innerHTML =
-      '<div class="f-head rise"><div>' +
-        '<div class="eyebrow">' + (isAdmin ? 'Admin' : 'Chekin') + '</div>' +
-        '<h1>' + (isAdmin ? 'The pipeline' : 'The network, by destination') + '</h1>' +
-        '<div class="sub">' + (isAdmin
-          ? 'Everything waiting on a Chekin decision — claims, flags and quality drift.'
-          : 'Host-sourced supply per destination, and the pipeline behind it.') + '</div>' +
-      '</div><div class="acts">' +
-        (F('bounties') ? '<a class="f-btn ghost" href="bounties-fable.html">Gap board</a>' : '') +
-        '<a class="f-btn" href="admin-review-fable.html">Review queue' + (queue.length ? ' · ' + queue.length : '') + '</a>' +
-      '</div></div>' +
-      pipelineBand() +
-      '<div class="f-sect"><div class="f-cols">' +
-        '<div class="f-stack">' + (isAdmin ? queuePreview() : destSection()) + '</div>' +
-        '<div class="f-stack">' + (isAdmin ? destSection() : queuePreview()) +
-          (F('activityFeed') ? activitySection(6) : '') + '</div>' +
-      '</div></div>';
-
-    var i, rows = body.querySelectorAll('[data-href]');
-    for (i = 0; i < rows.length; i++) (function(el){
-      el.addEventListener('click', function(){ location.href = el.getAttribute('data-href'); });
-    })(rows[i]);
-  }
-
-  /* ---------- route by persona ---------- */
-  if (persona === 'supplier') renderSupplier();
-  else if (persona === 'chekin' || persona === 'admin') renderStaff();
-  else renderBook();
+  document.getElementById('rng-n').addEventListener('input', recalc);
+  document.getElementById('rng-g').addEventListener('input', recalc);
+  recalc();
 })();
 </script>
 </body>

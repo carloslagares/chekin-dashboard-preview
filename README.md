@@ -17,7 +17,8 @@ dashboard/            ← THE APP. Self-contained, exportable as-is.
                         segments, deals, automation, consent), data/, services/,
                         agent/ and ds/_crm.*. It only consumes ../ds/ (shared
                         design system) and links back via ../index.html.
-  local-network/      ← LOCAL NETWORK. Supply-side residual programme inside the
+  local-network/      ← LOCAL EXPERIENCES (path kept for URL stability).
+                        Supply-side residual programme inside the
                         AppSell marketplace: a host introduces a local supplier,
                         who then becomes bookable by every property in coverage,
                         and the introducing host earns an ongoing residual.
@@ -70,10 +71,11 @@ python3 -m http.server 8080
 | `dashboard/guest-crm/index.html` | Guest CRM |
 | `dashboard/index.html?view=network` | Local Network inside the variant switcher |
 | `dashboard/index.html?view=crm` | Guest CRM inside the variant switcher |
-| `dashboard/local-network/index-fable.html` | **Local Network — the published design (Fable).** Seven pages, all five personas |
+| `dashboard/local-network/index-fable.html` | **Local Experiences — the published landing.** What the programme is, with a live earnings calculator |
+| `dashboard/local-network/supply-book-fable.html` | The supply book — the working view behind the landing's CTA |
 | `dashboard/local-network/index.html` | The first-pass design, kept for comparison |
 | `dashboard/local-network/index-fable.html?first_run=1` | Local Network before anything exists — the true empty state |
-| `dashboard/local-network/supply-book-fable.html` | The host's portfolio: claims, decay curve, 5-year book value |
+
 | `dashboard/local-network/submit-fable.html` | Submit-a-supplier wizard (5 steps) |
 | `dashboard/local-network/submit-fable.html?bounty=bty_cad_transfer` | The wizard pre-filled from a bounty |
 | `dashboard/local-network/supplier-detail-fable.html?supplier=sup_riera` | One supplier: claim stepper, roles, economics, quality |

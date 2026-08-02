@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Chekin — Local Network · Submit a supplier</title>
+<title>Chekin — Local Experiences · Submit a supplier</title>
 <link rel="stylesheet" href="../ds/colors_and_type.css">
 <link rel="stylesheet" href="../ds/_sidebar.css">
 <link rel="stylesheet" href="../ds/_agent.css">
@@ -14,7 +14,7 @@
   <div id="sidebar-slot" data-nav="local-network"></div>
   <main>
     <header class="top">
-      <div class="crumbs"><a href="index-fable.html"><b>Local Network</b></a> <span class="sep">/</span> Submit a supplier</div>
+      <div class="crumbs"><a href="index-fable.html"><b>Local Experiences</b></a> <span class="sep">/</span> Submit a supplier</div>
       <span id="fp-slot" style="margin-left:auto"></span>
       <span data-agent-trigger-slot></span>
       <button class="iconbtn" aria-label="Help"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 1 1 5.8 1c0 2-3 2-3 4M12 17h.01"/></svg></button>
@@ -73,7 +73,7 @@
         { k:'bounties', l:'Bounties', href:'bounties-fable.html', per:['host','pm','chekin','admin'], flag:'bounties' },
         { k:'admin', l:'Admin review', href:'admin-review-fable.html', per:['chekin','admin'] }
       ];
-      nav = '<nav class="f-tabs" aria-label="Local Network sections">' + T.filter(function(t){
+      nav = '<nav class="f-tabs" aria-label="Local Experiences sections">' + T.filter(function(t){
         if (t.flag && !F[t.flag]) return false;
         return !t.per || t.per.indexOf(p) >= 0;
       }).map(function(t){

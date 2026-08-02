@@ -626,3 +626,37 @@ input[type=range]{accent-color:var(--f-brand);width:100%}
 /* monthly bars (hand-rolled on detail page) */
 .f-chart .bar{fill:var(--f-brand-soft)}
 .f-chart .bar.cur{fill:var(--f-brand)}
+
+/* ============================================================
+   Fable — Local Experiences landing (index)
+   ============================================================ */
+
+/* open-bounty chip under the hero copy — rendered only when features.gaps */
+.f-bountychip{display:inline-flex;align-items:center;gap:8px;margin-top:20px;padding:7px 15px 7px 12px;border-radius:999px;background:var(--f-brand-tint);color:var(--f-brand);font:600 12.5px var(--font-primary)}
+.f-bountychip svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+
+/* the earnings calculator — a navy statement panel with two controls and bars */
+.f-calc{display:grid;grid-template-columns:1.25fr 1fr;gap:56px;align-items:center;padding:38px 42px}
+.f-calc .ctrl{margin-top:26px;max-width:430px}
+.f-calc .ctrl+.ctrl{margin-top:18px}
+.f-calc .ctrl .row{display:flex;justify-content:space-between;align-items:baseline;gap:16px;font:600 12.5px var(--font-primary);color:#A8B4E8;margin-bottom:8px}
+.f-calc .ctrl .row b{color:#fff;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.f-calc input[type=range]{accent-color:#8FA6FF;width:100%;display:block}
+.f-calc .fine{font:400 12px/18px var(--font-primary);color:#8E9AD6;margin-top:24px;max-width:440px}
+.f-calc .fine b{color:#E3E8FF;font-weight:600}
+.f-calc .keep{display:flex;align-items:center;gap:10px;margin-top:16px;padding:11px 14px;border-radius:10px;background:rgba(255,255,255,.09);font:600 12px/17px var(--font-primary);color:#E3E8FF}
+.f-calc .keep svg{width:14px;height:14px;stroke:#5DE0BE;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.f-cbars{display:block;width:100%;height:auto}
+.f-cbars .v{font:600 12px var(--font-primary);fill:#fff}
+.f-cbars .y{font:600 11px var(--font-primary);fill:#8E9AD6}
+@media (max-width:1080px){.f-calc{grid-template-columns:1fr;gap:36px;padding:32px 34px}}
+
+/* the three benefit cells — same hairline band language as the stat band */
+.f-benefits{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--f-hair);border-bottom:1px solid var(--f-hair)}
+.f-benefit{padding:32px 34px 36px;border-left:1px solid var(--f-hair);min-width:0}
+.f-benefit:first-child{border-left:none;padding-left:2px}
+.f-benefit .bi{width:38px;height:38px;border-radius:12px;background:var(--f-brand-tint);display:grid;place-items:center;margin-bottom:18px}
+.f-benefit .bi svg{width:18px;height:18px;stroke:var(--f-brand);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.f-benefit h3{font:600 15px/21px var(--font-primary);color:var(--f-ink);margin:0}
+.f-benefit p{font:400 13px/20px var(--font-primary);color:var(--f-muted);margin:8px 0 0}
+@media (max-width:840px){.f-benefits{grid-template-columns:1fr}.f-benefit{border-left:none;padding-left:2px;border-top:1px solid var(--f-hair)}.f-benefit:first-child{border-top:none}}
