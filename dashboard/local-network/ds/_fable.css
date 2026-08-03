@@ -692,3 +692,17 @@ input[type=range]{accent-color:var(--f-brand);width:100%}
 .f-benefit h3{font:600 15px/21px var(--font-primary);color:var(--f-ink);margin:0}
 .f-benefit p{font:400 13px/20px var(--font-primary);color:var(--f-muted);margin:8px 0 0}
 @media (max-width:1024px){.f-benefits{grid-template-columns:1fr}}
+
+/* ── Landing calculator: the source landing's own colours ──
+   The panel uses the Chekin brand gradient (#002CFA → #274BF0) exactly as the
+   landing we were given, not the module's navy statement panel. Scoped to
+   .f-calc so the supply book's navy five-year panel is untouched. */
+.f-navypanel.f-calc{background:linear-gradient(135deg,#002CFA 0%,#274BF0 100%)}
+.f-navypanel.f-calc::after{background:radial-gradient(circle,rgba(255,255,255,.16),transparent 70%)}
+.f-navypanel.f-calc .lbl{color:rgba(255,255,255,.75)}
+.f-navypanel.f-calc .note{color:rgba(255,255,255,.85)}
+.f-calc .ctrl .row{color:rgba(255,255,255,.75)}
+.f-calc .fine{color:rgba(255,255,255,.65)}
+.f-calc .fine b{color:#fff}
+.f-calc input[type=range]{accent-color:#fff}
+.f-cbars .y{fill:rgba(255,255,255,.75)}

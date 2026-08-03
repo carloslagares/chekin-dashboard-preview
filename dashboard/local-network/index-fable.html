@@ -178,11 +178,15 @@
   var floorFrom = C.decaySchedule[C.decaySchedule.length - 1].fromMonth;
   var rF = S.computeAccrual(100, claimAt(shiftM(today, -floorFrom)), EX, dest, today);
 
-  // calculator bounds follow the config's planning assumption for the category
-  var gBase = S.assumedGmv(EX.category);
+  // The slider opens where the source landing opened it — €30.000 of bookings
+  // per provider a year — so the headline reads as it did there. The euros are
+  // still priced by computeAccrual; only the starting position is the landing's.
+  // config.assumedAnnualGmvByCategory is calibrated against the small demo
+  // fixtures and understates a real provider, so it is not used here.
+  var gBase = 30000;
   var gStep = 500;
-  var gMin = Math.max(gStep, Math.round(gBase / 4 / gStep) * gStep);
-  var gMax = gBase * 5;
+  var gMin = 2000;
+  var gMax = 60000;
 
   /* ---------- gated: the open-bounty chip in the CTA row (features.gaps) ---------- */
   function bountyChip(){
@@ -198,21 +202,14 @@
       : '<div class="f-bountychip">' + txt + '</div>';
   }
 
-  /* ---------- Activate — turn the feature on and go straight to the wizard.
-     A day-one host has no supply book yet, so the first click always lands on
-     the submit form; once claims exist the same button opens the book. ---------- */
-  function isActivated(){
-    try { return localStorage.getItem('ln_activated') === '1'; } catch (e){ return false; }
-  }
-  function hasBook(){
-    if (!acctId) return false;
-    try { return S.getSupplyBook(acctId).entries.length > 0; } catch (e){ return false; }
-  }
+  /* ---------- Activate ----------
+     One CTA, one label, exactly as the source landing has it. This is an
+     activation page: it always offers to activate, and activating takes you to
+     the wizard. It deliberately does NOT morph its label once activated — a
+     landing that swaps its own call to action leaves you with no way back to
+     the activation screen. ---------- */
   function ctaHtml(){
-    if (!isActivated()) return '<button class="f-btn" id="cta-activate" type="button">Activate</button>';
-    return hasBook()
-      ? '<a class="f-btn" href="supply-book-fable.html">Open your supply book ' + ARROW + '</a>'
-      : '<a class="f-btn" href="submit-fable.html">Add your first provider ' + ARROW + '</a>';
+    return '<button class="f-btn" id="cta-activate" type="button">Activate</button>';
   }
 
   /* ---------- the two-column hero: copy + steps left, video card right ---------- */
@@ -322,7 +319,6 @@
 
   var act = document.getElementById('cta-activate');
   if (act) act.addEventListener('click', function(){
-    try { localStorage.setItem('ln_activated', '1'); } catch (e){}
     location.href = 'submit-fable.html';
   });
   var vb = document.getElementById('video-box');
