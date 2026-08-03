@@ -86,7 +86,11 @@
   .opt.active .v{background:var(--blue);color:#fff}
   .opt.active .check{opacity:1}
 
-  .stage{position:relative;min-height:100vh}
+  /* The switcher is fixed and centred, so it would otherwise sit on top of
+     whatever a variant puts in its own header — at narrower widths it was
+     covering the module's Ask Vela button and persona picker. Reserve a band
+     for it instead of floating over the content. */
+  .stage{position:relative;min-height:100vh;padding-top:66px}
   .variant{display:none}
   .variant.active{display:block}
   iframe.variant{width:100%;border:none;display:none;background:var(--bg)}
@@ -122,7 +126,7 @@
 
     <div class="group"><span class="pill gmod">Modules</span>Self-contained<span class="ln"></span></div>
     <button class="opt" data-v="crm" data-label="Guest CRM" data-gen="mod" role="menuitem"><span class="v">CRM</span><span class="t">Guest CRM</span><svg class="check" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button>
-    <button class="opt" data-v="ln" data-label="Local Network" data-gen="mod" role="menuitem"><span class="v">LN</span><span class="t">Local Network</span><span class="new mod">NEW</span><svg class="check" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button>
+    <button class="opt" data-v="ln" data-label="Local Experiences" data-gen="mod" role="menuitem"><span class="v">LN</span><span class="t">Local Experiences</span><span class="new mod">NEW</span><svg class="check" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button>
   </div>
 </div>
 
@@ -138,12 +142,12 @@
   <iframe class="variant" data-v="onb" data-src="onboarding.html" title="Onboarding — Fable 5"></iframe>
   <iframe class="variant" data-v="v9f" data-src="variants/v9_firstrun.html" title="First-run home — Fable 5"></iframe>
   <iframe class="variant" data-v="crm" data-src="guest-crm/index.html" title="Guest CRM"></iframe>
-  <iframe class="variant" data-v="ln" data-src="local-network/index-fable.html" title="Local Network"></iframe>
+  <iframe class="variant" data-v="ln" data-src="local-network/index-fable.html" title="Local Experiences"></iframe>
 </div>
 
 <script>
   function sizeFrames(){
-    document.querySelectorAll('iframe.variant').forEach(function(f){ f.style.height = window.innerHeight + 'px'; });
+    document.querySelectorAll('iframe.variant').forEach(function(f){ f.style.height = (window.innerHeight - 66) + 'px'; });
   }
   sizeFrames();
   window.addEventListener('resize', sizeFrames);
