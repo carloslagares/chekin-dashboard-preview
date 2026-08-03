@@ -197,7 +197,9 @@
       bookings:          base + 'bookings.html',
       properties:        base + 'properties.html',
       'guest-crm':       base + 'guest-crm/index.html',
-      'local-network':   base + 'local-network/index.html',
+      // the Fable design is what ships; index.html is the earlier pass, kept
+      // reachable by direct URL for comparison but not linked from the shell
+      'local-network':   base + 'local-network/index-fable.html',
       'view-agenda':     base + 'index.html?view=agenda',
       'view-compliance': base + 'index.html?view=compliance',
       'view-ai':         base + 'index.html?view=ai',
