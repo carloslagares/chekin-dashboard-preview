@@ -73,7 +73,7 @@ python3 -m http.server 8080
 | `dashboard/index.html?view=crm` | Guest CRM inside the variant switcher |
 | `dashboard/local-network/index-fable.html` | **Local Experiences — the published landing.** What the programme is, with a live earnings calculator |
 | `dashboard/local-network/supply-book-fable.html` | The supply book — the working view behind the landing's CTA |
-| `dashboard/local-network/index.html` | The first-pass design, kept for comparison |
+| `dashboard/local-network/index-firstpass.html` | The first-pass design, kept for comparison (`index.html` forwards to the current one) |
 | `dashboard/local-network/index-fable.html?first_run=1` | Local Network before anything exists — the true empty state |
 
 | `dashboard/local-network/submit-fable.html` | Submit-a-supplier wizard (5 steps) |

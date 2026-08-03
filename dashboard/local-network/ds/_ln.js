@@ -271,7 +271,7 @@
 
   // ---------- sub-nav ----------
   var ROUTES = [
-    { k: 'overview', label: 'Overview', href: 'index.html' },
+    { k: 'overview', label: 'Overview', href: 'index-firstpass.html' },
     { k: 'supply-book', label: 'Supply book', href: 'supply-book.html' },
     { k: 'discover', label: 'Discover', href: 'discover.html' },
     { k: 'bounties', label: 'Bounties', href: 'bounties.html' },
