@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chekin — Local Experiences</title>
+<link rel="stylesheet" href="../ds/colors_and_type.css">
+<link rel="stylesheet" href="../ds/_sidebar.css">
+<link rel="stylesheet" href="../ds/_agent.css">
+<link rel="stylesheet" href="ds/_fable.css">
+</head>
+<body>
+<div class="app">
+  <div id="sidebar-slot" data-nav="local-network"></div>
+  <main>
+    <header class="top">
+      <div class="crumbs"><b>Local Experiences</b></div>
+      <span data-agent-trigger-slot style="margin-left:auto"></span>
+      <button class="iconbtn" aria-label="Help"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 1 1 5.8 1c0 2-3 2-3 4M12 17h.01"/></svg></button>
+      <button class="iconbtn" aria-label="Notifications"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><div class="pip"></div></button>
+      <span id="fp-slot" style="margin-right:4px"></span>
+      <div class="user-av" id="user-av">GS</div>
+    </header>
+
+    <div class="page">
+      <span id="f-tabslot"></span>
+      <div id="ln-body"></div>
+    </div>
+  </main>
+</div>
+
+<div id="ln-drawer-root"></div>
+
+<script src="data/types.js"></script>
+<script src="data/config.js"></script>
+<script src="data/fixtures.js"></script>
+<script src="services/economics.js"></script>
+<script src="services/network-service.js"></script>
+<script src="services/earnings-service.js"></script>
+<script src="services/admin-service.js"></script>
+<script src="agent/agent.js"></script>
+<script src="ds/_ln.js"></script>
+<script src="../ds/_sidebar.js"></script>
+<script src="../ds/_agent.js"></script>
+<script>
+(function(){
+  'use strict';
+  var S = window.NetworkService, C = window.LN_CONFIG;
+  var body = document.getElementById('ln-body');
+
+  /* ---------- feature flags ----------
+     A missing flag reads as false. The only gated surface on this page is the
+     open-bounty call-to-action in the hero — features.gaps brings it back with
+     no other edit, exactly like every other gated surface in the module. */
+  function F(k){ return !!((C.features || {})[k]); }
+
+  /* ---------- fable chrome: tabs + persona switcher + first-run ---------- */
+  var CHEV = '<svg class="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>';
+  var ARROW = '<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+  var PERSONAS = {
+    host: { l:'Host', d:'A single-property owner — your suppliers and your earnings.' },
+    pm: { l:'Property manager', d:'A multi-property portfolio — the full supply book.' },
+    supplier: { l:'Supplier', d:'The provider’s own view — confirm a claim, watch your listing.' },
+    chekin: { l:'Chekin', d:'Internal staff — destination coverage and the pipeline.' },
+    admin: { l:'Admin', d:'Claim review, flags, quality watch and suspensions.' }
+  };
+  function fableTabs(active){
+    /* Module navigation is gated on features.moduleNav — the bar below is the
+       original tab set and returns exactly as it was when the flag flips. */
+    var nav = '';
+    if (F('moduleNav')){
+      var p = S.getPersona();
+      var T = [
+        { k:'overview', l:'Overview', href:'index-fable.html' },
+        { k:'book', l:'Supply book', href:'supply-book-fable.html', per:['host','pm'] },
+        { k:'discover', l:'Discover', href:'discover-fable.html', per:['host','pm'], flag:'discover' },
+        { k:'bounties', l:'Bounties', href:'bounties-fable.html', per:['host','pm','chekin','admin'], flag:'bounties' },
+        { k:'admin', l:'Admin review', href:'admin-review-fable.html', per:['chekin','admin'] }
+      ];
+      nav = '<nav class="f-tabs" aria-label="Local Experiences sections">' + T.filter(function(t){
+        if (t.flag && !F(t.flag)) return false;
+        return !t.per || t.per.indexOf(p) >= 0;
+      }).map(function(t){
+        return '<a' + (t.k === active ? ' class="on"' : '') + ' href="' + t.href + '">' + t.l + '</a>';
+      }).join('') + '</nav>';
+    }
+    return nav +
+    (S.isFirstRun() ? '<div class="f-note"><i></i><span><b>First-run mode.</b> The programme launches empty — this page is showing its true pre-launch state.</span><button class="f-link" id="fr-exit">Load the demo dataset</button></div>' : '');
+  }
+  function mountChrome(active){
+    var p = S.getPersona(), acct2 = S.currentAccount();
+    var slot = document.getElementById('f-tabslot');
+    if (slot) slot.outerHTML = fableTabs(active);
+    var av = document.getElementById('user-av');
+    if (av) av.textContent = acct2 ? acct2.name.split(/\s+/).map(function(w){ return w.charAt(0); }).slice(0, 2).join('').toUpperCase() : 'CK';
+    var fp = document.getElementById('fp-slot');
+    if (fp){
+      fp.innerHTML = '<div class="f-dd fp" id="fp-dd">' +
+        '<button class="f-ddt" aria-haspopup="true" aria-expanded="false"><span class="k">Viewing as</span><span class="v">' + PERSONAS[p].l + '</span>' + CHEV + '</button>' +
+        '<div class="f-ddm" role="menu">' + S.personas.map(function(k){
+          return '<button class="fp-o' + (k === p ? ' on' : '') + '" data-p="' + k + '"><span class="pt"></span><span style="min-width:0"><span class="t">' + PERSONAS[k].l + '</span><span class="dsc">' + PERSONAS[k].d + '</span></span></button>';
+        }).join('') +
+        ((S.hasSnapshot() && !S.isFirstRun()) ? '<div class="fp-foot"><button class="fp-o" id="fp-reset"><span class="pt"></span><span><span class="t">Reset demo data</span><span class="dsc">Discard everything created or changed in this session.</span></span></button></div>' : '') +
+        '</div></div>';
+      var dd = document.getElementById('fp-dd');
+      dd.querySelector('.f-ddt').addEventListener('click', function(e){
+        e.stopPropagation();
+        dd.className = dd.className.indexOf(' open') >= 0 ? 'f-dd fp' : 'f-dd fp open';
+      });
+      document.addEventListener('click', function(e){
+        if (!(e.target.closest && e.target.closest('#fp-dd'))) dd.className = 'f-dd fp';
+      });
+      document.addEventListener('keydown', function(e){ if (e.key === 'Escape') dd.className = 'f-dd fp'; });
+      dd.addEventListener('click', function(e){
+        if (e.target.closest('#fp-reset')){ S.resetDemo(); return; }
+        var b = e.target.closest('[data-p]'); if (!b) return;
+        S.setPersona(b.getAttribute('data-p'));
+        var u = new URLSearchParams(location.search); u.delete('persona');
+        var qs = u.toString();
+        location.href = location.pathname + (qs ? '?' + qs : '');
+      });
+    }
+    var fx = document.getElementById('fr-exit');
+    if (fx) fx.addEventListener('click', function(){ S.setFirstRun(false); });
+  }
+
+  mountChrome('overview');
+
+  /* ============================================================
+     THE LANDING — Local Experiences, before the book.
+     Every euro and every percentage below comes out of
+     NetworkService.computeAccrual over LN_CONFIG. Nothing is typed in:
+     change the decay schedule or the premium in data/config.js and this
+     page follows with no other edit.
+     ============================================================ */
+  var today = S._dataset.today;
+  var acctId = S.currentAccountId();
+
+  /* the example provider: the category the programme leads with, at the top
+     quality band the config defines — never a hard-coded score */
+  var EX = { id:'sup_lx', category:'experience', score: C.qualityBands[0].min };
+
+  function preferredDest(){
+    var props = acctId ? S.getProperties(acctId) : [];
+    var counts = {}, best = null;
+    props.forEach(function(p){ counts[p.destinationId] = (counts[p.destinationId] || 0) + 1; });
+    Object.keys(counts).forEach(function(k){ if (!best || counts[k] > counts[best]) best = k; });
+    var d = best ? S.getDestinationById(best) : null;
+    return d || S.getDestinations()[0] || null;
+  }
+  var dest = preferredDest();
+  // the landing illustrates the full premium — if this destination already
+  // covers the category well, illustrate with one that does not
+  if (dest && S.isSaturated(dest, EX)){
+    var open = S.getDestinations().filter(function(d){ return !S.isSaturated(d, EX); })[0];
+    if (open) dest = open;
+  }
+
+  function shiftM(iso, n){ var d = new Date(iso + 'T00:00:00Z'); d.setUTCMonth(d.getUTCMonth() + n); return d.toISOString().slice(0, 10); }
+  function claimAt(liveAt){
+    return { id:'clm_lx', state:'live', sharingMode:'network', liveAt: liveAt, networkAt: liveAt, bountyId: null,
+      roles: ['sourced','activated','maintained'].map(function(r){
+        return { role:r, holderAccountId:'_', sharePct: C.roleShares[r], since: liveAt, until: null };
+      }) };
+  }
+  /* five yearly residual totals for one provider doing `annual` of bookings —
+     sixty monthly accruals through the pricing engine, so the 5%→2% shape is
+     purely LN_CONFIG's decay schedule */
+  function yearlyFor(annual){
+    var monthly = annual / 12, ys = [0, 0, 0, 0, 0];
+    for (var m = 0; m < 60; m++){
+      ys[Math.floor(m / 12)] += S.computeAccrual(monthly, claimAt(shiftM(today, -m)), EX, dest, today).poolAmount;
+    }
+    return ys;
+  }
+  // the two rates the copy quotes: month one, and the perpetual floor
+  var r1 = S.computeAccrual(100, claimAt(today), EX, dest, today);
+  var floorFrom = C.decaySchedule[C.decaySchedule.length - 1].fromMonth;
+  var rF = S.computeAccrual(100, claimAt(shiftM(today, -floorFrom)), EX, dest, today);
+
+  // The slider opens where the source landing opened it — €30.000 of bookings
+  // per provider a year — so the headline reads as it did there. The euros are
+  // still priced by computeAccrual; only the starting position is the landing's.
+  // config.assumedAnnualGmvByCategory is calibrated against the small demo
+  // fixtures and understates a real provider, so it is not used here.
+  var gBase = 30000;
+  var gStep = 500;
+  var gMin = 2000;
+  var gMax = 60000;
+
+  /* ---------- gated: the open-bounty chip in the CTA row (features.gaps) ---------- */
+  function bountyChip(){
+    if (!F('gaps')) return '';
+    var inDest = S.getBounties({ status:'open', destination: dest && dest.id });
+    var openB = inDest.length ? inDest : S.getBounties({ status:'open' });
+    if (!openB.length) return '';
+    var where = (inDest.length && dest) ? ' in ' + LN.esc(dest.name) : '';
+    var CLOCK = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5l3 2"/></svg>';
+    var txt = CLOCK + '<span>' + openB.length + ' open ' + (openB.length === 1 ? 'bounty' : 'bounties') + where + ' right now</span>';
+    return F('bounties')
+      ? '<a class="f-bountychip" href="bounties-fable.html">' + txt + '</a>'
+      : '<div class="f-bountychip">' + txt + '</div>';
+  }
+
+  /* ---------- Activate ----------
+     One CTA, one label, exactly as the source landing has it. This is an
+     activation page: it always offers to activate, and activating takes you to
+     the wizard. It deliberately does NOT morph its label once activated — a
+     landing that swaps its own call to action leaves you with no way back to
+     the activation screen. ---------- */
+  function ctaHtml(){
+    return '<button class="f-btn" id="cta-activate" type="button">Activate</button>';
+  }
+
+  /* ---------- the two-column hero: copy + steps left, video card right ---------- */
+  var STEPS = [
+    { t:'You introduce.', d:'Name a local provider you already trust. One form, two minutes.' },
+    { t:'We contract them.', d:'Chekin verifies, signs and onboards them. You carry no liability.' },
+    { t:'The network sells them.', d:'Every property in the coverage area can offer it to their guests.' },
+    { t:'You get paid.', d:'A residual on every booking they ever generate — not only yours.' }
+  ];
+  var PLAY = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
+  function heroSection(){
+    return '<div class="f-hero rise">' +
+      '<div class="copy">' +
+        '<div class="titlerow"><h1>Local Experiences</h1><span class="f-newpill">New revenue stream</span></div>' +
+        '<p class="sub">Introduce the local providers you already recommend — the kayak school, the family winery, the private chef. Chekin contracts them, the whole network in your area can sell them, and you earn a share of every booking they ever generate.</p>' +
+        '<div class="f-hsteps">' + STEPS.map(function(s, i){
+          return '<div class="f-hstep"><span class="n">' + (i + 1) + '</span>' +
+            '<div class="tx"><b>' + s.t + '</b> ' + s.d + '</div></div>';
+        }).join('') + '</div>' +
+        '<div class="f-ctarow">' + ctaHtml() + bountyChip() + '</div>' +
+      '</div>' +
+      '<div class="f-video">' +
+        '<div class="vbox" id="video-box" role="button" tabindex="0" aria-label="Play: how hosts build a supply book (2 minutes)">' +
+          '<div class="play">' + PLAY + '</div>' +
+          '<span class="dur">2 min</span>' +
+        '</div>' +
+        '<div class="cap"><div class="t">How hosts build a supply book</div>' +
+        '<div class="s">From your first introduction to your first residual payout</div></div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  /* ---------- the earnings calculator ---------- */
+  function barSvg(ys){
+    var W = 400, H = 210, PT = 26, PB = 26, GAP = 14;
+    var bw = (W - GAP * (ys.length - 1)) / ys.length;
+    var ih = H - PT - PB;
+    var max = Math.max.apply(null, ys) || 1;
+    var OPS = [1, .72, .55, .42, .34];
+    var out = '';
+    for (var i = 0; i < ys.length; i++){
+      var h = Math.max(4, (ys[i] / max) * ih);
+      var x = i * (bw + GAP), y = H - PB - h;
+      out += '<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + h.toFixed(1) + '" rx="5" fill="#FFFFFF" fill-opacity="' + (OPS[i] || .3) + '"/>' +
+        '<text class="v" x="' + (x + bw / 2).toFixed(1) + '" y="' + (y - 8).toFixed(1) + '" text-anchor="middle">' + LN.money(ys[i]) + '</text>' +
+        '<text class="y" x="' + (x + bw / 2).toFixed(1) + '" y="' + (H - 8) + '" text-anchor="middle">Y' + (i + 1) + '</text>';
+    }
+    return '<svg class="f-cbars" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Projected residual by year over five years">' + out + '</svg>';
+  }
+  function calcSection(){
+    var CHECKICO = '<svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>';
+    return '<div class="f-sect tight"><div class="f-navypanel f-calc rise" style="animation-delay:.1s">' +
+      '<div>' +
+        '<div class="lbl">What your supply book could earn</div>' +
+        '<div class="hrow"><span class="big" id="calc-total"></span><span class="note" id="calc-note"></span></div>' +
+        '<div class="ctrl"><div class="row"><span>Providers you introduce</span><b id="val-n"></b></div>' +
+          '<input type="range" id="rng-n" min="1" max="12" step="1" value="6" aria-label="Providers you introduce"></div>' +
+        '<div class="ctrl"><div class="row"><span>Bookings per provider / year</span><b id="val-g"></b></div>' +
+          '<input type="range" id="rng-g" min="' + gMin + '" max="' + gMax + '" step="' + gStep + '" value="' + gBase + '" aria-label="Bookings per provider per year"></div>' +
+        '<div class="fine">Illustrative, at an ' + LN.esc(r1.qualityLabel.toLowerCase()) + ' provider quality score' + (dest ? ' in ' + LN.esc(dest.name) : '') + '. Your share is <b>' + LN.pct(r1.poolPct) + '</b> of the booking value in year one, easing to a <b>' + LN.pct(rF.poolPct) + '</b> floor you keep for as long as the provider stays live. Every figure is computed by the live pricing engine — nothing here is typed in.</div>' +
+      '</div>' +
+      '<div style="min-width:0"><div id="calc-bars"></div>' +
+        '<div class="keep">' + CHECKICO + '<span>You keep earning even when the guest is someone else’s</span></div>' +
+      '</div>' +
+    '</div></div>';
+  }
+  function recalc(){
+    var n = parseInt(document.getElementById('rng-n').value, 10);
+    var g = parseInt(document.getElementById('rng-g').value, 10);
+    var ys = yearlyFor(g).map(function(v){ return Math.round(v * n); });
+    var five = ys.reduce(function(a, b){ return a + b; }, 0);
+    document.getElementById('calc-total').textContent = LN.money(ys[0]);
+    document.getElementById('calc-note').innerHTML = 'in year one · <b style="color:#E3E8FF">' + LN.money(five) + '</b> over five years — decay schedule applied, bookings held flat';
+    document.getElementById('val-n').textContent = n + (n === 1 ? ' provider' : ' providers');
+    document.getElementById('val-g').textContent = LN.money(g);
+    document.getElementById('calc-bars').innerHTML = barSvg(ys);
+  }
+
+  /* ---------- the three benefit cells ---------- */
+  var BENEFITS = [
+    { i:'<circle cx="12" cy="12" r="9"/><path d="M12 7v10M9 9.5c0-1.4 1.3-2.5 3-2.5s3 1.1 3 2.5-1.3 2-3 2.5-3 1.1-3 2.5 1.3 2.5 3 2.5 3-1.1 3-2.5"/>',
+      t:'Income for work you already do',
+      d:'You recommend these providers for free today. Now the recommendation pays, on every booking, for years.' },
+    { i:'<path d="M12 2 4 5v7c0 5 3.5 8 8 10 4.5-2 8-5 8-10V5z"/><path d="M9 12l2 2 4-4"/>',
+      t:'Guest experience you control',
+      d:'Your own trusted operators in the guest flow instead of a faceless aggregator listing.' },
+    { i:'<path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/>',
+      t:'A supply book, not a payout',
+      d:'Every provider you add is a line in a portfolio with projected annual income — visible and growing.' }
+  ];
+  function benefitsSection(){
+    return '<div class="f-sect tight"><div class="f-benefits rise" style="animation-delay:.05s">' + BENEFITS.map(function(b){
+      return '<div class="f-benefit"><div class="bi"><svg viewBox="0 0 24 24">' + b.i + '</svg></div>' +
+        '<h3>' + b.t + '</h3><p>' + b.d + '</p></div>';
+    }).join('') + '</div></div>';
+  }
+
+  /* ---------- render ---------- */
+  body.innerHTML =
+    heroSection() +
+    calcSection() +
+    benefitsSection();
+
+  document.getElementById('rng-n').addEventListener('input', recalc);
+  document.getElementById('rng-g').addEventListener('input', recalc);
+  recalc();
+
+  var act = document.getElementById('cta-activate');
+  if (act) act.addEventListener('click', function(){
+    location.href = 'submit-fable.html';
+  });
+  var vb = document.getElementById('video-box');
+  function vplay(){ LN.toast('The two-minute walkthrough arrives with launch.'); }
+  vb.addEventListener('click', vplay);
+  vb.addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); vplay(); } });
+})();
+</script>
+</body>
+</html>
