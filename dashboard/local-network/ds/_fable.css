@@ -629,14 +629,47 @@ input[type=range]{accent-color:var(--f-brand);width:100%}
 
 /* ============================================================
    Fable — Local Experiences landing (index)
+   Layout cloned from the original landing; every colour and
+   component below comes from the fable token set above.
    ============================================================ */
 
-/* open-bounty chip under the hero copy — rendered only when features.gaps */
-.f-bountychip{display:inline-flex;align-items:center;gap:8px;margin-top:20px;padding:7px 15px 7px 12px;border-radius:999px;background:var(--f-brand-tint);color:var(--f-brand);font:600 12.5px var(--font-primary)}
+/* two-column hero: copy + steps on the left, the video card on the right */
+.f-hero{display:grid;grid-template-columns:1fr 380px;gap:56px;align-items:center}
+.f-hero .copy{display:flex;flex-direction:column;gap:18px;min-width:0}
+.f-hero .titlerow{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.f-hero h1{font:600 30px/36px var(--font-primary);letter-spacing:-.015em;color:var(--f-ink);margin:0}
+.f-hero .sub{font:400 15px/24px var(--font-primary);color:var(--f-muted);margin:0;text-wrap:pretty}
+.f-newpill{font:600 12px var(--font-primary);color:var(--f-brand);background:var(--f-wash);border:1px solid var(--f-brand-soft);border-radius:999px;padding:4px 12px;white-space:nowrap}
+@media (max-width:1080px){.f-hero{grid-template-columns:1fr;gap:44px}}
+
+/* the four steps — a compact inline numbered list */
+.f-hsteps{display:flex;flex-direction:column;gap:12px;margin-top:4px}
+.f-hstep{display:flex;align-items:flex-start;gap:12px}
+.f-hstep .n{width:24px;height:24px;border-radius:50%;background:var(--f-brand-tint);color:var(--f-brand);font:700 12px/24px var(--font-primary);text-align:center;flex-shrink:0}
+.f-hstep .tx{font:400 13.5px/22px var(--font-primary);color:var(--f-muted)}
+.f-hstep .tx b{color:var(--f-ink);font-weight:600}
+
+/* CTA row under the steps — the primary button plus the (gated) bounty chip */
+.f-ctarow{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:8px}
+.f-bountychip{display:inline-flex;align-items:center;gap:8px;padding:7px 15px 7px 12px;border-radius:999px;background:var(--f-brand-tint);color:var(--f-brand);font:600 12.5px var(--font-primary)}
 .f-bountychip svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+
+/* the video placeholder card */
+.f-video{display:flex;flex-direction:column;gap:12px;min-width:0}
+.f-video .vbox{position:relative;width:100%;aspect-ratio:16/10;border-radius:var(--f-r-lg);background:linear-gradient(135deg,var(--f-navy) 0%,var(--f-navy-2) 100%);display:grid;place-items:center;cursor:pointer;overflow:hidden;box-shadow:var(--f-shadow-lift)}
+.f-video .vbox::after{content:"";position:absolute;right:-70px;top:-70px;width:230px;height:230px;border-radius:50%;background:radial-gradient(circle,rgba(107,133,255,.28),transparent 70%);pointer-events:none}
+.f-video .play{width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.92);display:grid;place-items:center;transition:transform .15s;position:relative;z-index:1}
+.f-video .vbox:hover .play{transform:scale(1.06)}
+.f-video .play svg{width:22px;height:22px;fill:var(--f-navy);margin-left:3px}
+.f-video .dur{position:absolute;bottom:14px;left:16px;font:600 12px var(--font-primary);color:#E3E8FF;background:rgba(22,22,67,.55);padding:4px 10px;border-radius:999px;z-index:1}
+.f-video .cap{text-align:center}
+.f-video .cap .t{font:600 14px/19px var(--font-primary);color:var(--f-ink)}
+.f-video .cap .s{font:400 12px/17px var(--font-primary);color:var(--f-faint);margin-top:3px}
 
 /* the earnings calculator — a navy statement panel with two controls and bars */
 .f-calc{display:grid;grid-template-columns:1.25fr 1fr;gap:56px;align-items:center;padding:38px 42px}
+.f-calc .hrow{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-top:12px}
+.f-calc .hrow .big{margin-top:0}
 .f-calc .ctrl{margin-top:26px;max-width:430px}
 .f-calc .ctrl+.ctrl{margin-top:18px}
 .f-calc .ctrl .row{display:flex;justify-content:space-between;align-items:baseline;gap:16px;font:600 12.5px var(--font-primary);color:#A8B4E8;margin-bottom:8px}
@@ -651,12 +684,11 @@ input[type=range]{accent-color:var(--f-brand);width:100%}
 .f-cbars .y{font:600 11px var(--font-primary);fill:#8E9AD6}
 @media (max-width:1080px){.f-calc{grid-template-columns:1fr;gap:36px;padding:32px 34px}}
 
-/* the three benefit cells — same hairline band language as the stat band */
-.f-benefits{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--f-hair);border-bottom:1px solid var(--f-hair)}
-.f-benefit{padding:32px 34px 36px;border-left:1px solid var(--f-hair);min-width:0}
-.f-benefit:first-child{border-left:none;padding-left:2px}
-.f-benefit .bi{width:38px;height:38px;border-radius:12px;background:var(--f-brand-tint);display:grid;place-items:center;margin-bottom:18px}
+/* the three benefit cards — the module's card language, in a row */
+.f-benefits{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.f-benefit{background:var(--f-card);border:1px solid var(--f-hair);border-radius:var(--f-r-lg);padding:24px;min-width:0;box-shadow:var(--f-shadow)}
+.f-benefit .bi{width:38px;height:38px;border-radius:12px;background:var(--f-brand-tint);display:grid;place-items:center;margin-bottom:16px}
 .f-benefit .bi svg{width:18px;height:18px;stroke:var(--f-brand);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .f-benefit h3{font:600 15px/21px var(--font-primary);color:var(--f-ink);margin:0}
 .f-benefit p{font:400 13px/20px var(--font-primary);color:var(--f-muted);margin:8px 0 0}
-@media (max-width:840px){.f-benefits{grid-template-columns:1fr}.f-benefit{border-left:none;padding-left:2px;border-top:1px solid var(--f-hair)}.f-benefit:first-child{border-top:none}}
+@media (max-width:1024px){.f-benefits{grid-template-columns:1fr}}

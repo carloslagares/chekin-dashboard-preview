@@ -184,7 +184,7 @@
   var gMin = Math.max(gStep, Math.round(gBase / 4 / gStep) * gStep);
   var gMax = gBase * 5;
 
-  /* ---------- gated: the open-bounty call-to-action (features.gaps) ---------- */
+  /* ---------- gated: the open-bounty chip in the CTA row (features.gaps) ---------- */
   function bountyChip(){
     if (!F('gaps')) return '';
     var inDest = S.getBounties({ status:'open', destination: dest && dest.id });
@@ -194,23 +194,55 @@
     var CLOCK = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5l3 2"/></svg>';
     var txt = CLOCK + '<span>' + openB.length + ' open ' + (openB.length === 1 ? 'bounty' : 'bounties') + where + ' right now</span>';
     return F('bounties')
-      ? '<div><a class="f-bountychip" href="bounties-fable.html">' + txt + '</a></div>'
-      : '<div><div class="f-bountychip">' + txt + '</div></div>';
+      ? '<a class="f-bountychip" href="bounties-fable.html">' + txt + '</a>'
+      : '<div class="f-bountychip">' + txt + '</div>';
   }
 
-  /* ---------- the four steps ---------- */
+  /* ---------- Activate — turn the feature on and go straight to the wizard.
+     A day-one host has no supply book yet, so the first click always lands on
+     the submit form; once claims exist the same button opens the book. ---------- */
+  function isActivated(){
+    try { return localStorage.getItem('ln_activated') === '1'; } catch (e){ return false; }
+  }
+  function hasBook(){
+    if (!acctId) return false;
+    try { return S.getSupplyBook(acctId).entries.length > 0; } catch (e){ return false; }
+  }
+  function ctaHtml(){
+    if (!isActivated()) return '<button class="f-btn" id="cta-activate" type="button">Activate</button>';
+    return hasBook()
+      ? '<a class="f-btn" href="supply-book-fable.html">Open your supply book ' + ARROW + '</a>'
+      : '<a class="f-btn" href="submit-fable.html">Add your first provider ' + ARROW + '</a>';
+  }
+
+  /* ---------- the two-column hero: copy + steps left, video card right ---------- */
   var STEPS = [
-    { t:'You introduce', d:'Name a local provider you already trust. One form, two minutes.' },
-    { t:'We contract them', d:'Chekin verifies, signs and onboards them. You carry no liability.' },
-    { t:'The network sells them', d:'Every property in the coverage area can offer it to their guests.' },
-    { t:'You get paid', d:'A residual on every booking they ever generate — not only yours.' }
+    { t:'You introduce.', d:'Name a local provider you already trust. One form, two minutes.' },
+    { t:'We contract them.', d:'Chekin verifies, signs and onboards them. You carry no liability.' },
+    { t:'The network sells them.', d:'Every property in the coverage area can offer it to their guests.' },
+    { t:'You get paid.', d:'A residual on every booking they ever generate — not only yours.' }
   ];
-  function stepsBand(){
-    return '<div class="f-sect tight"><div class="f-stats rise" style="animation-delay:.05s">' + STEPS.map(function(s, i){
-      return '<div class="f-stat"><div class="lbl">Step ' + (i + 1) + '</div>' +
-        '<div class="val" style="font-size:19px;line-height:26px;white-space:normal">' + s.t + '</div>' +
-        '<div class="sup">' + s.d + '</div></div>';
-    }).join('') + '</div></div>';
+  var PLAY = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
+  function heroSection(){
+    return '<div class="f-hero rise">' +
+      '<div class="copy">' +
+        '<div class="titlerow"><h1>Local Experiences</h1><span class="f-newpill">New revenue stream</span></div>' +
+        '<p class="sub">Introduce the local providers you already recommend — the kayak school, the family winery, the private chef. Chekin contracts them, the whole network in your area can sell them, and you earn a share of every booking they ever generate.</p>' +
+        '<div class="f-hsteps">' + STEPS.map(function(s, i){
+          return '<div class="f-hstep"><span class="n">' + (i + 1) + '</span>' +
+            '<div class="tx"><b>' + s.t + '</b> ' + s.d + '</div></div>';
+        }).join('') + '</div>' +
+        '<div class="f-ctarow">' + ctaHtml() + bountyChip() + '</div>' +
+      '</div>' +
+      '<div class="f-video">' +
+        '<div class="vbox" id="video-box" role="button" tabindex="0" aria-label="Play: how hosts build a supply book (2 minutes)">' +
+          '<div class="play">' + PLAY + '</div>' +
+          '<span class="dur">2 min</span>' +
+        '</div>' +
+        '<div class="cap"><div class="t">How hosts build a supply book</div>' +
+        '<div class="s">From your first introduction to your first residual payout</div></div>' +
+      '</div>' +
+    '</div>';
   }
 
   /* ---------- the earnings calculator ---------- */
@@ -232,11 +264,10 @@
   }
   function calcSection(){
     var CHECKICO = '<svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>';
-    return '<div class="f-sect"><div class="f-navypanel f-calc rise" style="animation-delay:.1s">' +
+    return '<div class="f-sect tight"><div class="f-navypanel f-calc rise" style="animation-delay:.1s">' +
       '<div>' +
         '<div class="lbl">What your supply book could earn</div>' +
-        '<div class="big" id="calc-total"></div>' +
-        '<div class="note" id="calc-note"></div>' +
+        '<div class="hrow"><span class="big" id="calc-total"></span><span class="note" id="calc-note"></span></div>' +
         '<div class="ctrl"><div class="row"><span>Providers you introduce</span><b id="val-n"></b></div>' +
           '<input type="range" id="rng-n" min="1" max="12" step="1" value="6" aria-label="Providers you introduce"></div>' +
         '<div class="ctrl"><div class="row"><span>Bookings per provider / year</span><b id="val-g"></b></div>' +
@@ -253,8 +284,8 @@
     var g = parseInt(document.getElementById('rng-g').value, 10);
     var ys = yearlyFor(g).map(function(v){ return Math.round(v * n); });
     var five = ys.reduce(function(a, b){ return a + b; }, 0);
-    document.getElementById('calc-total').textContent = LN.money(five);
-    document.getElementById('calc-note').innerHTML = 'over five years · <b style="color:#E3E8FF">' + LN.money(ys[0]) + '</b> of it in year one — decay schedule applied, bookings held flat';
+    document.getElementById('calc-total').textContent = LN.money(ys[0]);
+    document.getElementById('calc-note').innerHTML = 'in year one · <b style="color:#E3E8FF">' + LN.money(five) + '</b> over five years — decay schedule applied, bookings held flat';
     document.getElementById('val-n').textContent = n + (n === 1 ? ' provider' : ' providers');
     document.getElementById('val-g').textContent = LN.money(g);
     document.getElementById('calc-bars').innerHTML = barSvg(ys);
@@ -273,7 +304,7 @@
       d:'Every provider you add is a line in a portfolio with projected annual income — visible and growing.' }
   ];
   function benefitsSection(){
-    return '<div class="f-sect"><div class="f-benefits rise" style="animation-delay:.05s">' + BENEFITS.map(function(b){
+    return '<div class="f-sect tight"><div class="f-benefits rise" style="animation-delay:.05s">' + BENEFITS.map(function(b){
       return '<div class="f-benefit"><div class="bi"><svg viewBox="0 0 24 24">' + b.i + '</svg></div>' +
         '<h3>' + b.t + '</h3><p>' + b.d + '</p></div>';
     }).join('') + '</div></div>';
@@ -281,24 +312,23 @@
 
   /* ---------- render ---------- */
   body.innerHTML =
-    '<div class="f-head rise"><div>' +
-      '<div class="eyebrow">New revenue stream</div>' +
-      '<h1>Local Experiences</h1>' +
-      '<div class="sub">Introduce the local providers you already recommend — the kayak school, the family winery, the private chef. Chekin contracts them, the whole network in your area can sell them, and you earn a share of every booking they ever generate.</div>' +
-      bountyChip() +
-    '</div><div class="acts">' +
-      '<a class="f-btn" href="supply-book-fable.html">Open your supply book ' + ARROW + '</a>' +
-    '</div></div>' +
-    stepsBand() +
+    heroSection() +
     calcSection() +
-    benefitsSection() +
-    '<div class="f-sect" style="text-align:center;padding:56px 0 8px;border-top:1px solid var(--f-hair)">' +
-      '<div style="font:600 20px/28px var(--font-primary);letter-spacing:-.01em">Every introduction becomes a line in your supply book.</div>' +
-      '<a class="f-btn" style="margin-top:22px" href="supply-book-fable.html">Open your supply book ' + ARROW + '</a></div>';
+    benefitsSection();
 
   document.getElementById('rng-n').addEventListener('input', recalc);
   document.getElementById('rng-g').addEventListener('input', recalc);
   recalc();
+
+  var act = document.getElementById('cta-activate');
+  if (act) act.addEventListener('click', function(){
+    try { localStorage.setItem('ln_activated', '1'); } catch (e){}
+    location.href = 'submit-fable.html';
+  });
+  var vb = document.getElementById('video-box');
+  function vplay(){ LN.toast('The two-minute walkthrough arrives with launch.'); }
+  vb.addEventListener('click', vplay);
+  vb.addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); vplay(); } });
 })();
 </script>
 </body>
