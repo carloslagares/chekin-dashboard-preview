@@ -44,6 +44,7 @@
   .trigger .gen.g48{background:#D5F5EC;color:var(--success)}
   .trigger .gen.gf5{background:#EEE9FF;color:#6C4CF1}
   .trigger .gen.gmod{background:#E4EDFF;color:#385BF8}
+  .trigger .gen.gf51{background:#DCD6FF;color:#4A2FD6}
   .trigger .chev{width:16px;height:16px;stroke:var(--ink2);fill:none;stroke-width:2;margin-right:6px;transition:transform .2s}
   .switcher.open .trigger .chev{transform:rotate(180deg)}
 
@@ -66,6 +67,7 @@
   .menu .group .pill.g48{background:#D5F5EC;color:var(--success)}
   .menu .group .pill.gf5{background:#EEE9FF;color:#6C4CF1}
   .menu .group .pill.gmod{background:#E4EDFF;color:#385BF8}
+  .menu .group .pill.gf51{background:#DCD6FF;color:#4A2FD6}
   .menu .group .ln{flex:1;height:1px;background:var(--line)}
 
   .opt{
@@ -124,6 +126,10 @@
     <button class="opt" data-v="onb" data-label="Onboarding" data-gen="f5" role="menuitem"><span class="v">OB</span><span class="t">Onboarding</span><span class="new f5">NEW</span><svg class="check" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button>
     <button class="opt" data-v="v9f" data-label="First run" data-gen="f5" role="menuitem"><span class="v">FR</span><span class="t">First-run home</span><span class="new f5">NEW</span><svg class="check" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button>
 
+    <div class="group"><span class="pill gf51">5.1</span>Fable 5.1 refine<span class="ln"></span></div>
+    <button class="opt" data-v="v10f" data-label="First run · 5.1" data-gen="f51" role="menuitem"><span class="v">FR2</span><span class="t">First-run refine</span><span class="new f5">NEW</span><svg class="check" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button>
+
+
     <div class="group"><span class="pill gmod">Modules</span>Self-contained<span class="ln"></span></div>
     <button class="opt" data-v="crm" data-label="Guest CRM" data-gen="mod" role="menuitem"><span class="v">CRM</span><span class="t">Guest CRM</span><svg class="check" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button>
     <button class="opt" data-v="ln" data-label="Local Experiences" data-gen="mod" role="menuitem"><span class="v">LN</span><span class="t">Local Experiences</span><span class="new mod">NEW</span><svg class="check" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button>
@@ -141,6 +147,7 @@
   <iframe class="variant" data-v="v8" data-src="variants/v8_fable.html" title="V8 Fable refine — Fable 5"></iframe>
   <iframe class="variant" data-v="onb" data-src="onboarding.html" title="Onboarding — Fable 5"></iframe>
   <iframe class="variant" data-v="v9f" data-src="variants/v9_firstrun.html" title="First-run home — Fable 5"></iframe>
+  <iframe class="variant" data-v="v10f" data-src="variants/v10_firstrun_fable51.html" title="First-run refine — Fable 5.1"></iframe>
   <iframe class="variant" data-v="crm" data-src="guest-crm/index.html" title="Guest CRM"></iframe>
   <iframe class="variant" data-v="ln" data-src="local-network/index-fable.html" title="Local Experiences"></iframe>
 </div>
@@ -161,7 +168,7 @@
 
   // Deep-link via ?view=agenda|compliance|ai|calendar|refined (from sidebar)
   var VIEW_MAP = { agenda:'v2', compliance:'v3', ai:'v4', calendar:'v5', refined:'v7', mobile:'v6', fable:'v8', onboarding:'onb', firstrun:'v9f',
-                   crm:'crm', network:'ln', 'local-network':'ln' };
+                   crm:'crm', network:'ln', 'local-network':'ln', firstrun51:'v10f' };
   var urlView = new URLSearchParams(location.search).get('view');
 
   var LS = 'chekin_welcome_variant';
@@ -185,7 +192,7 @@
     curV.textContent = v.toUpperCase();
     curLabel.textContent = opt.getAttribute('data-label');
     var gen = opt.getAttribute('data-gen');
-    var GEN_LABEL = { '47':'4.7', '48':'4.8', 'f5':'Fable', 'mod':'Module' };
+    var GEN_LABEL = { '47':'4.7', '48':'4.8', 'f5':'Fable', 'mod':'Module', 'f51':'Fable 5.1' };
     curGen.textContent = GEN_LABEL[gen] || gen;
     // class follows the gen key directly, so adding a group needs no branch here
     curGen.className = 'gen g' + gen;
